@@ -1,4 +1,4 @@
-package main.java.at.htlleonding.leoplaner.data;
+package at.htlleonding.leoplaner.data;
 
 public class Period {
     private SchoolDays schoolDays;
