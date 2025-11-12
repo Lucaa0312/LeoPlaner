@@ -102,6 +102,16 @@ package "TimeTable" {
         + addRoom(room: Room) : Room
         + addClassSubject(classSubject: ClassSubject) : boolean
     }
+
+    class CSVManager {
+        - dataRepository: DataRepository
+
+        + processCSV(String): boolean
+        + createTeacherFromCSV(String): void
+        + createSubjectFromCSV(String): void
+        + createTeacherFromCSV(String): void
+        + getLinesFromCSV(String): String[]
+    }
 }
 
 package algorithm {
@@ -141,6 +151,7 @@ ClassSubjectInstance --> "references"  ClassSubject
 ClassSubjectInstance --> "references" Period
 
 Timetable --> "gets Data from" DataRepository
+CSVManager --> "parses Data into" DataRepository
 
 SimulatedAnnealingAlgorithm --> "gets Data from" DataRepository
 SimulatedAnnealingAlgorithm --> "creates" Timetable
