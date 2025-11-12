@@ -103,6 +103,13 @@ package "TimeTable" {
         + addClassSubject(classSubject: ClassSubject) : boolean
     }
 
+
+    enum CSVType {
+        TEACHER
+        ROOM
+        SUBJECT
+    }
+
     class CSVManager {
         - dataRepository: DataRepository
 
@@ -152,6 +159,7 @@ ClassSubjectInstance --> "references" Period
 
 Timetable --> "gets Data from" DataRepository
 CSVManager --> "parses Data into" DataRepository
+CSVManager --> "Detects" CSVType
 
 SimulatedAnnealingAlgorithm --> "gets Data from" DataRepository
 SimulatedAnnealingAlgorithm --> "creates" Timetable
