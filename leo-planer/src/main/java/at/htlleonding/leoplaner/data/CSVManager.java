@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class CSVManager {
+  // TODO decide make static or non static
+  private CSVManager csvManager;
   final static String teacherType = "teacher";
   final static String roomType = "room";
   final static String subjectType = "subject";
@@ -22,10 +24,13 @@ public class CSVManager {
 
     switch (lines[1].split(";")[0]) {
       case teacherType:
+        createTeacherFromCSV(lines);
         break;
       case roomType:
+        createRoomFromCSV(lines);
         break;
       case subjectType:
+        createSubjectFromCSV(lines);
         break;
     }
 
@@ -40,6 +45,27 @@ public class CSVManager {
       String nameSymbol = line[1];
       // TODO taken subjects split and generate array + create
       // TODO handle DataRepository not being static
+    }
+  }
+
+  public static void createRoomFromCSV(String[] lines) {
+    for (int i = 1; i < lines.length; i++) {
+      String[] line = lines[i].split(";");
+
+      String roomName = line[0];
+      String roomPrefix = line[1];
+      String roomSuffix = line[2];
+      // TODO handle roomtypes array being parsed correctly
+      DataRepository.
+    }
+  }
+
+  public static void createSubjectFromCSV(String[] lines) {
+    for (int i = 1; i < lines.length; i++) {
+      String[] line = lines[i].split(";");
+
+      String subjectName = line[0];
+      // TODO handle required roomtypes array being parsed correctly
     }
   }
 
