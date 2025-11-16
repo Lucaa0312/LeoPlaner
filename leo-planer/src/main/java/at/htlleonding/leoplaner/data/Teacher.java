@@ -3,11 +3,10 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 
 public class Teacher {
-  boolean returnsd = CSVManager.processCSV("path/to/csvfile");
   private String teacherName;
   private String nameSymbol; // Lehrerkürzel
   private ArrayList<Period> takenPeriods;
-  private ArrayList<Subject> teachingSubject;
+  private ArrayList<Subject> teachingSubject; // TODO maybe change to array since it cannot be chagned at runtime
 
   public String getTeacherName() {
     return teacherName;
@@ -25,10 +24,10 @@ public class Teacher {
     return teachingSubject;
   }
 
-  public Teacher(ArrayList<Subject> teachingSubject, String nameSymbol, String teacherName) {
-    this.teachingSubject = teachingSubject;
-    this.nameSymbol = nameSymbol;
+  public Teacher(String teacherName, String nameSymbol, ArrayList<Subject> teachingSubject) {
     this.teacherName = teacherName;
+    this.nameSymbol = nameSymbol;
+    this.teachingSubject = teachingSubject;
   }
 
   public boolean checkIfTeacherTeachesSubject(Subject subject) {
