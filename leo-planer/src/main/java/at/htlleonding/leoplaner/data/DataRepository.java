@@ -10,38 +10,48 @@ public class DataRepository {
   private static DataRepository instance;
 
   public static DataRepository getInstance() {
+    if(instance == null) {
+      instance = new DataRepository();
+    }
     return instance;
   }
 
   private DataRepository() {
-
+    this.classSubjects = new ArrayList<>();
+    this.subjects = new ArrayList<>();
+    this.teachers = new ArrayList<>();
+    this.rooms = new ArrayList<>();
   }
 
   public ArrayList<ClassSubject> getClassSubjects() {
-    return null;
+    return this.classSubjects;
   }
 
   public ArrayList<Teacher> getTeachers() {
-    return null;
+    return this.teachers;
   }
 
   public ArrayList<Room> getRooms() {
-    return null;
+    return this.rooms;
   }
 
   public boolean addTeacher(Teacher teacher) {
+    this.teachers.add(teacher);
     return true;
   }
 
   public boolean addRoom(Room room) {
+    this.rooms.add(room);
     return true;
   }
 
   public boolean addClassSubject(ClassSubject classSubject) {
+    this.classSubjects.add(classSubject);
     return true;
   }
 
-  public boolean addSubject(Subject Subject) {
+  public boolean addSubject(Subject subject) {
+    this.subjects.add(subject);
     return true;
   }
 

@@ -21,7 +21,9 @@ public class CSVManager {
       return false;
     }
 
-    switch (lines[0].split(";")[0].toLowerCase()) {
+    String type = lines[0].split(";")[0].toLowerCase();
+
+    switch (type) {
       case teacherType:
         createTeacherFromCSV(lines, dataRepository);
         break;
@@ -31,6 +33,8 @@ public class CSVManager {
       case subjectType:
         createSubjectFromCSV(lines, dataRepository);
         break;
+      default:
+        throw new IllegalArgumentException("Unknown Type: " + type);
     }
 
     return true;
@@ -38,7 +42,7 @@ public class CSVManager {
 
   public static void createTeacherFromCSV(String[] lines, DataRepository dataRepository) {
     for (int i = 1; i < lines.length; i++) {
-      String[] line = lines[i].toLowerCase().split(";");
+      String[] line = lines[i].split(";"); // MAYBE check if it has the exact amount of lines the csv should have
 
       // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
       // (.CHEM is roomtype)
@@ -52,7 +56,7 @@ public class CSVManager {
         Subject subject = dataRepository.checkIfSubjectExists(subjectName.trim());
 
         if (subject == null) { // MAYBE fix this with an error message "Subject not found please import subject
-                               // csv first"
+                               // csv first" (test is already implemented)
           subject = new Subject(subjectName.trim(), null); // TODO add roomtypes in CSV
           dataRepository.addSubject(subject);
         }
@@ -80,13 +84,13 @@ public class CSVManager {
 
       int index = 0;
       for (String roomTypeString : roomTypesStrings) {
-        RoomTypes roomType;
+        RoomTypes roomType = null;
         try {
           roomType = RoomTypes.valueOf(roomTypeString.trim().toUpperCase());
           roomTypesArray[index] = roomType;
           index++;
         } catch (IllegalArgumentException e) {
-          // invalid room type, skip
+          System.out.println("Roomtype: " + roomType + " does not exist");
         }
       }
 
