@@ -2,6 +2,7 @@ package at.htlleonding.csv;
 
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,10 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestCSV { //Has to be reworked if singleton is changed to entitymanager
+public class TestCSV {
+    @Inject
+    DataRepository dataRepository;
+
     public static final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
     public static final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
     public static final String roomCSVPath = "src/resources/csvFiles/test1/testRoom.csv";
@@ -41,28 +45,24 @@ public class TestCSV { //Has to be reworked if singleton is changed to entityman
 
     @Test
     public void t01_testLoadFileReturnsFalseOnEmptyCSV() throws IOException{
-        DataRepository instance = DataRepository.getInstance();
-        boolean worked = CSVManager.processCSV(emptyCSV, instance);
+        boolean worked = CSVManager.processCSV(emptyCSV, dataRepository);
 
         assertFalse(worked);
     }
 
     @Test
     public void t02_testFirstTeacherOnLoadValidTeacherCSV() throws IOException {
-        DataRepository instance = DataRepository.getInstance();
-        CSVManager.processCSV(teacherCSVPath, instance);
+        CSVManager.processCSV(teacherCSVPath, dataRepository);
 
-        assertEquals("John Doe", instance.getTeachers().getFirst().getTeacherName());
-        assertEquals("JD", instance.getTeachers().getFirst().getNameSymbol());
+        assertEquals("John Doe", dataRepository.getTeachers().getFirst().getTeacherName());
+        assertEquals("JD", dataRepository.getTeachers().getFirst().getNameSymbol());
         //assertEquals("Math", instance.getTeachers().getFirst().getTeachingSubject().getFirst());
     }
 
     @Test
     public void t03_testThrowErrorOnLoadTeachersWrongSubject() throws IOException {
-        DataRepository instance = DataRepository.getInstance();
-
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CSVManager.processCSV(teacherCSVPathWithWrongSubject, instance);
+            CSVManager.processCSV(teacherCSVPathWithWrongSubject, dataRepository);
         });
 
         assertEquals("This subject doesn't exist.", exception.getMessage());
@@ -70,19 +70,15 @@ public class TestCSV { //Has to be reworked if singleton is changed to entityman
 
     @Test
     public void t04_testThrowErrorOnLoadCSVWithWrongType() throws IOException {
-        DataRepository instance = DataRepository.getInstance();
-
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CSVManager.processCSV(csvWithWrongType, instance);
+            CSVManager.processCSV(csvWithWrongType, dataRepository);
         });
     }
 
     @Test
     public void t05_testThrowErrorOnInvalidColumnLengthOnLoadTeacherCSV() {
-        DataRepository instance = DataRepository.getInstance();
-
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CSVManager.processCSV(csvWithTooLongColumn, instance);
+            CSVManager.processCSV(csvWithTooLongColumn, dataRepository);
         });
     }
 }

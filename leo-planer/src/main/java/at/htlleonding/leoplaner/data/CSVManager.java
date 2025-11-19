@@ -11,8 +11,6 @@ public class CSVManager {
   final static String teacherType = "teacher";
   final static String roomType = "room";
   final static String subjectType = "subject";
-  // TODO final static String testPath =
-  // "src/resources/csvFiles/test1/testTeacher.csv";
 
   public static boolean processCSV(String filePath, DataRepository dataRepository) {
     String[] lines = getLinesFromCSV(filePath);
@@ -55,17 +53,18 @@ public class CSVManager {
       ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes with ..);
       String[] subjects = line[2].split(",");
       for (String subjectName : subjects) {
-        Subject subject = dataRepository.checkIfSubjectExists(subjectName.trim());
+        Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim());
 
-        if (subject == null) { // MAYBE fix this with an error message "Subject not found please import subject
-                               // csv first" (test is already implemented)
-          subject = new Subject(subjectName.trim(), null); // TODO add roomtypes in CSV
-          dataRepository.addSubject(subject);
+        if (subject == null) {
+          throw new IllegalArgumentException("Subject " + subjectName + " does not exist. Please check the CSV.");
         }
         takenSubjects.add(subject);
       }
 
-      Teacher teacher = new Teacher(teacherName, nameSymbol, takenSubjects);
+      Teacher teacher = new Teacher();
+      teacher.setTeacherName(teacherName);
+      teacher.setNameSymbol(nameSymbol);
+      teacher.setTakenSubjects(takenSubjects);
       dataRepository.addTeacher(teacher);
     }
   }
@@ -98,7 +97,12 @@ public class CSVManager {
         }
       }
 
-      Room room = new Room(roomNumber, roomName, roomPrefix, roomSuffix, roomTypesArray);
+      Room room = new Room();
+      room.setRoomNumber(roomNumber);
+      room.setRoomName(roomName);
+      room.setRoomPrefix(roomPrefix);
+      room.setRoomSuffix(roomSuffix);
+      room.setRoomTypes(roomTypesArray);
       dataRepository.addRoom(room);
     }
   }
@@ -122,17 +126,19 @@ public class CSVManager {
           requiredRoomTypes[index] = roomType;
           index++;
         } catch (IllegalArgumentException e) {
-          // invalid room type, skip
+          throw new IllegalArgumentException("Roomtype " + roomTypeString + " does not exist. Please check CSV.");
         }
       }
 
-      Subject subject = new Subject(subjectName, requiredRoomTypes);
+      Subject subject = new Subject();
+      subject.setSubjectName(subjectName);
+      subject.setRequiredRoomTypes(requiredRoomTypes);
       dataRepository.addSubject(subject);
     }
   }
 
   public static String[] getLinesFromCSV(String filePath) {
-    String[] result = null;
+    String[] result;
     try {
       Path path = Paths.get(filePath);
       List<String> lines = Files.readAllLines(path);

@@ -6,10 +6,10 @@ import org.hibernate.annotations.NamedQuery;
 import jakarta.persistence.Entity;
 
 // TODO add NamedQueries
-@Entity
 @NamedQueries({
   @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from subject s")
 })
+@Entity
 public class Subject {
     private String subjectName;
     private RoomTypes[] requiredRoomTypes; //TODO forrign keys (onetomany) or not

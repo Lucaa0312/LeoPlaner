@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.data;
 
+
 public class Period {
     private SchoolDays schoolDays;
     private short schoolHour;

@@ -79,4 +79,14 @@ public class DataRepository {
     this.entityManager.persist(subject);
     return subject;
   }
+
+  public Subject getSubjectByNameAndCheckIfExists(String subjectName) {
+    Subject subject;
+      try {
+          subject = this.entityManager.find(Subject.class, subjectName);
+      } catch (Exception e) {
+          return null;
+      }
+      return subject;
+  }
 }
