@@ -1,9 +1,16 @@
 package at.htlleonding.leoplaner.data;
 
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+
+@NamedQueries({
+  @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from classSubject c")
+})
 
 @Entity
 public class ClassSubject {
@@ -19,6 +26,8 @@ public class ClassSubject {
     private short weeklyHours;
     private boolean requiresDoublePeriod;
     private boolean isBetterDoublePeriod;
+
+    static public final String QUERY_FIND_ALL = "ClassSubject.findAll";
 
 
     public Teacher getTeacher() {

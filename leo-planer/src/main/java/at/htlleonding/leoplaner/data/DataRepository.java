@@ -3,7 +3,11 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.smallrye.mutiny.helpers.Subscriptions.SingleItemSubscription;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 @ApplicationScoped
 public class DataRepository {
@@ -11,8 +15,12 @@ public class DataRepository {
   private ArrayList<Teacher> teachers;
   private ArrayList<Room> rooms;
 
-  public List<ClassSubject> getAllClassSubjects() { // Extend with TypedQuery once DataBase is set up
-    return classSubjects;
+  @Inject
+  EntityManager entityManager;
+
+  public List<ClassSubject> getAllClassSubjects() {
+    TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class);
+    return allClassSubjects.getResultList();
   }
 
   public ArrayList<ClassSubject> getClassSubjects() {
@@ -27,15 +35,39 @@ public class DataRepository {
     return null;
   }
 
-  public boolean addTeacher(Teacher teacher) {
-    return true;
+  public ClassSubject addClassSubject(ClassSubject classSubject) { //TODO correct return type???
+    if (this.entityManager.contains(classSubject)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(classSubject);
+    return classSubject;
   }
 
-  public boolean addRoom(Room room) {
-    return true;
+  public Teacher addTeacher(Teacher teacher) {
+    if (this.entityManager.contains(teacher)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(teacher);
+    return teacher;
   }
 
-  public boolean addClassSubject(ClassSubject classSubject) {
-    return true;
+  public Room addRoom(Room room) {
+    if (this.entityManager.contains(room)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(room);
+    return room;
+  }
+
+  public Subject addSubject(Subject subject) {
+    if (this.entityManager.contains(subject)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(subject);
+    return subject;
   }
 }
