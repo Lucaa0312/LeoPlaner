@@ -1,8 +1,20 @@
 package at.htlleonding.leoplaner.data;
 
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+
+import jakarta.persistence.Entity;
+
+// TODO add NamedQueries
+@Entity
+@NamedQueries({
+  @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from subject s")
+})
 public class Subject {
     private String subjectName;
-    private RoomTypes[] requiredRoomTypes;
+    private RoomTypes[] requiredRoomTypes; //TODO forrign keys (onetomany) or not
+
+    public static final String QUERY_FIND_ALL = "Subject.findAll";
 
     public String getSubjectName() {
         return subjectName;
@@ -12,8 +24,12 @@ public class Subject {
         return requiredRoomTypes;
     }
 
-    public Subject(String subjectName, RoomTypes[] requiredRoomTypes) {
-        this.subjectName = subjectName;
-        this.requiredRoomTypes = requiredRoomTypes;
+    public void setSubjectName(String subjectName) {
+      this.subjectName = subjectName;
     }
+
+    public void setRequiredRoomTypes(RoomTypes[] requiredRoomTypes) {
+      this.requiredRoomTypes = requiredRoomTypes;
+    }
+
 }

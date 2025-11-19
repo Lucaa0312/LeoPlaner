@@ -42,8 +42,10 @@ public class CSVManager {
 
   public static void createTeacherFromCSV(String[] lines, DataRepository dataRepository) {
     for (int i = 1; i < lines.length; i++) {
-      String[] line = lines[i].split(";"); // MAYBE check if it has the exact amount of lines the csv should have
-
+      String[] line = lines[i].split(";");
+      if(line.length != 3) {
+        throw new IllegalArgumentException("Teacher CSV is ONLY allowed to have 4 columns! Found " + line.length + " columns in row " + i);
+      }
       // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
       // (.CHEM is roomtype)
 
@@ -71,7 +73,9 @@ public class CSVManager {
   public static void createRoomFromCSV(String[] lines, DataRepository dataRepository) {
     for (int i = 1; i < lines.length; i++) {
       String[] line = lines[i].toLowerCase().split(";");
-
+      if(line.length != 5) {
+        throw new IllegalArgumentException("Room CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+      }
       // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
 
       short roomNumber = Short.parseShort(line[0]);
@@ -102,7 +106,9 @@ public class CSVManager {
   public static void createSubjectFromCSV(String[] lines, DataRepository dataRepository) {
     for (int i = 1; i < lines.length; i++) {
       String[] line = lines[i].toLowerCase().split(";");
-
+      if(line.length != 2) {
+        throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+      }
       // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
       String subjectName = line[0].trim();
       String[] requiredRoomTypesStrings = line[1].split(",");

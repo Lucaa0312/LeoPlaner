@@ -1,71 +1,82 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+
+@ApplicationScoped
 public class DataRepository {
   private ArrayList<ClassSubject> classSubjects;
-  private ArrayList<Subject> subjects;
   private ArrayList<Teacher> teachers;
   private ArrayList<Room> rooms;
-  private static DataRepository instance;
 
-  public static DataRepository getInstance() {
-    if(instance == null) {
-      instance = new DataRepository();
-    }
-    return instance;
+  @Inject
+  EntityManager entityManager;
+
+  public List<ClassSubject> getAllClassSubjects() {
+    TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class);
+    return allClassSubjects.getResultList();
   }
 
-  private DataRepository() {
-    this.classSubjects = new ArrayList<>();
-    this.subjects = new ArrayList<>();
-    this.teachers = new ArrayList<>();
-    this.rooms = new ArrayList<>();
+  public List<Teacher> getAllTeachers() {
+    TypedQuery<Teacher> allTeachers = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_ALL, Teacher.class);
+    return allTeachers.getResultList();
+  }
+
+  public List<Room> getAllRooms() {
+    TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
+    return allRooms.getResultList();
   }
 
   public ArrayList<ClassSubject> getClassSubjects() {
-    return this.classSubjects;
+    return null;
   }
 
   public ArrayList<Teacher> getTeachers() {
-    return this.teachers;
+    return null;
   }
 
   public ArrayList<Room> getRooms() {
-    return this.rooms;
+    return null;
   }
 
-  public boolean addTeacher(Teacher teacher) {
-    this.teachers.add(teacher);
-    return true;
+  public ClassSubject addClassSubject(ClassSubject classSubject) { //TODO correct return type???
+    if (this.entityManager.contains(classSubject)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(classSubject);
+    return classSubject;
   }
 
-  public boolean addRoom(Room room) {
-    this.rooms.add(room);
-    return true;
+  public Teacher addTeacher(Teacher teacher) {
+    if (this.entityManager.contains(teacher)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(teacher);
+    return teacher;
   }
 
-  public boolean addClassSubject(ClassSubject classSubject) {
-    this.classSubjects.add(classSubject);
-    return true;
+  public Room addRoom(Room room) {
+    if (this.entityManager.contains(room)) {
+      throw new IllegalArgumentException();
+    }
+
+    this.entityManager.persist(room);
+    return room;
   }
 
-  public boolean addSubject(Subject subject) {
-    this.subjects.add(subject);
-    return true;
-  }
+  public Subject addSubject(Subject subject) {
+    if (this.entityManager.contains(subject)) {
+      throw new IllegalArgumentException();
+    }
 
-  public Subject checkIfSubjectExists(String subjectName) {
-    return subjects.stream()
-        .filter(subject -> subject.getSubjectName().equalsIgnoreCase(subjectName))
-        .findFirst()
-        .orElse(null);
-  }
-
-  public Room checkIfRoomExists(String roomName) {
-    return rooms.stream()
-        .filter(room -> room.getRoomName().equalsIgnoreCase(roomName))
-        .findFirst()
-        .orElse(null);
+    this.entityManager.persist(subject);
+    return subject;
   }
 }
