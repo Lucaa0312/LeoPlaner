@@ -1,15 +1,6 @@
 param(
-    ###########################################################################
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # CONFIGURE THESE TWO PATHS
-    #
-    # 1. $InputDir:  where your .puml files are located
-    # 2. $OutputDir: where generated .svg files will be written
-    #
-    [string]$InputDir = "./puml",      # <--- CHANGE THIS if needed
-    [string]$OutputDir = "./img"    # <--- CHANGE THIS if needed
-    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    ###########################################################################
+    [string]$InputDir = "../documentation/puml",  
+    [string]$OutputDir = "../documentation/img"   
 )
 
 Write-Host "Input PUML directory: $InputDir"
