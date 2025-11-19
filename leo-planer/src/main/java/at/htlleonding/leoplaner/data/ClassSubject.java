@@ -7,9 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @NamedQueries({
-  @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from classSubject c")
+  @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c")
 })
 
 @Entity
