@@ -2,7 +2,7 @@ param(
     [string]$InputDir = "../documentation/puml",  
     [string]$OutputDir = "../documentation/img"   
 )
-
+#Script to generate diagrams from PUML files using PlantUML Docker image
 Write-Host "Input PUML directory: $InputDir"
 Write-Host "Output directory:     $OutputDir"
 
