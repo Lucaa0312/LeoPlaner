@@ -1,10 +1,17 @@
 package at.htlleonding.leoplaner.data;
 
+import org.hibernate.annotations.NamedQuery;
+import org.hibernate.annotations.NamedQueries;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+// TODO add NamedQueries
 @Entity
+@NamedQueries({
+  @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from room r")
+})
 public class Room {
   @Id
   @GeneratedValue
@@ -14,6 +21,9 @@ public class Room {
     private String roomPrefix;
     private String roomSuffix;
     private RoomTypes[] roomTypes; // TODO foreing key or not
+  
+    public static final String QUERY_FIND_ALL = "Room.findAll";
+
 
     public short getRoomNumber() {
         return roomNumber;

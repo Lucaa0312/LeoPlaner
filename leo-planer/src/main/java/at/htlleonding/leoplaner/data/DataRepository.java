@@ -3,7 +3,6 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.smallrye.mutiny.helpers.Subscriptions.SingleItemSubscription;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -21,6 +20,16 @@ public class DataRepository {
   public List<ClassSubject> getAllClassSubjects() {
     TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class);
     return allClassSubjects.getResultList();
+  }
+
+  public List<Teacher> getAllTeachers() {
+    TypedQuery<Teacher> allTeachers = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_ALL, Teacher.class);
+    return allTeachers.getResultList();
+  }
+
+  public List<Room> getAllRooms() {
+    TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
+    return allRooms.getResultList();
   }
 
   public ArrayList<ClassSubject> getClassSubjects() {
