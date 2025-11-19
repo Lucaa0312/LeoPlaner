@@ -1,5 +1,6 @@
 subject;name;requiredRoomTypes
-Chemistry,CHEM,PHY
+Chemistry;CHEM,PHY
 Math
 History
-Physics,PHY
+Physics;PHY
+German

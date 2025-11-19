@@ -1,15 +1,11 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
-
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 
 @NamedQueries({
   @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t")
@@ -19,12 +15,17 @@ import jakarta.persistence.OneToMany;
 public class Teacher {
   @Id
   @GeneratedValue
-  private long id;
+  private Long id;
   private String teacherName;
   private String nameSymbol; // Lehrerkürzel
 
-  @OneToMany
-  private ArrayList<Subject> teachingSubject;
+    @ManyToMany
+    @JoinTable( //create new table
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+  private List<Subject> teachingSubject = new ArrayList<>();
 
   public static final String QUERY_FIND_ALL = "Teacher.findAll";
 
@@ -37,7 +38,7 @@ public class Teacher {
   }
 
 
-  public ArrayList<Subject> getTeachingSubject() {
+  public List<Subject> getTeachingSubject() {
     return teachingSubject;
   }
 

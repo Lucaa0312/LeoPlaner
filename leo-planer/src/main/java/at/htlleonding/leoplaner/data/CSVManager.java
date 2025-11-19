@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CSVManager {
@@ -53,7 +54,8 @@ public class CSVManager {
       ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes with ..);
       String[] subjects = line[2].split(",");
       for (String subjectName : subjects) {
-        Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim());
+          System.out.println(subjectName.trim().toLowerCase());
+        Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
 
         if (subject == null) {
           throw new IllegalArgumentException("Subject " + subjectName + " does not exist. Please check the CSV.");
@@ -102,7 +104,7 @@ public class CSVManager {
       room.setRoomName(roomName);
       room.setRoomPrefix(roomPrefix);
       room.setRoomSuffix(roomSuffix);
-      room.setRoomTypes(roomTypesArray);
+      room.setRoomTypes(Arrays.stream(roomTypesArray).toList());
       dataRepository.addRoom(room);
     }
   }
@@ -110,29 +112,30 @@ public class CSVManager {
   public static void createSubjectFromCSV(String[] lines, DataRepository dataRepository) {
     for (int i = 1; i < lines.length; i++) {
       String[] line = lines[i].toLowerCase().split(";");
-      if(line.length != 2) {
-        throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+      if(line.length < 1) {
+        throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 1 columns! Found " + line.length + " columns in row " + i);
       }
       // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
       String subjectName = line[0].trim();
-      String[] requiredRoomTypesStrings = line[1].split(",");
-      RoomTypes[] requiredRoomTypes = new RoomTypes[requiredRoomTypesStrings.length];
-
-      int index = 0;
-      for (String roomTypeString : requiredRoomTypesStrings) {
-        RoomTypes roomType;
-        try {
-          roomType = RoomTypes.valueOf(roomTypeString.trim().toUpperCase());
-          requiredRoomTypes[index] = roomType;
-          index++;
-        } catch (IllegalArgumentException e) {
-          throw new IllegalArgumentException("Roomtype " + roomTypeString + " does not exist. Please check CSV.");
-        }
-      }
-
       Subject subject = new Subject();
+      if (line.length > 1) {
+          String[] requiredRoomTypesStrings = line[1].split(",");
+          RoomTypes[] requiredRoomTypes = new RoomTypes[requiredRoomTypesStrings.length];
+
+          int index = 0;
+          for (String roomTypeString : requiredRoomTypesStrings) {
+              RoomTypes roomType;
+              try {
+                  roomType = RoomTypes.valueOf(roomTypeString.trim().toUpperCase());
+                  requiredRoomTypes[index] = roomType;
+                  index++;
+              } catch (IllegalArgumentException e) {
+                  throw new IllegalArgumentException("Roomtype " + roomTypeString + " does not exist. Please check CSV.");
+              }
+              subject.setRequiredRoomTypes(Arrays.asList(requiredRoomTypes));
+          }
+      }
       subject.setSubjectName(subjectName);
-      subject.setRequiredRoomTypes(requiredRoomTypes);
       dataRepository.addSubject(subject);
     }
   }

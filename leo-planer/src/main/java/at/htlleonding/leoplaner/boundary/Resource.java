@@ -2,8 +2,10 @@ package at.htlleonding.leoplaner.boundary;
 
 import java.util.List;
 
+import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ClassSubject;
+import at.htlleonding.leoplaner.data.Teacher;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.inject.Inject;
@@ -13,17 +15,37 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-@Path("api/classSubjects")
+@Path("api")
 public class Resource {
   @Context
   UriInfo uriInfo;
   @Inject
   DataRepository dataRepository;
 
+  @Path("run/testCsv")
+  @GET
+  public void injectCsvData() {
+      final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
+      final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
+
+      CSVManager.processCSV(subjectCSVPath, dataRepository);
+      CSVManager.processCSV(teacherCSVPath, dataRepository);
+  }
+
+  @Path("classSubjects")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllClassSubjects() {
     List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
     return Response.status(Response.Status.OK).entity(classSubjects).build();
   }
+
+  @Path("teachers")
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAllTeachers() {
+      List<Teacher> teachers = dataRepository.getAllTeachers();
+      return Response.status(Response.Status.OK).entity(teachers).build();
+  }
+
 }

@@ -1,12 +1,10 @@
 package at.htlleonding.leoplaner.data;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.NamedQuery;
 import org.hibernate.annotations.NamedQueries;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import java.util.List;
 
 // TODO add NamedQueries
 @NamedQueries({
@@ -16,13 +14,19 @@ import jakarta.persistence.Id;
 public class Room {
   @Id
   @GeneratedValue
-  private long id;
+  private Long id;
   private short roomNumber;
   private String roomName;
   private String roomPrefix;
   private String roomSuffix;
-  @ElementCollection
-  private RoomTypes[] roomTypes; // TODO foreing key or not
+    @ElementCollection(targetClass = RoomTypes.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable( //create new join table
+            name = "room_roomtypes",
+            joinColumns = @JoinColumn(name = "room_id")
+    )
+    @Column(name = "room_type")
+  private List<RoomTypes> roomTypes;
 
   public static final String QUERY_FIND_ALL = "Room.findAll";
 
@@ -42,7 +46,7 @@ public class Room {
     return roomSuffix;
   }
 
-  public RoomTypes[] getRoomTypes() {
+  public List<RoomTypes> getRoomTypes() {
     return roomTypes;
   }
 
@@ -66,7 +70,7 @@ public class Room {
     this.roomSuffix = roomSuffix;
   }
 
-  public void setRoomTypes(RoomTypes[] roomTypes) {
+  public void setRoomTypes(List<RoomTypes> roomTypes) {
     this.roomTypes = roomTypes;
   }
 }

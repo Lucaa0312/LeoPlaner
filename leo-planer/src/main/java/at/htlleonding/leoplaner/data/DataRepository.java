@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DataRepository {
@@ -18,7 +19,7 @@ public class DataRepository {
   EntityManager entityManager;
 
   public List<ClassSubject> getAllClassSubjects() {
-    TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class);
+    TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
     return allClassSubjects.getResultList();
   }
 
@@ -30,6 +31,17 @@ public class DataRepository {
   public List<Room> getAllRooms() {
     TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
     return allRooms.getResultList();
+  }
+
+  public List<Subject> getAllSubjects() {
+      TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery("Subject.findAll", Subject.class);
+      return allSubjects.getResultList();
+  }
+
+  public Subject getSubjectByName(String name) {
+      TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery("Subject.findByName", Subject.class);
+      allSubjects.setParameter("filter", name);
+      return allSubjects.getSingleResult();
   }
 
   public ArrayList<ClassSubject> getClassSubjects() {
@@ -44,6 +56,7 @@ public class DataRepository {
     return null;
   }
 
+  @Transactional
   public ClassSubject addClassSubject(ClassSubject classSubject) { //TODO correct return type???
     if (this.entityManager.contains(classSubject)) {
       throw new IllegalArgumentException();
@@ -53,6 +66,7 @@ public class DataRepository {
     return classSubject;
   }
 
+  @Transactional
   public Teacher addTeacher(Teacher teacher) {
     if (this.entityManager.contains(teacher)) {
       throw new IllegalArgumentException();
@@ -62,6 +76,7 @@ public class DataRepository {
     return teacher;
   }
 
+@Transactional
   public Room addRoom(Room room) {
     if (this.entityManager.contains(room)) {
       throw new IllegalArgumentException();
@@ -71,6 +86,7 @@ public class DataRepository {
     return room;
   }
 
+@Transactional
   public Subject addSubject(Subject subject) {
     if (this.entityManager.contains(subject)) {
       throw new IllegalArgumentException();
@@ -83,7 +99,7 @@ public class DataRepository {
   public Subject getSubjectByNameAndCheckIfExists(String subjectName) {
     Subject subject;
       try {
-          subject = this.entityManager.find(Subject.class, subjectName);
+          subject = getSubjectByName(subjectName);
       } catch (Exception e) {
           return null;
       }
