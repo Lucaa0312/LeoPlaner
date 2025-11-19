@@ -1,49 +1,67 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+
+@NamedQueries({
+  @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t")
+})
+
+@Entity
 public class Teacher {
+  @Id
+  @GeneratedValue
+  private Long id;
+  private String teacherName;
+  private String nameSymbol; // Lehrerkürzel
 
-    private String teacherName;
-    private String nameSymbol; // Lehrerkürzel
-    private ArrayList<Period> takenPeriods;
-    private ArrayList<Subject> teachingSubject;
+    @ManyToMany
+    @JoinTable( //create new table
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+  private List<Subject> teachingSubject = new ArrayList<>();
 
-    public String getTeacherName() {
-        return teacherName;
-    }
+  public static final String QUERY_FIND_ALL = "Teacher.findAll";
 
-    public String getNameSymbol() {
-        return nameSymbol;
-    }
+  public String getTeacherName() {
+    return teacherName;
+  }
 
-    public ArrayList<Period> getTakenPeriods() {
-        return takenPeriods;
-    }
-
-    public ArrayList<Subject> getTeachingSubject() {
-        return teachingSubject;
-    }
+  public String getNameSymbol() {
+    return nameSymbol;
+  }
 
 
-    public Teacher(ArrayList<Subject> teachingSubject, String nameSymbol, String teacherName) {
-        this.teachingSubject = teachingSubject;
-        this.nameSymbol = nameSymbol;
-        this.teacherName = teacherName;
-    }
+  public List<Subject> getTeachingSubject() {
+    return teachingSubject;
+  }
 
-    public boolean checkIfTeacherTeachesSubject(Subject subject) {
-        return teachingSubject.contains(subject);
-    }
+  public boolean checkIfTeacherTeachesSubject(Subject subject) {
+    return teachingSubject.contains(subject);
+  }
 
-    public boolean checkIfTeacherAvailableInPeriod(Period period) {
-        return !takenPeriods.contains(period);
-    }
 
-    public boolean addTeacherPeriod(Period period) {
-        if (!checkIfTeacherAvailableInPeriod(period)) return false;
-        this.takenPeriods.add(period);
-        return true;
-    }
+  public void setId(long id) {
+    this.id = id;
+  }
+
+  public void setTeacherName(String teacherName) {
+    this.teacherName = teacherName;
+  }
+
+  public void setNameSymbol(String nameSymbol) {
+    this.nameSymbol = nameSymbol;
+  }
+
+
+  public void setTeachingSubject(ArrayList<Subject> teachingSubject) {
+    this.teachingSubject = teachingSubject;
+  }
 
 }
