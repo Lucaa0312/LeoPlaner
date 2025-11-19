@@ -39,19 +39,20 @@ entity RoomTypes {
 
 entity RequiredRoomTypes {
   <u>SubjectID : int
-  <u>RoomTypeID : int 
+  ---
+  RoomType : varchar(10)
 }
 
 entity Room_RoomTypes { 
   <u>RoomNumber : int 
-  <u>RoomTypeID : int 
+  ---
+  RoomType : varchar(10)
 }
 
 ClassSubject ||-- Subject
 ClassSubject ||-- Teacher
 
 Room }o-- Room_RoomTypes
-Room_RoomTypes }o-- RoomTypes
 
 Subject }o-- RequiredRoomTypes
 RequiredRoomTypes }o-- Room
