@@ -1,8 +1,11 @@
 package at.htlleonding.leoplaner.data;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class Subject {
     private String subjectName;
-    private RoomTypes[] requiredRoomTypes;
+    private RoomTypes[] requiredRoomTypes; //TODO forrign keys (onetomany) or not
 
     public String getSubjectName() {
         return subjectName;
@@ -12,8 +15,12 @@ public class Subject {
         return requiredRoomTypes;
     }
 
-    public Subject(String subjectName, RoomTypes[] requiredRoomTypes) {
-        this.subjectName = subjectName;
-        this.requiredRoomTypes = requiredRoomTypes;
+    public void setSubjectName(String subjectName) {
+      this.subjectName = subjectName;
     }
+
+    public void setRequiredRoomTypes(RoomTypes[] requiredRoomTypes) {
+      this.requiredRoomTypes = requiredRoomTypes;
+    }
+
 }
