@@ -8,14 +8,14 @@ import java.util.List;
 
 // TODO add NamedQueries
 @NamedQueries({
-  @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from Subject s"),
+        @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from Subject s"),
         @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where s.subjectName = :filter")
 })
 @Entity
 public class Subject {
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
     private String subjectName;
 
     @ElementCollection(targetClass = RoomTypes.class)
@@ -38,12 +38,24 @@ public class Subject {
         return requiredRoomTypes;
     }
 
-    public void setSubjectName(String subjectName) {
-      this.subjectName = subjectName;
+    public void setSubjectName(final String subjectName) {
+        this.subjectName = subjectName;
     }
 
-    public void setRequiredRoomTypes(List<RoomTypes> requiredRoomTypes) {
-      this.requiredRoomTypes = requiredRoomTypes;
+    public void setRequiredRoomTypes(final List<RoomTypes> requiredRoomTypes) {
+        this.requiredRoomTypes = requiredRoomTypes;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public static String getQueryFindAll() {
+        return QUERY_FIND_ALL;
+    }
+
+    public static String getQueryFindByName() {
+        return QUERY_FIND_BY_NAME;
     }
 
 }

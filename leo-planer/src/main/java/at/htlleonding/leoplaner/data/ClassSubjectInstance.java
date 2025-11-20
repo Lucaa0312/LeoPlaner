@@ -10,6 +10,7 @@ public class ClassSubjectInstance {
         this.classSubject = classSubject;
         this.period = period;
     }
+
     public void assignClassRoomIfNoSpecialRoomType() {
 
     }
