@@ -105,4 +105,11 @@ public class DataRepository {
       }
       return subject;
   }
+
+  public Teacher getTeacherByNameAndCheckIfExists(String teacherName) {
+    System.out.println(teacherName);
+    TypedQuery<Teacher> query = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_NAME, Teacher.class);
+    query.setParameter("filter", teacherName);
+    return query.getSingleResultOrNull();
+  }
 }

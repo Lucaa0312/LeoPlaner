@@ -12,6 +12,7 @@ public class CSVManager {
   final static String teacherType = "teacher";
   final static String roomType = "room";
   final static String subjectType = "subject";
+  final static String classSubjectType = "classsubject"; // TODO make finals name UPPERCASE
 
   public static boolean processCSV(String filePath, DataRepository dataRepository) {
     String[] lines = getLinesFromCSV(filePath);
@@ -31,6 +32,9 @@ public class CSVManager {
         break;
       case subjectType:
         createSubjectFromCSV(lines, dataRepository);
+        break;
+      case classSubjectType:
+        createClassSubjectFromCSV(lines, dataRepository);
         break;
       default:
         throw new IllegalArgumentException("Unknown Type: " + type);
@@ -137,6 +141,38 @@ public class CSVManager {
       }
       subject.setSubjectName(subjectName);
       dataRepository.addSubject(subject);
+    }
+  }
+
+  public static void createClassSubjectFromCSV(String[] lines, DataRepository dataRepository) { // TODO add unit tests
+    for (int i = 1; i < lines.length; i++) {
+      String[] line = lines[i].toLowerCase().split(";");
+      if(line.length != 5) {
+        throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 5 columns! Found " + line.length + " columns in row " + i);
+      }
+      // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
+      Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim());
+      Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim());
+      short weeklyHours = Short.parseShort(line[2].trim());
+      boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
+      boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
+
+      if (subject == null) {
+        throw new IllegalArgumentException("Subject " + line[0] + " does not exist. Please check the CSV.");
+      }
+
+      if (teacher == null) {
+        throw new IllegalArgumentException("Teacher " + line[1] + " does not exist. Please check the CSV.");
+      }
+
+
+      ClassSubject classSubject = new ClassSubject();
+      classSubject.setTeacher(teacher);
+      classSubject.setSubject(subject);
+      classSubject.setWeeklyHours(weeklyHours);
+      classSubject.setRequiresDoublePeriod(requiresDoublePeriod);
+      classSubject.setBetterDoublePeriod(isBetterDoublePeriod);
+      dataRepository.addClassSubject(classSubject);
     }
   }
 

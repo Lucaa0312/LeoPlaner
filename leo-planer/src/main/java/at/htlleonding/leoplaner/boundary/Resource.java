@@ -25,27 +25,32 @@ public class Resource {
   @Path("run/testCsv")
   @GET
   public void injectCsvData() {
-      final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
-      final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
+    final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
+    final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
+    final String classSubjectCSVPath = "src/resources/csvFiles/test1/testClassSubject.csv";
 
-      CSVManager.processCSV(subjectCSVPath, dataRepository);
-      CSVManager.processCSV(teacherCSVPath, dataRepository);
+    CSVManager.processCSV(subjectCSVPath, dataRepository);
+    CSVManager.processCSV(teacherCSVPath, dataRepository);
+    CSVManager.processCSV(classSubjectCSVPath, dataRepository);
   }
 
-  @Path("classSubjects")
+  @Path("/classSubjects")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllClassSubjects() {
     List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
+    for (ClassSubject cs : classSubjects) {
+      System.out.println(cs.getTeacher());
+    }
     return Response.status(Response.Status.OK).entity(classSubjects).build();
   }
 
-  @Path("teachers")
+  @Path("/teachers")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllTeachers() {
-      List<Teacher> teachers = dataRepository.getAllTeachers();
-      return Response.status(Response.Status.OK).entity(teachers).build();
+    List<Teacher> teachers = dataRepository.getAllTeachers();
+    return Response.status(Response.Status.OK).entity(teachers).build();
   }
 
 }
