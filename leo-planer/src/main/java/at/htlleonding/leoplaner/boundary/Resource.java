@@ -2,10 +2,7 @@ package at.htlleonding.leoplaner.boundary;
 
 import java.util.List;
 
-import at.htlleonding.leoplaner.data.CSVManager;
-import at.htlleonding.leoplaner.data.DataRepository;
-import at.htlleonding.leoplaner.data.ClassSubject;
-import at.htlleonding.leoplaner.data.Teacher;
+import at.htlleonding.leoplaner.data.*;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.inject.Inject;
@@ -35,4 +32,14 @@ public class Resource {
         CSVManager.processCSV(teacherCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list/subjects")
+    public Response getAllSubjects(){
+        injectCsvData();
+        List<Subject> subjects = this.dataRepository.getAllSubjects();
+        return Response.status(Response.Status.OK).entity(subjects).build();
+    }
+
 }
