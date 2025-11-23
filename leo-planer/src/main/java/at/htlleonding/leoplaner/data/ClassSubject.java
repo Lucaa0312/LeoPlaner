@@ -9,7 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
 @NamedQueries({
-        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c")
+        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c"),
+        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c where LOWER(c.className) = :filter")
 })
 
 @Entity
@@ -26,7 +27,10 @@ public class ClassSubject {
     private boolean requiresDoublePeriod;
     private boolean isBetterDoublePeriod;
 
+    private String className;
+
     static public final String QUERY_FIND_ALL = "ClassSubject.findAll";
+    static public final String QUERY_FIND_ALL_BY_CLASSNAME = "ClassSubject.findAllByClassName";
 
     public Teacher getTeacher() {
         return teacher;
@@ -35,6 +39,7 @@ public class ClassSubject {
     public Long getId() {
         return id;
     }
+
 
     public static String getQueryFindAll() {
         return QUERY_FIND_ALL;
@@ -78,5 +83,17 @@ public class ClassSubject {
 
     public void setBetterDoublePeriod(final boolean isBetterDoublePeriod) {
         this.isBetterDoublePeriod = isBetterDoublePeriod;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(final String className) {
+        this.className = className;
     }
 }

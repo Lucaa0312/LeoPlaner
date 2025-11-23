@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Subject;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -23,15 +24,18 @@ public class Resource {
 
     @Path("run/testCsv")
     @GET
-    public void injectCsvData() {
+    public void injectTestCsvData() {
         final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
         final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
         final String classSubjectCSVPath = "src/resources/csvFiles/test1/testClassSubject.csv";
+        final String roomCSVPath = "src/resources/csvFiles/test1/testRoom.csv";
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
+        CSVManager.processCSV(roomCSVPath, dataRepository);
+
+
+        this.dataRepository.createTimetable("4chitm", room);
     }
-
-
 }
