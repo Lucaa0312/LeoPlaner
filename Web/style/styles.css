@@ -1,0 +1,78 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    margin: 0;
+    padding: 0;
+}
+
+#header{
+    width: auto;
+    background-color: #e69246;
+    padding: 1vh;
+}
+#header img{
+    display: block;
+    width: 30vw;
+}
+
+#content{
+    width: auto;
+    height: auto;
+    background-color: rgb(167, 202, 233);
+}
+
+#days{
+    display: flex;
+    text-align: center;
+    justify-content: left;   
+}
+.day{
+    margin-right: 15vh;
+    font-size: large;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#day0{
+    border-right: solid;
+    text-align: center;
+}
+
+.day .headlineP{
+    margin-top: 1vh;
+    text-align: center;
+    margin-right: 2vh;
+    margin-left: 2vh;
+    margin-bottom: 1vh;
+}
+
+
+.gridBox div{
+    border-top: solid;
+    border-bottom: solid;
+    width: 10vw;
+    height: 15vh;
+    margin-bottom: 5vh;
+}
+
+.periodStarted{
+    margin-bottom: 10vh;
+}
+
+.gridBoxDays{
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.periodStyling{
+    width: 10vw;
+    border-style: solid;
+    height: 15vh;
+    margin-bottom: 5vh;
+}
+
+.period{
+    margin-top: 5vh;
+}
