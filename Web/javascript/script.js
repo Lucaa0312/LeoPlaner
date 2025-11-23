@@ -1,4 +1,4 @@
- let times = [
+  let times = [
         "07:05", 
         "07:55", 
         "08:00",
@@ -32,17 +32,33 @@
         "22:10"
     ];
 
-    let builder = "";
-    let builderDays = "";
-
+let builder = "";
+let builderDays = "";
+ 
 function load() {
     fetch("http://localhost:8080/api/classSubjects")
     .then(response => {
         response.json().then(data => {
             console.log(data);
+            console.log(data[0].subject);
 
-            for (let i = 0; i < times.length; i+=2) {
-                builderDays += `<div class="periodStyling"><p class="period">Lesson ${i}</p></div>`;
+            for (let i = 0; i < times.length; i++) {
+                let subjectName = "";
+                let teacherSymbol = "";
+                try {
+                    subjectName = data[i].subject.subjectName;
+                    teacherSymbol = data[i].teacher.nameSymbol;
+                }
+                catch (error) {
+                    subjectName = "No lesson";
+                    teacherSymbol = "-";
+                }
+
+                builderDays += `<div class="periodStyling">
+                <p class="period"> Lesson ${i} </p>
+                <p> ${subjectName} </p>
+                <p> ${teacherSymbol} </p>
+                </div>`;
                 builder += `<div id="hour${i}"><p class="periodStarted"> ${times[i]}</p> <p class="periodEnded">${times[i+1] ?? ""}</p></div>`;
             }
 
@@ -53,7 +69,7 @@ function load() {
             document.querySelectorAll('.gridBoxDays').forEach(box => {
                 box.innerHTML = builderDays;
             });
-
+            
         });
     })
     .catch(error => {
