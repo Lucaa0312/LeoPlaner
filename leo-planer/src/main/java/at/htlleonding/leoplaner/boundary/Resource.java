@@ -35,7 +35,6 @@ public class Resource {
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
         CSVManager.processCSV(roomCSVPath, dataRepository);
 
-        Room room = this.dataRepository.getRoomByNumber(24);
 
         this.dataRepository.createTimetable("4chitm", room);
     }
