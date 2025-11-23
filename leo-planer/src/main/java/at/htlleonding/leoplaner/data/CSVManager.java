@@ -58,7 +58,6 @@ public class CSVManager {
             ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes with ..);
             String[] subjects = line[2].split(",");
             for (String subjectName : subjects) {
-                System.out.println(subjectName.trim().toLowerCase());
                 Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
 
                 if (subject == null) {
@@ -151,8 +150,8 @@ public class CSVManager {
                 throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 5 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
-            Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim());
-            Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim());
+            Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
+            Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim().toLowerCase());
             short weeklyHours = Short.parseShort(line[2].trim());
             boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());

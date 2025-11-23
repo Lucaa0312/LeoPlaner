@@ -41,7 +41,7 @@ public class DataRepository {
     public Subject getSubjectByName(String name) {
         TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery("Subject.findByName", Subject.class);
         allSubjects.setParameter("filter", name);
-        return allSubjects.getSingleResult();
+        return allSubjects.getResultList().isEmpty() ? null : allSubjects.getResultList().get(0);
     }
 
     public ArrayList<ClassSubject> getClassSubjects() {
@@ -107,9 +107,8 @@ public class DataRepository {
     }
 
     public Teacher getTeacherByNameAndCheckIfExists(String teacherName) {
-        System.out.println(teacherName);
         TypedQuery<Teacher> query = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_NAME, Teacher.class); // TODO move this to a modular function
         query.setParameter("filter", teacherName);
-        return query.getSingleResultOrNull();
+        return query.getResultList().isEmpty() ? null : query.getResultList().get(0);
     }
 }
