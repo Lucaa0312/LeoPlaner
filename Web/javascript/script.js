@@ -1,36 +1,47 @@
 function load() {
+    let times = [
+        "07:05", 
+        "07:55", 
+        "08:00",
+        "08:50", 
+        "08:55",
+        "09:45", 
+        "10:00",
+        "10:50", 
+        "10:55",
+        "11:45", 
+        "11:50",
+        "12:40", 
+        "12:45",
+        "13:35", 
+        "13:40",
+        "14:30", 
+        "14:35",
+        "15:25",
+        "15:30",
+        "16:20", 
+        "16:25",
+        "17:15", 
+        "17:20",
+        "18:05",
+        "18:50", 
+        "19:00",
+        "19:45",
+        "20:30", 
+        "20:40",
+        "21:25",
+        "22:10"
+    ];
+
     let builder = "";
     
-    let hour = 7;
-    let minute = 5;
-
-    for (let i = 0; i < 18; i++) {
-
-        let timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-
-        builder += `<div id="hour${i}start">${timeStr}</div>`;
-
-        minute += 50;
-
-        
-
-        if (i == 3) {
-            minute += 15;
-        } else {
-            minute += 5;
-        }
-
-        if (minute >= 60) {
-            hour += Math.floor(minute / 60);
-            minute = minute % 60;
-        }
-
+    for (let i = 0; i < times.length; i+=2) {
+         builder += `<div id="hour${i}">${times[i]}<br><br>${times[i+1] ?? ""}</div>`;
     }
 
-    for (let i = 0; i < 5; i++) {
-        document.querySelector('.gridBox').innerHTML = builder;
-    }
-    
+    document.querySelectorAll('.gridBox').forEach(box => {
+        box.innerHTML = builder;
+    });
 }
 
 load();

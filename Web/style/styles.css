@@ -35,3 +35,13 @@ body{
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.gridBox div{
+    padding: 1vw;
+    border-style: solid;
+    border-radius: 5px;
+    border-color: black;
+    width: 15vh;
+    height: auto;
+    margin-top: 5vh;
+}
+
