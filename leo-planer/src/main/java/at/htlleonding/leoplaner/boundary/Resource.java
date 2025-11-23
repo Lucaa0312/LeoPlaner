@@ -33,13 +33,5 @@ public class Resource {
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list/subjects")
-    public Response getAllSubjects(){
-        injectCsvData();
-        List<Subject> subjects = this.dataRepository.getAllSubjects();
-        return Response.status(Response.Status.OK).entity(subjects).build();
-    }
 
 }
