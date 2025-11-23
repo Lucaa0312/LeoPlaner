@@ -34,14 +34,21 @@ function load() {
     ];
 
     let builder = "";
-    
+    let builderDays = "";
+
     for (let i = 0; i < times.length; i+=2) {
-         builder += `<div id="hour${i}">${times[i]}<br><br>${times[i+1] ?? ""}</div>`;
+        builderDays += `<div class="periodStyling"><p class="period">Lesson ${i}</p></div>`;
+        builder += `<div id="hour${i}"><p class="periodStarted"> ${times[i]}</p> <p class="periodEnded">${times[i+1] ?? ""}</p></div>`;
     }
 
     document.querySelectorAll('.gridBox').forEach(box => {
         box.innerHTML = builder;
     });
+
+    document.querySelectorAll('.gridBoxDays').forEach(box => {
+        box.innerHTML = builderDays;
+    });
+
 }
 
 load();
