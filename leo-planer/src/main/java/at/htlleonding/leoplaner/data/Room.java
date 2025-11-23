@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
@@ -10,7 +11,7 @@ import java.util.List;
 @NamedQueries({
         @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from Room r"),
         @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.id = :filter"),
-        @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.roomNumber = :filter")
+        @NamedQuery(name = Room.QUERY_FIND_BY_NUMBER, query = "select r from Room r where r.roomNumber = :filter")
 })
 @Entity
 public class Room {
@@ -28,6 +29,7 @@ public class Room {
             joinColumns = @JoinColumn(name = "room_id")
     )
     @Column(name = "room_type")
+    @JsonIgnore
     private List<RoomTypes> roomTypes;
 
     public static final String QUERY_FIND_ALL = "Room.findAll";
@@ -45,6 +47,10 @@ public class Room {
 
     public String getRoomPrefix() {
         return roomPrefix;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getRoomSuffix() {

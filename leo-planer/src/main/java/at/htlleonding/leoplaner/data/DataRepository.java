@@ -14,12 +14,14 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DataRepository {
-    private ArrayList<ClassSubject> classSubjects;
-    private ArrayList<Teacher> teachers;
-    private ArrayList<Room> rooms;
+    private Timetable currentTimetable;
 
     @Inject
     EntityManager entityManager;
+
+    public Timetable getCurrentTimetable() {
+        return currentTimetable;
+    }
 
     public List<ClassSubject> getAllClassSubjects() {
         TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
@@ -155,9 +157,9 @@ public class DataRepository {
         return result;
     }
 
-    public Timetable createTimetable(String className, Room classRoom) {
+    public void createTimetable(String className, Room classRoom) {
         List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
         ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, classRoom);
-        return new Timetable(classSubjectInstances);
+        this.currentTimetable = new Timetable(classSubjectInstances);
     }
 }

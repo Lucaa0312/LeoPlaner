@@ -24,7 +24,7 @@ public class Resource {
 
     @Path("run/testCsv")
     @GET
-    public void injectCsvData() {
+    public void injectTestCsvData() {
         final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
         final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
         final String classSubjectCSVPath = "src/resources/csvFiles/test1/testClassSubject.csv";
@@ -39,14 +39,4 @@ public class Resource {
 
         this.dataRepository.createTimetable("4chitm", room);
     }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list/subjects")
-    public Response getAllSubjects() {
-        injectCsvData();
-        List<Subject> subjects = this.dataRepository.getAllSubjects();
-        return Response.status(Response.Status.OK).entity(subjects).build();
-    }
-
 }

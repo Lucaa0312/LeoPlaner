@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
@@ -25,6 +26,7 @@ public class Subject {
             joinColumns = @JoinColumn(name = "subject_id")
     )
     @Column(name = "room_type")
+    @JsonIgnore
     private List<RoomTypes> requiredRoomTypes;
 
     public static final String QUERY_FIND_ALL = "Subject.findAll";

@@ -14,6 +14,14 @@ public class Timetable {
 
     }
 
+    public ArrayList<ClassSubjectInstance> getClassSubjectInstances() {
+        return classSubjectInstances;
+    }
+
+    public void setClassSubjectInstances(ArrayList<ClassSubjectInstance> classSubjectInstances) {
+        this.classSubjectInstances = classSubjectInstances;
+    }
+
     public void createRandomTimeTable() {
 
     }
