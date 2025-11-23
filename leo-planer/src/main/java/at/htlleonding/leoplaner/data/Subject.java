@@ -9,7 +9,7 @@ import java.util.List;
 // TODO add NamedQueries
 @NamedQueries({
         @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from Subject s"),
-        @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where s.subjectName = :filter")
+        @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where LOWER(s.subjectName) = :filter")
 })
 @Entity
 public class Subject {

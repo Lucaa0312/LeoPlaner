@@ -1,14 +1,13 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Timetable {
-    private ClassSubjectInstance[] timetable;
-    private ArrayList<ClassSubject> classSubjects;
-    private ArrayList<Teacher> teachers;
+    private ArrayList<ClassSubjectInstance> classSubjectInstances;
 
-    public ClassSubjectInstance[] getTimetable() {
-        return timetable;
+    public Timetable(ArrayList<ClassSubjectInstance> classSubjectInstances) {
+        this.classSubjectInstances = classSubjectInstances;
     }
 
     public void initializeArrayWithTotalWeeklyHours() {

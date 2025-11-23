@@ -9,7 +9,8 @@ import org.hibernate.annotations.NamedQuery;
 
 @NamedQueries({
         @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
-        @NamedQuery(name = Teacher.QUERY_FIND_BY_NAME, query = "select t from Teacher t where LOWER(t.teacherName) like LOWER(:filter)")
+        @NamedQuery(name = Teacher.QUERY_FIND_BY_NAME, query = "select t from Teacher t where LOWER(t.teacherName) like LOWER(:filter)"),
+        @NamedQuery(name = Teacher.QUERY_FIND_BY_ID, query = "select t from Teacher t where t.id = :filter")
 })
 
 @Entity
@@ -29,16 +30,10 @@ public class Teacher {
         return id;
     }
 
-    public static String getQueryFindAll() {
-        return QUERY_FIND_ALL;
-    }
-
-    public static String getQueryFindByName() {
-        return QUERY_FIND_BY_NAME;
-    }
 
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
+    public static final String QUERY_FIND_BY_ID = "Teacher.findByID";
 
     public String getTeacherName() {
         return teacherName;

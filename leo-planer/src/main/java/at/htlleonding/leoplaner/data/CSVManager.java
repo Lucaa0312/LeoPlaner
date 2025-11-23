@@ -77,7 +77,7 @@ public class CSVManager {
     public static void createRoomFromCSV(String[] lines, DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 5) {
+            if (line.length > 6) {
                 throw new IllegalArgumentException("Room CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
@@ -146,8 +146,8 @@ public class CSVManager {
     public static void createClassSubjectFromCSV(String[] lines, DataRepository dataRepository) { // TODO add unit tests
         for (int i = 1; i < lines.length; i++) {
             String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 5) {
-                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 5 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 6) {
+                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
             Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
@@ -155,6 +155,7 @@ public class CSVManager {
             short weeklyHours = Short.parseShort(line[2].trim());
             boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
+            String className = line[5].trim();
 
             if (subject == null) {
                 throw new IllegalArgumentException("Subject " + line[0] + " does not exist. Please check the CSV.");
@@ -171,6 +172,7 @@ public class CSVManager {
             classSubject.setWeeklyHours(weeklyHours);
             classSubject.setRequiresDoublePeriod(requiresDoublePeriod);
             classSubject.setBetterDoublePeriod(isBetterDoublePeriod);
+            classSubject.setClassName(className);
             dataRepository.addClassSubject(classSubject);
         }
     }

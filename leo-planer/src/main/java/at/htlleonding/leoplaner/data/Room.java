@@ -8,22 +8,15 @@ import java.util.List;
 
 // TODO add NamedQueries
 @NamedQueries({
-        @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from Room r")
+        @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from Room r"),
+        @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.id = :filter"),
+        @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.roomNumber = :filter")
 })
 @Entity
 public class Room {
     @Id
     @GeneratedValue
     private Long id;
-
-    public Long getId() {
-        return id;
-    }
-
-    public static String getQueryFindAll() {
-        return QUERY_FIND_ALL;
-    }
-
     private short roomNumber;
     private String roomName;
     private String roomPrefix;
@@ -38,6 +31,9 @@ public class Room {
     private List<RoomTypes> roomTypes;
 
     public static final String QUERY_FIND_ALL = "Room.findAll";
+    public static final String QUERY_FIND_BY_ID = "Room.findByID";
+    public static final String QUERY_FIND_BY_NUMBER = "Room.findByNumber";
+
 
     public short getRoomNumber() {
         return roomNumber;
