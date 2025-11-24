@@ -15,9 +15,12 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import org.jboss.logging.Logger;
 
 @Path("api/classSubjects")
 public class ClassSubjectResource {
+    private static final Logger LOG = Logger.getLogger(ClassSubjectResource.class);
+
     @Context
     UriInfo uriInfo;
     @Inject
@@ -27,20 +30,52 @@ public class ClassSubjectResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllClassSubjects() {
-        List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
-        return Response.status(Response.Status.OK).entity(classSubjects).build();
+        String endpoint = "GET /api/classSubjects";
+        String requestUri = uriInfo.getRequestUri().toString();
+        LOG.infof("[ENDPOINT: %s] [URI: %s] Request received - Fetching all class subjects", endpoint, requestUri);
+        
+        try {
+            List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
+            LOG.infof("[ENDPOINT: %s] [STATUS: 200 OK] Successfully retrieved %d class subjects", endpoint, classSubjects.size());
+            return Response.status(Response.Status.OK).entity(classSubjects).build();
+        } catch (Exception e) {
+            LOG.errorf(e, "[ENDPOINT: %s] [STATUS: 500 INTERNAL_SERVER_ERROR] Error occurred while fetching all class subjects - Exception: %s", endpoint, e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response addClassSubject(ClassSubject classSubject) {
-        ClassSubject createdClassSubject = this.dataRepository.addClassSubject(classSubject);  // TODO add Error handling
+        String endpoint = "POST /api/classSubjects";
+        String requestUri = uriInfo.getRequestUri().toString();
+        
+        if (classSubject == null) {
+            LOG.warnf("[ENDPOINT: %s] [URI: %s] [STATUS: 400 BAD_REQUEST] Request received with null class subject payload", endpoint, requestUri);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
-        UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-        uriBuilder.path(Long.toString(createdClassSubject.getId()));
+        LOG.infof("[ENDPOINT: %s] [URI: %s] Request received - Adding new class subject", endpoint, requestUri);
+        
+        try {
+            ClassSubject createdClassSubject = this.dataRepository.addClassSubject(classSubject);
 
-        return Response.created(uriBuilder.build()).build();
+            if (createdClassSubject == null) {
+                LOG.warnf("[ENDPOINT: %s] [STATUS: 500 INTERNAL_SERVER_ERROR] Failed to create class subject - repository returned null", endpoint);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+
+            UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
+            uriBuilder.path(Long.toString(createdClassSubject.getId()));
+            String createdUri = uriBuilder.build().toString();
+
+            LOG.infof("[ENDPOINT: %s] [STATUS: 201 CREATED] Successfully created class subject - ID: %d, Location: %s", endpoint, createdClassSubject.getId(), createdUri);
+            return Response.created(uriBuilder.build()).build();
+        } catch (Exception e) {
+            LOG.errorf(e, "[ENDPOINT: %s] [STATUS: 500 INTERNAL_SERVER_ERROR] Error occurred while adding class subject - Exception: %s", endpoint, e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
