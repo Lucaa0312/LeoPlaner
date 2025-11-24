@@ -11,6 +11,8 @@ body{
     width: auto;
     background-color: #e69246;
     padding: 1vh;
+    display: flex;
+    align-content: center;
 }
 #header img{
     display: block;
@@ -75,4 +77,26 @@ body{
 
 .period{
     margin-top: 5vh;
+}
+
+#randomizeButton {
+    font-family: fantasy;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #bd702c;
+    padding: 1vw;
+    border-style: solid;
+    border-radius: 1vw;
+    width: 5vw;
+    height: 1vh;
+    margin-left: 60vw;
+    margin-top: 2vh;
+    transition: 0.2s;
+}
+
+#randomizeButton:hover {
+    transform: scale(1.1);
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -28,5 +29,16 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCurrentTimeTable() {
         return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentTimetable()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/randomize")
+    public Response randomizeTimeTable() {
+
+        Timetable randomizedTimetable = dataRepository.randomizeTimetable();
+        return Response.status(Response.Status.OK)
+                .entity(randomizedTimetable)
+                .build();
     }
 }
