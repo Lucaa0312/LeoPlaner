@@ -1,19 +1,41 @@
 package at.htlleonding.leoplaner.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+
+import java.util.List;
+
+// TODO add NamedQueries
+@NamedQueries({
+        @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from Room r"),
+        @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.id = :filter"),
+        @NamedQuery(name = Room.QUERY_FIND_BY_NUMBER, query = "select r from Room r where r.roomNumber = :filter")
+})
+@Entity
 public class Room {
+    @Id
+    @GeneratedValue
+    private Long id;
     private short roomNumber;
     private String roomName;
     private String roomPrefix;
     private String roomSuffix;
-    private RoomTypes[] roomTypes;
+    @ElementCollection(targetClass = RoomTypes.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable( //create new join table
+            name = "room_roomtypes",
+            joinColumns = @JoinColumn(name = "room_id")
+    )
+    @Column(name = "room_type")
+    @JsonIgnore
+    private List<RoomTypes> roomTypes;
 
-    public Room(short roomNumber, String roomName, String roomPrefix, String roomSuffix, RoomTypes[] roomTypes) {
-        this.roomNumber = roomNumber;
-        this.roomName = roomName;
-        this.roomPrefix = roomPrefix;
-        this.roomSuffix = roomSuffix;
-        this.roomTypes = roomTypes;
-    }
+    public static final String QUERY_FIND_ALL = "Room.findAll";
+    public static final String QUERY_FIND_BY_ID = "Room.findByID";
+    public static final String QUERY_FIND_BY_NUMBER = "Room.findByNumber";
+
 
     public short getRoomNumber() {
         return roomNumber;
@@ -27,11 +49,39 @@ public class Room {
         return roomPrefix;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getRoomSuffix() {
         return roomSuffix;
     }
 
-    public RoomTypes[] getRoomTypes() {
+    public List<RoomTypes> getRoomTypes() {
         return roomTypes;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setRoomNumber(final short roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
+    public void setRoomName(final String roomName) {
+        this.roomName = roomName;
+    }
+
+    public void setRoomPrefix(final String roomPrefix) {
+        this.roomPrefix = roomPrefix;
+    }
+
+    public void setRoomSuffix(final String roomSuffix) {
+        this.roomSuffix = roomSuffix;
+    }
+
+    public void setRoomTypes(final List<RoomTypes> roomTypes) {
+        this.roomTypes = roomTypes;
     }
 }

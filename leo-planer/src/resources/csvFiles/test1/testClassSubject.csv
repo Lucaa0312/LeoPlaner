@@ -1,0 +1,4 @@
+classsubject;subjectname;teachername;weeklyHours;requiresDoublePeriod;isBetterDoublePeriod;className
+math;John Doe;2;false;false;4CHITM
+physics;John Doe;2;true;false;4CHITM
+history;Alexandro Buller;1;false;true;4CHITM
