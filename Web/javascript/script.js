@@ -97,7 +97,7 @@ function load() {
         });
 
         for (let i = 0; i < times.length; i+=2) {
-            builder["0"] += `<div id="hour${i}"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+            builder["0"] += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
         }
 
         for (let d = 1; d <= 6; d++) {
