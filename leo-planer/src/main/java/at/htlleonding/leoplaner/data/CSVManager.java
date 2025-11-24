@@ -116,12 +116,13 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             String[] line = lines[i].toLowerCase().split(";");
             if (line.length < 1) {
-                throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 1 columns! Found " + line.length + " columns in row " + i);
+                throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 1 columns! Found " + line.length + " columns in row " + i); //TODO Has to be changed
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             String subjectName = line[0].trim();
+            String subjectColor = line[2].trim();
             Subject subject = new Subject();
-            if (line.length > 1) {
+            if (!line[1].isBlank()) {
                 String[] requiredRoomTypesStrings = line[1].split(",");
                 RoomTypes[] requiredRoomTypes = new RoomTypes[requiredRoomTypesStrings.length];
 
@@ -138,6 +139,8 @@ public class CSVManager {
                     subject.setRequiredRoomTypes(Arrays.asList(requiredRoomTypes));
                 }
             }
+            String[] colorCodes = subjectColor.split(",");
+            subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]), Integer.parseInt(colorCodes[2])));
             subject.setSubjectName(subjectName);
             dataRepository.addSubject(subject);
         }
