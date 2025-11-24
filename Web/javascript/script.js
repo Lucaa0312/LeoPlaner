@@ -36,12 +36,13 @@ let builder = "";
 let builderDays = "";
  
 function load() {
-    fetch("http://localhost:8080/api/classSubjects")
+    fetch("http://localhost:8080/api/timetable")
     .then(response => {
         response.json().then(data => {
             console.log(data);
-            console.log(data[0].subject);
-
+            console.log(data.classSubjectInstances);
+            data = data.classSubjectInstances;
+            console.log(data);
             for (let i = 0; i < times.length; i++) {
                 let subjectName = "";
                 let teacherSymbol = "";

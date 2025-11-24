@@ -30,11 +30,12 @@ public class Resource {
         final String classSubjectCSVPath = "src/resources/csvFiles/test1/testClassSubject.csv";
         final String roomCSVPath = "src/resources/csvFiles/test1/testRoom.csv";
 
+
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
         CSVManager.processCSV(roomCSVPath, dataRepository);
-
+        Room room = this.dataRepository.getRoomByNumber(24);
 
         this.dataRepository.createTimetable("4chitm", room);
     }
