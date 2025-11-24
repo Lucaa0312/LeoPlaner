@@ -96,13 +96,13 @@ function load() {
             }
         });
 
-        for (let i = 0; i < times.length; i++) {
+        for (let i = 0; i < times.length; i+=2) {
             builder["0"] += `<div id="hour${i}"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
         }
 
         for (let d = 1; d <= 6; d++) {
             const dayKey = String(d);
-            for (let i = 0; i < times.length; i++) {
+            for (let i = 0; i < 16; i++) {
                 const slot = daySubjects[dayKey][i];
                 if (slot) {
                     builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
