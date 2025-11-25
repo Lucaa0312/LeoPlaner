@@ -11,11 +11,15 @@ body{
 #header{
     width: auto;
     background-color: #e69246;
-    padding: 1vh;
+    padding: 2vh;
+    border-bottom: solid;
+    border-color: rgb(255, 255, 255);
+    display: flex;
+    align-content: center;
 }
 #header img{
     display: block;
-    width: 30vw;
+    width: 25vw;
 }
 
 #content{
@@ -40,8 +44,10 @@ body{
 }
 
 #day0{
-    margin-right: 20vh;
-    border-right: solid;
+    margin-right: 0vh;
+    color: rgb(206, 232, 255);
+    /* border-right: solid;
+    border-color: rgb(206, 232, 255); */
     text-align: center;
 }
 
@@ -53,9 +59,17 @@ body{
     margin-bottom: 1vh;
 }
 
+.headlineP{
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+}
+
 
 .timeScheduleBoxes{
-    height: 14vh;
+    height: 15vh;
+    width: 3vw;
+    padding: 0.25vw;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -68,11 +82,13 @@ body{
 }
 
 .periodStyling{
-    width: 10vw;
+    width: 14.5vw;
+    padding: 0.25vw;
     border-style: solid;
-    height: 14vh;
-    margin-bottom: 1vh;
-    margin-right: 1vh;
+    border-color: rgb(206, 232, 255);
+    height: 15vh;
+    margin-bottom: 0.5vh;
+    margin-right: 0.5vh;
 }
 
 .period{
@@ -81,8 +97,8 @@ body{
 
 
 #gridBoxTimeSchedules .timeScheduleBoxes{
-    margin-bottom: 1vh;
-    border-top: solid;
-    border-bottom: solid;
+    margin-bottom: 0.5vh;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0);
 }
 

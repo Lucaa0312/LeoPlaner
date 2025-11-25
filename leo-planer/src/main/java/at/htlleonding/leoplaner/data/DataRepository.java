@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.data;
 import at.htlleonding.leoplaner.data.SchoolDays;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

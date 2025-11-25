@@ -18,6 +18,7 @@ public class Subject {
     @GeneratedValue
     private Long id;
     private String subjectName;
+    private RgbColor subjectColor;
 
     @ElementCollection(targetClass = RoomTypes.class)
     @Enumerated(EnumType.STRING)
@@ -46,6 +47,14 @@ public class Subject {
 
     public void setRequiredRoomTypes(final List<RoomTypes> requiredRoomTypes) {
         this.requiredRoomTypes = requiredRoomTypes;
+    }
+
+    public RgbColor getSubjectColor() {
+        return subjectColor;
+    }
+
+    public void setSubjectColor(RgbColor subjectColor) {
+        this.subjectColor = subjectColor;
     }
 
     public Long getId() {

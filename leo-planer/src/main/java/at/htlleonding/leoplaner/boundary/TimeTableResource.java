@@ -1,6 +1,11 @@
 package at.htlleonding.leoplaner.boundary;
 
+import java.util.List;
+
+import at.htlleonding.leoplaner.data.ClassSubject;
+import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -40,5 +45,17 @@ public class TimeTableResource {
             LOG.errorf(e, "[ENDPOINT: %s] [STATUS: 500 INTERNAL_SERVER_ERROR] Error occurred while fetching current timetable - Exception: %s", endpoint, e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/randomize")
+    public Response randomizeTimeTable() {
+
+        Room room = this.dataRepository.getRoomByNumber(24);
+        this.dataRepository.createTimetable("4chitm", room);
+        return Response.status(Response.Status.OK)
+                .entity(this.dataRepository.getCurrentTimetable())
+                .build();
     }
 }
