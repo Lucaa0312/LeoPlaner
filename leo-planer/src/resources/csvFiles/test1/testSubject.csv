@@ -1,0 +1,12 @@
+subject;name;requiredRoomTypes;color
+Chemistry;CHEM,PHY;222,209,214
+Math;;20,112,250
+History;;104,0,214
+Physics;PHY;0,207,214
+German;;201,0,0
+Sew;;255,192,203
+Insy;;112,128,144
+ITP;;255,165,0
+Law;;32,178,170
+Biology;;34,139,34
+English;;0,0,255

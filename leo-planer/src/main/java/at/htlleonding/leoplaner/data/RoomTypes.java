@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.data;
 
-public enum RoomTypes {
+public enum RoomTypes { // TODO remove from database and per Room-RequiredRoomtypes
+    // Subject-requiredRoomtyped table just add in plain text and convert in program
+    CLASSROOM,
     EDV,
     CHEM,
     PHY,

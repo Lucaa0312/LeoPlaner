@@ -117,7 +117,7 @@ function getRandomizedTimeTable() {
             for (let i = 0; i < 16; i++) {
                 const slot = daySubjects[dayKey][i];
                 if (slot) {
-                    builder[dayKey] += `<div class="periodStyling ${slot.subjectName}">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
+                    builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
                 } else {
                     builder[dayKey] += `<div class="periodStyling empty">\n    <p>No lesson</p>\n    <p>-</p>\n</div>\n`;
                 }
@@ -213,7 +213,7 @@ let builder = {
                 for (let i = 0; i < 16; i++) {
                     const slot = daySubjects[dayKey][i];
                     if (slot) {
-                        builder[dayKey] += `<div class="periodStyling ${slot.subjectName}">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
+                        builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
                     } else {
                         builder[dayKey] += `<div class="periodStyling empty">\n    <p>No lesson</p>\n    <p>-</p>\n</div>\n`;
                     }

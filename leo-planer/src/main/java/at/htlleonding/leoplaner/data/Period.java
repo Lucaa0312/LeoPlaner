@@ -1,18 +1,19 @@
 package at.htlleonding.leoplaner.data;
 
+
 public class Period {
     private SchoolDays schoolDays;
-    private short schoolHour;
+    private int schoolHour;
 
     public SchoolDays getSchoolDays() {
         return schoolDays;
     }
 
-    public short getSchoolHour() {
+    public int getSchoolHour() {
         return schoolHour;
     }
 
-    public Period(SchoolDays schoolDays, short schoolHour) {
+    public Period(SchoolDays schoolDays, int schoolHour) {
         this.schoolDays = schoolDays;
         this.schoolHour = schoolHour;
     }
