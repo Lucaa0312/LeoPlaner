@@ -1,6 +1,6 @@
-subject;name;requiredRoomTypes
-Chemistry;CHEM,PHY
-Math
-History
-Physics;PHY
-German
+subject;name;requiredRoomTypes;color
+Chemistry;CHEM,PHY;222,209,214
+Math;;20,112,250
+History;;104,0,214
+Physics;PHY;0,207,214
+German;;201,0,0
