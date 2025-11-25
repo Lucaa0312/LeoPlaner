@@ -12,6 +12,8 @@ body{
     width: auto;
     background-color: #e69246;
     padding: 1vh;
+    display: flex;
+    align-content: center;
 }
 #header img{
     display: block;

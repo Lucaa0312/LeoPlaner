@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.data;
 import at.htlleonding.leoplaner.data.SchoolDays;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -161,5 +162,19 @@ public class DataRepository {
         List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
         ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, classRoom);
         this.currentTimetable = new Timetable(classSubjectInstances);
+    }
+
+    public Timetable randomizeTimetable() {
+        int chooseRandomRoom = (int) (Math.random() * getAllRooms().size());
+        int chooseRandomClassSubject = (int) (Math.random() * getAllClassSubjects().size());
+
+        int randomRoomNumber = getAllRooms().get(chooseRandomRoom).getRoomNumber();
+        String randomClass = getAllClassSubjects().get(chooseRandomClassSubject).getClassName();
+
+        List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(randomClass);
+        ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, getRoomByNumber(randomRoomNumber));
+
+        this.currentTimetable = new Timetable(classSubjectInstances);
+        return this.currentTimetable;
     }
 }
