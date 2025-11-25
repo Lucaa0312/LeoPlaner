@@ -49,6 +49,86 @@ function getRandomizedTimeTable() {
 
         createLayout(data);
 
+        let daySubjects = {
+            "1": new Array(times.length).fill(null),
+            "2": new Array(times.length).fill(null),
+            "3": new Array(times.length).fill(null),
+            "4": new Array(times.length).fill(null),
+            "5": new Array(times.length).fill(null),
+            "6": new Array(times.length).fill(null)
+        };
+
+        function determineSlotIndex(item) {
+            try {
+                if (item && item.period) {
+                    return item.period.schoolHour !== undefined ? item.period.schoolHour - 1 : 0;
+                }
+            } catch (e) {
+                
+            }
+        }
+
+        // Populate daySubjects with entries from data
+        data.forEach((item) => {
+            try {
+                currentDay = item.period && item.period.schoolDays;
+            } catch (error) {
+                currentDay = "None";
+            }
+
+            let dayIndex = null;
+            switch (currentDay) {
+                case "MONDAY": dayIndex = 1; break;
+                case "TUESDAY": dayIndex = 2; break;
+                case "WEDNESDAY": dayIndex = 3; break;
+                case "THURSDAY": dayIndex = 4; break;
+                case "FRIDAY": dayIndex = 5; break;
+                case "SATURDAY": dayIndex = 6; break;
+                case "None": dayIndex = null; break;
+                default: dayIndex = 0;
+            }
+
+            if (dayIndex !== null && dayIndex >= 1 && dayIndex <= 6) {
+                let subjectName = "No lesson";
+                let teacherSymbol = "-";
+                try {
+                    subjectName = item.classSubject.subject.subjectName || subjectName;
+                    teacherSymbol = item.classSubject.teacher.nameSymbol || teacherSymbol;
+                } catch (error) {
+                    console.error(error);
+                }
+
+                const dayKey = String(dayIndex);
+                const slotIndex = determineSlotIndex(item, daySubjects[dayKey]);
+
+                daySubjects[dayKey][slotIndex] = {
+                    subjectName,
+                    teacherSymbol
+                };
+            }
+        });
+
+        for (let i = 0; i < times.length; i+=2) {
+            builder["0"] += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+        }
+
+        for (let d = 1; d <= 6; d++) {
+            const dayKey = String(d);
+            for (let i = 0; i < 16; i++) {
+                const slot = daySubjects[dayKey][i];
+                if (slot) {
+                    builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
+                } else {
+                    builder[dayKey] += `<div class="periodStyling empty">\n    <p>No lesson</p>\n    <p>-</p>\n</div>\n`;
+                }
+            }
+        }
+
+        for (let index in builder) {
+            const box = document.querySelector(`#day${index} .gridBoxDays`);
+            box.innerHTML = builder[index];
+            
+        }
     }).catch(error => {
         console.error('Error randomizing Timetable:', error);
     });
@@ -124,13 +204,13 @@ let builder = {
                 }
             });
 
-            for (let i = 0; i < times.length; i++) {
-                builder["0"] += `<div id="hour${i}"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+            for (let i = 0; i < times.length; i+=2) {
+                builder["0"] += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
             }
 
             for (let d = 1; d <= 6; d++) {
                 const dayKey = String(d);
-                for (let i = 0; i < times.length; i++) {
+                for (let i = 0; i < 16; i++) {
                     const slot = daySubjects[dayKey][i];
                     if (slot) {
                         builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
