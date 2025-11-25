@@ -5,6 +5,7 @@
 body{
     margin: 0;
     padding: 0;
+    width: auto;
 }
 
 #header{
@@ -31,12 +32,17 @@ body{
     justify-content: left;   
 }
 .day{
-    margin-right: 15vh;
     font-size: large;
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
 }
+
+.SchoolDays{
+    border-style: solid;
+}
+
 #day0{
+    margin-right: 20vh;
     border-right: solid;
     text-align: center;
 }
@@ -50,16 +56,11 @@ body{
 }
 
 
-.gridBox div{
-    border-top: solid;
-    border-bottom: solid;
-    width: 10vw;
-    height: 15vh;
-    margin-bottom: 5vh;
-}
-
-.periodStarted{
-    margin-bottom: 10vh;
+.timeScheduleBoxes{
+    height: 14vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .gridBoxDays{
@@ -71,32 +72,19 @@ body{
 .periodStyling{
     width: 10vw;
     border-style: solid;
-    height: 15vh;
-    margin-bottom: 5vh;
+    height: 14vh;
+    margin-bottom: 1vh;
+    margin-right: 1vh;
 }
 
 .period{
     margin-top: 5vh;
 }
 
-#randomizeButton {
-    font-family: fantasy;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-weight: bold;
-    background-color: #bd702c;
-    padding: 1vw;
-    border-style: solid;
-    border-radius: 1vw;
-    width: 5vw;
-    height: 1vh;
-    margin-left: 60vw;
-    margin-top: 2vh;
-    transition: 0.2s;
+
+#gridBoxTimeSchedules .timeScheduleBoxes{
+    margin-bottom: 1vh;
+    border-top: solid;
+    border-bottom: solid;
 }
 
-#randomizeButton:hover {
-    transform: scale(1.1);
-}
