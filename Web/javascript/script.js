@@ -201,13 +201,24 @@ let builder = {
                     const dayKey = String(dayIndex);
                     const slotIndex = determineSlotIndex(item, daySubjects[dayKey]);
 
-                    daySubjects[dayKey][slotIndex] = {
-                        subjectName,
-                        teacherSymbol,
-                        subjectColorRed,
-                        subjectColorGreen,
-                        subjectColorBlue
-                    };
+                    // daySubjects[dayKey][slotIndex] = {
+                    //     subjectName,
+                    //     teacherSymbol,
+                    //     subjectColorRed,
+                    //     subjectColorGreen,
+                    //     subjectColorBlue
+                    // };
+                    let hours = item.classSubject.weeklyHours || 1;
+
+                    for (let h = 0; h < hours; h++) {
+                        daySubjects[dayKey][slotIndex + h] = {
+                            subjectName,
+                            teacherSymbol,
+                            subjectColorRed,
+                            subjectColorGreen,
+                            subjectColorBlue
+                        };
+                    }
                 }
             });
 
@@ -223,7 +234,6 @@ let builder = {
                         builder[dayKey] += `<div class="periodStyling ${slot.subjectName}" style="border-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue});">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
                     } else {
                         builder[dayKey] += `<div class="periodStyling empty"></div>\n`; 
-                        // \n    <p>No lesson</p>\n    <p>-</p>\n
                     }
                 }
             }
