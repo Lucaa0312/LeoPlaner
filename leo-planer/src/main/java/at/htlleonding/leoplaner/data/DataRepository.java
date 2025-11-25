@@ -171,10 +171,8 @@ public class DataRepository {
         int randomRoomNumber = getAllRooms().get(chooseRandomRoom).getRoomNumber();
         String randomClass = getAllClassSubjects().get(chooseRandomClassSubject).getClassName();
 
-        List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(randomClass);
-        ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, getRoomByNumber(randomRoomNumber));
+        createTimetable(randomClass, getRoomByNumber(randomRoomNumber));
 
-        this.currentTimetable = new Timetable(classSubjectInstances);
-        return this.currentTimetable;
+        return getCurrentTimetable();
     }
 }
