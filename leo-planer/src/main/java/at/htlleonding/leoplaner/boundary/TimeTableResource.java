@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.boundary;
 import java.util.List;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
+import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
@@ -36,9 +37,10 @@ public class TimeTableResource {
     @Path("/randomize")
     public Response randomizeTimeTable() {
 
-        Timetable randomizedTimetable = dataRepository.randomizeTimetable();
+        Room room = this.dataRepository.getRoomByNumber(24);
+        this.dataRepository.createTimetable("4chitm", room);
         return Response.status(Response.Status.OK)
-                .entity(randomizedTimetable)
+                .entity(this.dataRepository.getCurrentTimetable())
                 .build();
     }
 }

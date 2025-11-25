@@ -163,16 +163,4 @@ public class DataRepository {
         ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, classRoom);
         this.currentTimetable = new Timetable(classSubjectInstances);
     }
-
-    public Timetable randomizeTimetable() {
-        int chooseRandomRoom = (int) (Math.random() * getAllRooms().size());
-        int chooseRandomClassSubject = (int) (Math.random() * getAllClassSubjects().size());
-
-        int randomRoomNumber = getAllRooms().get(chooseRandomRoom).getRoomNumber();
-        String randomClass = getAllClassSubjects().get(chooseRandomClassSubject).getClassName();
-
-        createTimetable(randomClass, getRoomByNumber(randomRoomNumber));
-
-        return getCurrentTimetable();
-    }
 }
