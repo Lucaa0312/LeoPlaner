@@ -190,6 +190,10 @@ let builder = {
                     try {
                         subjectName = item.classSubject.subject.subjectName || subjectName;
                         teacherSymbol = item.classSubject.teacher.nameSymbol || teacherSymbol;
+                        subjectColorRed = item.classSubject.subject.subjectColor.red || 0;
+                        subjectColorGreen = item.classSubject.subject.subjectColor.green || 0;
+                        subjectColorBlue = item.classSubject.subject.subjectColor.blue || 0;
+
                     } catch (error) {
                         console.error(error);
                     }
@@ -199,7 +203,10 @@ let builder = {
 
                     daySubjects[dayKey][slotIndex] = {
                         subjectName,
-                        teacherSymbol
+                        teacherSymbol,
+                        subjectColorRed,
+                        subjectColorGreen,
+                        subjectColorBlue
                     };
                 }
             });
@@ -213,9 +220,10 @@ let builder = {
                 for (let i = 0; i < 16; i++) {
                     const slot = daySubjects[dayKey][i];
                     if (slot) {
-                        builder[dayKey] += `<div class="periodStyling">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
+                        builder[dayKey] += `<div class="periodStyling ${slot.subjectName}" style="border-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue});">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
                     } else {
-                        builder[dayKey] += `<div class="periodStyling empty">\n    <p>No lesson</p>\n    <p>-</p>\n</div>\n`;
+                        builder[dayKey] += `<div class="periodStyling empty"></div>\n`; 
+                        // \n    <p>No lesson</p>\n    <p>-</p>\n
                     }
                 }
             }

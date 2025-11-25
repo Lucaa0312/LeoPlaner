@@ -1,72 +1,156 @@
-*{
-    margin: 0;
-    padding: 0;
-}
-body{
-    margin: 0;
-    padding: 0;
-    width: auto;
+/*VARIABLES*/
+:root {
+    /*colors*/
+    --transparent: rgba(0, 0, 0, 0);
+
+    /*Leo colors*/
+    --leo-orange: #e69246;
+    --leo-light-blue: rgb(167, 202, 233);
+    --leo-blue-tint-white: rgb(206, 232, 255);
+
+    /*subject colors*/
+    --sb-none: rgb(51, 51, 51);
+    --sb-red: rgb(255, 0, 0);
+    --sb-green: rgb(0, 255, 0);
+    --sb-yellow: rgb(255, 255, 0);
+
+    /*constant values*/
 }
 
-#header{
+@font-face {
+    font-family: alte-haas-grotesk;
+    src: url(../assets/font/alte-haas-grotesk/AlteHaasGroteskRegular.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    /*removes the blue marking by mouse drag*/
+}
+
+body {
+    margin: 0;
+    padding: 0;
     width: auto;
-    background-color: #e69246;
+    font-family: alte-haas-grotesk;
+}
+
+/*HEADER*/
+
+#header {
+    width: auto;
+    background-color: var(--leo-orange);
     padding: 2vh;
     border-bottom: solid;
-    border-color: rgb(255, 255, 255);
+    border-color: white;
     display: flex;
-    align-content: center;
+    align-items: center;
+    gap: 5%;
+    position: relative;
 }
-#header img{
+
+#header img {
+    position: absolute;
     display: block;
     width: 25vw;
 }
 
-#content{
+#randomizeButton {
+    cursor: pointer;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    background-color: var(--transparent);
+    color: white;
+    font-size: 2em;
+
+    border: 5px solid white;
+    padding: 1em 2.5em;
+    border-radius: 1em;
+    transition: all 400ms ease-out;
+}
+
+#randomizeButton>div,
+#randomizeButton i {
+    transition: transform 250ms ease-out;
+}
+
+
+#randomizeButton:hover {
+    border-radius: 2em;
+    transition: all 270ms ease-in;
+}
+
+#randomizeButton:hover>div {
+    transform: scale(1.25);
+}
+
+#randomizeButton:hover>div>i {
+    transform: translateY(-5px);
+}
+
+
+#randomizeButton:active {
+    background-color: var(--leo-light-blue);
+    transform: scale(0.95);
+    transition: all 50ms ease-out;
+}
+
+#randomizeButton:active>div>i {
+    transform: translateY(-15px);
+}
+
+/*CONTENT*/
+
+#content {
     width: auto;
     height: auto;
-    background-color: rgb(167, 202, 233);
+    background-color: var(--leo-light-blue);
 }
 
-#days{
+#days {
     display: flex;
     text-align: center;
-    justify-content: left;   
-}
-.day{
-    font-size: large;
-    font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
+    justify-content: left;
 }
 
-.SchoolDays{
+.day {
+    font-size: large;
+    font-weight: bold;
+    font-family: alte-haas-grotesk;
+}
+
+.SchoolDays {
     border-style: solid;
 }
 
-#day0{
+#day0 {
     margin-right: 0vh;
-    color: rgb(206, 232, 255);
+    color: var(--leo-blue-tint-white);
     /* border-right: solid;
     border-color: rgb(206, 232, 255); */
     text-align: center;
+    font-size: 1.25em;
 }
 
-.day .headlineP{
-    margin-top: 1vh;
+.day .headlineP {
     text-align: center;
+    margin-top: 1vh;
     margin-right: 2vh;
     margin-left: 2vh;
     margin-bottom: 1vh;
 }
 
-.headlineP{
+.headlineP {
     font-size: 2rem;
     font-weight: bold;
-    color: rgb(255, 255, 255);
+    color: white;
 }
 
 
-.timeScheduleBoxes{
+.timeScheduleBoxes {
     height: 15vh;
     width: 3vw;
     padding: 0.25vw;
@@ -75,30 +159,54 @@ body{
     justify-content: space-between;
 }
 
-.gridBoxDays{
+.gridBoxDays {
     text-align: center;
     align-items: center;
     justify-content: center;
 }
 
-.periodStyling{
+.periodStyling {
     width: 14.5vw;
-    padding: 0.25vw;
-    border-style: solid;
-    border-color: rgb(206, 232, 255);
     height: 15vh;
+
+    padding: 0.25vw;
     margin-bottom: 0.5vh;
-    margin-right: 0.5vh;
+    margin-right: 0.75vh;
+
+    border-style: solid;
+    border-color: var(--transparent);
+    border-radius: 0.5em;
+
+    font-size: 1.25em;
 }
 
-.period{
+
+
+.period {
     margin-top: 5vh;
 }
 
-
-#gridBoxTimeSchedules .timeScheduleBoxes{
-    margin-bottom: 0.5vh;
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0);
+/*Priod styling*/
+/* .empty{
+    /* border-color: var(--sb-none); 
+    
 }
 
+.physics {
+    border-color: var(--sb-red);
+}
+
+.history {
+    border-color: var(--sb-green);
+}
+
+.math {
+    border-color: var(--sb-yellow);
+} */
+
+
+#gridBoxTimeSchedules .timeScheduleBoxes {
+    margin-bottom: 0.5vh;
+    border-style: solid;
+    border-color: var(--transparent);
+}
