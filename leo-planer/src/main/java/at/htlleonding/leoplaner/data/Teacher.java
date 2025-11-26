@@ -49,23 +49,23 @@ public class Teacher {
         return teachingSubject;
     }
 
-    public boolean checkIfTeacherTeachesSubject(Subject subject) {
+    public boolean checkIfTeacherTeachesSubject(final Subject subject) {
         return teachingSubject.contains(subject);
     }
 
-    public void setId(long id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
-    public void setTeacherName(String teacherName) {
+    public void setTeacherName(final String teacherName) {
         this.teacherName = teacherName;
     }
 
-    public void setNameSymbol(String nameSymbol) {
+    public void setNameSymbol(final String nameSymbol) {
         this.nameSymbol = nameSymbol;
     }
 
-    public void setTeachingSubject(ArrayList<Subject> teachingSubject) {
+    public void setTeachingSubject(final ArrayList<Subject> teachingSubject) {
         this.teachingSubject = teachingSubject;
     }
 

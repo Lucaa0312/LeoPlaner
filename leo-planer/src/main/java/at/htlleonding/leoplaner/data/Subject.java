@@ -53,7 +53,7 @@ public class Subject {
         return subjectColor;
     }
 
-    public void setSubjectColor(RgbColor subjectColor) {
+    public void setSubjectColor(final RgbColor subjectColor) {
         this.subjectColor = subjectColor;
     }
 
