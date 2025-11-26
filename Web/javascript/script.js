@@ -231,7 +231,7 @@ let builder = {
                 for (let i = 0; i < 16; i++) {
                     const slot = daySubjects[dayKey][i];
                     if (slot) {
-                        builder[dayKey] += `<div class="periodStyling ${slot.subjectName}" style="border-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue});">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
+                        builder[dayKey] += `<div class="periodStyling ${slot.subjectName}" style="border-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue}); background-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue});">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
                     } else {
                         builder[dayKey] += `<div class="periodStyling empty"></div>\n`; 
                     }
