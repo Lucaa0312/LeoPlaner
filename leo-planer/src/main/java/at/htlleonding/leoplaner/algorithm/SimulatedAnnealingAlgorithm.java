@@ -12,7 +12,9 @@ public class SimulatedAnnealingAlgorithm {
     private Timetable nextTimeTable;
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
-    private double temperature;
+    private final double INIT_TEMPERATURE = 1000.0;
+    private final int ITERATIONS = 100000;
+    private final double COOLING_RATE = 0.995;
 
     public void duplicateTimeTableIntoNextTimeTable() {
 
@@ -47,42 +49,34 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public Timetable getCurrTimeTable() {
-      return currTimeTable;
+        return currTimeTable;
     }
 
     public void setCurrTimeTable(final Timetable currTimeTable) {
-      this.currTimeTable = currTimeTable;
+        this.currTimeTable = currTimeTable;
     }
 
     public Timetable getNextTimeTable() {
-      return nextTimeTable;
+        return nextTimeTable;
     }
 
     public void setNextTimeTable(final Timetable nextTimeTable) {
-      this.nextTimeTable = nextTimeTable;
+        this.nextTimeTable = nextTimeTable;
     }
 
     public ArrayList<Room> getRooms() {
-      return rooms;
+        return rooms;
     }
 
     public void setRooms(final ArrayList<Room> rooms) {
-      this.rooms = rooms;
+        this.rooms = rooms;
     }
 
     public ArrayList<Teacher> getTeachers() {
-      return teachers;
+        return teachers;
     }
 
     public void setTeachers(final ArrayList<Teacher> teachers) {
-      this.teachers = teachers;
-    }
-
-    public double getTemperature() {
-      return temperature;
-    }
-
-    public void setTemperature(final double temperature) {
-      this.temperature = temperature;
+        this.teachers = teachers;
     }
 }
