@@ -25,10 +25,10 @@ public class Resource {
     @Path("run/testCsv")
     @GET
     public void injectTestCsvData() {
-        final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
-        final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
-        final String classSubjectCSVPath = "src/resources/csvFiles/test1/testClassSubject.csv";
-        final String roomCSVPath = "src/resources/csvFiles/test1/testRoom.csv";
+        final String teacherCSVPath = "src/files/csvFiles/test1/testTeacher.csv";
+        final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
+        final String classSubjectCSVPath = "src/files/csvFiles/test1/testClassSubject.csv";
+        final String roomCSVPath = "src/files/csvFiles/test1/testRoom.csv";
 
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
