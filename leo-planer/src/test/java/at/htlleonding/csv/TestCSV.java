@@ -22,13 +22,13 @@ public class TestCSV {
   @Inject
   DataRepository dataRepository;
 
-  public static final String teacherCSVPath = "src/resources/csvFiles/test1/testTeacher.csv";
-  public static final String subjectCSVPath = "src/resources/csvFiles/test1/testSubject.csv";
-  public static final String roomCSVPath = "src/resources/csvFiles/test1/testRoom.csv";
-  public static final String emptyCSV = "src/resources/csvFiles/test1/testEmpty.csv";
-  public static final String teacherCSVPathWithWrongSubject = "src/resources/csvFiles/test1/testTeacherWrongSubject.csv";
-  public static final String csvWithWrongType = "src/resources/csvFiles/test1/testCSVWithWrongType.csv";
-  public static final String csvWithTooLongColumn = "src/resources/csvFiles/test1/testCSVWithTooLongColumnLength.csv";
+  public static final String teacherCSVPath = "src/files/csvFiles/test1/testTeacher.csv";
+  public static final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
+  public static final String roomCSVPath = "src/files/csvFiles/test1/testRoom.csv";
+  public static final String emptyCSV = "src/files/csvFiles/test1/testEmpty.csv";
+  public static final String teacherCSVPathWithWrongSubject = "src/files/csvFiles/test1/testTeacherWrongSubject.csv";
+  public static final String csvWithWrongType = "src/files/csvFiles/test1/testCSVWithWrongType.csv";
+  public static final String csvWithTooLongColumn = "src/files/csvFiles/test1/testCSVWithTooLongColumnLength.csv";
 
   @BeforeAll
   public static void checkIfFilesExist() throws IOException {
