@@ -15,7 +15,7 @@ public class SimulatedAnnealingAlgorithm {
     private Timetable nextTimeTable;
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
-    private final double INIT_TEMPERATURE = 1000.0;
+    private double temperature = 1000.0;
     private final int ITERATIONS = 100000;
     private final double COOLING_RATE = 0.995;
 
@@ -34,10 +34,27 @@ public class SimulatedAnnealingAlgorithm {
             do {
                 ranIndex2 = random.nextInt(0, indexesAmount);
             } while (ranIndex2 == ranIndex1);
+            
+            chooseRandomNeighborFunction(ranIndex1, ranIndex2);
+            
+            int costCurrTimeTable = determineCost(this.currTimeTable);
+            int costNextTimeTable = determineCost(this.nextTimeTable);
+          
+            boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
+            if (acceptSolution) {
+                this.currTimeTable = this.nextTimeTable;
+            }
 
-            
-            
+            decreaseTemperature();
         }
+    }
+
+    public int determineCost(Timetable timetable) {
+        //TODO if classsubject instance on friday, high cost
+        //  the later the period the more cost
+        //  if against classSubject.isBetterDoublePeriod higher cost
+        //  
+        return 0;
     }
 
     public void chooseRandomNeighborFunction(int index1, int index2) {
@@ -55,11 +72,7 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public void duplicateTimeTableIntoNextTimeTable() {
-
-    }
-
-    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable, final double temperature) {
+    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         return true;
     }
 
@@ -83,12 +96,8 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
-    public void decreaseTemperature(final double temperature) {
-
-    }
-
-    public int determineCost(final ClassSubjectInstance[] timetable) {
-        return 1;
+    public void decreaseTemperature() {
+        this.temperature *= COOLING_RATE;
     }
 
     public Timetable getCurrTimeTable() {
