@@ -18,6 +18,7 @@ public class SimulatedAnnealingAlgorithm {
     private double temperature = 1000.0;
     private final int ITERATIONS = 100000;
     private final double COOLING_RATE = 0.995;
+    public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
 
     @Inject 
     DataRepository dataRepository;
@@ -25,10 +26,10 @@ public class SimulatedAnnealingAlgorithm {
 
     public void algorithmLoop() {
         this.currTimeTable = this.dataRepository.getCurrentTimetable();
-        Random random = new Random();
+        final Random random = new Random();
         for (int i = 0; i < ITERATIONS; i++) {
-            int indexesAmount = this.currTimeTable.getClassSubjectInstances().size();
-            int ranIndex1 = random.nextInt(0, indexesAmount);
+            final int indexesAmount = this.currTimeTable.getClassSubjectInstances().size();
+            final int ranIndex1 = random.nextInt(0, indexesAmount);
             int ranIndex2;
 
             do {
@@ -37,10 +38,10 @@ public class SimulatedAnnealingAlgorithm {
             
             chooseRandomNeighborFunction(ranIndex1, ranIndex2);
             
-            int costCurrTimeTable = determineCost(this.currTimeTable);
-            int costNextTimeTable = determineCost(this.nextTimeTable);
+            final int costCurrTimeTable = determineCost(this.currTimeTable);
+            final int costNextTimeTable = determineCost(this.nextTimeTable);
           
-            boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
+            final boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
             if (acceptSolution) {
                 this.currTimeTable = this.nextTimeTable;
             }
@@ -49,7 +50,7 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public int determineCost(Timetable timetable) {
+    public int determineCost(final Timetable timetable) {
         //TODO if classsubject instance on friday, high cost
         //  the later the period the more cost
         //  if against classSubject.isBetterDoublePeriod higher cost
@@ -57,10 +58,10 @@ public class SimulatedAnnealingAlgorithm {
         return 0;
     }
 
-    public void chooseRandomNeighborFunction(int index1, int index2) {
-        Random random = new Random();
+    public void chooseRandomNeighborFunction(final int index1, final int index2) {
+        final Random random = new Random();
 
-        int ranNumber = random.nextInt(1, 2);
+        final int ranNumber = random.nextInt(1, 2);
         
         switch(ranNumber) {
             case 1:
@@ -73,7 +74,15 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
-        return true;
+        final int deltaCost = costNextTimeTable - costCurrTimeTable; 
+        
+        if (deltaCost > 0) { //next solution is better, always accept 
+            return true;
+        }
+        
+        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * temperature));
+
+        return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {
@@ -84,7 +93,7 @@ public class SimulatedAnnealingAlgorithm {
         this.nextTimeTable = this.currTimeTable.switchTwoClassSubjectInstancesAndReturn(firstIndex, secondIndex);
     }
 
-    public void changePeriod(int index) {
+    public void changePeriod(final int index) {
         this.nextTimeTable = this.currTimeTable.giveClassSubjectRandomPeriodAndReturn(index);
     }
 
