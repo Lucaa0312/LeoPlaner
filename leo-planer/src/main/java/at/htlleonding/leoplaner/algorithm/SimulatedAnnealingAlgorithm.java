@@ -13,13 +13,14 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
+@ApplicationScoped
 public class SimulatedAnnealingAlgorithm {
     private Timetable currTimeTable;
     private Timetable nextTimeTable;
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
     private double temperature = 1000.0;
-    private final int ITERATIONS = 100000;
+    private final int ITERATIONS = 100000000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
 
@@ -51,6 +52,8 @@ public class SimulatedAnnealingAlgorithm {
 
             decreaseTemperature();
         }
+        
+        this.dataRepository.setCurrentTimetable(currTimeTable);
     }
 
     public int determineCost(final Timetable timetable) {
@@ -77,7 +80,10 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 500; //TODO good cost change model + better data structure to avoid switch case
+                    break;
+                case SATURDAY:
+                    cost += 1000; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
             
@@ -93,14 +99,15 @@ public class SimulatedAnnealingAlgorithm {
         return cost;
     }
 
-    public void chooseRandomNeighborFunction(final int index1, final int index2) {
+    public void chooseRandomNeighborFunction(final int index1, final int index2) { //TODO add random function to change isntance duration, maybe split? isntance in multiple or another random generator
         final Random random = new Random();
 
         final int ranNumber = random.nextInt(1, 2);
         
         switch(ranNumber) {
             case 1:
-              swapPeriods(index1, index2);
+              changePeriod(index1);
+              //swapPeriods(index1, index2);
               break;
             case 2:
               changePeriod(index1);
@@ -111,13 +118,15 @@ public class SimulatedAnnealingAlgorithm {
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable; 
         
-        if (deltaCost > 0) { //next solution is better, always accept 
+        if (deltaCost < 0) { //next solution is better, always accept 
+            System.out.println(costCurrTimeTable + "   " + costNextTimeTable);
             return true;
         }
+        return false;
         
-        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * temperature));
+        //final double probability = Math.exp(deltaCost / (BOLTZMANN_CONSTANT * temperature));
 
-        return Math.random() < probability;
+        //return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {

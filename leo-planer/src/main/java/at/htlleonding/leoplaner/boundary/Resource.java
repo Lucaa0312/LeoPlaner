@@ -16,6 +16,8 @@ public class Resource {
     UriInfo uriInfo;
     @Inject
     DataRepository dataRepository;
+    @Inject
+    SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
 
     @Path("run/testCsv")
     @GET
@@ -38,7 +40,6 @@ public class Resource {
     @Path("run/algorithm")
     @GET
     public void runAlgorithm() {
-        SimulatedAnnealingAlgorithm algorithm = new SimulatedAnnealingAlgorithm();
-        algorithm.algorithmLoop();
+        simulatedAnnealingAlgorithm.algorithmLoop();
     }
 }
