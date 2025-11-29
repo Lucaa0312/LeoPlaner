@@ -1,14 +1,17 @@
 package at.htlleonding.leoplaner.algorithm;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
+import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.Timetable;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 
 public class SimulatedAnnealingAlgorithm {
     private Timetable currTimeTable;
@@ -54,8 +57,40 @@ public class SimulatedAnnealingAlgorithm {
         //TODO if classsubject instance on friday, high cost
         //  the later the period the more cost
         //  if against classSubject.isBetterDoublePeriod higher cost
-        //  
-        return 0;
+        //  maybe different rooms
+        int cost = 0;
+        
+        for (ClassSubjectInstance classSubjectInstance : timetable.getClassSubjectInstances()) {
+            Period period = classSubjectInstance.getPeriod();
+
+            switch (period.getSchoolDays()){
+                case MONDAY:
+                    cost += 1;
+                    break;
+                case TUESDAY:
+                    cost += 2;
+                    break;
+                case WEDNESDAY:
+                    cost += 3;
+                    break;
+                case THURSDAY:
+                    cost += 4;
+                    break;
+                case FRIDAY:
+                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
+                    break;
+            }
+            
+            if (period.getSchoolHour() > 5) {
+                cost += period.getSchoolHour() * 10;
+            }
+
+
+            if (classSubjectInstance.getClassSubject().isBetterDoublePeriod() &&  classSubjectInstance.getDuration() == 1) {
+                cost += 30; //TODO handle required double period check when creating random timetable
+            }
+        }
+        return cost;
     }
 
     public void chooseRandomNeighborFunction(final int index1, final int index2) {

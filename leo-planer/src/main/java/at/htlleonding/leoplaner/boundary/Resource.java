@@ -1,18 +1,13 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.util.List;
-
+import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.Subject;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api")
@@ -38,5 +33,12 @@ public class Resource {
         Room room = this.dataRepository.getRoomByNumber(24);
 
         this.dataRepository.createTimetable("4chitm", room);
+    }
+
+    @Path("run/algorithm")
+    @GET
+    public void runAlgorithm() {
+        SimulatedAnnealingAlgorithm algorithm = new SimulatedAnnealingAlgorithm();
+        algorithm.algorithmLoop();
     }
 }
