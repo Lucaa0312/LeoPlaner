@@ -39,7 +39,9 @@ public class Timetable {
     public ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList() {
         ArrayList<ClassSubjectInstance> clonedClassSubjectInstances = new ArrayList<>();
         for (ClassSubjectInstance csi : this.classSubjectInstances) {
-            clonedClassSubjectInstances.add(csi);
+            Period clonedPeriod = new Period(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour());
+            ClassSubjectInstance clonedCsi = new ClassSubjectInstance(csi.getClassSubject(), clonedPeriod, csi.getRoom(), csi.getDuration());
+            clonedClassSubjectInstances.add(clonedCsi);
         }
         return clonedClassSubjectInstances;
     }

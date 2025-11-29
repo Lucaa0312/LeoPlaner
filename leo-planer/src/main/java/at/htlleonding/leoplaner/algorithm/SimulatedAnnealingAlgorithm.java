@@ -20,7 +20,7 @@ public class SimulatedAnnealingAlgorithm {
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
     private double temperature = 1000.0;
-    private final int ITERATIONS = 100000000;
+    private final int ITERATIONS = 100000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
 
@@ -80,10 +80,10 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 500; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
                     break;
                 case SATURDAY:
-                    cost += 1000; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
+                    cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
             
@@ -103,7 +103,6 @@ public class SimulatedAnnealingAlgorithm {
         final Random random = new Random();
 
         final int ranNumber = random.nextInt(1, 2);
-        
         switch(ranNumber) {
             case 1:
               changePeriod(index1);
@@ -116,14 +115,14 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
-        final int deltaCost = costNextTimeTable - costCurrTimeTable; 
-        
-        if (deltaCost < 0) { //next solution is better, always accept 
-            System.out.println(costCurrTimeTable + "   " + costNextTimeTable);
+        final int deltaCost = costNextTimeTable - costCurrTimeTable;
+
+
+        if (deltaCost < 0) { //next solution is better, always accept
             return true;
         }
         return false;
-        
+
         //final double probability = Math.exp(deltaCost / (BOLTZMANN_CONSTANT * temperature));
 
         //return Math.random() < probability;
