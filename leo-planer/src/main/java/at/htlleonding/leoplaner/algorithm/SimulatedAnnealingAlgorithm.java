@@ -23,6 +23,7 @@ public class SimulatedAnnealingAlgorithm {
     private final int ITERATIONS = 100000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
+    //public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
     @Inject 
     DataRepository dataRepository;
@@ -51,6 +52,7 @@ public class SimulatedAnnealingAlgorithm {
             }
 
             decreaseTemperature();
+            this.dataRepository.setCurrentTimetable(currTimeTable);
         }
         
         this.dataRepository.setCurrentTimetable(currTimeTable);
@@ -117,15 +119,13 @@ public class SimulatedAnnealingAlgorithm {
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable;
 
-
         if (deltaCost < 0) { //next solution is better, always accept
             return true;
         }
-        return false;
 
-        //final double probability = Math.exp(deltaCost / (BOLTZMANN_CONSTANT * temperature));
+        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * temperature));
 
-        //return Math.random() < probability;
+        return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {
