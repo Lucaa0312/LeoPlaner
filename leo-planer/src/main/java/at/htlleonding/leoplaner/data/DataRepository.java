@@ -24,6 +24,11 @@ public class DataRepository {
         return currentTimetable;
     }
 
+    public void setCurrentTimetable(Timetable currentTimetable) {
+        this.currentTimetable = currentTimetable;
+    }
+
+
     public List<ClassSubject> getAllClassSubjects() {
         TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
         return allClassSubjects.getResultList();
@@ -152,7 +157,7 @@ public class DataRepository {
             SchoolDays randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
             int schoolHour = random.nextInt(1, 7);
             Period period = new Period(randomSchoolDay, schoolHour);
-            result.add(new ClassSubjectInstance(classSubject, period, classRoom));
+            result.add(new ClassSubjectInstance(classSubject, period, classRoom, 1));
         }
 
         return result;
