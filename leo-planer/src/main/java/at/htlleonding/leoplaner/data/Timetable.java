@@ -47,7 +47,7 @@ public class Timetable {
     }
 
     public void implementRandomLunchBreakOnDay(SchoolDays schoolday) {
-        int classesAmountOnDay = (int) classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).count();
+        int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum();
 
         Random random = new Random();
         int randSchoolHour = random.nextInt(1, classesAmountOnDay);
