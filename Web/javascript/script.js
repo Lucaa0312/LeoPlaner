@@ -40,7 +40,7 @@ function load() {
 load();
 
 function getRandomizedTimeTable() {
-    fetch("http://localhost:8080/api/timetable/randomize")
+    fetch("http://localhost:8080/api/timetable/")
     .then(response => {
         return response.json();
     }).then(data => {
@@ -50,6 +50,20 @@ function getRandomizedTimeTable() {
 
     }).catch(error => {
         console.error('Error randomizing Timetable:', error);
+    });
+}
+
+function getOptimizedTimetable() {
+    fetch("http://localhost:8080/api/run/algorithm")
+    .then(response => {
+        return response.json();
+    }).then(data => {
+        data = data.classSubjectInstances;
+        console.log(data);
+        createLayout(data);
+
+    }).catch(error => {
+        console.error('Error optimizing Timetable:', error);
     });
 }
 
@@ -162,5 +176,4 @@ let builder = {
                 box.innerHTML = builder[index];
 
             }
-        
 }
