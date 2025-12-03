@@ -1,0 +1,20 @@
+#header {
+    width: auto;
+    background-color: var(--leo-orange);
+    padding: 2vh;
+    border-bottom: solid;
+    border-color: white;
+    display: flex;
+    align-items: center;
+}
+
+#header img {
+    display: block;
+    width: 25vw;
+}
+
+#content {
+    width: auto;
+    height: auto;
+    background-color: var(--leo-light-blue);
+}
