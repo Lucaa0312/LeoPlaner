@@ -8,13 +8,52 @@
     align-items: center;
 }
 
+body {
+     background-color: var(--leo-light-blue);
+}
+
 #header img {
     display: block;
     width: 25vw;
 }
 
 #content {
-    width: auto;
-    height: auto;
     background-color: var(--leo-light-blue);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column  ;
 }
+
+h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--sb-none);
+    margin-bottom: 1vh;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: var(--sb-none);
+    margin-bottom: 3vh;
+}
+
+button {
+    background-color: var(--leo-orange);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding: 1vh 2vh;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+}
+
+button:hover {
+    background-color: var(--leo-blue-tint-white);
+    color: var(--leo-orange);
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+}
+
