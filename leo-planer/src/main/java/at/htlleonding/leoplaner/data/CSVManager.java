@@ -155,7 +155,7 @@ public class CSVManager {
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
             final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
             final Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim().toLowerCase());
-            final short weeklyHours = Short.parseShort(line[2].trim());
+            final int weeklyHours = Integer.parseInt(line[2].trim());
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
             final String className = line[5].trim();

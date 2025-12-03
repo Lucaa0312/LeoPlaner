@@ -13,14 +13,6 @@ public class ClassSubjectInstance {
         this.duration = duration;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(final int duration) {
-        this.duration = duration;
-    }
-
     public void assignClassRoomIfNoSpecialRoomType() {
 
     }
@@ -49,4 +41,11 @@ public class ClassSubjectInstance {
         this.room = room;
     }
 
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 }

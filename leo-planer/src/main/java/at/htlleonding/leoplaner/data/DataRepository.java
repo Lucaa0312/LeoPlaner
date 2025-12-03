@@ -2,10 +2,7 @@ package at.htlleonding.leoplaner.data;
 
 import at.htlleonding.leoplaner.data.SchoolDays;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -150,14 +147,30 @@ public class DataRepository {
     public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(List<ClassSubject> classSubjects, Room classRoom) {
         //List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
         SchoolDays[] schoolDays = SchoolDays.values();
+        HashMap<SchoolDays, Integer> checkRandom = new HashMap<>();
 
         ArrayList<ClassSubjectInstance> result = new ArrayList<>();
         Random random = new Random();
         for (ClassSubject classSubject : classSubjects) {
-            SchoolDays randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
-            int schoolHour = random.nextInt(1, 7);
-            Period period = new Period(randomSchoolDay, schoolHour);
-            result.add(new ClassSubjectInstance(classSubject, period, classRoom, 1));
+            SchoolDays randomSchoolDay;
+            int schoolHour;
+            int randomDuration;
+            int hoursCounter = classSubject.getWeeklyHours();
+            while (hoursCounter != 0) {
+                randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
+                schoolHour = random.nextInt(1, 7);
+
+                int weeklyHoursBounds = classSubject.getWeeklyHours();
+                randomDuration = random.nextInt(1, weeklyHoursBounds+1); //weeklyHoursBounds == 1 ? 1 :
+                System.out.println(randomDuration);
+
+                if ((checkRandom.get(randomSchoolDay) == null || checkRandom.get(randomSchoolDay) != schoolHour) && (hoursCounter - randomDuration) >= 0) {
+                    Period period = new Period(randomSchoolDay, schoolHour);
+                    result.add(new ClassSubjectInstance(classSubject, period, classRoom, randomDuration));
+                    checkRandom.put(randomSchoolDay, schoolHour);
+                    hoursCounter -= randomDuration;
+                }
+            }
         }
 
         return result;
