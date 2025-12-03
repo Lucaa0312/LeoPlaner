@@ -4,11 +4,13 @@ public class ClassSubjectInstance {
     private ClassSubject classSubject;
     private Period period;
     private Room room;
+    private int duration;
 
-    public ClassSubjectInstance(final ClassSubject classSubject, final Period period, final Room room) {
+    public ClassSubjectInstance(final ClassSubject classSubject, final Period period, final Room room, final int duration) {
         this.classSubject = classSubject;
         this.period = period;
         this.room = room;
+        this.duration = duration;
     }
 
     public void assignClassRoomIfNoSpecialRoomType() {
@@ -39,4 +41,11 @@ public class ClassSubjectInstance {
         this.room = room;
     }
 
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 }

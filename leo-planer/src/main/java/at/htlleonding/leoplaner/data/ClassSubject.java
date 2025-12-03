@@ -23,7 +23,7 @@ public class ClassSubject {
     @ManyToOne
     private Subject subject;
 
-    private short weeklyHours;
+    private int weeklyHours;
     private boolean requiresDoublePeriod;
     private boolean isBetterDoublePeriod;
 
@@ -49,7 +49,7 @@ public class ClassSubject {
         return subject;
     }
 
-    public short getWeeklyHours() {
+    public int getWeeklyHours() {
         return weeklyHours;
     }
 
@@ -73,7 +73,7 @@ public class ClassSubject {
         this.subject = subject;
     }
 
-    public void setWeeklyHours(final short weeklyHours) {
+    public void setWeeklyHours(final int weeklyHours) {
         this.weeklyHours = weeklyHours;
     }
 
