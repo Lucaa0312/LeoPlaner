@@ -46,6 +46,21 @@ public class Timetable {
         return clonedClassSubjectInstances;
     }
 
+    public void implementRandomLunchBreakOnDay(SchoolDays schoolday) {
+        int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum();
+
+        Random random = new Random();
+        int randSchoolHour = random.nextInt(1, classesAmountOnDay);
+
+        final boolean LUNCHBREAK = true;
+        Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
+
+        this.classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randSchoolHour)
+                        .forEach(e -> e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1));
+
+        this.classSubjectInstances.add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1));
+    }
+
     public Timetable cloneCurrentTimeTable() {
         return new Timetable(cloneClassSubjectInstanceList());
     }
