@@ -89,8 +89,11 @@ public class SimulatedAnnealingAlgorithm {
                     break;
             }
             
-            if (period.getSchoolHour() > 5) {
-                cost += period.getSchoolHour() * 10;
+            if (period.getSchoolHour() > 6) {
+                if (!timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).findFirst().isPresent()) {
+                    timetable.implementRandomLunchBreakOnDay(period.getSchoolDays());
+                }
+                cost += (period.getSchoolHour() - 6) * 10;
             }
 
 
