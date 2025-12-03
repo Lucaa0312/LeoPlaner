@@ -1,0 +1,30 @@
+/*VARIABLES*/
+:root {
+    /*colors*/
+    --transparent: rgba(0, 0, 0, 0);
+
+    /*Leo colors*/
+    --leo-orange: #e69246;
+    --leo-light-blue: rgb(167, 202, 233);
+    --leo-blue-tint-white: rgb(206, 232, 255);
+
+    /*subject colors*/
+    --sb-none: rgb(51, 51, 51);
+    --sb-red: rgb(255, 0, 0);
+    --sb-green: rgb(0, 255, 0);
+    --sb-yellow: rgb(255, 255, 0);
+
+    /*constant values*/
+}
+
+/*EXTERNAL FONTS*/
+@font-face {
+    font-family: alte-haas-grotesk;
+    src: url(../assets/font/alte-haas-grotesk/AlteHaasGroteskRegular.ttf);
+}
+
+/*GENERAL CHANGES*/
+* {
+    margin: 0;
+    padding: 0;
+}

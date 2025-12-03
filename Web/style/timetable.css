@@ -1,42 +1,12 @@
-/*VARIABLES*/
-:root {
-    /*colors*/
-    --transparent: rgba(0, 0, 0, 0);
-
-    /*Leo colors*/
-    --leo-orange: #e69246;
-    --leo-light-blue: rgb(167, 202, 233);
-    --leo-blue-tint-white: rgb(206, 232, 255);
-
-    /*subject colors*/
-    --sb-none: rgb(51, 51, 51);
-    --sb-red: rgb(255, 0, 0);
-    --sb-green: rgb(0, 255, 0);
-    --sb-yellow: rgb(255, 255, 0);
-
-    /*constant values*/
-}
-
-@font-face {
-    font-family: alte-haas-grotesk;
-    src: url(../assets/font/alte-haas-grotesk/AlteHaasGroteskRegular.ttf);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    /*removes the blue marking by mouse drag*/
-}
-
 body {
     margin: 0;
     padding: 0;
     width: auto;
     font-family: alte-haas-grotesk;
+    user-select: none;
 }
 
-/*HEADER*/
+/*=========================================HEADER=========================================*/
 
 #header {
     width: auto;
@@ -56,6 +26,7 @@ body {
     width: 25vw;
 }
 
+/*=========================================RANDOMIZE BUTTON=========================================*/
 #randomizeButton {
     cursor: pointer;
 
@@ -102,8 +73,7 @@ body {
     transform: translateY(-15px);
 }
 
-/*CONTENT*/
-
+/*=========================================CONTENT=========================================*/
 #content {
     width: auto;
     height: auto;
@@ -129,8 +99,6 @@ body {
 #day0 {
     margin-right: 0vh;
     color: var(--leo-blue-tint-white);
-    /* border-right: solid;
-    border-color: rgb(206, 232, 255); */
     text-align: center;
     font-size: 1.25em;
 }
@@ -190,25 +158,6 @@ body {
 .period {
     margin-top: 5vh;
 }
-
-/*Priod styling*/
-/* .empty{
-    /* border-color: var(--sb-none); 
-    
-}
-
-.physics {
-    border-color: var(--sb-red);
-}
-
-.history {
-    border-color: var(--sb-green);
-}
-
-.math {
-    border-color: var(--sb-yellow);
-} */
-
 
 #gridBoxTimeSchedules .timeScheduleBoxes {
     margin-bottom: 0.5vh;

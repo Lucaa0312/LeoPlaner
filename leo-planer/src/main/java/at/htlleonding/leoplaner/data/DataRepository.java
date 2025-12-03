@@ -21,6 +21,11 @@ public class DataRepository {
         return currentTimetable;
     }
 
+    public void setCurrentTimetable(Timetable currentTimetable) {
+        this.currentTimetable = currentTimetable;
+    }
+
+
     public List<ClassSubject> getAllClassSubjects() {
         TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
         return allClassSubjects.getResultList();

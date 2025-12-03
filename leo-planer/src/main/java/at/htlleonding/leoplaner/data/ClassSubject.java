@@ -53,14 +53,6 @@ public class ClassSubject {
         return weeklyHours;
     }
 
-    public boolean isRequiresDoublePeriod() {
-        return requiresDoublePeriod;
-    }
-
-    public boolean isBetterDoublePeriod() {
-        return isBetterDoublePeriod;
-    }
-
     public void setId(final long id) {
         this.id = id;
     }
@@ -95,5 +87,13 @@ public class ClassSubject {
 
     public void setClassName(final String className) {
         this.className = className;
+    }
+
+    public boolean isRequiresDoublePeriod() {
+        return requiresDoublePeriod;
+    }
+
+    public boolean isBetterDoublePeriod() {
+        return isBetterDoublePeriod;
     }
 }
