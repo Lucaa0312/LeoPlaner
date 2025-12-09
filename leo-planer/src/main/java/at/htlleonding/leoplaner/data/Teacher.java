@@ -23,7 +23,7 @@ public class Teacher {
     private String nameSymbol; // Lehrerkürzel
 
     @ManyToMany
-    @JsonIgnore // TODO later on add dtos maybe
+    //@JsonIgnore // TODO later on add dtos maybe
     @JoinTable( // create new table
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
