@@ -40,7 +40,7 @@ function load() {
 load();
 
 function getRandomizedTimeTable() {
-    fetch("http://localhost:8080/api/timetable/")
+    fetch("http://localhost:8080/api/timetable/randomize")
     .then(response => {
         return response.json();
     }).then(data => {
@@ -141,7 +141,7 @@ let builder = {
                     //     subjectColorGreen,
                     //     subjectColorBlue
                     // };
-                    let hours = item.classSubject.weeklyHours || 1;
+                    /*let hours = item.classSubject.weeklyHours || 1;
 
                     for (let h = 0; h < hours; h++) {
                         daySubjects[dayKey][slotIndex + h] = {
@@ -151,7 +151,30 @@ let builder = {
                             subjectColorGreen,
                             subjectColorBlue
                         };
+                    }*/
+
+                    // richtige Dauer aus dem Backend (z.B. duration = 2 für Doppelstunden)
+                    let duration = item.duration || 1;
+
+                    // Eintragen der Perioden
+                    for (let h = 0; h < duration; h++) {
+                        const target = slotIndex + h;
+
+                        if (daySubjects[dayKey][target] !== null) {
+                            console.warn("Überschneidung! Slot bereits belegt:", dayKey, target);
+                            continue;
+                        }
+
+                        daySubjects[dayKey][target] = {
+                            subjectName,
+                            teacherSymbol,
+                            subjectColorRed,
+                            subjectColorGreen,
+                            subjectColorBlue
+                        };
                     }
+ 
+
                 }
             });
 
