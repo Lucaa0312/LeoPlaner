@@ -12,37 +12,43 @@
 </head>
 
 <body onload="loadSubjects()">
-    <nav>
-        <div id="teacher-tab-btn"><i class="fa-solid fa-graduation-cap"></i></div>
-        <div id="subject-tab-btn"><i class="fa-solid fa-book"></i></div>
-    </nav>
+    <div id="header">
+        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" width="30vw">
+    </div>
 
-    <main>
-        <div id="teacher-tab">
-            <div id="teacher-list">
-                <div id="teacher-search"></div>
-                <div id="teacher-element-list">
-                    <!-- list with all teachers -->
-                    <div class="teacher-element">
-                        <p>Tomas Teacher</p>
+    <div id="content-wrapper">
+        <nav>
+            <div id="teacher-tab-btn"><i class="fa-solid fa-graduation-cap"></i></div>
+            <div id="subject-tab-btn"><i class="fa-solid fa-book"></i></div>
+        </nav>
+
+        <main>
+            <div id="teacher-tab">
+                <div id="teacher-list">
+                    <div id="teacher-search"></div>
+                    <div id="teacher-element-list">
+                        <!-- list with all teachers -->
+                        <div class="teacher-element">
+                            <p></p>
+                        </div>
                     </div>
+                    <div id="action-btn"></div>
                 </div>
-                <div id="action-btn"></div>
+
+                <div id="teacher-info">
+                    <img src="" alt="" id="teacher-pic">
+                    <div id="teacher-name"></div>
+                </div>
             </div>
 
-            <div id="teacher-info">
-                <img src="" alt="" id="teacher-pic">
-                <div id="teacher-name"></div>
+            <div id="subject-tab"></div>
+
+            <div id="form">
+
             </div>
-        </div>
-
-        <div id="subject-tab"></div>
-
-        <div id="form">
-
-        </div>
-        <!-- Form generation in javascript-->
-    </main>
+            <!-- Form generation in javascript-->
+        </main>
+    </div>
 </body>
 
 </html>
