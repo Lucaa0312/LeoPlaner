@@ -47,7 +47,7 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].split(";");
             if (line.length != 3) {
-                throw new IllegalArgumentException("Teacher CSV is ONLY allowed to have 4 columns! Found " + line.length + " columns in row " + i);
+                throw new IllegalArgumentException("Teacher CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
             // (.CHEM is roomtype)
@@ -77,8 +77,8 @@ public class CSVManager {
     public static void createRoomFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length > 6) {
-                throw new IllegalArgumentException("Room CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 5) {
+                throw new IllegalArgumentException("Room CSV is only allowed to have 5 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
 
@@ -115,8 +115,8 @@ public class CSVManager {
     public static void createSubjectFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length < 1) {
-                throw new IllegalArgumentException("Subject CSV is ONLY allowed to have 1 columns! Found " + line.length + " columns in row " + i); //TODO Has to be changed
+            if (line.length != 3) {
+                throw new IllegalArgumentException("Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); //TODO Has to be changed
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
