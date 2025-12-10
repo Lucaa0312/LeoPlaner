@@ -21,7 +21,7 @@ body {
 }
 
 #header img {
-    position: absolute;
+    /* position: absolute; */
     display: block;
     width: 25vw;
 }
@@ -72,6 +72,46 @@ body {
 #randomizeButton:active>div>i {
     transform: translateY(-15px);
 }
+
+/*=========================================ALGORITHM BUTTON=========================================*/
+#algorithmButton {
+    cursor: pointer;
+
+    margin-left: auto;
+    margin-right: 2vw;
+
+    background-color: var(--transparent);
+    color: white;
+    font-size: 2em;
+
+    border: 5px solid white;
+    padding: 1em 2.5em;
+    border-radius: 1em;
+    transition: all 400ms ease-out;
+}
+#algorithmButton>div,
+#algorithmButton i {
+    transition: transform 250ms ease-out;
+}
+#algorithmButton:hover {
+    border-radius: 2em;
+    transition: all 270ms ease-in;
+}
+#algorithmButton:hover>div {
+    transform: scale(1.25);
+}
+#algorithmButton:hover>div>i {
+    transform: translateY(-5px);
+}
+#algorithmButton:active {
+    background-color: var(--leo-light-blue);
+    transform: scale(0.95);
+    transition: all 50ms ease-out;
+}
+#algorithmButton:active>div>i {
+    transform: translateY(-15px);
+}
+
 
 /*=========================================CONTENT=========================================*/
 #content {

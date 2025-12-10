@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algorithm Visualisation</title>
-    <link rel="stylesheet" href="./style/essentials.css">
-    <link rel="stylesheet" href="./style/timetable.css">
-    <script defer src="./javascript/script.js"></script>
+    <link rel="stylesheet" href="../style/essentials.css">
+    <link rel="stylesheet" href="../style/timetable.css">
+    <script defer src="../javascript/script.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="header">
-        <img src="./assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" width="30vw">
+        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" onclick="location.href='../index.html'" width="30vw">
         <div id="randomizeButton" onclick="getRandomizedTimeTable()"><div><i class="fa-solid fa-dice"></i> Randomize</div></div>
+
+        <!-- <div id="algorithmButton" onclick=""><div><i class="fa-solid fa-sitemap"></i> Algorithm</div></div> -->
+        <!-- <div id="algorithmButton" onclick=""><div><i class="fa-solid fa-temperature-three-quarters"></i> Algorithm</div></div> -->
+         
+        <div id="algorithmButton" onclick="getOptimizedTimetable()"><div><i class="fa-solid fa-chart-line"></i> Algorithm</div></div>
     </div>
     <div id="content">
         <div id="days">
