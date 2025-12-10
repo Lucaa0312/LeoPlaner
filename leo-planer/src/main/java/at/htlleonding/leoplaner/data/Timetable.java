@@ -56,7 +56,7 @@ public class Timetable {
         Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
 
         this.classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randSchoolHour)
-                        .forEach(e -> e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1));
+                        .forEach(e -> e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1)); // move each class after lunch break one hour later
 
         this.classSubjectInstances.add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1));
     }
