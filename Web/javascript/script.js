@@ -55,6 +55,20 @@ function getRandomizedTimeTable() {
     });
 }
 
+function getOptimizedTimetable() {
+    fetch("http://localhost:8080/api/run/algorithm")
+    .then(response => {
+        return response.json();
+    }).then(data => {
+        data = data.classSubjectInstances;
+        console.log(data);
+        createLayout(data);
+
+    }).catch(error => {
+        console.error('Error optimizing Timetable:', error);
+    });
+}
+
 function createLayout(data) {
 let builder = {
                 "0": "", // "Time schedules"
@@ -122,24 +136,50 @@ let builder = {
                     const dayKey = String(dayIndex);
                     const slotIndex = determineSlotIndex(item, daySubjects[dayKey]);
 
-                    // daySubjects[dayKey][slotIndex] = {
-                    //     subjectName,
-                    //     teacherSymbol,
-                    //     subjectColorRed,
-                    //     subjectColorGreen,
-                    //     subjectColorBlue
-                    // };
-                    let hours = item.classSubject.weeklyHours || 1;
 
-                    for (let h = 0; h < hours; h++) {
-                        daySubjects[dayKey][slotIndex + h] = {
-                            subjectName,
-                            teacherSymbol,
-                            subjectColorRed,
-                            subjectColorGreen,
-                            subjectColorBlue
-                        };
+                    // richtige Dauer aus dem Backend 
+                    let duration = item.duration || 1;
+
+                    // Wir suchen den ersten freien Startpunkt, der genug Platz hat
+                    function findFreeStartIndex(arr, startIndex, duration) {
+
+                        let i = startIndex;
+
+                        while (i < arr.length) {
+                            let blockFree = true;
+
+                            for (let d = 0; d < duration; d++) {
+                                if (arr[i + d] !== null || i + d >= arr.length) {
+                                    blockFree = false;
+                                    break;
+                                }
+                            }
+
+                            if (blockFree) return i;
+
+                            i++; // Stunde weiter nach unten schieben
+                        }
+
+                        return -1; 
                     }
+
+                    let freeStart = findFreeStartIndex(daySubjects[dayKey], slotIndex, duration);
+
+                    if (freeStart === -1) {
+                        console.warn("KEIN PLATZ GEFUNDEN für:", subjectName, "am Tag", dayKey);
+                    } else {
+                        for (let h = 0; h < duration; h++) {
+                            daySubjects[dayKey][freeStart + h] = {
+                                subjectName,
+                                teacherSymbol,
+                                subjectColorRed,
+                                subjectColorGreen,
+                                subjectColorBlue
+                            };
+                        }
+                    }
+ 
+
                 }
             });
 
@@ -164,7 +204,6 @@ let builder = {
                 box.innerHTML = builder[index];
 
             }
-        
 }
 
 
