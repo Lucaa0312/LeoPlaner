@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 
 @NamedQueries({
         @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c"),
-        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c where LOWER(c.className) = :filter")
+        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c where LOWER(c.className) = LOWER(:filter)")
 })
 
 @Entity
