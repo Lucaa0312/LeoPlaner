@@ -134,44 +134,47 @@ let builder = {
                     const dayKey = String(dayIndex);
                     const slotIndex = determineSlotIndex(item, daySubjects[dayKey]);
 
-                    // daySubjects[dayKey][slotIndex] = {
-                    //     subjectName,
-                    //     teacherSymbol,
-                    //     subjectColorRed,
-                    //     subjectColorGreen,
-                    //     subjectColorBlue
-                    // };
-                    /*let hours = item.classSubject.weeklyHours || 1;
 
-                    for (let h = 0; h < hours; h++) {
-                        daySubjects[dayKey][slotIndex + h] = {
-                            subjectName,
-                            teacherSymbol,
-                            subjectColorRed,
-                            subjectColorGreen,
-                            subjectColorBlue
-                        };
-                    }*/
-
-                    // richtige Dauer aus dem Backend (z.B. duration = 2 für Doppelstunden)
+                    // richtige Dauer aus dem Backend 
                     let duration = item.duration || 1;
 
-                    // Eintragen der Perioden
-                    for (let h = 0; h < duration; h++) {
-                        const target = slotIndex + h;
+                    // Wir suchen den ersten freien Startpunkt, der genug Platz hat
+                    function findFreeStartIndex(arr, startIndex, duration) {
 
-                        if (daySubjects[dayKey][target] !== null) {
-                            console.warn("Überschneidung! Slot bereits belegt:", dayKey, target);
-                            continue;
+                        let i = startIndex;
+
+                        while (i < arr.length) {
+                            let blockFree = true;
+
+                            for (let d = 0; d < duration; d++) {
+                                if (arr[i + d] !== null || i + d >= arr.length) {
+                                    blockFree = false;
+                                    break;
+                                }
+                            }
+
+                            if (blockFree) return i;
+
+                            i++; // Stunde weiter nach unten schieben
                         }
 
-                        daySubjects[dayKey][target] = {
-                            subjectName,
-                            teacherSymbol,
-                            subjectColorRed,
-                            subjectColorGreen,
-                            subjectColorBlue
-                        };
+                        return -1; 
+                    }
+
+                    let freeStart = findFreeStartIndex(daySubjects[dayKey], slotIndex, duration);
+
+                    if (freeStart === -1) {
+                        console.warn("KEIN PLATZ GEFUNDEN für:", subjectName, "am Tag", dayKey);
+                    } else {
+                        for (let h = 0; h < duration; h++) {
+                            daySubjects[dayKey][freeStart + h] = {
+                                subjectName,
+                                teacherSymbol,
+                                subjectColorRed,
+                                subjectColorGreen,
+                                subjectColorBlue
+                            };
+                        }
                     }
  
 
