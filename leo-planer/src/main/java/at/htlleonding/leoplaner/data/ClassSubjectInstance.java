@@ -4,7 +4,7 @@ public class ClassSubjectInstance {
     private ClassSubject classSubject;
     private Period period;
     private Room room;
-    private int duration;
+    private int duration; //amount of hours (classes) specific instance takes
 
     public ClassSubjectInstance(final ClassSubject classSubject, final Period period, final Room room, final int duration) {
         this.classSubject = classSubject;
