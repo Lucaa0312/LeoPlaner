@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DataRepository {
-    private Timetable currentTimetable;
+    private Timetable currentTimetable; //volatile, algorithms keep updating this value at the moment
 
     @Inject
     EntityManager entityManager;

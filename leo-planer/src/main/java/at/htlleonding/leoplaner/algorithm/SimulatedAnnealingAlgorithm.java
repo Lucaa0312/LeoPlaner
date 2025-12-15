@@ -19,7 +19,7 @@ public class SimulatedAnnealingAlgorithm {
     private Timetable nextTimeTable;
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
-    private double temperature = 1000.0;
+    private double temperature = 1000.0; //could also go in the small number range like 1-0
     private final int ITERATIONS = 100000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
@@ -32,7 +32,7 @@ public class SimulatedAnnealingAlgorithm {
     public void algorithmLoop() {
         this.currTimeTable = this.dataRepository.getCurrentTimetable();
         final Random random = new Random();
-        for (int i = 0; i < ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) { //main loop
             final int indexesAmount = this.currTimeTable.getClassSubjectInstances().size();
             final int ranIndex1 = random.nextInt(0, indexesAmount);
             int ranIndex2;
@@ -40,7 +40,8 @@ public class SimulatedAnnealingAlgorithm {
             do {
                 ranIndex2 = random.nextInt(0, indexesAmount);
             } while (ranIndex2 == ranIndex1);
-            
+            //create 2 ranbdom non equal indexes
+      
             chooseRandomNeighborFunction(ranIndex1, ranIndex2);
             
             final int costCurrTimeTable = determineCost(this.currTimeTable);

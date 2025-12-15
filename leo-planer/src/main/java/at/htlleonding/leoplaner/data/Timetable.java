@@ -6,13 +6,13 @@ import java.util.Random;
 
 public class Timetable {
     private ArrayList<ClassSubjectInstance> classSubjectInstances;
-    private int totalWeeklyHours;
+    private int totalWeeklyHours; //all durations summed up
 
     public Timetable(final ArrayList<ClassSubjectInstance> classSubjectInstances) {
         this.classSubjectInstances = classSubjectInstances;
     }
 
-    public void calculateWeeklyHours() {
+    public void calculateWeeklyHours() {  //TODO free lunch periods not included yet
       int totalHours = 0;
       List<String> classSubjectsUsed = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public class Timetable {
         return false;
     }
 
-    public ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList() {
+    public ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList() { //deep deep copy since all lives on the heap
         ArrayList<ClassSubjectInstance> clonedClassSubjectInstances = new ArrayList<>();
         for (ClassSubjectInstance csi : this.classSubjectInstances) {
             Period clonedPeriod = new Period(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour());
@@ -47,7 +47,7 @@ public class Timetable {
     }
 
     public void implementRandomLunchBreakOnDay(SchoolDays schoolday) {
-        int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum();
+        int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum(); //sum of all durations on certain day
 
         Random random = new Random();
         int randSchoolHour = random.nextInt(1, classesAmountOnDay);
@@ -58,7 +58,7 @@ public class Timetable {
         this.classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randSchoolHour)
                         .forEach(e -> e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1)); // move each class after lunch break one hour later
 
-        this.classSubjectInstances.add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1));
+        this.classSubjectInstances.add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1)); //place holder fake csi for lunch break
     }
 
     public Timetable cloneCurrentTimeTable() {

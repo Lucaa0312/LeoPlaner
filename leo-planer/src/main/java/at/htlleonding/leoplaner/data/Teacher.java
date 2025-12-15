@@ -27,11 +27,9 @@ public class Teacher {
     @JoinTable( // create new table
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
+    
 
-    public Long getId() {
-        return id;
-    }
-
+    //TODO later on add list for periods the teacher does (not) want to (cant) teach
 
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
@@ -39,6 +37,10 @@ public class Teacher {
 
     public String getTeacherName() {
         return teacherName;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getNameSymbol() {
