@@ -158,13 +158,22 @@ public class DataRepository {
             int hoursCounter = classSubject.getWeeklyHours();
             while (hoursCounter != 0) {
                 randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
-                schoolHour = random.nextInt(1, 7);
+                schoolHour = random.nextInt(1, 9);
 
                 int weeklyHoursBounds = classSubject.getWeeklyHours();
                 randomDuration = random.nextInt(1, weeklyHoursBounds+1); //weeklyHoursBounds == 1 ? 1 :
                 System.out.println(randomDuration);
 
-                if ((checkRandom.get(randomSchoolDay) == null || checkRandom.get(randomSchoolDay) != schoolHour) && (hoursCounter - randomDuration) >= 0) {
+                //chek if other multi-class instance takes up period already
+                boolean periodIsFree = true;
+                for (int i = 0; i < randomDuration; i++) {
+                    if (checkRandom.get(randomSchoolDay) != null && checkRandom.get(randomSchoolDay) + i == schoolHour) {
+                        periodIsFree = false;
+                    }
+                }
+
+                if ((checkRandom.get(randomSchoolDay) == null || periodIsFree) 
+                    && (hoursCounter - randomDuration) >= 0) {
                     Period period = new Period(randomSchoolDay, schoolHour);
                     result.add(new ClassSubjectInstance(classSubject, period, classRoom, randomDuration));
                     checkRandom.put(randomSchoolDay, schoolHour);

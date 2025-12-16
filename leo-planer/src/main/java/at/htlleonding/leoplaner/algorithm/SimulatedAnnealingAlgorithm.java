@@ -40,7 +40,7 @@ public class SimulatedAnnealingAlgorithm {
             do {
                 ranIndex2 = random.nextInt(0, indexesAmount);
             } while (ranIndex2 == ranIndex1);
-            //create 2 ranbdom non equal indexes
+            //create 2 random non equal indexes
       
             chooseRandomNeighborFunction(ranIndex1, ranIndex2);
             
@@ -56,7 +56,7 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.setCurrentTimetable(currTimeTable);
         }
         
-        this.dataRepository.setCurrentTimetable(currTimeTable);
+        this.dataRepository.setCurrentTimetable(currTimeTable); //secure stuff
     }
 
     public int determineCost(final Timetable timetable) {
@@ -89,7 +89,7 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
-            
+
             if (period.getSchoolHour() > 6) {
                 if (!timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).findFirst().isPresent()) { //checks if break already exists on that day
                     timetable.implementRandomLunchBreakOnDay(period.getSchoolDays());
