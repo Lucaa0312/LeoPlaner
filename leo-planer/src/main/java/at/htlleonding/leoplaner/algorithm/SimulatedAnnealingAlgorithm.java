@@ -65,7 +65,6 @@ public class SimulatedAnnealingAlgorithm {
         //  if against classSubject.isBetterDoublePeriod higher cost
         //  maybe different rooms
         int cost = 0;
-        
         for (ClassSubjectInstance classSubjectInstance : timetable.getClassSubjectInstances()) {
             Period period = classSubjectInstance.getPeriod();
 

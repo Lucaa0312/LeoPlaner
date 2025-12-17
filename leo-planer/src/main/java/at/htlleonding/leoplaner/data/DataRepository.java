@@ -162,7 +162,6 @@ public class DataRepository {
 
                 int weeklyHoursBounds = classSubject.getWeeklyHours();
                 randomDuration = random.nextInt(1, weeklyHoursBounds+1); //weeklyHoursBounds == 1 ? 1 :
-                System.out.println(randomDuration);
 
                 //chek if other multi-class instance takes up period already
                 boolean periodIsFree = true;

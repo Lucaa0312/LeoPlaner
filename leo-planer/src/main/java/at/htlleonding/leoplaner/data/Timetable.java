@@ -50,8 +50,7 @@ public class Timetable {
         int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum(); //sum of all durations on certain day
 
         Random random = new Random();
-        int randSchoolHour = random.nextInt(1, classesAmountOnDay);
-        System.out.println(randSchoolHour);
+        int randSchoolHour = random.nextInt(1, classesAmountOnDay + 2);
 
         final boolean LUNCHBREAK = true;
         Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
