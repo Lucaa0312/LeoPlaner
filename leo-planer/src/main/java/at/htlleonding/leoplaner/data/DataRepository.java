@@ -147,41 +147,63 @@ public class DataRepository {
     public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(List<ClassSubject> classSubjects, Room classRoom) {
         //List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
         SchoolDays[] schoolDays = SchoolDays.values();
-        HashMap<SchoolDays, Integer> checkRandom = new HashMap<>();
-
+        HashMap<SchoolDays, ArrayList<Integer>> occupiedHours = new HashMap<>();
         ArrayList<ClassSubjectInstance> result = new ArrayList<>();
         Random random = new Random();
+        final int MAX_HOUR = 8;
+        final int MIN_HOUR = 1;
+
         for (ClassSubject classSubject : classSubjects) {
             SchoolDays randomSchoolDay;
             int schoolHour;
             int randomDuration;
-            int hoursCounter = classSubject.getWeeklyHours();
+            final int WEEKLY_HOURS = classSubject.getWeeklyHours();
+            int hoursCounter = WEEKLY_HOURS;
+
             while (hoursCounter != 0) {
                 randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
-                schoolHour = random.nextInt(1, 9);
+                schoolHour = random.nextInt(MIN_HOUR, MAX_HOUR);
 
-                int weeklyHoursBounds = classSubject.getWeeklyHours();
-                randomDuration = random.nextInt(1, weeklyHoursBounds+1); //weeklyHoursBounds == 1 ? 1 :
+                randomDuration = random.nextInt(1, WEEKLY_HOURS + 1); //weeklyHoursBounds == 1 ? 1 :
 
-                //chek if other multi-class instance takes up period already
-                boolean periodIsFree = true;
-                for (int i = 0; i < randomDuration; i++) {
-                    if (checkRandom.get(randomSchoolDay) != null && checkRandom.get(randomSchoolDay) + i == schoolHour) {
-                        periodIsFree = false;
-                    }
-                }
-
-                if ((checkRandom.get(randomSchoolDay) == null || periodIsFree) 
-                    && (hoursCounter - randomDuration) >= 0) {
+                  if (checkIfPeriodIsFree(occupiedHours,  schoolHour, randomDuration, randomSchoolDay)
+                  && (hoursCounter - randomDuration) >= 0) {
                     Period period = new Period(randomSchoolDay, schoolHour);
                     result.add(new ClassSubjectInstance(classSubject, period, classRoom, randomDuration));
-                    checkRandom.put(randomSchoolDay, schoolHour);
+
+                    //for each duration, add a placeholder in the hasmap to reserve space
+                    reserveHoursInOccupiesHours(occupiedHours,  schoolHour, randomDuration, randomSchoolDay);
+
                     hoursCounter -= randomDuration;
                 }
             }
         }
 
         return result;
+    }
+
+    public boolean checkIfPeriodIsFree(HashMap<SchoolDays, ArrayList<Integer>> occupiedHours, int schoolHour, int duration, SchoolDays schoolDay) {
+        ArrayList<Integer> allOccupiedHoursOnDay = occupiedHours.get(schoolDay);
+
+        if (allOccupiedHoursOnDay == null) { //entire day is free
+            return true;
+        }
+
+        for (int i = 0; i < duration; i++) {
+            if (allOccupiedHoursOnDay.contains(schoolHour + i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void reserveHoursInOccupiesHours(HashMap<SchoolDays, ArrayList<Integer>> occupiedHours, int schoolHour, int duration, SchoolDays schoolDay) {
+        ArrayList<Integer> updatedListOnDay = occupiedHours.getOrDefault(schoolDay, new ArrayList<>());
+
+        for (int i = 0; i < duration; i++) {
+            updatedListOnDay.add(schoolHour + i);
+        }
+        occupiedHours.put(schoolDay, updatedListOnDay);
     }
 
     public void createTimetable(String className, Room classRoom) {
