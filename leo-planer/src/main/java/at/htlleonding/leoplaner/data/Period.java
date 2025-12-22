@@ -9,7 +9,6 @@ public class Period {
     public Period(final SchoolDays schoolDays, final int schoolHour) {
         this.schoolDays = schoolDays;
         this.schoolHour = schoolHour;
-        this.isLunchBreak = false;
     }
 
     public Period(final SchoolDays schoolDays, final int schoolHour, final boolean isLunchBreak) {

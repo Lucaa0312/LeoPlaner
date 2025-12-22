@@ -150,7 +150,7 @@ public class DataRepository {
         HashMap<SchoolDays, ArrayList<Integer>> occupiedHours = new HashMap<>();
         ArrayList<ClassSubjectInstance> result = new ArrayList<>();
         Random random = new Random();
-        final int MAX_HOUR = 8;
+        final int MAX_HOUR = 9;
         final int MIN_HOUR = 1;
 
         for (ClassSubject classSubject : classSubjects) {
