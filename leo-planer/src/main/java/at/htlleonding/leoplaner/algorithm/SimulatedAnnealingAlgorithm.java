@@ -20,7 +20,7 @@ public class SimulatedAnnealingAlgorithm {
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
     private double temperature = 1000.0; //could also go in the small number range like 1-0
-    private final int ITERATIONS = 100;
+    private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
     //public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -87,17 +87,17 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 500; //TODO good cost change model + better data structure to avoid switch case
                     break;
                 case SATURDAY:
-                    cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
+                    cost += 1000; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
 
             if (period.getSchoolHour() > 5) {
-                 System.out.println(timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size());
+                 //System.out.println(timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size());
                 if (timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size() == 0) { //checks if break already exists on that day
-                    timetable.implementRandomLunchBreakOnDay(period.getSchoolDays());
+                    //timetable.implementRandomLunchBreakOnDay(period.getSchoolDays()); fixing this currently 
                 }
                 cost += (period.getSchoolHour() - 6) * 10;
             }

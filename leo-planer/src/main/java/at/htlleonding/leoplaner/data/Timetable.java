@@ -67,7 +67,7 @@ public class Timetable {
         List<ClassSubjectInstance> csisOnDay = this.classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolDay).toList();
 
         final int FIRST_HOUR = 1;
-        final int LAST_HOUR = 9;
+        final int LAST_HOUR = 12;
 
         // latest possible start hour so duration fits
         for (int startHour = FIRST_HOUR; startHour <= LAST_HOUR - duration + 1; startHour++) {
