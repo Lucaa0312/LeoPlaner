@@ -93,7 +93,6 @@ function createLayout(data) {
         }
     });
 
-
     // Key: Day, Value: array of classSubjects
     map.set("MONDAY", arrayMon)
     map.set("TUESDAY", arrayTue)
@@ -136,6 +135,7 @@ function createLayout(data) {
                 </div>
             `;
         }
+
     });
 });
 
@@ -149,13 +149,16 @@ function getDayId(day) {
         case "FRIDAY": return 5;
         case "SATURDAY": return 6;
         default: return 0; // Should never happen
+        }
     }
+
 }
 
 
 
-    
-        }
+
+
+
 /*
 let builder = {
                 "0": "", // "Time schedules"
