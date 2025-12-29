@@ -10,15 +10,6 @@ let times = [
     "22:10"
 ]
 
-const daysOfWeek = [
-    "Time schedules",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday"
-]
-
 let currentDay = ""
 
 let currentTimetableData = []
@@ -68,6 +59,8 @@ function getOptimizedTimetable() {
 function createLayout(data) {
     console.log('Raw data:', data)
 
+    // Create and fill map
+
     let map = new Map()
 
     let arrayMon = []
@@ -100,6 +93,8 @@ function createLayout(data) {
         }
     });
 
+
+    // Key: Day, Value: array of classSubjects
     map.set("MONDAY", arrayMon)
     map.set("TUESDAY", arrayTue)
     map.set("WEDNESDAY", arrayWed)
@@ -108,10 +103,59 @@ function createLayout(data) {
     map.set("SATURDAY", arraySat)
     console.log('Map:', map)
 
-    
+    let timesBuilder = ``
 
+    for (let i = 0; i < times.length; i+=2) {
+            timesBuilder += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+        }
+
+    document.getElementById("day0").querySelector(".gridBoxDays").innerHTML = timesBuilder
+    
+    // value, key
+    map.forEach((classSubjects, day) => {
+
+    const dayId = `day${getDayId(day)}`; 
+    const gridBox = document.getElementById(dayId).querySelector(".gridBoxDays");
+    
+    gridBox.innerHTML = ""; 
+
+    // Create HTML 
+    classSubjects.forEach(item => {
+        const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
+        const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
+        const duration = item.duration || 1; 
+        const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
+        const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
+        const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+
+        for (let d = 0; d < duration; d++) {
+            gridBox.innerHTML += `
+                <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                    <p>${subjectName}</p>
+                    <p>${teacherSymbol}</p>
+                </div>
+            `;
+        }
+    });
+});
+
+// Helper function to convert day name to its corresponding ID
+function getDayId(day) {
+    switch(day) {
+        case "MONDAY": return 1;
+        case "TUESDAY": return 2;
+        case "WEDNESDAY": return 3;
+        case "THURSDAY": return 4;
+        case "FRIDAY": return 5;
+        case "SATURDAY": return 6;
+        default: return 0; // Should never happen
+    }
 }
 
+
+
+    
+        }
 /*
 let builder = {
                 "0": "", // "Time schedules"
