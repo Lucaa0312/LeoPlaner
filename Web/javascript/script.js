@@ -155,82 +155,10 @@ function getDayId(day) {
 }
 
 
+/* Here is the code for preventing overlapping entries and filling the timetable correctly, if needed later
+- should be fixed in the backend though
 
-
-
-
-/*
-let builder = {
-                "0": "", // "Time schedules"
-                "1": "", // Monday
-                "2": "", // Tuesday
-                "3": "", // Wednesday
-                "4": "", // Thursday
-                "5": "",  // Friday
-                "6": "" // Saturday 
-            };
-
-            let daySubjects = {
-                "1": new Array(times.length).fill(null),
-                "2": new Array(times.length).fill(null),
-                "3": new Array(times.length).fill(null),
-                "4": new Array(times.length).fill(null),
-                "5": new Array(times.length).fill(null),
-                "6": new Array(times.length).fill(null)
-            };
-
-            function determineSlotIndex(item) {
-                try {
-                    if (item && item.period) {
-                        return item.period.schoolHour !== undefined ? item.period.schoolHour - 1 : 0;
-                    }
-                } catch (e) {
-
-                }
-            }
-
-            // Populate daySubjects with entries from data
-            data.forEach((item) => {
-                try {
-                    currentDay = item.period && item.period.schoolDays;
-                } catch (error) {
-                    currentDay = "None";
-                }
-
-                let dayIndex = null;
-                switch (currentDay) {
-                    case "MONDAY": dayIndex = 1; break;
-                    case "TUESDAY": dayIndex = 2; break;
-                    case "WEDNESDAY": dayIndex = 3; break;
-                    case "THURSDAY": dayIndex = 4; break;
-                    case "FRIDAY": dayIndex = 5; break;
-                    case "SATURDAY": dayIndex = 6; break;
-                    case "None": dayIndex = null; break;
-                    default: dayIndex = 0;
-                }
-
-                if (dayIndex !== null && dayIndex >= 1 && dayIndex <= 6) {
-                    let subjectName = "No lesson";
-                    let teacherSymbol = "-";
-                    try {
-                        subjectName = item.classSubject.subject.subjectName || subjectName;
-                        teacherSymbol = item.classSubject.teacher.nameSymbol || teacherSymbol;
-                        subjectColorRed = item.classSubject.subject.subjectColor.red || 0;
-                        subjectColorGreen = item.classSubject.subject.subjectColor.green || 0;
-                        subjectColorBlue = item.classSubject.subject.subjectColor.blue || 0;
-
-                    } catch (error) {
-                        console.error(error);
-                    }
-
-                    const dayKey = String(dayIndex);
-                    const slotIndex = determineSlotIndex(item, daySubjects[dayKey]);
-
-
-                    // richtige Dauer aus dem Backend 
-                    let duration = item.duration || 1;
-
-                    // Wir suchen den ersten freien Startpunkt, der genug Platz hat
+// Wir suchen den ersten freien Startpunkt, der genug Platz hat
                     function findFreeStartIndex(arr, startIndex, duration) {
 
                         let i = startIndex;
@@ -269,31 +197,4 @@ let builder = {
                         }
                     }
  
-
-                }
-            });
-
-            for (let i = 0; i < times.length; i+=2) {
-                builder["0"] += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
-            }
-
-            for (let d = 1; d <= 6; d++) {
-                const dayKey = String(d);
-                for (let i = 0; i < 16; i++) {
-                    const slot = daySubjects[dayKey][i];
-                    if (slot) {
-                        builder[dayKey] += `<div class="periodStyling ${slot.subjectName}" style="border-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue}); background-color: rgb(${slot.subjectColorRed}, ${slot.subjectColorGreen}, ${slot.subjectColorBlue});">\n    <p>${slot.subjectName}</p>\n    <p>${slot.teacherSymbol}</p>\n</div>\n`;
-                    } else {
-                        builder[dayKey] += `<div class="periodStyling empty"></div>\n`; 
-                    }
-                }
-            }
-
-            for (let index in builder) {
-                const box = document.querySelector(`#day${index} .gridBoxDays`);
-                box.innerHTML = builder[index];
-
-            }
-}
-
 */
