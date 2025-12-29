@@ -8,7 +8,7 @@ let times = [
     "16:25", "17:15", "17:20", "18:05", "18:50",
     "19:00", "19:45", "20:30", "20:40", "21:25",
     "22:10"
-];
+]
 
 const daysOfWeek = [
     "Time schedules",
@@ -17,59 +17,102 @@ const daysOfWeek = [
     "Wednesday",
     "Thursday",
     "Friday"
-];
+]
 
-let currentDay = "";
+let currentDay = ""
 
-let currentTimetableData = [];
+let currentTimetableData = []
 
 function load() {
     fetch("http://localhost:8080/api/timetable")
     .then(response => {
-        return response.json();
+        return response.json()
     }).then(data => {
-        currentTimetableData = data.classSubjectInstances;
-        data = data.classSubjectInstances;
-        console.log(data);
-
-        createLayout(data);
+        currentTimetableData = data.classSubjectInstances
+        data = data.classSubjectInstances
+        createLayout(data)
         
     }).catch(error => {
-        console.error('Error fetching data:', error);
-    });
+        console.error('Error fetching data:', error)
+    })
 }
 
-load();
+load()
 
 function getRandomizedTimeTable() {
     fetch("http://localhost:8080/api/timetable/randomize")
     .then(response => {
-        return response.json();
+        return response.json()
     }).then(data => {
-        data = data.classSubjectInstances;
-        console.log(data);
-        createLayout(data);
+        data = data.classSubjectInstances
+        createLayout(data)
 
     }).catch(error => {
-        console.error('Error randomizing Timetable:', error);
-    });
+        console.error('Error randomizing Timetable:', error)
+    })
 }
 
 function getOptimizedTimetable() {
     fetch("http://localhost:8080/api/run/algorithm")
     .then(response => {
-        return response.json();
+        return response.json()
     }).then(data => {
-        data = data.classSubjectInstances;
-        console.log(data);
-        createLayout(data);
+        data = data.classSubjectInstances
+        createLayout(data)
 
     }).catch(error => {
-        console.error('Error optimizing Timetable:', error);
-    });
+        console.error('Error optimizing Timetable:', error)
+    })
 }
 
 function createLayout(data) {
+    console.log('Raw data:', data)
+
+    let map = new Map()
+
+    let arrayMon = []
+    let arrayTue = []
+    let arrayWed = []
+    let arrayThu = []
+    let arrayFri = []
+    let arraySat = []
+
+    data.forEach(item => {
+        switch (item.period.schoolDays) {
+            case "MONDAY":
+                arrayMon.push(item)
+                break
+            case "TUESDAY":
+                arrayTue.push(item)
+                break
+            case "WEDNESDAY":
+                arrayWed.push(item)
+                break
+            case "THURSDAY":
+                arrayThu.push(item)
+                break
+            case "FRIDAY":
+                arrayFri.push(item)
+                break
+            case "SATURDAY":
+                arraySat.push(item)
+                break
+        }
+    });
+
+    map.set("MONDAY", arrayMon)
+    map.set("TUESDAY", arrayTue)
+    map.set("WEDNESDAY", arrayWed)
+    map.set("THURSDAY", arrayThu)
+    map.set("FRIDAY", arrayFri)
+    map.set("SATURDAY", arraySat)
+    console.log('Map:', map)
+
+    
+
+}
+
+/*
 let builder = {
                 "0": "", // "Time schedules"
                 "1": "", // Monday
@@ -206,4 +249,4 @@ let builder = {
             }
 }
 
-
+*/
