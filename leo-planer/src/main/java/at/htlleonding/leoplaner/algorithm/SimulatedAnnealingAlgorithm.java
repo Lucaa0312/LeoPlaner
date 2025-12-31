@@ -20,7 +20,7 @@ public class SimulatedAnnealingAlgorithm {
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
     private double temperature = 1000.0; //could also go in the small number range like 1-0
-    private final int ITERATIONS = 100000;
+    private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
     //public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -40,12 +40,17 @@ public class SimulatedAnnealingAlgorithm {
             do {
                 ranIndex2 = random.nextInt(0, indexesAmount);
             } while (ranIndex2 == ranIndex1);
-            //create 2 ranbdom non equal indexes
+            //create 2 random non equal indexes
+
+            if (this.currTimeTable.getClassSubjectInstances().get(ranIndex1).getPeriod().isLunchBreak() || this.currTimeTable.getClassSubjectInstances().get(ranIndex2).getPeriod().isLunchBreak()) {
+                continue; //no reason to play around with lunch breaks only causes problems
+            } //if more checks are needed then itll be moved to a helper method
       
             chooseRandomNeighborFunction(ranIndex1, ranIndex2);
             
             final int costCurrTimeTable = determineCost(this.currTimeTable);
             final int costNextTimeTable = determineCost(this.nextTimeTable);
+
           
             final boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
             if (acceptSolution) {
@@ -56,7 +61,7 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.setCurrentTimetable(currTimeTable);
         }
         
-        this.dataRepository.setCurrentTimetable(currTimeTable);
+        this.dataRepository.setCurrentTimetable(currTimeTable); //secure stuff
     }
 
     public int determineCost(final Timetable timetable) {
@@ -65,8 +70,7 @@ public class SimulatedAnnealingAlgorithm {
         //  if against classSubject.isBetterDoublePeriod higher cost
         //  maybe different rooms
         int cost = 0;
-        
-        for (ClassSubjectInstance classSubjectInstance : timetable.getClassSubjectInstances()) {
+        for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) { //create a copy to not have mofying conflicts
             Period period = classSubjectInstance.getPeriod();
 
             switch (period.getSchoolDays()){
@@ -83,22 +87,23 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 500; //TODO good cost change model + better data structure to avoid switch case
                     break;
                 case SATURDAY:
-                    cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
+                    cost += 1000; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
-            
-            if (period.getSchoolHour() > 6) {
-                if (!timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).findFirst().isPresent()) { //checks if break already exists on that day
-                    timetable.implementRandomLunchBreakOnDay(period.getSchoolDays());
+
+            if (period.getSchoolHour() > 5) {
+                 //System.out.println(timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size());
+                if (timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size() == 0) { //checks if break already exists on that day
+                    //timetable.implementRandomLunchBreakOnDay(period.getSchoolDays()); fixing this currently 
                 }
                 cost += (period.getSchoolHour() - 6) * 10;
             }
 
 
-            if (classSubjectInstance.getClassSubject().isBetterDoublePeriod() &&  classSubjectInstance.getDuration() == 1) {
+            if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().isBetterDoublePeriod() &&  classSubjectInstance.getDuration() == 1) {
                 cost += 30; //TODO handle required double period check when creating random timetable
             }
         }
@@ -107,7 +112,6 @@ public class SimulatedAnnealingAlgorithm {
 
     public void chooseRandomNeighborFunction(final int index1, final int index2) { //TODO add random function to change isntance duration, maybe split? isntance in multiple or another random generator
         final Random random = new Random();
-
         final int ranNumber = random.nextInt(1, 2);
         switch(ranNumber) {
             case 1:

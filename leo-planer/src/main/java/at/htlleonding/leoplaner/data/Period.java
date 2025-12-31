@@ -6,18 +6,9 @@ public class Period {
     private int schoolHour;
     private boolean isLunchBreak;
 
-    public SchoolDays getSchoolDays() {
-        return schoolDays;
-    }
-
-    public int getSchoolHour() {
-        return schoolHour;
-    }
-
     public Period(final SchoolDays schoolDays, final int schoolHour) {
         this.schoolDays = schoolDays;
         this.schoolHour = schoolHour;
-        this.isLunchBreak = false;
     }
 
     public Period(final SchoolDays schoolDays, final int schoolHour, final boolean isLunchBreak) {
@@ -28,6 +19,14 @@ public class Period {
 
     public boolean isLunchBreak() {
         return isLunchBreak;
+    }
+
+    public SchoolDays getSchoolDays() {
+        return schoolDays;
+    }
+
+    public int getSchoolHour() {
+        return schoolHour;
     }
 
     public void setLunchBreak(boolean isLunchBreak) {

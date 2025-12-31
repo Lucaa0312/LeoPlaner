@@ -27,15 +27,6 @@ public class Timetable {
       setTotalWeeklyHours(totalHours);
     }
 
-    public boolean checkIfPeriodIsTaken(Period period) {
-        for (ClassSubjectInstance csi : classSubjectInstances) {
-            if (csi.getPeriod().getSchoolDays() == period.getSchoolDays() && csi.getPeriod().getSchoolHour() == period.getSchoolHour()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList() { //deep deep copy since all lives on the heap
         ArrayList<ClassSubjectInstance> clonedClassSubjectInstances = new ArrayList<>();
         for (ClassSubjectInstance csi : this.classSubjectInstances) {
@@ -47,10 +38,15 @@ public class Timetable {
     }
 
     public void implementRandomLunchBreakOnDay(SchoolDays schoolday) {
-        int classesAmountOnDay = classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getDuration()).sum(); //sum of all durations on certain day
+        final int HIGHEST_SCHOOLHOUR = classSubjectInstances.stream()
+                                                              .filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
+                                                              .max().getAsInt(); //get highest Schoolhour
+        final int LOWEST_SCHOOLHOUR = classSubjectInstances.stream().
+                                                                filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
+                                                                .min().getAsInt(); //get lowest Schoolhour
 
         Random random = new Random();
-        int randSchoolHour = random.nextInt(1, classesAmountOnDay);
+        int randSchoolHour = random.nextInt(LOWEST_SCHOOLHOUR, HIGHEST_SCHOOLHOUR + 1);
 
         final boolean LUNCHBREAK = true;
         Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
@@ -65,17 +61,55 @@ public class Timetable {
         return new Timetable(cloneClassSubjectInstanceList());
     }
 
+
+    public ArrayList<Period> returnAllFreePeriodsOnCertainDay(SchoolDays schoolDay, int duration) {
+        ArrayList<Period> result = new ArrayList<>();
+        List<ClassSubjectInstance> csisOnDay = this.classSubjectInstances.stream().filter(e -> e.getPeriod().getSchoolDays() == schoolDay).toList();
+
+        final int FIRST_HOUR = 1;
+        final int LAST_HOUR = 12;
+
+        // latest possible start hour so duration fits
+        for (int startHour = FIRST_HOUR; startHour <= LAST_HOUR - duration + 1; startHour++) {
+            boolean isFree = true;
+
+            // check agaainst ALL existing CSIs
+            for (ClassSubjectInstance csi : csisOnDay) {
+                int occupiedStart = csi.getPeriod().getSchoolHour();
+                int occupiedEnd = occupiedStart + csi.getDuration() - 1;
+
+                int candidateStart = startHour;
+                int candidateEnd = startHour + duration - 1;
+
+                // overlap check
+                if (candidateStart <= occupiedEnd && candidateEnd >= occupiedStart) {
+                    isFree = false;
+                    break;
+                }
+            }
+
+            if (isFree) {
+                result.add(new Period(schoolDay, startHour));
+            }
+        }
+
+        return result;
+    }
+
+
     public Timetable giveClassSubjectRandomPeriodAndReturn(int index) {
         Random random = new Random();
-        Period period;
-        do {
-            SchoolDays ranSchoolDay = SchoolDays.values()[random.nextInt(0, SchoolDays.values().length)];
-            int randSchoolHour = random.nextInt(1, 7);
-            period = new Period(ranSchoolDay, randSchoolHour);
+        ArrayList<Period> allFreePeriods = new ArrayList<>();
 
-        } while (checkIfPeriodIsTaken(period));
+        for (SchoolDays schoolDay : SchoolDays.values()) {
+            allFreePeriods.addAll(returnAllFreePeriodsOnCertainDay(schoolDay, this.classSubjectInstances.get(index).getDuration()));
+        }
 
-        return switchClassSubjectInstancePeriodAndReturn(index,period);
+        if (allFreePeriods.isEmpty()) {
+            throw new RuntimeException("no Free Period avaible"); //TODO add a check for that in algorrithm class
+        }
+
+        return switchClassSubjectInstancePeriodAndReturn(index, allFreePeriods.get(random.nextInt(allFreePeriods.size())));
   }
 
     public Timetable switchClassSubjectInstancePeriodAndReturn(int index, Period newPeriod) {
