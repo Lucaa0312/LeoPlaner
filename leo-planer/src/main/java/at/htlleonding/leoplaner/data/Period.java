@@ -4,21 +4,22 @@ package at.htlleonding.leoplaner.data;
 public class Period {
     private SchoolDays schoolDays;
     private int schoolHour;
-    private boolean isLunchBreak;
+    private boolean lunchBreak;
 
     public Period(final SchoolDays schoolDays, final int schoolHour) {
         this.schoolDays = schoolDays;
         this.schoolHour = schoolHour;
+        this.lunchBreak = false;
     }
 
-    public Period(final SchoolDays schoolDays, final int schoolHour, final boolean isLunchBreak) {
+    public Period(final SchoolDays schoolDays, final int schoolHour, final boolean lunchBreak) {
         this.schoolDays = schoolDays;
         this.schoolHour = schoolHour;
-        this.isLunchBreak = isLunchBreak;
+        this.lunchBreak = lunchBreak;
     }
 
     public boolean isLunchBreak() {
-        return isLunchBreak;
+        return lunchBreak;
     }
 
     public SchoolDays getSchoolDays() {
@@ -29,8 +30,8 @@ public class Period {
         return schoolHour;
     }
 
-    public void setLunchBreak(boolean isLunchBreak) {
-        this.isLunchBreak = isLunchBreak;
+    public void setLunchBreak(boolean lunchBreak) {
+        this.lunchBreak = lunchBreak;
     }
 
     public void setSchoolDays(SchoolDays schoolDays) {

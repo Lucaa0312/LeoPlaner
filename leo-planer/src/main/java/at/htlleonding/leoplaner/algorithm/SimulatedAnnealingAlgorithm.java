@@ -4,12 +4,14 @@ import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
+import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -20,7 +22,7 @@ public class SimulatedAnnealingAlgorithm {
     private ArrayList<Room> rooms;
     private ArrayList<Teacher> teachers;
     private double temperature = 1000.0; //could also go in the small number range like 1-0
-    private final int ITERATIONS = 10000;
+    private final int ITERATIONS = 1000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; //maybe adjust real constant: 1.380649e-23;
     //public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -61,7 +63,21 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.setCurrentTimetable(currTimeTable);
         }
         
+        repairTimetable(currTimeTable);
         this.dataRepository.setCurrentTimetable(currTimeTable); //secure stuff
+    }
+
+    public void repairTimetable(Timetable timetable) {
+        searchAndImplementLunchBreaks(timetable);
+    }
+
+    public void searchAndImplementLunchBreaks(Timetable timetable) {
+        for (SchoolDays day : SchoolDays.values()) {
+            List<ClassSubjectInstance> classesOnDay = timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == day).toList();
+            if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() > 6)) {
+                timetable.implementRandomLunchBreakOnDay(day);
+            }
+        }
     }
 
     public int determineCost(final Timetable timetable) {
@@ -87,21 +103,16 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 500; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
                     break;
                 case SATURDAY:
-                    cost += 1000; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
+                    cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
 
-            if (period.getSchoolHour() > 5) {
-                 //System.out.println(timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size());
-                if (timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == period.getSchoolDays() && e.getPeriod().isLunchBreak()).toList().size() == 0) { //checks if break already exists on that day
-                    //timetable.implementRandomLunchBreakOnDay(period.getSchoolDays()); fixing this currently 
-                }
+            if (period.getSchoolHour() > 6) {
                 cost += (period.getSchoolHour() - 6) * 10;
             }
-
 
             if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().isBetterDoublePeriod() &&  classSubjectInstance.getDuration() == 1) {
                 cost += 30; //TODO handle required double period check when creating random timetable
