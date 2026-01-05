@@ -1,6 +1,6 @@
 // JavaScript for Timetable Page
 
-let times = [
+const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
     "09:45", "10:00", "10:50", "10:55", "11:45",
     "11:50", "12:40", "12:45", "13:35", "13:40",
@@ -19,9 +19,7 @@ function load() {
     .then(response => {
         return response.json()
     }).then(data => {
-        currentTimetableData = data.classSubjectInstances
-        data = data.classSubjectInstances
-        createLayout(data)
+        createLayout(data.classSubjectInstances)
         
     }).catch(error => {
         console.error('Error fetching data:', error)
@@ -35,8 +33,7 @@ function getRandomizedTimeTable() {
     .then(response => {
         return response.json()
     }).then(data => {
-        data = data.classSubjectInstances
-        createLayout(data)
+        createLayout(data.classSubjectInstances)
 
     }).catch(error => {
         console.error('Error randomizing Timetable:', error)
@@ -48,60 +45,30 @@ function getOptimizedTimetable() {
     .then(response => {
         return response.json()
     }).then(data => {
-        data = data.classSubjectInstances
-        createLayout(data)
+        createLayout(data.classSubjectInstances)
 
     }).catch(error => {
         console.error('Error optimizing Timetable:', error)
     })
 }
 
+/*
+
+*/
+
 function createLayout(data) {
     console.log('Raw data:', data)
-
-    // Create and fill map
-
     let map = new Map()
 
-    let arrayMon = []
-    let arrayTue = []
-    let arrayWed = []
-    let arrayThu = []
-    let arrayFri = []
-    let arraySat = []
-
+    // Note: Data will not follow any particular order
     data.forEach(item => {
-        switch (item.period.schoolDays) {
-            case "MONDAY":
-                arrayMon.push(item)
-                break
-            case "TUESDAY":
-                arrayTue.push(item)
-                break
-            case "WEDNESDAY":
-                arrayWed.push(item)
-                break
-            case "THURSDAY":
-                arrayThu.push(item)
-                break
-            case "FRIDAY":
-                arrayFri.push(item)
-                break
-            case "SATURDAY":
-                arraySat.push(item)
-                break
-        }
+    if (!map.has(item.period.schoolDays)) {
+      map.set(item.period.schoolDays, [])
+    }
+    map.get(item.period.schoolDays).push(item)
     });
 
-    // Key: Day, Value: array of classSubjects
-    map.set("MONDAY", arrayMon)
-    map.set("TUESDAY", arrayTue)
-    map.set("WEDNESDAY", arrayWed)
-    map.set("THURSDAY", arrayThu)
-    map.set("FRIDAY", arrayFri)
-    map.set("SATURDAY", arraySat)
     console.log('Map:', map)
-
     let timesBuilder = ``
 
     for (let i = 0; i < times.length; i+=2) {
@@ -113,8 +80,7 @@ function createLayout(data) {
     // value, key
     map.forEach((classSubjects, day) => {
 
-    const dayId = `day${getDayId(day)}`; 
-    const gridBox = document.getElementById(dayId).querySelector(".gridBoxDays");
+    const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
     
     gridBox.innerHTML = ""; 
 
@@ -138,20 +104,6 @@ function createLayout(data) {
 
     });
 });
-
-// Helper function to convert day name to its corresponding ID
-function getDayId(day) {
-    switch(day) {
-        case "MONDAY": return 1;
-        case "TUESDAY": return 2;
-        case "WEDNESDAY": return 3;
-        case "THURSDAY": return 4;
-        case "FRIDAY": return 5;
-        case "SATURDAY": return 6;
-        default: return 0; // Should never happen
-        }
-    }
-
 }
 
 
