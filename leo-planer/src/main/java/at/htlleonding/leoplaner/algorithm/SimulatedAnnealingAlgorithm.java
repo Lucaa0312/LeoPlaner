@@ -54,7 +54,6 @@ public class SimulatedAnnealingAlgorithm {
             final int costCurrTimeTable = determineCost(this.currTimeTable);
             final int costNextTimeTable = determineCost(this.nextTimeTable);
 
-          
             final boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
             if (acceptSolution) {
                 this.currTimeTable = this.nextTimeTable;
@@ -103,7 +102,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void searchAndImplementLunchBreaks(Timetable timetable, List<ClassSubjectInstance> classesOnDay, SchoolDays day) {
-        if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() > 6)) { //TODO consider durations of >2 as well
+        if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6)) {
             timetable.implementRandomLunchBreakOnDay(day);
         }
     }
@@ -131,15 +130,15 @@ public class SimulatedAnnealingAlgorithm {
                     cost += 4;
                     break;
                 case FRIDAY:
-                    cost += 50; //TODO good cost change model + better data structure to avoid switch case
+                    cost += 30; //TODO good cost change model + better data structure to avoid switch case
                     break;
                 case SATURDAY:
                     cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
                     break;
             }
 
-            if (period.getSchoolHour() > 6) {
-                cost += (period.getSchoolHour() - 6) * 10;
+            if (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 > 6) {
+                cost += (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 - 5) * 10;
             }
 
             if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().isBetterDoublePeriod() &&  classSubjectInstance.getDuration() == 1) {
