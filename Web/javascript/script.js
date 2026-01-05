@@ -1,5 +1,4 @@
 // JavaScript for Timetable Page
-
 const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
     "09:45", "10:00", "10:50", "10:55", "11:45",
@@ -52,10 +51,6 @@ function getOptimizedTimetable() {
     })
 }
 
-/*
-
-*/
-
 function createLayout(data) {
     console.log('Raw data:', data)
     let map = new Map()
@@ -105,48 +100,3 @@ function createLayout(data) {
     });
 });
 }
-
-
-/* Here is the code for preventing overlapping entries and filling the timetable correctly, if needed later
-- should be fixed in the backend though
-
-// Wir suchen den ersten freien Startpunkt, der genug Platz hat
-                    function findFreeStartIndex(arr, startIndex, duration) {
-
-                        let i = startIndex;
-
-                        while (i < arr.length) {
-                            let blockFree = true;
-
-                            for (let d = 0; d < duration; d++) {
-                                if (arr[i + d] !== null || i + d >= arr.length) {
-                                    blockFree = false;
-                                    break;
-                                }
-                            }
-
-                            if (blockFree) return i;
-
-                            i++; // Stunde weiter nach unten schieben
-                        }
-
-                        return -1; 
-                    }
-
-                    let freeStart = findFreeStartIndex(daySubjects[dayKey], slotIndex, duration);
-
-                    if (freeStart === -1) {
-                        console.warn("KEIN PLATZ GEFUNDEN für:", subjectName, "am Tag", dayKey);
-                    } else {
-                        for (let h = 0; h < duration; h++) {
-                            daySubjects[dayKey][freeStart + h] = {
-                                subjectName,
-                                teacherSymbol,
-                                subjectColorRed,
-                                subjectColorGreen,
-                                subjectColorBlue
-                            };
-                        }
-                    }
- 
-*/
