@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -68,15 +69,42 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void repairTimetable(Timetable timetable) {
-        searchAndImplementLunchBreaks(timetable);
+        for (SchoolDays day : SchoolDays.values()) {
+            List<ClassSubjectInstance> classesOnDay = timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == day)
+            .sorted(Comparator.comparingInt(e -> e.getPeriod().getSchoolHour())).toList();
+
+            moveDayToStartAtFirstHour(timetable, classesOnDay);
+            closeAllGapsBetweenInstances(timetable, classesOnDay);
+            searchAndImplementLunchBreaks(timetable, classesOnDay, day);
+        }
     }
 
-    public void searchAndImplementLunchBreaks(Timetable timetable) {
-        for (SchoolDays day : SchoolDays.values()) {
-            List<ClassSubjectInstance> classesOnDay = timetable.getClassSubjectInstances().stream().filter(e -> e.getPeriod().getSchoolDays() == day).toList();
-            if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() > 6)) {
-                timetable.implementRandomLunchBreakOnDay(day);
-            }
+    public void moveDayToStartAtFirstHour(Timetable timetable, List<ClassSubjectInstance> classesOnDay) {
+        if (classesOnDay.isEmpty()) {
+            return;
+        }
+
+        Period firstClassOfTheDay = classesOnDay.getFirst().getPeriod();
+
+        if (firstClassOfTheDay.getSchoolHour() != 1) {
+            firstClassOfTheDay.setSchoolHour(1);
+        }
+    }
+
+    public void closeAllGapsBetweenInstances(Timetable timetable, List<ClassSubjectInstance> classesOnDay) {
+        for (int i = 0; i < classesOnDay.size() - 1; i++) {
+            int currentEndOfClass = classesOnDay.get(i).getPeriod().getSchoolHour() + classesOnDay.get(i).getDuration();
+            Period nextPeriod = classesOnDay.get(i + 1).getPeriod();
+
+          if (nextPeriod.getSchoolHour() > currentEndOfClass) { //just means if the next class starts at a time bigger than what the previous class ended, hence resulting in a gap
+              nextPeriod.setSchoolHour(currentEndOfClass);
+          }
+        }
+    }
+
+    public void searchAndImplementLunchBreaks(Timetable timetable, List<ClassSubjectInstance> classesOnDay, SchoolDays day) {
+        if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() > 6)) { //TODO consider durations of >2 as well
+            timetable.implementRandomLunchBreakOnDay(day);
         }
     }
 
