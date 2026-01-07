@@ -18,7 +18,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api/timetable")
@@ -32,7 +31,7 @@ public class TimeTableResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCurrentTimeTable() {
-        return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentTimetable()).build();
+        return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
     }
 
     @GET

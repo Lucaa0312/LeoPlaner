@@ -18,7 +18,12 @@ public class DataRepository {
     EntityManager entityManager;
 
     public Timetable getCurrentTimetable() {
-        return currentTimetable;
+        return this.currentTimetable;
+    }
+
+    public Timetable getCurrentSortedBySchoolhourTimetable() {
+        this.currentTimetable.sortTimetableBySchoolhour();
+        return this.currentTimetable;
     }
 
     public void setCurrentTimetable(Timetable currentTimetable) {

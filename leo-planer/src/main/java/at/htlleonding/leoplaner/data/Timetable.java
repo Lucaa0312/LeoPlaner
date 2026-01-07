@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Comparator;
 
 public class Timetable {
     private ArrayList<ClassSubjectInstance> classSubjectInstances;
@@ -10,6 +11,10 @@ public class Timetable {
 
     public Timetable(final ArrayList<ClassSubjectInstance> classSubjectInstances) {
         this.classSubjectInstances = classSubjectInstances;
+    }
+
+    public void sortTimetableBySchoolhour() {
+        this.classSubjectInstances.sort(Comparator.comparingInt(e -> e.getPeriod().getSchoolHour()));
     }
 
     public void calculateWeeklyHours() {  //TODO free lunch periods not included yet
