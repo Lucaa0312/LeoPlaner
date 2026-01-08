@@ -12,12 +12,25 @@ import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
 @ApplicationScoped
 public class SimulatedAnnealingAlgorithm {
+    private static final Map<SchoolDays, Integer> costOfEachDay = new HashMap<>();
+    static {
+        costOfEachDay.put(SchoolDays.MONDAY, 5);
+        costOfEachDay.put(SchoolDays.TUESDAY, 3);
+        costOfEachDay.put(SchoolDays.WEDNESDAY, 4);
+        costOfEachDay.put(SchoolDays.THURSDAY, 5);
+        costOfEachDay.put(SchoolDays.FRIDAY, 30);
+        costOfEachDay.put(SchoolDays.SATURDAY, 100);
+    }
+
+
     private Timetable currTimeTable;
     private Timetable nextTimeTable;
     private ArrayList<Room> rooms;
@@ -115,27 +128,7 @@ public class SimulatedAnnealingAlgorithm {
         int cost = 0;
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) { //create a copy to not have mofying conflicts
             Period period = classSubjectInstance.getPeriod();
-
-            switch (period.getSchoolDays()){
-                case MONDAY:
-                    cost += 1;
-                    break;
-                case TUESDAY:
-                    cost += 2;
-                    break;
-                case WEDNESDAY:
-                    cost += 3;
-                    break;
-                case THURSDAY:
-                    cost += 4;
-                    break;
-                case FRIDAY:
-                    cost += 30; //TODO good cost change model + better data structure to avoid switch case
-                    break;
-                case SATURDAY:
-                    cost += 100; //NOPE TODO implement +SATURDAY mode, default should be monday to friday
-                    break;
-            }
+            cost += costOfEachDay.get(period.getSchoolDays()); //cost of being in each day, replacing the switch case
 
             if (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 > 6) {
                 cost += (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 - 5) * 10;
@@ -229,4 +222,10 @@ public class SimulatedAnnealingAlgorithm {
     public void setTeachers(final ArrayList<Teacher> teachers) {
         this.teachers = teachers;
     }
+
+    public static void fillMapWithElements(Map<SchoolDays, Integer> map) {
+
+    }
+    
+  
 }
