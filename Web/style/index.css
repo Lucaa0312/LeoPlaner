@@ -95,7 +95,7 @@
 /* ------------------DASHBOARD CONTENT---------------------*/
 
 #dashboard-content {
-    margin-top: 5vh;
+    margin-top: 2.5vh;
     display: flex;
     flex-direction: row;
 }
@@ -154,14 +154,16 @@
     color: var(--leo-text-color);
 }
 
-.stat-arrow-icon{
+.stat-card i{
     display: flex;
     text-align: center;
     justify-content: center;
     align-items: center;
+}
 
+.stat-arrow-icon{
+    color: var(--leo-text-color);
     margin-top: 2vh;
-    
     font-size: 2rem;
 }
 
