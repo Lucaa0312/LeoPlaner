@@ -10,7 +10,7 @@ body {
 
 #header {
     width: auto;
-    background-color: var(--leo-orange);
+    /* background-color: var(--leo-orange); */
     padding: 2vh;
     border-bottom: solid;
     border-color: white;
@@ -64,7 +64,7 @@ body {
 
 
 #randomizeButton:active {
-    background-color: var(--leo-light-blue);
+    /* background-color: var(--leo-light-blue); */
     transform: scale(0.95);
     transition: all 50ms ease-out;
 }
@@ -104,7 +104,7 @@ body {
     transform: translateY(-5px);
 }
 #algorithmButton:active {
-    background-color: var(--leo-light-blue);
+    /* background-color: var(--leo-light-blue); */
     transform: scale(0.95);
     transition: all 50ms ease-out;
 }
@@ -117,7 +117,7 @@ body {
 #content {
     width: auto;
     height: auto;
-    background-color: var(--leo-light-blue);
+    /* background-color: var(--leo-light-blue); */
 }
 
 #days {
@@ -138,7 +138,7 @@ body {
 
 #day0 {
     margin-right: 0vh;
-    color: var(--leo-blue-tint-white);
+    /* color: var(--leo-blue-tint-white); */
     text-align: center;
     font-size: 1.25em;
 }
