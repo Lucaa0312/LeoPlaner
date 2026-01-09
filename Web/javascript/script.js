@@ -57,9 +57,9 @@ function createLayout(data) {
 
     // Note: Data will not follow any particular order
     data.forEach(item => {
-    if (!map.has(item.period.schoolDays)) {
-      map.set(item.period.schoolDays, [])
-    }
+        if (!map.has(item.period.schoolDays)) {
+            map.set(item.period.schoolDays, [])
+        }
     map.get(item.period.schoolDays).push(item)
     });
 
@@ -89,12 +89,20 @@ function createLayout(data) {
         const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
 
         for (let d = 0; d < duration; d++) {
-            gridBox.innerHTML += `
-                <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
-                    <p>${subjectName}</p>
-                    <p>${teacherSymbol}</p>
-                </div>
-            `;
+            if (subjectName != "No lesson"){
+                gridBox.innerHTML += `
+                    <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                        <p>${subjectName}</p>
+                        <p>${teacherSymbol}</p>
+                    </div>
+                `;
+            }
+            else {
+                gridBox.innerHTML += `
+                    <div class="periodStyling">
+                    </div>
+                `;
+            }
         }
 
     });
