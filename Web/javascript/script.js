@@ -13,15 +13,20 @@ let currentDay = ""
 
 let currentTimetableData = []
 
+/* Doesn't work yet
+function init() {
+    fetch("http://localhost:8080/api/run/testCsv")
+}
+*/ 
+
 function load() {
     fetch("http://localhost:8080/api/timetable")
     .then(response => {
         return response.json()
     }).then(data => {
         createLayout(data.classSubjectInstances)
-        
     }).catch(error => {
-        console.error('Error fetching data:', error)
+        console.error('Error loading Timetable:', error)
     })
 }
 
