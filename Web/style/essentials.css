@@ -4,10 +4,6 @@
     --transparent: rgba(0, 0, 0, 0);
 
     /*Leo colors*/
-    /* --leo-orange: #e69246;
-    --leo-light-blue: rgb(167, 202, 233);
-    --leo-blue-tint-white: rgb(206, 232, 255); */
-
     --leo-primary-color1: #4F46E5;
     --leo-primary-color2: #3B82F6;
     --leo-secondary-color: #F59E0B;
@@ -28,4 +24,96 @@
     margin: 0;
     padding: 0;
     font-family: "Roboto", sans-serif;
+}
+
+
+/* ------------------NAVIGATION BAR--------------------- */
+#nav-bar {
+    height: 100%;
+    width: 20vw;
+}
+
+#logo-container{
+    background-color: var(--leo-background-color);
+    border-radius: 50%;
+
+    width: 5vw;
+    height: 5vw;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 2vh;
+    margin-left: 1vw;
+}
+
+#nav-item-container {
+    margin-top: 10vh;
+}
+
+.nav-item {
+    display: grid;
+    grid-template-columns: 3rem auto;
+    align-items: center;
+    gap: 1rem;
+    
+    margin-top: 2vh;
+    margin-left: 2vw;
+    margin-right: 2vw;
+
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
+    padding-left: 1vw;
+    padding-right: 1vw;
+
+    cursor: pointer;
+
+    color: var(--leo-text-color);
+    font-weight: 0;
+    font-size: 2rem;
+}
+
+.nav-item:hover {
+    color: var(--leo-primary-color1);
+    background-color: var(--leo-background-color);
+
+    border-radius: 5vw;
+}
+
+
+
+.nav-item i {
+    font-size: 2.5rem;
+    justify-self: center;
+}
+
+#account-info-box {
+    display: grid;
+    grid-template-columns: 5vw auto;
+    align-items: center;
+
+    position: fixed;
+    bottom: 2vh;
+
+    margin-left: 1vw;
+
+    cursor: pointer;
+}
+
+#account-avatar {
+    width: 3vw;
+    height: 3vw;
+    border-radius: 50%;
+
+    margin-left: 1vw;
+
+    object-fit:scale-down;
+    border-style: solid;
+}
+
+#account-username {
+    font-size: 2rem;
+    color: var(--leo-text-color);
+    font-weight: 0;
 }

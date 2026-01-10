@@ -35,34 +35,6 @@ function showLastUpdateTime() {
 }
 
 
-// //Generates dashboard statistics cards
-// function generateDashboardStats() {
-//     const statsContainer = document.getElementById("stat-card-container");
-//     if (!statsContainer) return;
-
-//     statsContainer.replaceChildren(); 
-
-//     statsData.forEach((stat) => {
-//         const card = document.createElement("div");
-//         card.className = "stat-card";
-//         card.id = stat.id;
-
-//         const label = document.createElement("h2");
-//         label.className = "stat-text";
-//         label.innerHTML = stat.label;
-
-//         const number = document.createElement("h1");
-//         number.className = "stat-number";
-//         number.textContent = stat.value;
-
-
-//         card.appendChild(label);
-//         card.appendChild(number);
-
-//         statsContainer.appendChild(card);
-//     });
-// }
-
 
 // Generates dashboard statistics cards
 function generateDashboardStats() {
@@ -106,6 +78,7 @@ function initializeApp() {
     generateWelcomeText();
     showLastUpdateTime();
     generateDashboardStats();
+    generateNavItems();
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

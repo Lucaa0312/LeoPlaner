@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../style/essentials.css">
     <link rel="stylesheet" href="../style/timetable.css">
     <script defer src="../javascript/script.js"></script>
+    <script defer src="../javascript/navbar.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -14,50 +15,54 @@
         <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" onclick="location.href='../index.html'" width="30vw">
         <div id="randomizeButton" onclick="getRandomizedTimeTable()"><div><i class="fa-solid fa-dice"></i> Randomize</div></div>
 
-        <!-- <div id="algorithmButton" onclick=""><div><i class="fa-solid fa-sitemap"></i> Algorithm</div></div> -->
-        <!-- <div id="algorithmButton" onclick=""><div><i class="fa-solid fa-temperature-three-quarters"></i> Algorithm</div></div> -->
-         
         <div id="algorithmButton" onclick="getOptimizedTimetable()"><div><i class="fa-solid fa-chart-line"></i> Algorithm</div></div>
     </div>
-    <div id="content">
-        <div id="days">
 
-            <div class="day" id="day0">
-                <p class="headlineP"><br></p>
-                <div class="gridBoxDays" id="gridBoxTimeSchedules"></div>
-            </div>
+    <div id="flex-container">
+        <div id="nav-bar"></div>
 
-            <div class="day" class="SchoolDays" id="MONDAY">
-                <p class="headlineP">Monday</p>
-                <div class="gridBoxDays"></div>
-            </div>
+        <div id="content">
+            <div id="days">
 
-            <div class="day" class="SchoolDays" id="TUESDAY">
-                <p class="headlineP">Tuesday</p>
-                <div class="gridBoxDays"></div>
-            </div>
+                <div class="day" id="day0">
+                    <p class="headlineP"><br></p>
+                    <div class="gridBoxDays" id="gridBoxTimeSchedules"></div>
+                </div>
 
-            <div class="day" class="SchoolDays" id="WEDNESDAY">
-                <p class="headlineP">Wednesday</p>
-                <div class="gridBoxDays"></div>
-            </div>
+                <div class="day" class="SchoolDays" id="MONDAY">
+                    <p class="headlineP">Monday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
 
-            <div class="day" class="SchoolDays" id="THURSDAY">
-                <p class="headlineP">Thursday</p>
-                <div class="gridBoxDays"></div>
-            </div>
+                <div class="day" class="SchoolDays" id="TUESDAY">
+                    <p class="headlineP">Tuesday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
 
-            <div class="day" class="SchoolDays" id="FRIDAY">
-                <p class="headlineP">Friday</p>
-                <div class="gridBoxDays"></div>
-            </div>
+                <div class="day" class="SchoolDays" id="WEDNESDAY">
+                    <p class="headlineP">Wednesday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
 
-            <div class="day" class="SchoolDays" id="SATURDAY">
-                <p class="headlineP">Saturday</p>
-                <div class="gridBoxDays"></div>
+                <div class="day" class="SchoolDays" id="THURSDAY">
+                    <p class="headlineP">Thursday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
+
+                <div class="day" class="SchoolDays" id="FRIDAY">
+                    <p class="headlineP">Friday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
+
+                <div class="day" class="SchoolDays" id="SATURDAY">
+                    <p class="headlineP">Saturday</p>
+                    <div class="gridBoxDays"></div>
+                </div>
+        
             </div>
-  
         </div>
     </div>
+
+   
 </body>
 </html>

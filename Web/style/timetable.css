@@ -11,6 +11,7 @@ body {
 #header {
     width: auto;
     /* background-color: var(--leo-orange); */
+    background-color: orange;
     padding: 2vh;
     border-bottom: solid;
     border-color: white;
@@ -24,6 +25,13 @@ body {
     /* position: absolute; */
     display: block;
     width: 25vw;
+}
+
+#flex-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
 }
 
 /*=========================================RANDOMIZE BUTTON=========================================*/
@@ -64,7 +72,7 @@ body {
 
 
 #randomizeButton:active {
-    /* background-color: var(--leo-light-blue); */
+    background-color: var(--leo-primary-color1);
     transform: scale(0.95);
     transition: all 50ms ease-out;
 }
@@ -104,7 +112,7 @@ body {
     transform: translateY(-5px);
 }
 #algorithmButton:active {
-    /* background-color: var(--leo-light-blue); */
+    background-color: var(--leo-primary-color1);
     transform: scale(0.95);
     transition: all 50ms ease-out;
 }
@@ -117,7 +125,7 @@ body {
 #content {
     width: auto;
     height: auto;
-    /* background-color: var(--leo-light-blue); */
+    background-color: white;
 }
 
 #days {
@@ -138,7 +146,7 @@ body {
 
 #day0 {
     margin-right: 0vh;
-    /* color: var(--leo-blue-tint-white); */
+    color: var(--leo-text-color);
     text-align: center;
     font-size: 1.25em;
 }
