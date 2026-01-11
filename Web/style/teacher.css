@@ -118,13 +118,6 @@ form {
 */
 
 
-.flex-container {
-    display: flex;
-    flex-direction: row;
-    height: 100%;
-    width: 100%;
-}
-
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {
     background-color: var(--leo-background-color);

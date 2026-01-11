@@ -27,6 +27,17 @@
 }
 
 
+/* ------------------FLEX CONTAINER--------------------- */
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+
+
 /* ------------------NAVIGATION BAR--------------------- */
 #nav-bar {
     height: 100%;
