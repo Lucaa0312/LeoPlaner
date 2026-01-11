@@ -64,3 +64,40 @@
 //     console.error('Error adding teacher:', error);
 //   });
 // }
+
+
+function loadAddTeacherForm() {
+    
+    const disableOverlay = document.getElementById("disable-overlay");
+    disableOverlay.style.display = "block";
+
+    const addTeacherScreen = document.getElementById("add-teacher-screen");
+    addTeacherScreen.style.display = "flex";
+    addTeacherScreen.style.flexDirection = "column";
+    if (!addTeacherScreen) return; 
+
+    const headerContainer = document.createElement("div");
+    headerContainer.id = "add-teacher-header-container";
+    headerContainer.innerHTML = `
+      <h1 id="add-teacher-header">Add new Teacher</h1>`;
+
+    const closeScreenButton = document.createElement("div");
+    closeScreenButton.id = "close-add-teacher-screen-btn";
+    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
+
+    closeScreenButton.onclick = () => {
+        addTeacherScreen.style.display = "none";
+        disableOverlay.style.display = "none";
+    };
+
+    headerContainer.appendChild(closeScreenButton);
+
+    addTeacherScreen.replaceChildren(headerContainer);
+}
+
+
+function initializeApp() {
+    initNavbar();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);

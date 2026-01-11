@@ -60,6 +60,3 @@ function initNavbar() {
     
     navBar.replaceChildren(logoContainer, navItemContainer, accountInfo);
 }
-
-
-document.addEventListener("DOMContentLoaded", initNavbar);

@@ -129,18 +129,18 @@ form {
 
 #header-text {
     font-weight: bold;
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: var(--leo-text-color);
 
     margin-left: 5vw;
     margin-top: 2vh;
-    margin-right: 45vw;
+    margin-right: 43vw;
 }
 
 #header-subtext {
     opacity: 0.4;
     font-weight: bold;
-    font-size: 1.75rem;
+    font-size: 2.25rem;
     color: var(--leo-text-color);
 
     margin-left: 5vw;
@@ -206,4 +206,60 @@ form {
 
 
     cursor: pointer;
+}
+
+
+/* ------------------add-teacher-screen--------------------- */
+#disable-overlay {
+    display: none;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 17.5vw;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+#add-teacher-screen {
+    position: fixed;
+    top: 9vh;
+    left: 30vw;
+
+    width: 60vw;
+    height: 80vh;
+
+    background-color: var(--leo-background-color);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-radius: 2vw;
+
+    display: none;
+}
+
+#add-teacher-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    padding-left: 3vw;
+    padding-right: 3vw;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+}
+
+#add-teacher-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--leo-text-color);
+}
+
+#close-add-teacher-screen-btn {
+    position: absolute;
+    right: 2vw;
+    top: 2vh;
+    cursor: pointer;
+
+    font-size: 3rem;
+    color: var(--leo-primary-color1);
 }

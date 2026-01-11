@@ -75,6 +75,7 @@ function generateDashboardStats() {
 
 
 function initializeApp() {
+    initNavbar();
     generateWelcomeText();
     showLastUpdateTime();
     generateDashboardStats();

@@ -30,7 +30,6 @@ function load() {
     })
 }
 
-load()
 
 function getRandomizedTimeTable() {
     fetch("http://localhost:8080/api/timetable/randomize")
@@ -113,3 +112,11 @@ function createLayout(data) {
     });
 });
 }
+
+
+function initializeApp() {
+    load();
+    initNavbar();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
