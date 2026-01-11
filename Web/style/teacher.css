@@ -1,0 +1,216 @@
+/* body {
+    margin: 0;
+    padding: 0;
+    width: auto;
+    font-family: alte-haas-grotesk;
+    user-select: none;
+}
+
+/*=========================================HEADER=========================================
+
+#header {
+    width: auto;
+    background-color: white;
+    box-sizing: border-box;
+    padding: 0 3.5%;
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    position: relative;
+    margin: 0;
+    height: 10vh;
+}
+
+#header img {
+    position: absolute;
+    display: block;
+    width: 15%;
+}
+
+/*=========================================CONTENT=========================================
+
+#content-wrapper {
+    display: flex;
+    height: 90vh;
+    margin: 0;
+}
+
+/*------Setting navigation------
+nav {
+    height: 100%;
+    width: 2.5em;
+    background-color: white;
+}
+
+nav>div {
+    width: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*------tab-list------
+
+/*------main------
+main {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/*------form------
+#form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+form {
+    width: 35%;
+    height: 90%;
+    font-size: 1.2em;
+    text-align: center;
+    background-color: lightblue;
+    padding: 2em 0;
+}
+
+#checkbox-wrapper {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1.5em;
+    margin: 2em 0;
+    text-align: left;
+}
+
+.subject-box {
+    padding-left: 30%;
+}
+
+.subject-box > input[type="checkbox"] {
+    width: 1.2em;
+    aspect-ratio: 1/1;
+}
+
+#add-teacher-btn {
+    font-size: 1.5em;
+    padding: 0.5rem 1rem;
+    background-color: orange;
+    border-radius: 20px;
+    border: solid white 2px;
+    color: white;
+
+    transition: all 200ms ease-in;
+}
+#add-teacher-btn:hover{
+    border-radius: 1em;
+}
+#add-teacher-btn:active {
+    transform: scale(0.95);
+    transition: all 100ms ease-in; 
+}
+*/
+
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+/* ------------------MAIN CONTENT BOX--------------------- */
+#main-content {
+    background-color: var(--leo-background-color);
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+
+}
+
+#header-text {
+    font-weight: bold;
+    font-size: 2.5rem;
+    color: var(--leo-text-color);
+
+    margin-left: 5vw;
+    margin-top: 2vh;
+    margin-right: 45vw;
+}
+
+#header-subtext {
+    opacity: 0.4;
+    font-weight: bold;
+    font-size: 1.75rem;
+    color: var(--leo-text-color);
+
+    margin-left: 5vw;
+}
+
+
+/* ------------------TEACHER CONTROLS---------------------*/
+#teacher-controls {
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    
+} 
+
+#teacher-search {
+    width: 20vw;
+    text-align: right;
+
+    padding-right: 3vw;
+    padding-top: 0.5vh;
+    padding-bottom: 0.5vh;
+
+    background-color: #D9D9D9;
+
+    border-radius: 31px;
+    border-style: none;
+    font-size: 1.75rem;
+
+    color: var(--leo-text-color);
+}
+
+#search-icon{
+    position: fixed;
+    width: 1.5vw;
+    top: 2.70vh;
+    right: 1.25vw;
+    color: var(--leo-text-color);
+}
+
+#add-teacher-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.75rem;
+    width: 12vw;
+
+    font-weight: semi-bold;
+
+    margin-top: 1.5vh;
+
+    padding-left: 1vw;
+    padding-right: 1vw;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+
+    border-radius: 43px;
+
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+
+    cursor: pointer;
+}

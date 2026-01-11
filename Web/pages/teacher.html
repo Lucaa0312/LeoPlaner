@@ -6,11 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
     <link rel="stylesheet" href="../style/essentials.css">
-    <link rel="stylesheet" href="../style/settings.css">
-    <script defer src="../javascript/settings.js"></script>
+    <link rel="stylesheet" href="../style/teacher.css">
+    <script defer src="../javascript/teacher.js"></script>
+    <script defer src="../javascript/navbar.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
 
+
+
+
+<body>
+
+    <div class="flex-container">
+        
+        <div id="nav-bar"></div>
+
+        <div id="main-content">
+            <div class="flex-container">
+                <div id="header-section">
+                    <h1 id="header-text">Teachers</h1>
+                    <p id="header-subtext">Here&apos;s the status of your timetable</p>
+                </div>
+                <div id="teacher-controls">
+                    <input type="text" id="teacher-search" placeholder="Search for a teacher">
+                    <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Search Icon">
+                    <div id="add-teacher-btn"><i class="fa-solid fa-plus"></i><p>Add Teacher</p></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+
+<!-- 
 <body onload="loadSubjects()">
     <div id="header">
         <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" width="30vw">
@@ -27,7 +58,7 @@
                 <div id="teacher-list">
                     <div id="teacher-search"></div>
                     <div id="teacher-element-list">
-                        <!-- list with all teachers -->
+                        <!-- list with all teachers 
                         <div class="teacher-element">
                             <p></p>
                         </div>
@@ -46,9 +77,7 @@
             <div id="form">
 
             </div>
-            <!-- Form generation in javascript-->
+            <!-- Form generation in javascript -
         </main>
     </div>
-</body>
-
-</html>
+</body> -->
