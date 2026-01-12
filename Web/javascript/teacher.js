@@ -90,9 +90,52 @@ function loadAddTeacherForm() {
         disableOverlay.style.display = "none";
     };
 
+    const formContainer = document.createElement("div");
+    formContainer.id = "form-container";
+    formContainer.innerHTML = `
+      <form id="add-teacher-form">
+        
+        <div class="avatar-upload">
+            <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
+            <label for="teacher-image-input" class="avatar-label">
+                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
+            </label>
+            <p>Upload Photo</p>
+        </div>
+        <br>
+        <input type="text" id="first-name-input" name="first-name" required placeholder="First Name">
+        <br>
+        <input type="text" id="last-name-input" name="last-name" required placeholder="Last Name">
+        <br>
+        <input type="text" id="initials-input" name="initials" required placeholder="Initials">
+        <br>
+        <input type="email" id="email-input" name="email" required placeholder="Email">
+      </form>
+    `;
+
     headerContainer.appendChild(closeScreenButton);
 
-    addTeacherScreen.replaceChildren(headerContainer);
+    addTeacherScreen.replaceChildren(headerContainer, formContainer);
+
+    imagePreview();
+}
+
+
+// Image Preview Function
+function imagePreview() {
+    const input = document.getElementById("teacher-image-input");
+    const preview = document.getElementById("avatar-preview");
+
+    input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+        preview.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 

@@ -222,11 +222,11 @@ form {
 
 #add-teacher-screen {
     position: fixed;
-    top: 9vh;
+    top: 5vh;
     left: 30vw;
 
     width: 60vw;
-    height: 80vh;
+    height: 90vh;
 
     background-color: var(--leo-background-color);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -262,4 +262,110 @@ form {
 
     font-size: 3rem;
     color: var(--leo-primary-color1);
+}
+
+
+/* ------------------ Form --------------------- */
+#form-container {
+    display: flex;
+    flex-direction: row;
+}
+
+
+#add-teacher-form {
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 10vh;
+    margin-left: 5vw;
+
+    width: 25vw;
+}
+
+
+.avatar-upload {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#teacher-image-input {
+    display: none;
+}
+
+
+.avatar-label {
+    width: 4.5vw;
+    height: 4.5vw;
+    background-color: #F3F4F6;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.2s ease;
+}
+
+.avatar-label:hover {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+
+#avatar-preview {
+    width: 3.5vw;
+    height: 3.5vw;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatar-label img {
+    width: 4vw;
+    height: 4vw;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatar-upload p {
+    margin-left: 1vw;
+    font-size: 2rem;
+    color: var(--leo-text-color);
+    align-self: center;
+    opacity: 0.7;
+    font-weight: bold;
+}
+
+
+#first-name-input,
+#last-name-input,
+#initials-input,
+#email-input {
+    width: 15vw;
+
+    padding-right: 1vw;
+    padding-left: 1vw;
+    padding-top: 0.7vh;
+    padding-bottom: 0.7vh;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-radius: 31px;
+    border-style: none;
+    font-size: 1.75rem;
+
+    color: var(--leo-text-color);
+}
+
+#first-name-input:active,
+#last-name-input:active,
+#initials-input:active,
+#email-input:active {
+    outline: none;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
