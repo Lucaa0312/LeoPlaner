@@ -1,69 +1,3 @@
-// function loadSubjects() {
-//   fetch("http://localhost:8080/api/subjects")
-//     .then(response => {
-//       return response.json();
-//     }).then(data => {
-//       console.log(data);
-//       let subjects = ``;
-
-//       for (let i = 0; i < data.length; i++) {
-//         let subject = data[i];
-//         subjects += `
-//                 <input type="checkbox" id="${subject.subjectName}" name="subject${subject.id}" value="${subject.id}">
-//                 <label for="${subject.subjectName}"> ${subject.subjectName}</label>
-//                     <br><br>`;
-//       }
-
-//       let content = `
-//             <div>
-//                 <form>
-//                     <label for="teacherName" >Teacher Name:</label>
-//                     <input type="text" id="teacherName" name="teacherName" required>
-//                     <br><br>
-//                     <label for="teacherEmail">Name Symbol:</label>
-//                     <input type="text" id="teacherNameSymbol" name="teacherNameSymbol" required>
-//                     <br><br>
-//                     <label for="teacherSubjects">Subjects:</label>
-//                     ${subjects}
-//                     <input type="button" value="Add Teacher" onclick="addTeacher()">
-//                 </form>
-//             </div>
-//             `;
-
-//       document.getElementById("form").innerHTML = content;
-//     }).catch(error => {
-//       console.error('Error fetching subjects:', error);
-//     });
-// }
-
-// function addTeacher() {
-//   let teacherName = document.getElementById("teacherName").value;
-//   let teacherNameSymbol = document.getElementById("teacherNameSymbol").value;
-//   let selectedSubjects = []; document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-//     selectedSubjects.push(parseInt(checkbox.value));
-//   });
-//   let teacherData = {
-//     teacherName: teacherName,
-//     nameSymbol: teacherNameSymbol,
-//     teachingSubject: selectedSubjects.map(id => ({ id: parseInt(id) }))
-//   };
-//   fetch("http://localhost:8080/api/teachers", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     body: JSON.stringify(teacherData)
-//   }).then(response => {
-//     if (response.ok) {
-//       alert("Teacher added successfully!");
-//       document.querySelector("form").reset();
-//     } else {
-//       alert("Failed to add teacher.");
-//     }
-//   }).catch(error => {
-//     console.error('Error adding teacher:', error);
-//   });
-// }
 
 
 let allSubjects = [];        // all Subjects from DB
@@ -96,6 +30,10 @@ function initSubjectSearch() {
             !selectedSubjects.some(sel => sel.id === s.id)
         );
 
+        if (matches.length === 0) {
+            dropdown.innerHTML = `<div class="dropdown-item">No subjects found</div>`;
+        }   
+
         matches.forEach(subject => {
             const item = document.createElement("div");
             item.className = "dropdown-item";
@@ -126,7 +64,7 @@ function addSubject(subject) {
         <span class="remove-chip">×</span>
     `;
 
-    chip.querySelector(".remove-chip").onclick = () => {
+    chip.onclick = () => {
         selectedSubjects = selectedSubjects.filter(s => s.id !== subject.id);
         chip.remove();
     };
@@ -138,7 +76,7 @@ function addSubject(subject) {
 //add teacher to DB
 function addTeacher() {
     const teacherData = {
-        teacherName: document.getElementById("first-name-input").value,
+        teacherName: document.getElementById("first-name-input").value + " " + document.getElementById("last-name-input").value,
         nameSymbol: document.getElementById("initials-input").value,
         teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
     };
@@ -150,6 +88,34 @@ function addTeacher() {
     });
 }
 
+
+// Initialize availability day selection
+function initAvailabilityDays() {
+    const days = document.querySelectorAll("#availability-grid .day");
+
+    days.forEach(day => {
+        day.addEventListener("click", () => {
+            day.classList.toggle("active");
+        });
+    });
+}
+
+// Image Preview Function
+function imagePreview() {
+    const input = document.getElementById("teacher-image-input");
+    const preview = document.getElementById("avatar-preview");
+
+    input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+        preview.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
 
 function loadAddTeacherForm() {
@@ -206,38 +172,122 @@ function loadAddTeacherForm() {
 
         <div id="subject-dropdown"></div>
         <div id="selected-subjects"></div>
+        <div id="workload-input-container">
+            <input type="text" id="workload-input" name="workload" required placeholder="Workload (e.g., 22h)">
+        </div>
       </div>
     `;
 
+    const availabilityContainer = document.createElement("div");
+    availabilityContainer.id = "availability-container";
+    availabilityContainer.innerHTML = `
+        <div id="availability-header">
+            Set Availability
+        </div>
+        <div id="availability-grid">
+            <div class="day active">Mo</div>
+            <div class="day">Di</div>
+            <div class="day">Mi</div>
+            <div class="day">Do</div>
+            <div class="day">Fr</div>
+        </div>
+    `;
+
+    const submitButton = document.createElement("div");
+    submitButton.id = "submit-teacher-btn";
+    submitButton.textContent = "Submit";
+    submitButton.onclick = () => { {
+        addTeacher();
+        addTeacherScreen.style.display = "none";
+        disableOverlay.style.display = "none";
+    }};
+
     headerContainer.appendChild(closeScreenButton);
 
-    addTeacherScreen.replaceChildren(headerContainer, formContainer);
+    addTeacherScreen.replaceChildren(headerContainer, formContainer, availabilityContainer, submitButton);
 
+    initAvailabilityDays();
     imagePreview();
     loadSubjects();
     initSubjectSearch();
 }
 
 
-// Image Preview Function
-function imagePreview() {
-    const input = document.getElementById("teacher-image-input");
-    const preview = document.getElementById("avatar-preview");
 
-    input.addEventListener("change", () => {
-        const file = input.files[0];
-        if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = () => {
-        preview.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-    });
+// function displayTeachers() {
+//     fetch("http://localhost:8080/api/teachers")
+//     .then(res => res.json())
+//     .then(data => {
+//         const displayContainer = document.getElementById("display-teachers");
+//         displayContainer.innerHTML = "";
+//         data.forEach(teacher => {
+//             const teacherCard = document.createElement("div");
+//             teacherCard.className = "teacher-card";
+//             teacherCard.innerHTML = `
+//                 <p class="teacher-name">${teacher.teacherName}</p>
+//                 <p class="teacher-initials">${teacher.nameSymbol}</p>
+//             `;
+//             displayContainer.appendChild(teacherCard);
+//         });
+//     })
+//     .catch(err => console.error(err));
+// }
+
+function displayTeachers() {
+    fetch("http://localhost:8080/api/teachers")
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById("display-teachers");
+            container.innerHTML = "";
+
+            data.forEach(teacher => {
+                const card = document.createElement("div");
+                card.className = "teacher-row";
+
+                // Subjects anzeigen (max 2 + rest als +X)
+                const subjects = teacher.teachingSubject || [];
+                const visibleSubjects = subjects.slice(0, 2);
+                const remaining = subjects.length - visibleSubjects.length;
+
+                const subjectsHTML = `
+                    ${visibleSubjects.map(s =>
+                        `<span class="subject-chip">${s.subjectName}</span>`
+                    ).join("")}
+                    ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
+                `;
+
+                card.innerHTML = `
+                    <div class="teacher-left">
+                        <div class="avatar-placeholder">👤</div>
+                        <div class="teacher-info">
+                            <div class="teacher-name">${teacher.teacherName}</div>
+                            <div class="teacher-email muted">example@mail.com</div>
+                        </div>
+                    </div>
+
+                    <div class="teacher-initials">${teacher.nameSymbol}</div>
+
+                    <div class="teacher-subjects">
+                        ${subjectsHTML}
+                    </div>
+
+                    <div class="teacher-workload">
+                        ${teacher.workload || "—"}
+                    </div>
+
+                    <div class="teacher-edit">✏️</div>
+                `;
+
+                container.appendChild(card);
+            });
+        })
+        .catch(err => console.error(err));
 }
 
 
 function initializeApp() {
+    displayTeachers();
     initNavbar();
 }
 

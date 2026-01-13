@@ -22,17 +22,24 @@
         <div id="nav-bar"></div>
 
         <div id="main-content">
-            <div class="flex-container">
+            <div class="flex-row" id="teacher-header">
                 <div id="header-section">
                     <h1 id="header-text">Teachers</h1>
                     <p id="header-subtext">Here&apos;s the status of your timetable</p>
                 </div>
                 <div id="teacher-controls">
-                    <input type="text" id="teacher-search" placeholder="Search for a teacher">
-                    <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Search Icon">
+                    <div id="teacher-search-bar">
+                        <input type="text" id="teacher-search" placeholder="Search for a teacher">
+                        <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Search Icon">
+                    </div>
                     <div id="add-teacher-btn" onclick="loadAddTeacherForm()"><i class="fa-solid fa-plus"></i><p>Add Teacher</p></div>
                 </div>
             </div>
+
+            <div id="display-teachers">
+                <!-- Generated in JavaScript -->
+            </div>
+            
 
             <div id="disable-overlay">
                 <div id="add-teacher-screen">
@@ -47,45 +54,3 @@
 </body>
 
 </html>
-
-
-<!-- 
-<body onload="loadSubjects()">
-    <div id="header">
-        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" width="30vw">
-    </div>
-
-    <div id="content-wrapper">
-        <nav>
-            <div id="teacher-tab-btn"><i class="fa-solid fa-graduation-cap"></i></div>
-            <div id="subject-tab-btn"><i class="fa-solid fa-book"></i></div>
-        </nav>
-
-        <main>
-            <div id="teacher-tab">
-                <div id="teacher-list">
-                    <div id="teacher-search"></div>
-                    <div id="teacher-element-list">
-                        <!-- list with all teachers 
-                        <div class="teacher-element">
-                            <p></p>
-                        </div>
-                    </div>
-                    <div id="action-btn"></div>
-                </div>
-
-                <div id="teacher-info">
-                    <img src="" alt="" id="teacher-pic">
-                    <div id="teacher-name"></div>
-                </div>
-            </div>
-
-            <div id="subject-tab"></div>
-
-            <div id="form">
-
-            </div>
-            <!-- Form generation in javascript -
-        </main>
-    </div>
-</body> -->

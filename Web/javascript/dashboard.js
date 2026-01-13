@@ -8,11 +8,11 @@ const statsData = [
 
 
 //load stats from Backend API
-function loadSubjects() {
+function loadTeacherStats() {
     fetch("http://localhost:8080/api/teachers/getTeacherCount")
         .then(res => res.json())
         .then(data => {
-            statsData.value = data;
+            statsData[0].value = data;
         })
         .catch(err => console.error(err));
 }
@@ -87,11 +87,11 @@ function generateDashboardStats() {
 
 
 function initializeApp() {
+    loadTeacherStats();
     initNavbar();
     generateWelcomeText();
     showLastUpdateTime();
-    generateDashboardStats();
-    generateNavItems();
+    setTimeout(generateDashboardStats, 50);
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
