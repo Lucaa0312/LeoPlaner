@@ -50,7 +50,11 @@ public class DataRepository {
     public Teacher getTeacherByID(Long id) {
         TypedQuery<Teacher> teacher = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_ID, Teacher.class);
         teacher.setParameter("filter", id);
-        return teacher.getSingleResult(); 
+        return teacher.getSingleResult();
+    }
+
+    public Long getTeacherCount() {
+        return this.entityManager.createNamedQuery(Teacher.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
     public List<Room> getAllRooms() {

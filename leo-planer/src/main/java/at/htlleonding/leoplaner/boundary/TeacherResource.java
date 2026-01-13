@@ -44,6 +44,15 @@ public class TeacherResource {
 
 
     }
+
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getTeacherCount")
+    public Response getTeacherCount() {
+        Long teacherCount = this.dataRepository.getTeacherCount();
+        return Response.status(Response.Status.OK).entity(teacherCount).build();
+    }
 }
 
 

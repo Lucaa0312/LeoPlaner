@@ -5,13 +5,15 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jdk.jfr.Name;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
 @NamedQueries({
         @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
         @NamedQuery(name = Teacher.QUERY_FIND_BY_NAME, query = "select t from Teacher t where LOWER(t.teacherName) like LOWER(:filter)"),
-        @NamedQuery(name = Teacher.QUERY_FIND_BY_ID, query = "select t from Teacher t where t.id = :filter")
+        @NamedQuery(name = Teacher.QUERY_FIND_BY_ID, query = "select t from Teacher t where t.id = :filter"),
+        @NamedQuery(name = Teacher.QUERY_GET_COUNT, query = "select count(t) from Teacher t")
 })
 
 @Entity
@@ -34,6 +36,7 @@ public class Teacher {
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
     public static final String QUERY_FIND_BY_ID = "Teacher.findByID";
+    public static final String QUERY_GET_COUNT = "Teacher.getCount";
 
     public String getTeacherName() {
         return teacherName;
