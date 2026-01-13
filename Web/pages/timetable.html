@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,59 +11,117 @@
     <script defer src="../javascript/navbar.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-    <div id="header">
-        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" onclick="location.href='../index.html'" width="30vw">
-        <div id="randomizeButton" onclick="getRandomizedTimeTable()"><div><i class="fa-solid fa-dice"></i> Randomize</div></div>
-
-        <div id="algorithmButton" onclick="getOptimizedTimetable()"><div><i class="fa-solid fa-chart-line"></i> Algorithm</div></div>
-    </div>
-
     <div class="flex-container">
+
         <div id="nav-bar"></div>
 
-        <div id="content">
-            <div id="days">
+        <div id="main-content">
 
-                <div class="day" id="day0">
-                    <p class="headlineP"><br></p>
-                    <div class="gridBoxDays" id="gridBoxTimeSchedules"></div>
+            <div id="top-bar">
+                <h1 id="title">Timetable</h1>
+
+                <div id="middle-console">
+                    <div class="top-bar-select" id="classes">
+                        <button class="select-trigger">Classes</button>
+                        <ul class="select-menu">
+                            <li data-value="4bhitm">4bhitm</li>
+                            <li data-value="4chitm">4chitm</li>
+                            <li data-value="4ahitm">4ahitm</li>
+                        </ul>
+                    </div>
+
+                    <div class="top-bar-select" id="teachers">
+                        <button class="select-trigger">Teachers</button>
+                        <ul class="select-menu">
+                            <li value="aist">AIST</li>
+                            <li value="muep">MUEP</li>
+                            <li value="giri">GIRI</li>
+                        </ul>
+                    </div>
+
+                    <div class="top-bar-select" id="rooms">
+                        <button class="select-trigger">Rooms</button>
+                        <ul class="select-menu">
+                            <li value="e22">E22</li>
+                            <li value="103">103</li>
+                            <li value="205">205</li>
+                        </ul>
+                    </div>
+
+                    <div class="top-bar-btn" id="filter">
+                        <div><i class="fa-solid fa-filter"></i></div>
+                    </div>
+                    <div class="top-bar-btn" id="share">
+                        <div><i class="fa-solid fa-share-nodes"></i></div>
+                    </div>
+                    <div class="top-bar-btn" id="print">
+                        <div><i class="fa-solid fa-print"></i></div>
+                    </div>
                 </div>
 
-                <div class="day" class="SchoolDays" id="MONDAY">
-                    <p class="headlineP">Monday</p>
-                    <div class="gridBoxDays"></div>
+                <div class="top-bar-btn" id="randomizeButton" onclick="getRandomizedTimeTable()">
+                    <div><i class="fa-solid fa-dice"></i></div>
                 </div>
 
-                <div class="day" class="SchoolDays" id="TUESDAY">
-                    <p class="headlineP">Tuesday</p>
-                    <div class="gridBoxDays"></div>
+                <div class="top-bar-btn" id="algorithmButton" onclick="getOptimizedTimetable()">
+                    <div><i class="fa-solid fa-chart-line"></i></div>
                 </div>
+            </div>
 
-                <div class="day" class="SchoolDays" id="WEDNESDAY">
-                    <p class="headlineP">Wednesday</p>
-                    <div class="gridBoxDays"></div>
-                </div>
+            <div id="timetable-content">
+                <div id="scroll-table-container">
+                    <div id="days">
 
-                <div class="day" class="SchoolDays" id="THURSDAY">
-                    <p class="headlineP">Thursday</p>
-                    <div class="gridBoxDays"></div>
-                </div>
+                        <div class="day" id="day0">
+                            <p class="headlineP"><br></p>
+                            <div class="gridBoxDays" id="gridBoxTimeSchedules"></div>
+                        </div>
 
-                <div class="day" class="SchoolDays" id="FRIDAY">
-                    <p class="headlineP">Friday</p>
-                    <div class="gridBoxDays"></div>
-                </div>
+                        <div class="day" class="SchoolDays" id="MONDAY">
+                            <p class="headlineP">Mon</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
 
-                <div class="day" class="SchoolDays" id="SATURDAY">
-                    <p class="headlineP">Saturday</p>
-                    <div class="gridBoxDays"></div>
+                        <div class="day" class="SchoolDays" id="TUESDAY">
+                            <p class="headlineP">Tue</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
+
+                        <div class="day" class="SchoolDays" id="WEDNESDAY">
+                            <p class="headlineP">Wed</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
+
+                        <div class="day" class="SchoolDays" id="THURSDAY">
+                            <p class="headlineP">Thu</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
+
+                        <div class="day" class="SchoolDays" id="FRIDAY">
+                            <p class="headlineP">Fri</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
+
+                        <div class="day" class="SchoolDays" id="SATURDAY">
+                            <p class="headlineP">Sat</p>
+                            <div class="gridBoxDays"></div>
+                        </div>
+
+                    </div>
                 </div>
-        
             </div>
         </div>
+
     </div>
 
-   
+
 </body>
+
 </html>
+
+
+<!-- <div id="header">
+        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" onclick="location.href='../index.html'" width="30vw">
+    </div> -->
