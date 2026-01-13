@@ -53,6 +53,10 @@ public class DataRepository {
         return teacher.getSingleResult();
     }
 
+    public Long getTeacherCount() {
+        return this.entityManager.createNamedQuery(Teacher.QUERY_GET_COUNT, Long.class).getSingleResult();
+    }
+
     public List<Room> getAllRooms() {
         TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
         return allRooms.getResultList();
