@@ -261,14 +261,18 @@ form {
     cursor: pointer;
 
     font-size: 3rem;
-    color: var(--leo-primary-color1);
+    color: rgb(145, 0, 0);
 }
 
 
 /* ------------------ Form --------------------- */
 #form-container {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto auto;
+    row-gap: 0vh;
+    column-gap: 0vw;
+
+    margin-top: 5vh;
 }
 
 
@@ -276,10 +280,9 @@ form {
     display: flex;
     flex-direction: column;
 
-    margin-top: 10vh;
     margin-left: 5vw;
 
-    width: 25vw;
+    width: 20vw;
 }
 
 
@@ -359,13 +362,107 @@ form {
     border-style: none;
     font-size: 1.75rem;
 
+    border: none;
+    outline: none;
+
     color: var(--leo-text-color);
 }
 
-#first-name-input:active,
-#last-name-input:active,
-#initials-input:active,
-#email-input:active {
+#first-name-input:focus,
+#last-name-input:focus,
+#initials-input:focus,
+#email-input:focus {
     outline: none;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
+}
+
+
+/* ------------------add-subjects-container--------------------- */
+
+#add-subjects-container{
+    margin-top: 13.5vh;
+}
+
+#subject-input-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    width: 15vw;
+
+    padding-right: 1vw;
+    padding-left: 1vw;
+    padding-top: 0.7vh;
+    padding-bottom: 0.7vh;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-radius: 31px;
+    border-style: none;
+    font-size: 1.75rem;
+
+    color: var(--leo-text-color);
+}
+
+#subject-input-container:focus-within{
+    outline: none;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
+}
+
+#subject-input{
+    background: transparent;
+    font-size: 1.75rem;
+    color: var(--leo-text-color);
+    text-align: right;
+
+    width: 12vw;
+
+    margin-right: 0.5vw;
+
+    border: none;
+    outline: none;
+}
+
+
+
+
+#add-subject-img {
+    color: var(--leo-text-color);
+    width: 1.5vw;
+    height: 1.5vw;
+
+    justify-self: center;
+}
+
+
+#subject-dropdown {
+    background: white;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+.subject-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #5b4bff;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 20px;
+    margin: 4px;
+}
+
+.remove-chip {
+    margin-left: 8px;
+    cursor: pointer;
 }

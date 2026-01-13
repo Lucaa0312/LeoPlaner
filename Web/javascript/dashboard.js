@@ -7,6 +7,18 @@ const statsData = [
 ];
 
 
+//load stats from Backend API
+function loadSubjects() {
+    fetch("http://localhost:8080/api/teachers/getTeacherCount")
+        .then(res => res.json())
+        .then(data => {
+            statsData.value = data;
+        })
+        .catch(err => console.error(err));
+}
+
+
+
 //Gemerates welcome text based on time of day
 function generateWelcomeText() {
     const welcomeTextElement = document.getElementById("welcome-text");

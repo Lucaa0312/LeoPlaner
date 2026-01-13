@@ -66,6 +66,92 @@
 // }
 
 
+let allSubjects = [];        // all Subjects from DB
+let selectedSubjects = [];  // selected Subjects for Teacher
+
+//load subjects from DB
+function loadSubjects() {
+    fetch("http://localhost:8080/api/subjects")
+        .then(res => res.json())
+        .then(data => {
+            allSubjects = data;
+        })
+        .catch(err => console.error(err));
+}
+
+
+// Initialize subject search functionality
+function initSubjectSearch() {
+    const input = document.getElementById("subject-input");
+    const dropdown = document.getElementById("subject-dropdown");
+
+    input.addEventListener("input", () => {
+        const query = input.value.toLowerCase();
+        dropdown.innerHTML = "";
+
+        if (!query) return;
+
+        const matches = allSubjects.filter(s =>
+            s.subjectName.toLowerCase().includes(query) &&
+            !selectedSubjects.some(sel => sel.id === s.id)
+        );
+
+        matches.forEach(subject => {
+            const item = document.createElement("div");
+            item.className = "dropdown-item";
+            item.textContent = subject.subjectName;
+
+            item.onclick = () => {
+                addSubject(subject);
+                dropdown.innerHTML = "";
+                input.value = "";
+            };
+
+            dropdown.appendChild(item);
+        });
+    });
+}
+
+// Add subject to selected list
+
+function addSubject(subject) {
+    selectedSubjects.push(subject);
+
+    const container = document.getElementById("selected-subjects");
+
+    const chip = document.createElement("div");
+    chip.className = "subject-chip";
+    chip.innerHTML = `
+        ${subject.subjectName}
+        <span class="remove-chip">×</span>
+    `;
+
+    chip.querySelector(".remove-chip").onclick = () => {
+        selectedSubjects = selectedSubjects.filter(s => s.id !== subject.id);
+        chip.remove();
+    };
+
+    container.appendChild(chip);
+}
+
+
+//add teacher to DB
+function addTeacher() {
+    const teacherData = {
+        teacherName: document.getElementById("first-name-input").value,
+        nameSymbol: document.getElementById("initials-input").value,
+        teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
+    };
+
+    fetch("http://localhost:8080/api/teachers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(teacherData)
+    });
+}
+
+
+
 function loadAddTeacherForm() {
     
     const disableOverlay = document.getElementById("disable-overlay");
@@ -111,6 +197,16 @@ function loadAddTeacherForm() {
         <br>
         <input type="email" id="email-input" name="email" required placeholder="Email">
       </form>
+
+      <div id="add-subjects-container">
+        <div id="subject-input-container">
+            <input type="text" id="subject-input" placeholder="Add Subject"/>
+            <img id="add-subject-img" src="../assets/img/magnifyingGlass.png" alt="Add Subject"/>
+        </div>
+
+        <div id="subject-dropdown"></div>
+        <div id="selected-subjects"></div>
+      </div>
     `;
 
     headerContainer.appendChild(closeScreenButton);
@@ -118,6 +214,8 @@ function loadAddTeacherForm() {
     addTeacherScreen.replaceChildren(headerContainer, formContainer);
 
     imagePreview();
+    loadSubjects();
+    initSubjectSearch();
 }
 
 
