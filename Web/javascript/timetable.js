@@ -1,3 +1,43 @@
+// Dopdown button trigger
+
+document.querySelectorAll('.top-bar-select').forEach(wrapper => {
+    const trigger = wrapper.querySelector('.select-trigger');
+    const menu = wrapper.querySelector('.select-menu');
+
+    if (!trigger || !menu) return;
+
+    trigger.addEventListener('click', () => {
+        wrapper.classList.toggle('is-open');
+    });
+
+    // click auf dropbox item
+    menu.addEventListener('click', event => {
+        const li = event.target.closest('li');
+        if (!li) return;
+
+        const previouslySelected = menu.querySelector('.selected-item');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected-item');
+        }
+
+        wrapper.classList.remove('is-open');
+        li.classList.add('selected-item');
+
+        const data = li.dataset.value;
+        console.log(data);
+    });
+});
+
+// click außerhalb schließt alle Dropdowns
+document.addEventListener('click', event => {
+    const isClickInside = event.target.closest('.top-bar-select');
+    if (isClickInside) return;
+
+    document.querySelectorAll('.top-bar-select').forEach(wrapper => {
+        wrapper.classList.remove('is-open');
+    });
+});
+
 // JavaScript for Timetable Page
 const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
@@ -17,42 +57,42 @@ let currentTimetableData = []
 function init() {
     fetch("http://localhost:8080/api/run/testCsv")
 }
-*/ 
+*/
 
 function load() {
     fetch("http://localhost:8080/api/timetable")
-    .then(response => {
-        return response.json()
-    }).then(data => {
-        createLayout(data.classSubjectInstances)
-    }).catch(error => {
-        console.error('Error loading Timetable:', error)
-    })
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            createLayout(data.classSubjectInstances)
+        }).catch(error => {
+            console.error('Error loading Timetable:', error)
+        })
 }
 
 
 function getRandomizedTimeTable() {
     fetch("http://localhost:8080/api/timetable/randomize")
-    .then(response => {
-        return response.json()
-    }).then(data => {
-        createLayout(data.classSubjectInstances)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            createLayout(data.classSubjectInstances)
 
-    }).catch(error => {
-        console.error('Error randomizing Timetable:', error)
-    })
+        }).catch(error => {
+            console.error('Error randomizing Timetable:', error)
+        })
 }
 
 function getOptimizedTimetable() {
     fetch("http://localhost:8080/api/run/algorithm")
-    .then(response => {
-        return response.json()
-    }).then(data => {
-        createLayout(data.classSubjectInstances)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            createLayout(data.classSubjectInstances)
 
-    }).catch(error => {
-        console.error('Error optimizing Timetable:', error)
-    })
+        }).catch(error => {
+            console.error('Error optimizing Timetable:', error)
+        })
 }
 
 function createLayout(data) {
@@ -64,53 +104,53 @@ function createLayout(data) {
         if (!map.has(item.period.schoolDays)) {
             map.set(item.period.schoolDays, [])
         }
-    map.get(item.period.schoolDays).push(item)
+        map.get(item.period.schoolDays).push(item)
     });
 
     console.log('Map:', map)
     let timesBuilder = ``
 
-    for (let i = 0; i < times.length; i+=2) {
-            timesBuilder += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
-        }
+    for (let i = 0; i < times.length; i += 2) {
+        timesBuilder += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+    }
 
     document.getElementById("day0").querySelector(".gridBoxDays").innerHTML = timesBuilder
-    
+
     // value, key
     map.forEach((classSubjects, day) => {
 
-    const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
-    
-    gridBox.innerHTML = ""; 
+        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
 
-    // Create HTML 
-    classSubjects.forEach(item => {
-        const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
-        const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
-        const duration = item.duration || 1; 
-        const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
-        const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
-        const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+        gridBox.innerHTML = "";
 
-        for (let d = 0; d < duration; d++) {
-            if (subjectName != "No lesson"){
-                gridBox.innerHTML += `
+        // Create HTML 
+        classSubjects.forEach(item => {
+            const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
+            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
+            const duration = item.duration || 1;
+            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
+            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
+            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+
+            for (let d = 0; d < duration; d++) {
+                if (subjectName != "No lesson") {
+                    gridBox.innerHTML += `
                     <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
                     </div>
                 `;
-            }
-            else {
-                gridBox.innerHTML += `
+                }
+                else {
+                    gridBox.innerHTML += `
                     <div class="periodStyling">
                     </div>
                 `;
+                }
             }
-        }
 
+        });
     });
-});
 }
 
 
