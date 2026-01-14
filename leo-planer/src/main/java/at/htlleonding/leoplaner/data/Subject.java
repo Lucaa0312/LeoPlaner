@@ -10,7 +10,8 @@ import java.util.List;
 // TODO add NamedQueries
 @NamedQueries({
         @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from Subject s"),
-        @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where LOWER(s.subjectName) = LOWER(:filter)")
+        @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where LOWER(s.subjectName) = LOWER(:filter)"),
+        @NamedQuery(name = Subject.QUERY_GET_COUNT, query = "select count(s) from Subject s")
 })
 @Entity
 public class Subject {
@@ -32,6 +33,7 @@ public class Subject {
 
     public static final String QUERY_FIND_ALL = "Subject.findAll";
     public static final String QUERY_FIND_BY_NAME = "Subject.findByName";
+    public static final String QUERY_GET_COUNT = "Subject.getCount";
 
     public String getSubjectName() {
         return subjectName;

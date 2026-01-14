@@ -74,15 +74,23 @@ public class DataRepository {
         return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
     }
 
+    public Long getRoomCount() {
+        return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
+    }
+
     public List<Subject> getAllSubjects() {
-        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery("Subject.findAll", Subject.class);
+        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_ALL, Subject.class);
         return allSubjects.getResultList();
     }
 
     public Subject getSubjectByName(String name) {
-        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery("Subject.findByName", Subject.class);
+        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME, Subject.class);
         allSubjects.setParameter("filter", name);
         return allSubjects.getResultList().isEmpty() ? null : allSubjects.getResultList().get(0);
+    }
+
+    public Long getSubjectCount() {
+        return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
     public ArrayList<ClassSubject> getClassSubjects() {
