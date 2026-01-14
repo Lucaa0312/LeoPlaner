@@ -1,19 +1,17 @@
-# ---------- build stage ----------
-FROM eclipse-temurin:25-jdk AS build
-WORKDIR /app
+FROM maven:3.9.12-eclipse-temurin-21
 
-# copy wrapper + pom first (better caching)
-COPY mvnw mvnw.cmd pom.xml ./
-COPY .mvn .mvn
-RUN ./mvnw -B dependency:go-offline
+WORKDIR /workspace
 
-# copy source and build
-COPY src src
-RUN ./mvnw -B package -DskipTests
+# Copy pom.xml and download dependencies to speed up future starts
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# ---------- runtime stage ----------
-FROM eclipse-temurin:25-jre
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+# Copy the rest of the code
+COPY src ./src
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 5005 is for the debugger, 8080 for the app
+EXPOSE 5005
+
+# Run Quarkus in Dev Mode, allowing remote connections
+CMD ["mvn", "quarkus:dev", "-Dquarkus.http.host=0.0.0.0", "-Ddebug=false"]
