@@ -41,10 +41,7 @@ public class TeacherResource {
         uriBuilder.path(Long.toString(teacherCreated.getId()));
 
         return Response.created(uriBuilder.build()).build();
-
-
     }
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

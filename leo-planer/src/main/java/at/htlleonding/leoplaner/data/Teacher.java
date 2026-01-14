@@ -3,11 +3,11 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jdk.jfr.Name;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @NamedQueries({
         @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
@@ -30,6 +30,13 @@ public class Teacher {
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
     
+    @OneToMany
+    @JsonIgnoreProperties({"teacher"})
+    private List<TeacherNonWorkingHours> teacher_non_working_hours;
+
+    @OneToMany
+    @JsonIgnoreProperties({"teacher"})
+    private List<TeacherNonPreferredHours> teacher_non_preferred_hours;
 
     //TODO later on add list for periods the teacher does (not) want to (cant) teach
 

@@ -1,5 +1,5 @@
-teacher;name;Symbol;teachingSubjects
-John Doe;JD;Math,Physics
+teacher;name;Symbol;teachingSubjects;Nonworking;nonpreferred
+John Doe;JD;Math,Physics;MONDAY-1,2,3,4,5,6,7,8,9:TUESDAY-1;
 Luca Pres;LP;German,Chemistry
 Alexandro Buller;AB;History
 Andires Lop;AL;Math,Physics
