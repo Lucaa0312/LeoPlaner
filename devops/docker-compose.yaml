@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ../backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/demo
+      SPRING_DATASOURCE_USERNAME: demo
+      SPRING_DATASOURCE_PASSWORD: demo
+
+  postgres:
+    extends:
+      file: ../database/docker-compose.yaml
+      service: postgres
+
+  adminer:
+    extends:
+      file: ../database/docker-compose.yaml
+      service: adminer
