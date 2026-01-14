@@ -200,6 +200,7 @@ function loadAddTeacherForm() {
         addTeacher();
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
+        setTimeout(() => {displayTeachers();}, 80);
     }};
 
     headerContainer.appendChild(closeScreenButton);
