@@ -20,11 +20,6 @@ public class TeacherNonWorkingHours {
     private SchoolDays day;
     private Integer schoolHour;
 
-    public TeacherNonWorkingHours(SchoolDays day, Integer schoolHour) {
-        this.day = day;
-        this.schoolHour = schoolHour;
-    }
-
     public Long getId() {
         return id;
     }

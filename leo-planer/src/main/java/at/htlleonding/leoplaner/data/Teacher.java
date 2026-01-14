@@ -32,11 +32,11 @@ public class Teacher {
     
     @OneToMany
     @JsonIgnoreProperties({"teacher"})
-    private List<TeacherNonWorkingHours> teacher_non_working_hours;
+    private List<TeacherNonWorkingHours> teacher_non_working_hours = new ArrayList<>();
 
     @OneToMany
     @JsonIgnoreProperties({"teacher"})
-    private List<TeacherNonPreferredHours> teacher_non_preferred_hours;
+    private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 
     //TODO later on add list for periods the teacher does (not) want to (cant) teach
 

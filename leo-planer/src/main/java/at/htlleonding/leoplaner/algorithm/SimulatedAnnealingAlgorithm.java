@@ -6,6 +6,8 @@ import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
+import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
+import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -128,6 +130,21 @@ public class SimulatedAnnealingAlgorithm {
         int cost = 0;
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) { //create a copy to not have mofying conflicts
             Period period = classSubjectInstance.getPeriod();
+
+            final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
+            teacherNonWorkingHour.setDay(period.getSchoolDays());
+            teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
+            if (classSubjectInstance.getClassSubject().getTeacher().getTeacher_non_working_hours().contains(teacherNonWorkingHour)) {
+                return cost + 999999; //is to be never be accepted
+            }
+
+            final TeacherNonPreferredHours teacherNonPreferredHours = new TeacherNonPreferredHours();
+            teacherNonPreferredHours.setDay(period.getSchoolDays());
+            teacherNonPreferredHours.setSchoolHour(period.getSchoolHour());
+            if (classSubjectInstance.getClassSubject().getTeacher().getTeacher_non_preferred_hours().contains(teacherNonPreferredHours)) {
+                cost += 50;
+            }
+
             cost += costOfEachDay.get(period.getSchoolDays()); //cost of being in each day, replacing the switch case
 
             if (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 > 6) {
