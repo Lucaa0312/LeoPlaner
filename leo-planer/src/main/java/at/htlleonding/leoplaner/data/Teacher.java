@@ -81,4 +81,19 @@ public class Teacher {
         this.teachingSubject = teachingSubject;
     }
 
+    public List<TeacherNonWorkingHours> getTeacher_non_working_hours() {
+        return teacher_non_working_hours;
+    }
+
+    public void setTeacher_non_working_hours(List<TeacherNonWorkingHours> teacher_non_working_hours) {
+        this.teacher_non_working_hours = teacher_non_working_hours;
+    }
+
+    public List<TeacherNonPreferredHours> getTeacher_non_preferred_hours() {
+        return teacher_non_preferred_hours;
+    }
+
+    public void setTeacher_non_preferred_hours(List<TeacherNonPreferredHours> teacher_non_preferred_hours) {
+        this.teacher_non_preferred_hours = teacher_non_preferred_hours;
+    }
 }
