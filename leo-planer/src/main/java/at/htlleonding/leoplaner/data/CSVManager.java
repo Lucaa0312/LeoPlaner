@@ -101,7 +101,7 @@ public class CSVManager {
         }
     }
 
-    private static void parseDayHourString(String stringValue, Consumer<ParsedDayHour> consumer) {
+    private static void parseDayHourString(String stringValue, Consumer<ParsedDayHour> consumerBob) {
         if (stringValue == null || stringValue.isBlank()) return;
 
         String[] allNonWorkingDays = stringValue.split(":");
@@ -113,7 +113,7 @@ public class CSVManager {
             String[] schoolHours = dayAndHours[1].split(",");
 
             for (String schoolHour : schoolHours) {
-               consumer.accept(new ParsedDayHour(day, Integer.parseInt(schoolHour.trim())));
+                consumerBob.accept(new ParsedDayHour(day, Integer.parseInt(schoolHour.trim())));
             }
 
         }
