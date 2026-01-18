@@ -134,14 +134,14 @@ public class SimulatedAnnealingAlgorithm {
             final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
             teacherNonWorkingHour.setDay(period.getSchoolDays());
             teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
-            if (classSubjectInstance.getClassSubject().getTeacher().getTeacher_non_working_hours().contains(teacherNonWorkingHour)) {
+            if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher().checkIfHourExistsInNonWorkingList(teacherNonWorkingHour)) {
                 return cost + 999999; //is to be never be accepted
             }
 
             final TeacherNonPreferredHours teacherNonPreferredHours = new TeacherNonPreferredHours();
             teacherNonPreferredHours.setDay(period.getSchoolDays());
             teacherNonPreferredHours.setSchoolHour(period.getSchoolHour());
-            if (classSubjectInstance.getClassSubject().getTeacher().getTeacher_non_preferred_hours().contains(teacherNonPreferredHours)) {
+            if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher().checkIfHourExistsInNonPreferredList(teacherNonPreferredHours)) {
                 cost += 50;
             }
 

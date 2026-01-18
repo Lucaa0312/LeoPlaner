@@ -45,6 +45,18 @@ public class Teacher {
     public static final String QUERY_FIND_BY_ID = "Teacher.findByID";
     public static final String QUERY_GET_COUNT = "Teacher.getCount";
 
+    public boolean checkIfHourExistsInNonWorkingList(TeacherNonWorkingHours tnw) {
+        return listContainsHour(this.teacher_non_working_hours, tnw);
+    }
+
+    public boolean checkIfHourExistsInNonPreferredList(TeacherNonPreferredHours tnw) {
+        return listContainsHour(this.teacher_non_preferred_hours, tnw);
+    }
+
+    public <T extends HoursPeriod> boolean listContainsHour(List<T> list, T hour) {
+        return list.stream().anyMatch(e -> e.getDay() == hour.getDay() && e.getSchoolHour() == hour.getSchoolHour());
+    }
+
     public String getTeacherName() {
         return teacherName;
     }

@@ -7,7 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class TeacherNonPreferredHours {
+public class TeacherNonPreferredHours implements HoursPeriod {
     @Id
     @GeneratedValue
     Long id;
@@ -35,6 +35,7 @@ public class TeacherNonPreferredHours {
       this.teacher = teacher;
     }
 
+    @Override
     public SchoolDays getDay() {
       return day;
     }
@@ -43,6 +44,7 @@ public class TeacherNonPreferredHours {
       this.day = day;
     }
 
+    @Override
     public Integer getSchoolHour() {
       return schoolHour;
     }
