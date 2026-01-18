@@ -30,11 +30,11 @@ public class Teacher {
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
     
-    @OneToMany
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"teacher"})
     private List<TeacherNonWorkingHours> teacher_non_working_hours = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"teacher"})
     private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 

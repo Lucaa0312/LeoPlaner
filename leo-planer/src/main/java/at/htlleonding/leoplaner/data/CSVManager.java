@@ -49,8 +49,8 @@ public class CSVManager {
     public static void createTeacherFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].split(";");
-            if (line.length != 5) {
-                throw new IllegalArgumentException("Teacher CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 6) {
+                //throw new IllegalArgumentException("Teacher CSV is only allowed to have 6 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
             // (.CHEM is roomtype)
@@ -78,7 +78,7 @@ public class CSVManager {
             //CSV FORMAT Nonworking/Nonpreferred   ;Day-hour,hour:Day2-hour,hour
             List<TeacherNonWorkingHours> nonWorkingHours = new ArrayList<>();
             parseDayHourString(line[3], parsed -> {
-                TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
+                final TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
                 nwh.setDay(parsed.day());
                 nwh.setSchoolHour(parsed.hour());
                 nwh.setTeacher(teacher);
