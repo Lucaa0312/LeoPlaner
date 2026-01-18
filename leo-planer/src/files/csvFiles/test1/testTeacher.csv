@@ -1,13 +1,13 @@
-teacher;name;Symbol;teachingSubjects
-John Doe;JD;Math,Physics
-Luca Pres;LP;German,Chemistry
-Alexandro Buller;AB;History
-Andires Lop;AL;Math,Physics
-Smash Ham;smh;Sew,Insy
-Sebastian Koch;SK;ITP
-Marline Lehner;ml;English
-Mone Bauer;mb;Biology,Geography
-Lori Jut;lj;Law,Religion
-David Martiz;dm;Economy
-Benedikt Lauer;bl;MEDTPD,MEDTSM
-Lara Krapfen;lk;MEDT3D,MEDTFI
+teacher;name;Symbol;teachingSubjects;Nonworking;nonpreferred
+John Doe;JD;Math,Physics;MONDAY-1,2,3,4,5,6,7,8,9:TUESDAY-1,2,3;FRIDAY-4,5,7:THURSDAY-3,4,6,8;FRIDAY-6
+Luca Pres;LP;German,Chemistry;FRIDAY-5,6,8;WEDNESDAY-1:TUESDAY-5,8
+Alexandro Buller;AB;History;TUESDAY-1,8,9;TUESDAY-1,4,7
+Andires Lop;AL;Math,Physics;MONDAY-4,8:WEDNESDAY-3,4,7,9;THURSDAY-1,2,7
+Smash Ham;smh;Sew,Insy;WEDNESDAY-7;THURSDAY-6:MONDAY-2,5,9
+Sebastian Koch;SK;ITP;TUESDAY-3,8;WEDNESDAY-1,5:MONDAY-2,4
+Marline Lehner;ml;English;MONDAY-5,7;TUESDAY-4,5,7:THURSDAY-2,4,8
+Mone Bauer;mb;Biology,Geography;FRIDAY-1,9:TUESDAY-1,2,4;THURSDAY-7,8:WEDNESDAY-2,5
+Lori Jut;lj;Law,Religion;TUESDAY-1;FRIDAY-2,8
+David Martiz;dm;Economy;TUESDAY-1:WEDNESDAY-1,3,5,7;MONDAY-3,8:THURSDAY-2,5
+Benedikt Lauer;bl;MEDTPD,MEDTSM;WEDNESDAY-2,5,7;WEDNESDAY-4,6,7:THURSDAY-1,4
+Lara Krapfen;lk;MEDT3D,MEDTFI;TUESDAY-1;TUESDAY-5,9:FRIDAY-2,6,8
