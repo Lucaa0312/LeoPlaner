@@ -1,5 +1,7 @@
 package at.htlleonding.leoplaner.data;
 
+import at.htlleonding.leoplaner.dto.ParsedDayHour;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -7,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CSVManager {
     final static String teacherType = "teacher";
@@ -46,8 +49,8 @@ public class CSVManager {
     public static void createTeacherFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].split(";");
-            if (line.length != 3) {
-                throw new IllegalArgumentException("Teacher CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 6) {
+                //throw new IllegalArgumentException("Teacher CSV is only allowed to have 6 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
             // (.CHEM is roomtype)
@@ -70,8 +73,51 @@ public class CSVManager {
             teacher.setTeacherName(teacherName);
             teacher.setNameSymbol(nameSymbol);
             teacher.setTeachingSubject(takenSubjects);
+
+
+            //CSV FORMAT Nonworking/Nonpreferred   ;Day-hour,hour:Day2-hour,hour
+            List<TeacherNonWorkingHours> nonWorkingHours = new ArrayList<>();
+            parseDayHourString(line[3], parsed -> {
+                final TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
+                nwh.setDay(parsed.day());
+                nwh.setSchoolHour(parsed.hour());
+                nwh.setTeacher(teacher);
+                nonWorkingHours.add(nwh);
+            });
+            teacher.setTeacher_non_working_hours(nonWorkingHours);
+
+
+            List<TeacherNonPreferredHours> nonPreferredHours = new ArrayList<>();
+            parseDayHourString(line[4], parsed -> {
+                TeacherNonPreferredHours nph = new TeacherNonPreferredHours();
+                nph.setDay(parsed.day());
+                nph.setSchoolHour(parsed.hour());
+                nph.setTeacher(teacher);
+                nonPreferredHours.add(nph);
+            });
+            teacher.setTeacher_non_preferred_hours(nonPreferredHours);
+
             dataRepository.addTeacher(teacher);
         }
+    }
+
+    private static void parseDayHourString(String stringValue, Consumer<ParsedDayHour> consumerBob) {
+        if (stringValue == null || stringValue.isBlank()) return;
+
+        String[] allNonWorkingDays = stringValue.split(":");
+
+        for (String allNonWorkingDay : allNonWorkingDays) {
+            String[] dayAndHours = allNonWorkingDay.split("-");
+
+            SchoolDays day = SchoolDays.valueOf(dayAndHours[0].trim());
+            String[] schoolHours = dayAndHours[1].split(",");
+
+            for (String schoolHour : schoolHours) {
+                consumerBob.accept(new ParsedDayHour(day, Integer.parseInt(schoolHour.trim())));
+            }
+
+        }
+
     }
 
     public static void createRoomFromCSV(final String[] lines, final DataRepository dataRepository) {

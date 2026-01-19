@@ -42,6 +42,14 @@ public class SubjectResource {
 
         return Response.created(uriBuilder.build()).build();
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getSubjectCount")
+    public Response getSubjectCount() {
+        Long subjectCount = this.dataRepository.getSubjectCount();
+        return Response.status(Response.Status.OK).entity(subjectCount).build();
+    }
 }
 
 

@@ -43,6 +43,14 @@ public class RoomResource {
 
         return Response.created(uriBuilder.build()).build();
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getRoomCount")
+    public Response getRoomCount() {
+        Long roomCount = this.dataRepository.getRoomCount();
+        return Response.status(Response.Status.OK).entity(roomCount).build();
+    }
 }
 
 

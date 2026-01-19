@@ -3,11 +3,11 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jdk.jfr.Name;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @NamedQueries({
         @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
@@ -30,6 +30,13 @@ public class Teacher {
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
     
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"teacher"})
+    private List<TeacherNonWorkingHours> teacher_non_working_hours = new ArrayList<>();
+
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"teacher"})
+    private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 
     //TODO later on add list for periods the teacher does (not) want to (cant) teach
 
@@ -37,6 +44,18 @@ public class Teacher {
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
     public static final String QUERY_FIND_BY_ID = "Teacher.findByID";
     public static final String QUERY_GET_COUNT = "Teacher.getCount";
+
+    public boolean checkIfHourExistsInNonWorkingList(TeacherNonWorkingHours tnw) {
+        return listContainsHour(this.teacher_non_working_hours, tnw);
+    }
+
+    public boolean checkIfHourExistsInNonPreferredList(TeacherNonPreferredHours tnw) {
+        return listContainsHour(this.teacher_non_preferred_hours, tnw);
+    }
+
+    public <T extends HoursPeriod> boolean listContainsHour(List<T> list, T hour) {
+        return list.stream().anyMatch(e -> e.getDay() == hour.getDay() && e.getSchoolHour() == hour.getSchoolHour());
+    }
 
     public String getTeacherName() {
         return teacherName;
@@ -74,4 +93,19 @@ public class Teacher {
         this.teachingSubject = teachingSubject;
     }
 
+    public List<TeacherNonWorkingHours> getTeacher_non_working_hours() {
+        return teacher_non_working_hours;
+    }
+
+    public void setTeacher_non_working_hours(List<TeacherNonWorkingHours> teacher_non_working_hours) {
+        this.teacher_non_working_hours = teacher_non_working_hours;
+    }
+
+    public List<TeacherNonPreferredHours> getTeacher_non_preferred_hours() {
+        return teacher_non_preferred_hours;
+    }
+
+    public void setTeacher_non_preferred_hours(List<TeacherNonPreferredHours> teacher_non_preferred_hours) {
+        this.teacher_non_preferred_hours = teacher_non_preferred_hours;
+    }
 }
