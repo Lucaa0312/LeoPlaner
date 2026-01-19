@@ -1,13 +1,23 @@
 package at.htlleonding.leoplaner.boundary;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Room;
+import at.htlleonding.leoplaner.data.RoomTypes;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Timetable;
+import at.htlleonding.leoplaner.dto.ClassSubjectDTO;
+import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
+import at.htlleonding.leoplaner.dto.PeriodDTO;
+import at.htlleonding.leoplaner.dto.RoomDTO;
+import at.htlleonding.leoplaner.dto.SubjectClassLinkDTO;
+import at.htlleonding.leoplaner.dto.TeacherSubjectLinkDTO;
+import at.htlleonding.leoplaner.dto.TimetableDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -30,8 +40,16 @@ public class TimeTableResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCurrentTimeTable() {
-        return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
+    public TimetableDTO getCurrentTimeTable() {
+        Timetable timetable = this.dataRepository.getCurrentSortedBySchoolhourTimetable();
+        return new TimetableDTO(timetable.getTotalWeeklyHours(), (ArrayList<ClassSubjectInstanceDTO>) timetable.getClassSubjectInstances().stream()
+                .map(e -> new ClassSubjectInstanceDTO(e.getDuration(),
+                                      new RoomDTO(e.getRoom().getRoomNumber(), e.getRoom().getRoomName(), e.getRoom().getRoomPrefix(), e.getRoom().getRoomSuffix(), (ArrayList<RoomTypes>) e.getRoom().getRoomTypes()),
+                                      new PeriodDTO(e.getPeriod().getSchoolDays(), e.getPeriod().getSchoolHour(), e.getPeriod().isLunchBreak()),
+                                      new ClassSubjectDTO(e.getClassSubject().getWeeklyHours(), e.getClassSubject().isRequiresDoublePeriod(), e.getClassSubject().isBetterDoublePeriod(), e.getClassSubject().getClassName(), 
+                                                  new TeacherSubjectLinkDTO(e.getClassSubject().getTeacher().getTeacherName(), e.getClassSubject().getTeacher().getNameSymbol()),
+                                                  new SubjectClassLinkDTO(e.getClassSubject().getSubject().getSubjectName(), e.getClassSubject().getSubject().getSubjectColor())))).toList());
+        //return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
     }
 
     @GET
