@@ -24,7 +24,7 @@ public class Room {
     private String roomName;
     private String roomPrefix;
     private String roomSuffix;
-    @ElementCollection(targetClass = RoomTypes.class)
+    @ElementCollection(targetClass = RoomTypes.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable( //create new join table
             name = "room_roomtypes",

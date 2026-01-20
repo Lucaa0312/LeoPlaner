@@ -42,13 +42,14 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     public TimetableDTO getCurrentTimeTable() {
         Timetable timetable = this.dataRepository.getCurrentSortedBySchoolhourTimetable();
-        return new TimetableDTO(timetable.getTotalWeeklyHours(), (ArrayList<ClassSubjectInstanceDTO>) timetable.getClassSubjectInstances().stream()
+        return new TimetableDTO(timetable.getTotalWeeklyHours(), timetable.getClassSubjectInstances().stream()
                 .map(e -> new ClassSubjectInstanceDTO(e.getDuration(),
-                                      new RoomDTO(e.getRoom().getRoomNumber(), e.getRoom().getRoomName(), e.getRoom().getRoomPrefix(), e.getRoom().getRoomSuffix(), (ArrayList<RoomTypes>) e.getRoom().getRoomTypes()),
+                                      new RoomDTO(e.getRoom().getRoomNumber(), e.getRoom().getRoomName(), e.getRoom().getRoomPrefix(), e.getRoom().getRoomSuffix(), e.getRoom().getRoomTypes()),
                                       new PeriodDTO(e.getPeriod().getSchoolDays(), e.getPeriod().getSchoolHour(), e.getPeriod().isLunchBreak()),
                                       new ClassSubjectDTO(e.getClassSubject().getWeeklyHours(), e.getClassSubject().isRequiresDoublePeriod(), e.getClassSubject().isBetterDoublePeriod(), e.getClassSubject().getClassName(), 
                                                   new TeacherSubjectLinkDTO(e.getClassSubject().getTeacher().getTeacherName(), e.getClassSubject().getTeacher().getNameSymbol()),
-                                                  new SubjectClassLinkDTO(e.getClassSubject().getSubject().getSubjectName(), e.getClassSubject().getSubject().getSubjectColor())))).toList());
+                                                  new SubjectClassLinkDTO(e.getClassSubject().getSubject().getSubjectName(), e.getClassSubject().getSubject().getSubjectColor()))))
+                                        .toList());
         //return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
     }
 

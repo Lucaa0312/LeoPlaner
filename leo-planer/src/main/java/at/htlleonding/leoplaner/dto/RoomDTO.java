@@ -1,9 +1,13 @@
 package at.htlleonding.leoplaner.dto;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import at.htlleonding.leoplaner.data.RoomTypes;
 
 public record RoomDTO(short roomNumber, String roomName, String roomPrefix, String roomSuffix,
-    ArrayList<RoomTypes> roomTypes) {
+    List<RoomTypes> roomTypes) {
+
+  public RoomDTO {
+    roomTypes = List.copyOf(roomTypes);
+  }
 }

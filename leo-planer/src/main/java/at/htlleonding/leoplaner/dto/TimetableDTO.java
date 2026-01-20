@@ -1,6 +1,10 @@
 package at.htlleonding.leoplaner.dto;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public record TimetableDTO(int weeklyHours, ArrayList<ClassSubjectInstanceDTO> ClassSubjectInstances) {
+public record TimetableDTO(int weeklyHours, List<ClassSubjectInstanceDTO> classSubjectInstances) {
+
+    public TimetableDTO {
+        classSubjectInstances = List.copyOf(classSubjectInstances);
+    }
 }
