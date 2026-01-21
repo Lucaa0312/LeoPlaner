@@ -52,6 +52,8 @@ public class TimeTableResource {
                 continue;
             }
 
+            if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null) continue;
+
             classSubjectInstanceDTOs.add(
                                       new ClassSubjectInstanceDTO(csi.getDuration(),
                                       new RoomDTO(csi.getRoom().getRoomNumber(), csi.getRoom().getRoomName(), csi.getRoom().getRoomPrefix(), csi.getRoom().getRoomSuffix(), csi.getRoom().getRoomTypes()),
