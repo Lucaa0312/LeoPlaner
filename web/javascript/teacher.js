@@ -297,24 +297,22 @@ function displayTeachers() {
         });
 }
 
+// Search functionality for teachers
 function searchTeacher() {
-    const query = document.getElementById("teacher-search").value.toLowerCase();
-    const teacherRows = document.querySelectorAll(".teacher-row");
+    let query = document.getElementById("teacher-search").value.toLowerCase();
+    let rows = document.querySelectorAll(".teacher-row");
 
-    teacherRows.forEach(row => {
-        const name = row.querySelector(".teacher-name")?.textContent?.toLowerCase() || "";
+    rows.forEach(function (row) {
+        let name = row.querySelector(".teacher-name").textContent.toLowerCase();
+        let initials = row.querySelector(".teacher-initials").textContent.toLowerCase();
+        let subjects = row.querySelector(".teacher-subjects").textContent.toLowerCase();
 
-        const initials = row.querySelector(".teacher-initials")?.textContent?.toLowerCase() || "";
-
-        const subjects = row.querySelector(".teacher-subjects")?.textContent?.toLowerCase() || "";
-
-        const match =
-            query === "" ||
-            name.includes(query) ||
-            initials.includes(query) ||
-            subjects.includes(query);
-
-        row.style.display = match ? "" : "none";
+        if (query === "" || name.includes(query) || initials.includes(query) || subjects.includes(query)) {
+            row.style.display = "";
+        } 
+        else {
+            row.style.display = "none";
+        }
     });
 }
 
