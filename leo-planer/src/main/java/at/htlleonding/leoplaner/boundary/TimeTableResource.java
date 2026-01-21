@@ -54,13 +54,7 @@ public class TimeTableResource {
 
             if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null) continue;
 
-            classSubjectInstanceDTOs.add(
-                                      new ClassSubjectInstanceDTO(csi.getDuration(),
-                                      new RoomDTO(csi.getRoom().getRoomNumber(), csi.getRoom().getRoomName(), csi.getRoom().getRoomPrefix(), csi.getRoom().getRoomSuffix(), csi.getRoom().getRoomTypes()),
-                                      new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
-                                      new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(), 
-                                                  new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
-                                                  new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor()))));
+            classSubjectInstanceDTOs.add(createClassSubjectInstanceDTO(csi));
         }
 
         return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs);
@@ -74,7 +68,6 @@ public class TimeTableResource {
         Room room = this.dataRepository.getRoomByNumber(24);
         this.dataRepository.createTimetable("4chitm", room);
         return Response.status(Response.Status.OK)
-                .entity(this.dataRepository.getCurrentTimetable())
                 .build();
     }
     
@@ -82,9 +75,22 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByDay/{day}")
     public Response getClassSubjectInstancesByDay(@PathParam("day") String day) {
-      List<ClassSubjectInstance> timetableByDay = this.dataRepository.getCurrentTimetable().getClassSubjectInstances().stream()
-                .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase())).sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour()).toList();
+      List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable().getClassSubjectInstances().stream()
+                .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase()))
+              .sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour())
+              .map(csi -> createClassSubjectInstanceDTO(csi))
+              .toList();
 
       return Response.status(Response.Status.OK).entity(timetableByDay).build();
+    }
+    
+
+    private ClassSubjectInstanceDTO createClassSubjectInstanceDTO(ClassSubjectInstance csi) {
+        return new ClassSubjectInstanceDTO(csi.getDuration(),
+                new RoomDTO(csi.getRoom().getRoomNumber(), csi.getRoom().getRoomName(), csi.getRoom().getRoomPrefix(), csi.getRoom().getRoomSuffix(), csi.getRoom().getRoomTypes()),
+                new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
+                new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(),
+                        new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
+                        new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())));
     }
 }
