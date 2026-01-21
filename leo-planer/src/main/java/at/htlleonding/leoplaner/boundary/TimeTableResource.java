@@ -101,6 +101,7 @@ public class TimeTableResource {
     @Path("/getByTeacher/{id}")
     public TeacherTimetableDTO getTeacherTimetable(@PathParam("id") Long id) {
         final Timetable timetableTeacher = this.dataRepository.getCurrentTeacherTimetable(id);
+        System.out.println(id +  "" + timetableTeacher.getClassSubjectInstances().isEmpty());
         final Teacher teacher = this.dataRepository.getTeacherByID(id);
         return new TeacherTimetableDTO(
               new TeacherNoSubjectDTO(teacher.getTeacherName(), teacher.getNameSymbol(), teacher.getTeacher_non_working_hours().stream().map(e -> new TeacherNonWorkingHourDTO(e.getDay(), e.getSchoolHour())).toList(),
