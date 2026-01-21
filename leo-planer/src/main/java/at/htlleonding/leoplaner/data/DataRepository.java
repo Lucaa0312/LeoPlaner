@@ -33,7 +33,7 @@ public class DataRepository {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
         return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
-                              .filter(e -> e.getClassSubject().getTeacher().getTeacherName().equals(teacher.getTeacherName())).toList());
+                              .filter(e -> e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList());
         }
 
     public List<ClassSubject> getAllClassSubjects() {
