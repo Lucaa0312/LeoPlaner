@@ -71,14 +71,12 @@
 
 #teacher-search {
     background: transparent;
-    font-size: 1.75rem;
     color: var(--leo-text-color);
+    font-size: 1.5rem;
     text-align: right;
 
-    width: 12vw;
-
+    width: 20vw;
     margin-right: 0.5vw;
-
     border: none;
     outline: none;
 }
@@ -552,7 +550,7 @@
     margin-top: 10vh;
 
     width: 80vw;
-    height: 85vh;
+    height: 80vh;
 
     overflow-y: scroll;
 }

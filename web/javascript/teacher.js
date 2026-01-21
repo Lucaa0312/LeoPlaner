@@ -216,24 +216,6 @@ function loadAddTeacherForm() {
 
 
 
-// function displayTeachers() {
-//     fetch("http://localhost:8080/api/teachers")
-//     .then(res => res.json())
-//     .then(data => {
-//         const displayContainer = document.getElementById("display-teachers");
-//         displayContainer.innerHTML = "";
-//         data.forEach(teacher => {
-//             const teacherCard = document.createElement("div");
-//             teacherCard.className = "teacher-card";
-//             teacherCard.innerHTML = `
-//                 <p class="teacher-name">${teacher.teacherName}</p>
-//                 <p class="teacher-initials">${teacher.nameSymbol}</p>
-//             `;
-//             displayContainer.appendChild(teacherCard);
-//         });
-//     })
-//     .catch(err => console.error(err));
-// }
 
 function displayTeachers() {
     fetch("http://localhost:8080/api/teachers")
@@ -252,7 +234,8 @@ function displayTeachers() {
                 <p id="teacher-edit-section">Bearbeiten</p>
             `;
             container.appendChild(tableInfo);
-
+            
+            
 
             data.forEach(teacher => {
                 const card = document.createElement("div");
@@ -293,8 +276,36 @@ function displayTeachers() {
 
                 container.appendChild(card);
             });
+
+            const breakDiv = document.createElement("div");
+            breakDiv.style.height = "6vh";
+            breakDiv.innerHTML = "&nbsp;";
+
+            container.appendChild(breakDiv);
+
         })
         .catch(err => console.error(err));
+}
+
+function searchTeacher() {
+    const query = document.getElementById("teacher-search").value.toLowerCase();
+    const teacherRows = document.querySelectorAll(".teacher-row");
+
+    teacherRows.forEach(row => {
+        const name = row.querySelector(".teacher-name")?.textContent?.toLowerCase() || "";
+
+        const initials = row.querySelector(".teacher-initials")?.textContent?.toLowerCase() || "";
+
+        const subjects = row.querySelector(".teacher-subjects")?.textContent?.toLowerCase() || "";
+
+        const match =
+            query === "" ||
+            name.includes(query) ||
+            initials.includes(query) ||
+            subjects.includes(query);
+
+        row.style.display = match ? "" : "none";
+    });
 }
 
 
@@ -304,3 +315,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+document.getElementById("teacher-search").addEventListener("input", searchTeacher);
