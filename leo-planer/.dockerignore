@@ -1,5 +1,7 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+target
+.git
+.gitignore
+.vscode
+.idea
+.target/
+.DS_Store
