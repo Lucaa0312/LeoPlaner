@@ -46,12 +46,12 @@ public class Timetable {
         final int HIGHEST_SCHOOLHOUR = classSubjectInstances.stream()
                                                               .filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
                                                               .max().getAsInt(); //get highest Schoolhour
-        final int LOWEST_SCHOOLHOUR = classSubjectInstances.stream().
-                                                                filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
-                                                                .min().getAsInt(); //get lowest Schoolhour
+        final int LOWEST_SCHOOLHOUR = classSubjectInstances.stream()
+                                                              .filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
+                                                              .min().getAsInt(); //get lowest Schoolhour
 
         Random random = new Random();
-        int randSchoolHour = random.nextInt(LOWEST_SCHOOLHOUR, HIGHEST_SCHOOLHOUR + 1);
+        int randSchoolHour = random.nextInt(LOWEST_SCHOOLHOUR + 2, HIGHEST_SCHOOLHOUR + 1);
 
         final boolean LUNCHBREAK = true;
         Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
