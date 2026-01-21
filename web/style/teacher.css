@@ -2,7 +2,7 @@
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {
     background-color: var(--leo-background-color);
-    width: 100vw;
+    width: 80vw;
     height: 100vh;
     position: relative;
 
@@ -121,8 +121,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-size: 1.75rem;
-    width: 12vw;
+    font-size: 1.5rem;
+    width: 15vw;
 
     font-weight: semi-bold;
 
@@ -546,7 +546,10 @@
 #display-teachers{
     margin-left: auto;
     margin-right: auto;
-    margin-top: 3vh;
+
+
+
+    margin-top: 10vh;
 
     width: 80vw;
     height: 85vh;
@@ -554,13 +557,85 @@
     overflow-y: scroll;
 }
 
+#table-info{
+    display: grid;
+    grid-template-columns: 2fr 1fr 3fr 1fr auto;
+    gap: 0.3vw;
+    align-items: center;
+
+    width: 60vw;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2vh;
+
+    font-size: 1.2rem;
+
+    color: var(--leo-text-color);
+}
+
+#teacher-left-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: -2vw;
+    padding-right: auto;
+    opacity: 0.7;
+
+}
+#teacher-initials-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -0.3vw;
+
+    opacity: 0.7;
+}
+#teacher-subjects-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -1vw;
+
+    opacity: 0.7;
+}
+#teacher-workload-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -2vw;
+
+    opacity: 0.7;
+}
+#teacher-edit-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: 0;
+    opacity: 0.7;
+}
+
 .teacher-row {
     display: grid;
     grid-template-columns: 2fr 1fr 3fr 1fr auto;
     align-items: center;
 
+    width: 55vw;
+    margin-left: auto;
+    margin-right: auto;
+
+
     background: white;
-    border: 2px solid #4f46e5;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 20px;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
@@ -609,7 +684,7 @@
 
 .teacher-subjects {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.1rem;
     flex-wrap: wrap;
 }
 

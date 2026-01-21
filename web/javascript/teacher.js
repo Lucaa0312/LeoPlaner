@@ -242,6 +242,18 @@ function displayTeachers() {
             const container = document.getElementById("display-teachers");
             container.innerHTML = "";
 
+            const tableInfo = document.createElement("div");
+            tableInfo.id = "table-info";
+            tableInfo.innerHTML = `
+                <p id="teacher-left-section">Name</p>
+                <p id="teacher-initials-section">K&uuml;rzel</p>
+                <p id="teacher-subjects-section">F&auml;cher</p>
+                <p id="teacher-workload-section">Arbeitslast</p>
+                <p id="teacher-edit-section">Bearbeiten</p>
+            `;
+            container.appendChild(tableInfo);
+
+
             data.forEach(teacher => {
                 const card = document.createElement("div");
                 card.className = "teacher-row";
@@ -263,7 +275,6 @@ function displayTeachers() {
                         <div class="avatar-placeholder">👤</div>
                         <div class="teacher-info">
                             <div class="teacher-name">${teacher.teacherName}</div>
-                            <div class="teacher-email muted">example@mail.com</div>
                         </div>
                     </div>
 
