@@ -42,14 +42,26 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     public TimetableDTO getCurrentTimeTable() {
         Timetable timetable = this.dataRepository.getCurrentSortedBySchoolhourTimetable();
-        return new TimetableDTO(timetable.getTotalWeeklyHours(), timetable.getClassSubjectInstances().stream()
-                .map(e -> new ClassSubjectInstanceDTO(e.getDuration(),
-                                      new RoomDTO(e.getRoom().getRoomNumber(), e.getRoom().getRoomName(), e.getRoom().getRoomPrefix(), e.getRoom().getRoomSuffix(), e.getRoom().getRoomTypes()),
-                                      new PeriodDTO(e.getPeriod().getSchoolDays(), e.getPeriod().getSchoolHour(), e.getPeriod().isLunchBreak()),
-                                      new ClassSubjectDTO(e.getClassSubject().getWeeklyHours(), e.getClassSubject().isRequiresDoublePeriod(), e.getClassSubject().isBetterDoublePeriod(), e.getClassSubject().getClassName(), 
-                                                  new TeacherSubjectLinkDTO(e.getClassSubject().getTeacher().getTeacherName(), e.getClassSubject().getTeacher().getNameSymbol()),
-                                                  new SubjectClassLinkDTO(e.getClassSubject().getSubject().getSubjectName(), e.getClassSubject().getSubject().getSubjectColor()))))
-                                        .toList());
+        List<ClassSubjectInstanceDTO> classSubjectInstanceDTOs = new ArrayList<>();
+
+        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+            if (csi.getPeriod().isLunchBreak()) {
+                classSubjectInstanceDTOs.add(new ClassSubjectInstanceDTO(1, null, 
+                    new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()), 
+                    null));
+                continue;
+            }
+
+            classSubjectInstanceDTOs.add(
+                                      new ClassSubjectInstanceDTO(csi.getDuration(),
+                                      new RoomDTO(csi.getRoom().getRoomNumber(), csi.getRoom().getRoomName(), csi.getRoom().getRoomPrefix(), csi.getRoom().getRoomSuffix(), csi.getRoom().getRoomTypes()),
+                                      new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
+                                      new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(), 
+                                                  new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
+                                                  new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor()))));
+        }
+
+        return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs);
         //return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
     }
 
