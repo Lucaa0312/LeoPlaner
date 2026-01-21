@@ -221,70 +221,80 @@ function displayTeachers() {
     fetch("http://localhost:8080/api/teachers")
         .then(res => res.json())
         .then(data => {
-            const container = document.getElementById("display-teachers");
-            container.innerHTML = "";
+            if (!data || data.length === 0) {
+                console.log("No teachers found");
+                return;
+            }
+            else {
+                document.getElementById("no-teachers").style.display = "none";
 
-            const tableInfo = document.createElement("div");
-            tableInfo.id = "table-info";
-            tableInfo.innerHTML = `
-                <p id="teacher-left-section">Name</p>
-                <p id="teacher-initials-section">K&uuml;rzel</p>
-                <p id="teacher-subjects-section">F&auml;cher</p>
-                <p id="teacher-workload-section">Arbeitslast</p>
-                <p id="teacher-edit-section">Bearbeiten</p>
-            `;
-            container.appendChild(tableInfo);
-            
-            
+                const container = document.getElementById("display-teachers");
+                container.innerHTML = "";
 
-            data.forEach(teacher => {
-                const card = document.createElement("div");
-                card.className = "teacher-row";
-
-                // Subjects anzeigen (max 2 + rest als +X)
-                const subjects = teacher.teachingSubject || [];
-                const visibleSubjects = subjects.slice(0, 2);
-                const remaining = subjects.length - visibleSubjects.length;
-
-                const subjectsHTML = `
-                    ${visibleSubjects.map(s =>
-                        `<span class="subject-chip">${s.subjectName}</span>`
-                    ).join("")}
-                    ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
+                const tableInfo = document.createElement("div");
+                tableInfo.id = "table-info";
+                tableInfo.innerHTML = `
+                    <p id="teacher-left-section">Name</p>
+                    <p id="teacher-initials-section">K&uuml;rzel</p>
+                    <p id="teacher-subjects-section">F&auml;cher</p>
+                    <p id="teacher-workload-section">Arbeitslast</p>
+                    <p id="teacher-edit-section">Bearbeiten</p>
                 `;
+                container.appendChild(tableInfo);
+                
+                
 
-                card.innerHTML = `
-                    <div class="teacher-left">
-                        <div class="avatar-placeholder">👤</div>
-                        <div class="teacher-info">
-                            <div class="teacher-name">${teacher.teacherName}</div>
+                data.forEach(teacher => {
+                    const card = document.createElement("div");
+                    card.className = "teacher-row";
+
+                    // Subjects anzeigen (max 2 + rest als +X)
+                    const subjects = teacher.teachingSubject || [];
+                    const visibleSubjects = subjects.slice(0, 2);
+                    const remaining = subjects.length - visibleSubjects.length;
+
+                    const subjectsHTML = `
+                        ${visibleSubjects.map(s =>
+                            `<span class="subject-chip">${s.subjectName}</span>`
+                        ).join("")}
+                        ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
+                    `;
+
+                    card.innerHTML = `
+                        <div class="teacher-left">
+                            <div class="avatar-placeholder">👤</div>
+                            <div class="teacher-info">
+                                <div class="teacher-name">${teacher.teacherName}</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="teacher-initials">${teacher.nameSymbol}</div>
+                        <div class="teacher-initials">${teacher.nameSymbol}</div>
 
-                    <div class="teacher-subjects">
-                        ${subjectsHTML}
-                    </div>
+                        <div class="teacher-subjects">
+                            ${subjectsHTML}
+                        </div>
 
-                    <div class="teacher-workload">
-                        ${teacher.workload || "—"}
-                    </div>
+                        <div class="teacher-workload">
+                            ${teacher.workload || "—"}
+                        </div>
 
-                    <div class="teacher-edit">✏️</div>
-                `;
+                        <div class="teacher-edit">✏️</div>
+                    `;
 
-                container.appendChild(card);
-            });
+                    container.appendChild(card);
+                });
 
-            const breakDiv = document.createElement("div");
-            breakDiv.style.height = "6vh";
-            breakDiv.innerHTML = "&nbsp;";
+                const breakDiv = document.createElement("div");
+                breakDiv.style.height = "6vh";
+                breakDiv.innerHTML = "&nbsp;";
 
-            container.appendChild(breakDiv);
-
+                container.appendChild(breakDiv);
+            }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            
+        });
 }
 
 function searchTeacher() {

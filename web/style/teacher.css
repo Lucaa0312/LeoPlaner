@@ -89,30 +89,6 @@
     justify-self: center;
 }
 
-/* #teacher-search {
-    width: 20vw;
-    text-align: right;
-
-    padding-right: 3vw;
-    padding-top: 0.5vh;
-    padding-bottom: 0.5vh;
-
-    background-color: #D9D9D9;
-
-    border-radius: 31px;
-    border-style: none;
-    font-size: 1.75rem;
-
-    color: var(--leo-text-color);
-}
-
-#search-icon{
-    position: fixed;
-    width: 1.5vw;
-    top: 2.70vh;
-    right: 1.25vw;
-    color: var(--leo-text-color);
-} */
 
 #add-teacher-btn {
     display: flex;
@@ -151,10 +127,10 @@
 /* ------------------add-teacher-screen--------------------- */
 #disable-overlay {
     display: none;
-    width: 100%;
+    width: 80vw;
     position: fixed;
     top: 0;
-    left: 17.5vw;
+    left: 20vw;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
 }
@@ -705,4 +681,18 @@
 .teacher-edit {
     cursor: pointer;
     font-size: 1.2rem;
+}
+
+/* ------------------ No Teachers Message --------------------- */
+#no-teachers {
+    display: block;
+    position: absolute;
+    top: 30vh;
+    left: 15vw;
+    text-align: center;
+    
+    color: var(--leo-text-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0.8;
 }
