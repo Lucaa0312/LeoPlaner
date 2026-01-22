@@ -157,10 +157,14 @@
     align-items: center;
     justify-content: center;
 
+    border-radius: 2vw 2vw 0 0;
+
     padding-left: 3vw;
     padding-right: 3vw;
     padding-top: 2vh;
     padding-bottom: 2vh;
+
+    background-color: blueviolet;
 }
 
 #add-teacher-header {
@@ -195,6 +199,8 @@
     column-gap: 0vw;
 
     margin-top: 5vh;
+
+    background-color: yellow;
 }
 
 
@@ -205,12 +211,14 @@
     margin-left: 5vw;
 
     width: 20vw;
+
+    background-color: red;
 }
 
 
 .avatar-upload {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 1vh;
 }
 
 #teacher-image-input {
@@ -303,6 +311,7 @@
 
 #add-subjects-container{
     margin-top: 13.5vh;
+    background-color: red;
 }
 
 #subject-input-container{

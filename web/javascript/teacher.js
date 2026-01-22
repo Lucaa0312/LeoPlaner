@@ -119,6 +119,7 @@ function imagePreview() {
 
 
 function loadAddTeacherForm() {
+    document.getElementById("no-teachers").style.display = "none";
     
     const disableOverlay = document.getElementById("disable-overlay");
     disableOverlay.style.display = "block";
@@ -138,6 +139,7 @@ function loadAddTeacherForm() {
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
     closeScreenButton.onclick = () => {
+        displayTeachers();
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
     };
@@ -197,10 +199,15 @@ function loadAddTeacherForm() {
     submitButton.id = "submit-teacher-btn";
     submitButton.textContent = "Submit";
     submitButton.onclick = () => { {
-        addTeacher();
-        addTeacherScreen.style.display = "none";
-        disableOverlay.style.display = "none";
-        setTimeout(() => {displayTeachers();}, 80);
+        // if (){
+            
+        // }
+        // else {
+            addTeacher();
+            addTeacherScreen.style.display = "none";
+            disableOverlay.style.display = "none";
+            setTimeout(() => {displayTeachers();}, 80);
+        // }
     }};
 
     headerContainer.appendChild(closeScreenButton);
@@ -223,6 +230,7 @@ function displayTeachers() {
         .then(data => {
             if (!data || data.length === 0) {
                 console.log("No teachers found");
+                document.getElementById("no-teachers").style.display = "block";
                 return;
             }
             else {
@@ -278,7 +286,7 @@ function displayTeachers() {
                             ${teacher.workload || "—"}
                         </div>
 
-                        <div class="teacher-edit">✏️</div>
+                        <div class="teacher-edit"><i class="fa-solid fa-pencil"></i></div>
                     `;
 
                     container.appendChild(card);
