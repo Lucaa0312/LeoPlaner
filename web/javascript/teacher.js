@@ -1,5 +1,3 @@
-
-
 let allSubjects = [];        // all Subjects from DB
 let selectedSubjects = [];  // selected Subjects for Teacher
 
@@ -72,21 +70,95 @@ function addSubject(subject) {
     container.appendChild(chip);
 }
 
+// let allSubjects = [];
+// let selectedSubjects = [];
 
-//add teacher to DB
-function addTeacher() {
-    const teacherData = {
-        teacherName: document.getElementById("first-name-input").value + " " + document.getElementById("last-name-input").value,
-        nameSymbol: document.getElementById("initials-input").value,
-        teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
-    };
+// // helper: eindeutiger key (weil keine IDs)
+// const subjectKey = (s) => (s.subjectName || "").toLowerCase().trim();
 
-    fetch("http://localhost:8080/api/teachers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(teacherData)
-    });
-}
+
+// function loadSubjects() {
+//     fetch("http://localhost:8080/api/subjects")
+//         .then(res => res.json())
+//         .then(data => {
+//             allSubjects = data;
+//         })
+//         .catch(err => console.error(err));
+// }
+
+// function initSubjectSearch() {
+//     const input = document.getElementById("subject-input");
+//     const dropdown = document.getElementById("subject-dropdown");
+
+//     input.addEventListener("input", () => {
+//         const query = input.value.toLowerCase().trim();
+//         dropdown.innerHTML = "";
+
+//         if (!query) return;
+
+//         const matches = allSubjects.filter(s =>
+//             s.subjectName.toLowerCase().includes(query) &&
+//             !selectedSubjects.some(sel => subjectKey(sel) === subjectKey(s))
+//         );
+
+//         if (matches.length === 0) {
+//             dropdown.innerHTML = `<div class="dropdown-item">No subjects found</div>`;
+//             return;
+//         }
+
+//         matches.forEach(subject => {
+//             const item = document.createElement("div");
+//             item.className = "dropdown-item";
+//             item.textContent = subject.subjectName;
+
+//             item.onclick = () => {
+//                 addSubject(subject);
+//                 dropdown.innerHTML = "";
+//                 input.value = "";
+//             };
+
+//             dropdown.appendChild(item);
+//         });
+//     });
+// }
+
+// function addSubject(subject) {
+//     // doppelte verhindern
+//     if (selectedSubjects.some(s => subjectKey(s) === subjectKey(subject))) return;
+
+//     selectedSubjects.push(subject);
+
+//     const container = document.getElementById("selected-subjects");
+//     const chip = document.createElement("div");
+//     chip.className = "subject-chip";
+//     chip.innerHTML = `
+//         ${subject.subjectName}
+//         <span class="remove-chip" title="Remove">×</span>
+//     `;
+
+//     chip.onclick = () => {
+//         selectedSubjects = selectedSubjects.filter(s => s.id !== subject.id);
+//         chip.remove();
+//     };
+
+//     container.appendChild(chip);
+// }
+
+
+// //add teacher to DB
+// function addTeacher() {
+//     const teacherData = {
+//         teacherName: document.getElementById("first-name-input").value + " " + document.getElementById("last-name-input").value,
+//         nameSymbol: document.getElementById("initials-input").value,
+//         teachingSubject: selectedSubjects.map(s => s.subjectName)
+//     };
+
+//     fetch("http://localhost:8080/api/teachers", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(teacherData)
+//     });
+// }
 
 
 // Initialize availability day selection
