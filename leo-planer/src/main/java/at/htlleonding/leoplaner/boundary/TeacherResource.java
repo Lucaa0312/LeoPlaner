@@ -4,7 +4,6 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Teacher;
-import at.htlleonding.leoplaner.dto.SubjectDTO;
 import at.htlleonding.leoplaner.dto.TeacherDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
