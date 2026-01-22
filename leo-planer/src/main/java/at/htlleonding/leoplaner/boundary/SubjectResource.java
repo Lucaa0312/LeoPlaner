@@ -30,7 +30,7 @@ public class SubjectResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<SubjectDTO> getAllSubjects() {
         return dataRepository.getAllSubjects().stream().map(e ->
-                new SubjectDTO(e.getSubjectName(), e.getSubjectColor(), e.getRequiredRoomTypes())).toList();
+                new SubjectDTO(e.getId(), e.getSubjectName(), e.getSubjectColor(), e.getRequiredRoomTypes())).toList();
     }
 
     @POST

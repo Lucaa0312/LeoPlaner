@@ -31,7 +31,7 @@ public class TeacherResource {
     public List<TeacherDTO> getAllTeachers() {
         return dataRepository.getAllTeachers().stream().map(e ->
                 new TeacherDTO(e.getTeacherName(), e.getNameSymbol(), e.getTeachingSubject().stream().map(ts ->
-                        new SubjectDTO(ts.getSubjectName(), ts.getSubjectColor(), ts.getRequiredRoomTypes())).toList())
+                        new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectColor(), ts.getRequiredRoomTypes())).toList())
         ).toList();
     }
 

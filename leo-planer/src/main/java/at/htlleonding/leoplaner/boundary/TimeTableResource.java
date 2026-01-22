@@ -98,7 +98,7 @@ public class TimeTableResource {
                 new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
                 new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(),
                         new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
-                        new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())));
+                        new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getId(), csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())));
     }
 
     @GET
@@ -118,7 +118,7 @@ public class TimeTableResource {
                                       new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
                                       new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(), 
                                                   new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
-                                                  new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())))
+                                                  new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getId(), csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())))
                               ).toList()));
     }
 }
