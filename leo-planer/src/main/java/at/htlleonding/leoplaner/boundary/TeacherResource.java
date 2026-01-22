@@ -30,8 +30,7 @@ public class TeacherResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<TeacherDTO> getAllTeachers() {
         return dataRepository.getAllTeachers().stream().map(e ->
-                new TeacherDTO(e.getTeacherName(), e.getNameSymbol(), e.getTeachingSubject().stream().map(ts ->
-                        new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectColor(), ts.getRequiredRoomTypes())).toList())
+                UtilBuildFunctions.createTeacherDTO(e)
         ).toList();
     }
 
