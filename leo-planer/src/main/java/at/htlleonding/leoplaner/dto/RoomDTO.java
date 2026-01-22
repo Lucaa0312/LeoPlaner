@@ -4,7 +4,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.RoomTypes;
 
-public record RoomDTO(short roomNumber, String roomName, String roomPrefix, String roomSuffix,
+public record RoomDTO(Long id, short roomNumber, String roomName, String roomPrefix, String roomSuffix,
     List<RoomTypes> roomTypes) {
 
   public RoomDTO {

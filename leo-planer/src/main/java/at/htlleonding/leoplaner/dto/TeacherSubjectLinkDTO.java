@@ -1,5 +1,5 @@
 
 package at.htlleonding.leoplaner.dto;
 
-public record TeacherSubjectLinkDTO(String teacherName, String nameSymbol) {
+public record TeacherSubjectLinkDTO(Long id, String teacherName, String nameSymbol) {
 }
