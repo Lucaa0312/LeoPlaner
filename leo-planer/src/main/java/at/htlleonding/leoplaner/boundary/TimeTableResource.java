@@ -99,6 +99,8 @@ public class TimeTableResource {
                 new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(),
                         new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
                         new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor())));
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByTeacher/{id}")
