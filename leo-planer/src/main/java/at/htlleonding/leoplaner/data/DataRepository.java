@@ -80,7 +80,7 @@ public class DataRepository {
     }
 
     public Long getRoomCount() {
-        return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
+        return this.entityManager.createNamedQuery(Room.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
     public List<Subject> getAllSubjects() {
