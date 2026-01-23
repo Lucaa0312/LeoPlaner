@@ -39,6 +39,8 @@ document.addEventListener('click', event => {
 });
 
 // JavaScript for Timetable Page
+let breakAfterPeriod = 2;
+
 const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
     "09:45", "10:00", "10:50", "10:55", "11:45",
@@ -95,6 +97,7 @@ function getOptimizedTimetable() {
         })
 }
 
+//Load all Times and hours into the table view
 function createLayout(data) {
     console.log('Raw data:', data)
     let map = new Map()
@@ -108,20 +111,39 @@ function createLayout(data) {
     });
 
     console.log('Map:', map)
-    let timesBuilder = ``
+    let timesBuilder = ``;
+    let linePlacer = ``;
 
+    //load period start and end time
     for (let i = 0; i < times.length; i += 2) {
-        timesBuilder += `<div class="timeScheduleBoxes"><p class="periodStarted">${times[i]}</p> <p class="periodEnded">${times[i + 1] || ""}</p></div>\n`;
+        if (i == breakAfterPeriod * 2) {
+            timesBuilder += `<div class="break-box"></div>\n`;
+
+            linePlacer += `<div class="break-line"></div>\n`;
+        }
+
+        timesBuilder += `<div class="period-box">
+        <p class="period-started">${times[i]}</p>
+        <p class="current-period">${i}. EH</p>
+        <p class="period-ended">${times[i + 1] || ""}</p>
+        </div>\n`;
+
+        linePlacer += `<div class="period-line"></div>\n`;
+
     }
 
-    document.getElementById("day0").querySelector(".gridBoxDays").innerHTML = timesBuilder
+    document.getElementById("timetable-times").innerHTML = timesBuilder;
+    document.getElementById("timetable-background").innerHTML = linePlacer;
 
     // value, key
     map.forEach((classSubjects, day) => {
 
-        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
+        const gridBox = document.getElementById(day).querySelector(".periods");
 
         gridBox.innerHTML = "";
+
+        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SOPOSED TO BE INSERTED
+        let itemCount = 0;
 
         // Create HTML 
         classSubjects.forEach(item => {
@@ -132,10 +154,16 @@ function createLayout(data) {
             const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
 
+            if (itemCount == breakAfterPeriod) {
+                gridBox.innerHTML += `<div class="period-break"></div>\n`;
+            }
+            
+            itemCount++;
+
             for (let d = 0; d < duration; d++) {
                 if (subjectName != "No lesson") {
                     gridBox.innerHTML += `
-                    <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
                     </div>
@@ -143,7 +171,7 @@ function createLayout(data) {
                 }
                 else {
                     gridBox.innerHTML += `
-                    <div class="periodStyling">
+                    <div class="period-styling">
                     </div>
                 `;
                 }

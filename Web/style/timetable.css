@@ -1,3 +1,7 @@
+:root {
+    --period-height: 5rem;
+    --break-height: 1.5rem;
+}
 /*=========================================HEADER=========================================*/
 
 #header {
@@ -78,7 +82,8 @@
     border: none;
 }
 
-.select-trigger:hover, .top-bar-select.is-open .select-trigger {
+.select-trigger:hover,
+.top-bar-select.is-open .select-trigger {
     background-color: white;
 }
 
@@ -105,9 +110,11 @@
     cursor: default;
     padding-bottom: 0.1em;
 }
+
 .select-menu li:last-of-type {
     padding-bottom: 0.3em;
 }
+
 .select-menu li:hover {
     background-color: #00000013;
 }
@@ -154,7 +161,7 @@
 }
 
 /*======================================TIMETABLE CONTENT=================================*/
-#timetable-content {
+#timetable {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -165,25 +172,11 @@
     box-sizing: border-box;
 }
 
-#scroll-table-container {
-    scroll-behavior: smooth;
-    text-align: center;
-    justify-content: left;
-
-    background-color: white;
-    color: var(--leo-text-color);
-
-    border-radius: 36px;
-
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: scroll;
-}
-
-#days {
+#timetable-content {
     display: flex;
     text-align: center;
-    justify-content: left;
+    align-items: start;
+    flex-direction: column;
 
     background-color: white;
     color: var(--leo-text-color);
@@ -191,65 +184,126 @@
     border-radius: 36px;
 
     width: 100%;
-}
+    max-height: 85vh;
+    padding: 2% 5% 0 5%;
+    box-sizing: border-box;
 
-.day {
     font-size: large;
     font-weight: bold;
     font-family: alte-haas-grotesk;
 }
 
-.SchoolDays {
-    border-style: solid;
+#timetable-day-name {
+    width: 100%;
+    display: flex;
 }
 
-#day0 {
-    margin-right: 0vh;
-    text-align: center;
-    font-size: 1.25em;
-}
+#timetable-day-name>div {
+    display: flex;
+    align-items: end;
+    justify-content: center;
 
-.day .headlineP {
-    text-align: center;
-    margin-top: 1vh;
-    margin-right: 2vh;
-    margin-left: 2vh;
-    margin-bottom: 1vh;
-    width: 8vw;
-}
-
-.headlineP {
     font-size: 2rem;
-    font-weight: bold;
-    color: var(--leo-text-color);
+
+    width: 9vw;
+    min-width: 9vw;
+    max-height: var(--period-height);
+}
+
+#timetable-day-name>div:first-child {
+    width: 5vw !important;
+    min-width: 5vw !important;
 }
 
 
-.timeScheduleBoxes {
-    height: 5vh;
-    width: 3vw;
-    padding: 0.25vw;
+#timetable-view {
+    position: relative;
+    width: 100%;
+
+    display: flex;
+
+    scroll-behavior: smooth;
+    text-align: center;
+    justify-content: left;
+
+    width: 100%;
+    overflow-y: scroll;
+}
+
+#timetable-background {
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+}
+
+#timetable-background>div {
+    border-bottom: black dashed 2px;
+}
+
+.period-line {
+    margin-top: 5px;
+    height: var(--period-height);
+    box-sizing: border-box;
+}
+
+.break-line {
+    height: var(--break-height);
+}
+
+#timetable-times {
+    min-width: 5vw;
+    text-align: left;
+    
+    z-index: 2;
+}
+
+.period-box {
+    margin-top: 5px;
+    height: var(--period-height);
+    box-sizing: border-box;
+}
+
+.break-box {
+    height: var(--break-height);
+}
+
+.current-period {
+    font-size: 1.8rem;
+}
+
+/*periods*/
+#timetable-days {
+    z-index: 2;
+    display: flex;
+    width: calc(100%-5vw);
+}
+
+.school-days {
+    width: 9vw;
+    min-width: 9vw;
+
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    align-items: center;
 }
 
-.gridBoxDays {
+.periods {
     text-align: center;
+        display: flex;
+        flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-.periodStyling {
-    width: 80%;
-    height: 5vh;
+.period-styling {
+    width: 90%;
+    height: var(--period-height);
 
+    margin-bottom: 5px;
     padding: 0.25vw;
-    margin-bottom: 0.5vh;
-    margin-right: 0.75vh;
+    box-sizing: border-box;
 
-    border-style: solid;
-    border-color: var(--transparent);
+    border: none;
     border-radius: 0.5em;
 
     font-size: 1.25em;
@@ -260,14 +314,11 @@
     align-items: center;
 }
 
-
+.period-break {
+    height: var(--break-height);
+    margin-bottom: 2.5px;
+}
 
 .period {
     margin-top: 5vh;
-}
-
-#gridBoxTimeSchedules .timeScheduleBoxes {
-    margin-bottom: 0.5vh;
-    border-style: solid;
-    border-color: var(--transparent);
 }
