@@ -54,10 +54,6 @@ const times = [
     "22:10"
 ]
 
-let currentDay = ""
-
-let currentTimetableData = []
-
 /* Doesn't work yet
 function init() {
     fetch("http://localhost:8080/api/run/testCsv")
@@ -105,6 +101,8 @@ function getTimetableByTeacher(teacherId) {
         .then(response => {
             return response.json()
         }).then(data => {
+            console.log(data)
+            
             createLayout(data.timetableDTO.classSubjectInstances)
 
         }).catch(error => {
@@ -113,6 +111,7 @@ function getTimetableByTeacher(teacherId) {
 }
 
 function createLayout(data) {
+    clearLayout()
     console.log('Raw data:', data)
     let map = new Map()
 
@@ -137,21 +136,19 @@ function createLayout(data) {
     map.forEach((classSubjects, day) => {
 
         const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
-
-        gridBox.innerHTML = "";
-
+        let content = ""
         // Create HTML 
         classSubjects.forEach(item => {
-            const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
-            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
-            const duration = item.duration || 1;
-            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
-            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
-            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+            const subjectName = item.classSubject?.subject?.subjectName || "No lesson"
+            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-"
+            const duration = item.duration || 1
+            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200
+            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200
+            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200
 
             for (let d = 0; d < duration; d++) {
-                if (subjectName != "No lesson") {
-                    gridBox.innerHTML += `
+                if (subjectName !== "No lesson") {
+                    content += `
                     <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
@@ -159,17 +156,26 @@ function createLayout(data) {
                 `;
                 }
                 else {
-                    gridBox.innerHTML += `
+                    content += `
                     <div class="periodStyling">
                     </div>
                 `;
                 }
+        
             }
 
         });
+        gridBox.innerHTML = content;
     });
 }
 
+function clearLayout(){
+    let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    days.forEach(day => {
+        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
+        gridBox.innerHTML = "";
+    });
+}
 
 function initializeApp() {
     load();
