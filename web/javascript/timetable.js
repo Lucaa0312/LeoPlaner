@@ -24,7 +24,12 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         li.classList.add('selected-item');
 
         const data = li.dataset.value;
-        console.log(data);
+        const selectedCategory = wrapper.id;
+        if (selectedCategory === 'teachers') {
+            getTimetableByTeacher(data);
+        }
+
+        // Add more conditions HERE
     });
 });
 
@@ -96,7 +101,15 @@ function getOptimizedTimetable() {
 }
 
 function getTimetableByTeacher(teacherId) {
-    console.log(teacherId);
+    fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            createLayout(data.timetableDTO.classSubjectInstances)
+
+        }).catch(error => {
+            console.error('Error loading Timetable by teacher:', error)
+        })
 }
 
 function createLayout(data) {
