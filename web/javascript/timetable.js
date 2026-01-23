@@ -10,7 +10,7 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         wrapper.classList.toggle('is-open');
     });
 
-    // click auf dropbox item
+    // click on dropbox item
     menu.addEventListener('click', event => {
         const li = event.target.closest('li');
         if (!li) return;
@@ -28,7 +28,7 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
     });
 });
 
-// click außerhalb schließt alle Dropdowns
+// click out of box closes dropdown
 document.addEventListener('click', event => {
     const isClickInside = event.target.closest('.top-bar-select');
     if (isClickInside) return;
@@ -93,6 +93,10 @@ function getOptimizedTimetable() {
         }).catch(error => {
             console.error('Error optimizing Timetable:', error)
         })
+}
+
+function getTimetableByTeacher(teacherId) {
+    console.log(teacherId);
 }
 
 function createLayout(data) {
