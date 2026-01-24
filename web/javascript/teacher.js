@@ -135,31 +135,35 @@ function loadAddTeacherForm() {
     closeScreenButton.id = "close-add-teacher-screen-btn";
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
-    closeScreenButton.onclick = async () => {
-        await displayTeachers();
+    closeScreenButton.onclick = () => {
+        displayTeachers();
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
     };
+
+    
+    const avaterUploadDiv = document.createElement("div");
+    avaterUploadDiv.className = "avatar-upload";
+    avaterUploadDiv.innerHTML = `   
+        <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
+            <label for="teacher-image-input" class="avatar-label">
+                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
+            </label>
+            <p>Upload Photo</p>`;
+
+    
 
     const formContainer = document.createElement("div");
     formContainer.id = "form-container";
     formContainer.innerHTML = `
       <form id="add-teacher-form">
         
-        <div class="avatar-upload">
-            <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
-            <label for="teacher-image-input" class="avatar-label">
-                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
-            </label>
-            <p>Upload Photo</p>
-        </div>
-        <br>
         <input type="text" id="first-name-input" name="first-name" required placeholder="First Name">
-        <br>
+        
         <input type="text" id="last-name-input" name="last-name" required placeholder="Last Name">
-        <br>
+        
         <input type="text" id="initials-input" name="initials" required placeholder="Initials">
-        <br>
+        
         <input type="email" id="email-input" name="email" required placeholder="Email">
       </form>
 
@@ -171,9 +175,6 @@ function loadAddTeacherForm() {
 
         <div id="subject-dropdown"></div>
         <div id="selected-subjects"></div>
-        <div id="workload-input-container">
-            <input type="text" id="workload-input" name="workload" required placeholder="Workload (e.g., 22h)">
-        </div>
       </div>
     `;
 
@@ -209,7 +210,7 @@ function loadAddTeacherForm() {
 
     headerContainer.appendChild(closeScreenButton);
 
-    addTeacherScreen.replaceChildren(headerContainer, formContainer, availabilityContainer, submitButton);
+    addTeacherScreen.replaceChildren(headerContainer, avaterUploadDiv, formContainer, availabilityContainer, submitButton);
 
     initAvailabilityDays();
     imagePreview();

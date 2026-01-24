@@ -164,7 +164,7 @@
     padding-top: 2vh;
     padding-bottom: 2vh;
 
-    background-color: blueviolet;
+    height: 5vh;
 }
 
 #add-teacher-header {
@@ -175,8 +175,8 @@
 
 #close-add-teacher-screen-btn {
     position: absolute;
-    right: 2vw;
-    top: 2vh;
+    right: 1.5vw;
+    top: 1vh;
     cursor: pointer;
 
     font-size: 3rem;
@@ -198,27 +198,33 @@
     row-gap: 0vh;
     column-gap: 0vw;
 
-    margin-top: 5vh;
+    margin-top: 2vh;
+    margin-left: auto;
+    margin-right: auto;
 
-    background-color: yellow;
+    width: 50vw;
 }
 
 
 #add-teacher-form {
     display: flex;
     flex-direction: column;
+    gap: 2vh;
+    margin-left: auto;
+    margin-right: auto;
 
-    margin-left: 5vw;
+    width: auto;
 
-    width: 20vw;
-
-    background-color: red;
 }
 
 
 .avatar-upload {
     display: flex;
-    margin-bottom: 1vh;
+    margin-top: 2vh;
+    /* background-color: red; */
+    width: 20vw;
+    margin-left: 5vw;
+    padding-left: 1.5vw;
 }
 
 #teacher-image-input {
@@ -278,7 +284,7 @@
 #last-name-input,
 #initials-input,
 #email-input {
-    width: 15vw;
+    width: 20vw;
 
     padding-right: 1vw;
     padding-left: 1vw;
@@ -310,8 +316,9 @@
 /* ------------------add-subjects-container--------------------- */
 
 #add-subjects-container{
-    margin-top: 13.5vh;
-    background-color: red;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
 }
 
 #subject-input-container{
@@ -320,7 +327,7 @@
     align-items: center;
     justify-content: flex-end;
 
-    width: 15vw;
+    width: 20vw;
 
     padding-right: 1vw;
     padding-left: 1vw;
@@ -381,7 +388,8 @@
 }
 
 .dropdown-item {
-    padding: 8px;
+    padding: 0.5vw;
+    border-radius: 0.5vw;
     cursor: pointer;
 }
 
@@ -393,7 +401,9 @@
     display: grid;
     grid-template-columns: auto auto;
     
-    width: 15vw;
+    margin-left: 5vh;
+
+    width: 10vw;
 }
 
 .subject-chip {
@@ -418,39 +428,13 @@
 }
 
 
-#workload-input-container{
-    margin-top: 16vh;
-}
-#workload-input{
-    width: 15vw;
-
-    padding-right: 1vw;
-    padding-left: 1vw;
-    padding-top: 0.7vh;
-    padding-bottom: 0.7vh;
-
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
-    border-radius: 2vw;
-    border-style: none;
-    font-size: 1.75rem;
-
-    border: none;
-    outline: none;
-
-    color: var(--leo-text-color);
-}
-
-#workload-input:focus {
-    outline: none;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
-}
 
 /* ------------------ Availability Days --------------------- */
 #availability-container {
-    width: 50vw;
-    margin: 5vh auto 0 auto; 
+    margin-top: 5vh;
+    margin-left: auto;
+    margin-right: auto;
+
 }
 
 #availability-header {
@@ -496,8 +480,12 @@
 
 #submit-teacher-btn {
     margin-top: 5vh;
+
     margin-left: auto;
     margin-right: auto;
+    
+    text-align: center;
+    width: 10vw;
 
     padding-left: 2.5vw;
     padding-right: 2.5vw;
