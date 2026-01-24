@@ -1,2 +1,4 @@
 documentation/SprintReview_RevealJS/*
 documentation/img/revealJS/*
+startApplication.sh
+stopApplication.sh

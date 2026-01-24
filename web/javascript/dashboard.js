@@ -6,8 +6,8 @@ const statsData = [
     { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
 
-
-//load teacher stats from Backend API
+/*
+load teacher stats from Backend API
 function loadTeacherStats() {
     fetch("http://localhost:8080/api/teachers/getTeacherCount")
         .then(res => res.json())
@@ -17,7 +17,7 @@ function loadTeacherStats() {
         .catch(err => console.error(err));
 }
 
-// load subject stats from Backend API
+load subject stats from Backend API
 function loadSubjectStats() {
     fetch("http://localhost:8080/api/subjects/getSubjectCount")
         .then(res => res.json())
@@ -27,7 +27,7 @@ function loadSubjectStats() {
         .catch(err => console.error(err));
 }
 
-// load room stats from Backend API
+load room stats from Backend API
 function loadRoomStats() {
     fetch("http://localhost:8080/api/rooms/getRoomCount")
         .then(res => res.json())
@@ -36,7 +36,7 @@ function loadRoomStats() {
         })
         .catch(err => console.error(err));
 }
-
+*/
 
 
 //Gemerates welcome text based on time of day
@@ -110,8 +110,35 @@ function generateDashboardStats() {
 }
 
 
+// Initialize the dashboard application
+async function initializeApp() {
+  initNavbar();
+  generateWelcomeText();
+  showLastUpdateTime();
 
-function initializeApp() {
+  try {
+    const [teachers, subjects, rooms] = await Promise.all([
+      fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json()),
+      fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json()),
+      fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json()),
+    ]);
+
+    statsData[0].value = teachers;
+    statsData[1].value = subjects;
+    statsData[2].value = rooms;
+
+  } catch (e) {
+    console.error("Fehler beim Laden:", e);
+  }
+
+  generateDashboardStats();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
+
+
+// Initialize the dashboard application
+/*function initializeApp() {
     loadRoomStats();
     loadTeacherStats();
     loadSubjectStats();
@@ -120,5 +147,5 @@ function initializeApp() {
     showLastUpdateTime();
     setTimeout(generateDashboardStats, 50);
 }
-
+*/
 document.addEventListener("DOMContentLoaded", initializeApp);
