@@ -121,6 +121,9 @@ function loadAddTeacherForm() {
     const disableOverlay = document.getElementById("disable-overlay");
     disableOverlay.style.display = "block";
 
+    const displayTeachers = document.getElementById("display-teachers");
+    displayTeachers.style.overflowY = "hidden";
+
     const addTeacherScreen = document.getElementById("add-teacher-screen");
     addTeacherScreen.style.display = "flex";
     addTeacherScreen.style.flexDirection = "column";
@@ -136,7 +139,7 @@ function loadAddTeacherForm() {
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
     closeScreenButton.onclick = () => {
-        displayTeachers();
+        displayTeachers.style.overflowY = "scroll";
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
     };
