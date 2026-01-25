@@ -137,6 +137,7 @@ function createLayout(data) {
 
         const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
         let content = ""
+        let currentPeriod = 0
         // Create HTML 
         classSubjects.forEach(item => {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson"
@@ -145,6 +146,13 @@ function createLayout(data) {
             const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200
             const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200
+            const period = item.period.schoolHour
+
+            // Fill empty periods
+            while (currentPeriod < period) {
+                content += `<div class="periodStyling"></div>`
+                currentPeriod++
+            }
 
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson") {
@@ -163,6 +171,7 @@ function createLayout(data) {
                 }
         
             }
+            currentPeriod += duration
 
         });
         gridBox.innerHTML = content;
