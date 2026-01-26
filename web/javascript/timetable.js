@@ -110,6 +110,11 @@ function getTimetableByTeacher(teacherId) {
         })
 }
 
+function clearChoice() {
+    this.window.location.href = "./timetable.html";
+    load();
+}
+
 function createLayout(data) {
     clearLayout()
     console.log('Raw data:', data)
