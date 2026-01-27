@@ -10,7 +10,7 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         wrapper.classList.toggle('is-open');
     });
 
-    // click auf dropbox item
+    // click on dropbox item
     menu.addEventListener('click', event => {
         const li = event.target.closest('li');
         if (!li) return;
@@ -24,11 +24,16 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         li.classList.add('selected-item');
 
         const data = li.dataset.value;
-        console.log(data);
+        const selectedCategory = wrapper.id;
+        if (selectedCategory === 'teachers') {
+            getTimetableByTeacher(data);
+        }
+
+        // Add more conditions HERE
     });
 });
 
-// click außerhalb schließt alle Dropdowns
+// click out of box closes dropdown
 document.addEventListener('click', event => {
     const isClickInside = event.target.closest('.top-bar-select');
     if (isClickInside) return;
@@ -48,10 +53,6 @@ const times = [
     "19:00", "19:45", "20:30", "20:40", "21:25",
     "22:10"
 ]
-
-let currentDay = ""
-
-let currentTimetableData = []
 
 /* Doesn't work yet
 function init() {
@@ -95,7 +96,27 @@ function getOptimizedTimetable() {
         })
 }
 
+function getTimetableByTeacher(teacherId) {
+    fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            
+            createLayout(data.timetableDTO.classSubjectInstances)
+
+        }).catch(error => {
+            console.error('Error loading Timetable by teacher:', error)
+        })
+}
+
+function clearChoice() {
+    this.window.location.href = "./timetable.html";
+    load();
+}
+
 function createLayout(data) {
+    clearLayout()
     console.log('Raw data:', data)
     let map = new Map()
 
@@ -120,21 +141,27 @@ function createLayout(data) {
     map.forEach((classSubjects, day) => {
 
         const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
-
-        gridBox.innerHTML = "";
-
+        let content = ""
+        let currentPeriod = 0
         // Create HTML 
         classSubjects.forEach(item => {
-            const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
-            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
-            const duration = item.duration || 1;
-            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
-            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
-            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+            const subjectName = item.classSubject?.subject?.subjectName || "No lesson"
+            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-"
+            const duration = item.duration || 1
+            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200
+            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200
+            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200
+            const period = item.period.schoolHour
+
+            // Fill empty periods
+            while (currentPeriod < period) {
+                content += `<div class="periodStyling"></div>`
+                currentPeriod++
+            }
 
             for (let d = 0; d < duration; d++) {
-                if (subjectName != "No lesson") {
-                    gridBox.innerHTML += `
+                if (subjectName !== "No lesson") {
+                    content += `
                     <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
@@ -142,17 +169,27 @@ function createLayout(data) {
                 `;
                 }
                 else {
-                    gridBox.innerHTML += `
+                    content += `
                     <div class="periodStyling">
                     </div>
                 `;
                 }
+        
             }
+            currentPeriod += duration
 
         });
+        gridBox.innerHTML = content;
     });
 }
 
+function clearLayout(){
+    let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    days.forEach(day => {
+        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
+        gridBox.innerHTML = "";
+    });
+}
 
 function initializeApp() {
     load();
