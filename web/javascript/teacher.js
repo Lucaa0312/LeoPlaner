@@ -78,6 +78,8 @@ function addTeacher() {
         teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
     };
 
+    console.log("SENDING", roomData);
+
     fetch("http://localhost:8080/api/teachers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
