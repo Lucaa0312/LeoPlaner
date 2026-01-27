@@ -4,7 +4,8 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.Subject;
+import at.htlleonding.leoplaner.dto.RoomDTO;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -24,12 +25,11 @@ public class RoomResource {
     @Context
     UriInfo uriInfo;
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllRooms() {
-        List<Room> rooms = dataRepository.getAllRooms();
-        return Response.status(Response.Status.OK).entity(rooms).build();
+    public List<RoomDTO> getAllRooms() {
+        return dataRepository.getAllRooms().stream().map(e ->
+          UtilBuildFunctions.createRoomDTO(e)).toList();
     }
 
     @POST

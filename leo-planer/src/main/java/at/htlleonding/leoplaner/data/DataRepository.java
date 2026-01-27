@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.data;
 
-import at.htlleonding.leoplaner.data.SchoolDays;
 
 import java.util.*;
 
@@ -30,6 +29,12 @@ public class DataRepository {
         this.currentTimetable = currentTimetable;
     }
 
+    public Timetable getCurrentTeacherTimetable(Long id) {
+        this.currentTimetable.sortTimetableBySchoolhour();
+        final Teacher teacher = getTeacherByID(id);
+        return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
+                              .filter(e -> e.getClassSubject() != null && e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList());
+        }
 
     public List<ClassSubject> getAllClassSubjects() {
         TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
@@ -75,7 +80,7 @@ public class DataRepository {
     }
 
     public Long getRoomCount() {
-        return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
+        return this.entityManager.createNamedQuery(Room.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
     public List<Subject> getAllSubjects() {

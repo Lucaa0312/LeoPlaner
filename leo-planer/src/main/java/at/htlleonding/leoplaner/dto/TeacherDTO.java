@@ -1,6 +1,9 @@
 package at.htlleonding.leoplaner.dto;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public record TeacherDTO(String teacherName, String nameSymbol, ArrayList<SubjectDTO> teachingSubject) {
+public record TeacherDTO(Long id, String teacherName, String nameSymbol, List<SubjectDTO> teachingSubject) {
+  public TeacherDTO {
+    teachingSubject = List.copyOf(teachingSubject);
+  }
 }

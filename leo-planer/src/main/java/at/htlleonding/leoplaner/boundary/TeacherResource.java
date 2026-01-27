@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Teacher;
+import at.htlleonding.leoplaner.dto.TeacherDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -26,9 +27,10 @@ public class TeacherResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllTeachers() {
-        List<Teacher> teachers = dataRepository.getAllTeachers();
-        return Response.status(Response.Status.OK).entity(teachers).build();
+    public List<TeacherDTO> getAllTeachers() {
+        return dataRepository.getAllTeachers().stream().map(e ->
+                UtilBuildFunctions.createTeacherDTO(e)
+        ).toList();
     }
 
     @POST

@@ -10,7 +10,7 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         wrapper.classList.toggle('is-open');
     });
 
-    // click auf dropbox item
+    // click on dropbox item
     menu.addEventListener('click', event => {
         const li = event.target.closest('li');
         if (!li) return;
@@ -24,11 +24,16 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
         li.classList.add('selected-item');
 
         const data = li.dataset.value;
-        console.log(data);
+        const selectedCategory = wrapper.id;
+        if (selectedCategory === 'teachers') {
+            getTimetableByTeacher(data);
+        }
+
+        // Add more conditions HERE
     });
 });
 
-// click außerhalb schließt alle Dropdowns
+// click out of box closes dropdown
 document.addEventListener('click', event => {
     const isClickInside = event.target.closest('.top-bar-select');
     if (isClickInside) return;
@@ -50,10 +55,6 @@ const times = [
     "19:00", "19:45", "20:30", "20:40", "21:25",
     "22:10"
 ]
-
-let currentDay = ""
-
-let currentTimetableData = []
 
 /* Doesn't work yet
 function init() {
@@ -97,8 +98,28 @@ function getOptimizedTimetable() {
         })
 }
 
+function getTimetableByTeacher(teacherId) {
+    fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            
+            createLayout(data.timetableDTO.classSubjectInstances)
+
+        }).catch(error => {
+            console.error('Error loading Timetable by teacher:', error)
+        })
+}
+
+function clearChoice() {
+    this.window.location.href = "./timetable.html";
+    load();
+}
+
 //Load all Times and hours into the table view
 function createLayout(data) {
+    clearLayout()
     console.log('Raw data:', data)
     let map = new Map()
 
@@ -175,12 +196,22 @@ function createLayout(data) {
                     </div>
                 `;
                 }
+        
             }
+            currentPeriod += duration
 
         });
+        gridBox.innerHTML = content;
     });
 }
 
+function clearLayout(){
+    let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    days.forEach(day => {
+        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
+        gridBox.innerHTML = "";
+    });
+}
 
 function initializeApp() {
     load();

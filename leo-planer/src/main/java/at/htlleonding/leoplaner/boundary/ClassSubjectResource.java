@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.dto.ClassSubjectDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -23,12 +24,11 @@ public class ClassSubjectResource {
     @Inject
     DataRepository dataRepository;
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllClassSubjects() {
-        List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
-        return Response.status(Response.Status.OK).entity(classSubjects).build();
+    public List<ClassSubjectDTO> getAllClassSubjects() {
+        return dataRepository.getAllClassSubjects().stream().map(e ->
+                  UtilBuildFunctions.createClassSubjectDTO(e)).toList();
     }
 
     @POST

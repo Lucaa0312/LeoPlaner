@@ -1,27 +1,24 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.RoomTypes;
 import at.htlleonding.leoplaner.data.SchoolDays;
+import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Timetable;
-import at.htlleonding.leoplaner.dto.ClassSubjectDTO;
 import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
 import at.htlleonding.leoplaner.dto.PeriodDTO;
-import at.htlleonding.leoplaner.dto.RoomDTO;
-import at.htlleonding.leoplaner.dto.SubjectClassLinkDTO;
-import at.htlleonding.leoplaner.dto.TeacherSubjectLinkDTO;
+import at.htlleonding.leoplaner.dto.TeacherNoSubjectDTO;
+import at.htlleonding.leoplaner.dto.TeacherNonPreferredHourDTO;
+import at.htlleonding.leoplaner.dto.TeacherNonWorkingHourDTO;
+import at.htlleonding.leoplaner.dto.TeacherTimetableDTO;
 import at.htlleonding.leoplaner.dto.TimetableDTO;
+
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -37,7 +34,6 @@ public class TimeTableResource {
     @Inject
     DataRepository dataRepository;
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public TimetableDTO getCurrentTimeTable() {
@@ -52,13 +48,9 @@ public class TimeTableResource {
                 continue;
             }
 
-            classSubjectInstanceDTOs.add(
-                                      new ClassSubjectInstanceDTO(csi.getDuration(),
-                                      new RoomDTO(csi.getRoom().getRoomNumber(), csi.getRoom().getRoomName(), csi.getRoom().getRoomPrefix(), csi.getRoom().getRoomSuffix(), csi.getRoom().getRoomTypes()),
-                                      new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()),
-                                      new ClassSubjectDTO(csi.getClassSubject().getWeeklyHours(), csi.getClassSubject().isRequiresDoublePeriod(), csi.getClassSubject().isBetterDoublePeriod(), csi.getClassSubject().getClassName(), 
-                                                  new TeacherSubjectLinkDTO(csi.getClassSubject().getTeacher().getTeacherName(), csi.getClassSubject().getTeacher().getNameSymbol()),
-                                                  new SubjectClassLinkDTO(csi.getClassSubject().getSubject().getSubjectName(), csi.getClassSubject().getSubject().getSubjectColor()))));
+            if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null) continue;
+
+            classSubjectInstanceDTOs.add(UtilBuildFunctions.createClassSubjectInstanceDTO(csi));
         }
 
         return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs);
@@ -72,7 +64,6 @@ public class TimeTableResource {
         Room room = this.dataRepository.getRoomByNumber(24);
         this.dataRepository.createTimetable("4chitm", room);
         return Response.status(Response.Status.OK)
-                .entity(this.dataRepository.getCurrentTimetable())
                 .build();
     }
     
@@ -80,9 +71,29 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByDay/{day}")
     public Response getClassSubjectInstancesByDay(@PathParam("day") String day) {
-      List<ClassSubjectInstance> timetableByDay = this.dataRepository.getCurrentTimetable().getClassSubjectInstances().stream()
-                .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase())).sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour()).toList();
+      List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable().getClassSubjectInstances().stream()
+              .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase()))
+              .sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour())
+              .map(csi -> UtilBuildFunctions.createClassSubjectInstanceDTO(csi))
+              .toList();
 
       return Response.status(Response.Status.OK).entity(timetableByDay).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getByTeacher/{id}")
+    public TeacherTimetableDTO getTeacherTimetable(@PathParam("id") Long id) {
+        final Timetable timetableTeacher = this.dataRepository.getCurrentTeacherTimetable(id);
+        final Teacher teacher = this.dataRepository.getTeacherByID(id);
+
+        return new TeacherTimetableDTO(
+              new TeacherNoSubjectDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(), teacher.getTeacher_non_working_hours().stream().map(e -> new TeacherNonWorkingHourDTO(e.getDay(), e.getSchoolHour())).toList(),
+              teacher.getTeacher_non_preferred_hours().stream()
+                                    .map(e -> new TeacherNonPreferredHourDTO(e.getDay(), e.getSchoolHour())).toList()), 
+
+              new TimetableDTO(timetableTeacher.getTotalWeeklyHours(), 
+                              timetableTeacher.getClassSubjectInstances().stream().map(csi ->
+                              UtilBuildFunctions.createClassSubjectInstanceDTO(csi)).toList()));
     }
 }

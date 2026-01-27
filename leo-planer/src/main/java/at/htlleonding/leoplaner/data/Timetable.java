@@ -6,10 +6,10 @@ import java.util.Random;
 import java.util.Comparator;
 
 public class Timetable {
-    private ArrayList<ClassSubjectInstance> classSubjectInstances;
+    private List<ClassSubjectInstance> classSubjectInstances;
     private int totalWeeklyHours; //all durations summed up
 
-    public Timetable(final ArrayList<ClassSubjectInstance> classSubjectInstances) {
+    public Timetable(final List<ClassSubjectInstance> classSubjectInstances) {
         this.classSubjectInstances = classSubjectInstances;
     }
 
@@ -137,11 +137,11 @@ public class Timetable {
     }
  
 
-    public ArrayList<ClassSubjectInstance> getClassSubjectInstances() {
+    public List<ClassSubjectInstance> getClassSubjectInstances() {
         return classSubjectInstances;
     }
 
-    public void setClassSubjectInstances(final ArrayList<ClassSubjectInstance> classSubjectInstances) {
+    public void setClassSubjectInstances(final List<ClassSubjectInstance> classSubjectInstances) {
         this.classSubjectInstances = classSubjectInstances;
     }
 
