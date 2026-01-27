@@ -204,6 +204,7 @@ function loadAddTeacherForm() {
 
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
+        displayTeachers.style.overflowY = "scroll";
 
         setTimeout(() => {
             displayTeachers();
@@ -307,7 +308,7 @@ function displayTeachers() {
 
 // Search functionality for teachers
 function searchTeacher() {
-    let query = document.getElementById("teacher-search").value.toLowerCase();
+    let query = document.getElementById("input-field").value.toLowerCase();
     let rows = document.querySelectorAll(".teacher-row");
 
     rows.forEach(function (row) {
@@ -331,4 +332,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-document.getElementById("teacher-search").addEventListener("input", searchTeacher);
+document.getElementById("input-field").addEventListener("input", searchTeacher);
