@@ -61,6 +61,7 @@ function init() {
 */
 
 function load() {
+    clearLayout();
     fetch("http://localhost:8080/api/timetable")
         .then(response => {
             return response.json()
@@ -71,40 +72,39 @@ function load() {
         })
 }
 
-
 function getRandomizedTimeTable() {
+    clearLayout();
     fetch("http://localhost:8080/api/timetable/randomize")
         .then(response => {
             return response.json()
         }).then(data => {
             createLayout(data.classSubjectInstances)
-
         }).catch(error => {
             console.error('Error randomizing Timetable:', error)
         })
 }
 
 function getOptimizedTimetable() {
+    clearLayout();
     fetch("http://localhost:8080/api/run/algorithm")
         .then(response => {
             return response.json()
         }).then(data => {
             createLayout(data.classSubjectInstances)
-
         }).catch(error => {
             console.error('Error optimizing Timetable:', error)
         })
 }
 
 function getTimetableByTeacher(teacherId) {
+    clearLayout();
     fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
         .then(response => {
             return response.json()
         }).then(data => {
-            console.log(data)
-            
+            console.log(`Fetched data:`, data)
             createLayout(data.timetableDTO.classSubjectInstances)
-
+            createRedArea(data.teacher);
         }).catch(error => {
             console.error('Error loading Timetable by teacher:', error)
         })
@@ -115,8 +115,37 @@ function clearChoice() {
     load();
 }
 
+function createRedArea(teacher) {
+    const noWorkingHours = [];
+
+    for (let i = 0; i < teacher.teacherNonWorkingHours.length; i++) {
+        noWorkingHours.push({
+            classSubject: {
+                subject: {
+                    id: 2,
+                    subjectName: "RedArea",
+                    subjectColor: { red: 255, green: 0, blue: 0 }
+                },
+                teacher: {
+                    id: teacher.id,
+                    teacherName: teacher.teacherName,
+                    nameSymbol: teacher.nameSymbol
+                }
+            },
+            period: {
+                schoolDays: teacher.teacherNonWorkingHours[i].day,
+                schoolHour: teacher.teacherNonWorkingHours[i].schoolHour,
+                lunchBreak: false
+            }
+        });
+    }
+
+    console.log("Red area data:", noWorkingHours);
+    createLayout(noWorkingHours);
+}
+
+
 function createLayout(data) {
-    clearLayout()
     console.log('Raw data:', data)
     let map = new Map()
 
@@ -139,7 +168,6 @@ function createLayout(data) {
 
     // value, key
     map.forEach((classSubjects, day) => {
-
         const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
         let content = ""
         let currentPeriod = 0
@@ -160,11 +188,17 @@ function createLayout(data) {
             }
 
             for (let d = 0; d < duration; d++) {
-                if (subjectName !== "No lesson") {
+                if (subjectName !== "No lesson" && subjectName !== "RedArea") {
                     content += `
                     <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
+                    </div>
+                `;
+                }
+                else if (subjectName === "RedArea") {
+                    content += `
+                    <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                     </div>
                 `;
                 }
@@ -174,10 +208,8 @@ function createLayout(data) {
                     </div>
                 `;
                 }
-        
             }
-            currentPeriod += duration
-
+            currentPeriod += duration;
         });
         gridBox.innerHTML = content;
     });
