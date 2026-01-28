@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.algorithm;
 
+import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.DataRepository;
@@ -8,7 +9,9 @@ import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
+import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
+import at.htlleonding.leoplaner.dto.PeriodDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -83,9 +86,36 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void setAttributesOfTimetable(Timetable timetableToSet, int cost, double temperature) { // maybe make Generic
-                                                                                                   // for dynamic
+        // for dynamic
         timetableToSet.setCostOfTimetable(cost);
         timetableToSet.setTempAtTimetable(temperature);
+    }
+
+    // TODO maybe advance with just being able to get new Changes instead of entire
+    // timetable
+    public void setTeacherTakenPeriod(final Timetable timetable) {
+        final List<ClassSubjectInstance> classSubjectInstancesList = timetable.getClassSubjectInstances();
+
+        for (ClassSubjectInstance csi : classSubjectInstancesList) {
+            final Period period = csi.getPeriod();
+            final ClassSubject classSubject = csi.getClassSubject();
+            final String className = classSubject.getClassName();
+            final Teacher teacher = classSubject.getTeacher();
+
+            teacher.getTakenUpPeriods().add(new TeacherTakenPeriod(period, className));
+        }
+    }
+
+    public void resetAllTeacherTakenPeriodInClass(final String className) {
+        List<Teacher> teachers = this.dataRepository.getAllTeachers();
+
+        teachers.stream().forEach(
+                teacher -> resetTeacherTakenPeriod(teacher, className));
+    }
+
+    public void resetTeacherTakenPeriod(final Teacher teacher, String className) {
+        teacher.getTakenUpPeriods().removeAll(
+                teacher.getTakenUpPeriods().stream().filter(e -> e.className().equals(className)).toList());
     }
 
     public void repairTimetable(Timetable timetable) {
@@ -118,8 +148,8 @@ public class SimulatedAnnealingAlgorithm {
             Period nextPeriod = classesOnDay.get(i + 1).getPeriod();
 
             if (nextPeriod.getSchoolHour() > currentEndOfClass) { // just means if the next class starts at a time
-                                                                  // bigger than what the previous class ended, hence
-                                                                  // resulting in a gap
+                // bigger than what the previous class ended, hence
+                // resulting in a gap
                 nextPeriod.setSchoolHour(currentEndOfClass);
             }
         }
@@ -138,15 +168,13 @@ public class SimulatedAnnealingAlgorithm {
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
         int cost = 0;
-        for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) { // create
-                                                                                                                  // a
-                                                                                                                  // copy
-                                                                                                                  // to
-                                                                                                                  // not
-                                                                                                                  // have
-                                                                                                                  // mofying
-                                                                                                                  // conflicts
-            Period period = classSubjectInstance.getPeriod();
+        for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
+            final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
+            final Period period = classSubjectInstance.getPeriod();
+
+            if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
+                return cost + 999999;
+            }
 
             final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
             teacherNonWorkingHour.setDay(period.getSchoolDays());
@@ -177,6 +205,10 @@ public class SimulatedAnnealingAlgorithm {
             }
         }
         return cost;
+    }
+
+    public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {
+        return teacher.getTakenUpPeriods().contains(period);
     }
 
     public void chooseRandomNeighborFunction(final int index1, final int index2) { // TODO add random function to change

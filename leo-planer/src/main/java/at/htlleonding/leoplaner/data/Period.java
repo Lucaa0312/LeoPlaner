@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.data;
 
+import jakarta.persistence.Embeddable;
 
+@Embeddable
 public class Period {
     private SchoolDays schoolDays;
     private int schoolHour;
