@@ -1,13 +1,13 @@
 //Dashboard id and Label mapping
 const statsData = [
-    { id: "stat-card-teachers", label: "Total<br>Teachers:", value: 0 },
-    { id: "stat-card-subjects", label: "Total<br>Subjects:", value: 0 },
-    { id: "stat-card-rooms", label: "Available<br>Rooms:", value: 0 },
-    { id: "stat-card-conflicts", label: "Conflicts:", value: 0 },
+    { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
+    { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
+    { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
+    { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
 
-
-//load stats from Backend API
+/*
+load teacher stats from Backend API
 function loadTeacherStats() {
     fetch("http://localhost:8080/api/teachers/getTeacherCount")
         .then(res => res.json())
@@ -17,6 +17,26 @@ function loadTeacherStats() {
         .catch(err => console.error(err));
 }
 
+load subject stats from Backend API
+function loadSubjectStats() {
+    fetch("http://localhost:8080/api/subjects/getSubjectCount")
+        .then(res => res.json())
+        .then(data => {
+            statsData[1].value = data;
+        })
+        .catch(err => console.error(err));
+}
+
+load room stats from Backend API
+function loadRoomStats() {
+    fetch("http://localhost:8080/api/rooms/getRoomCount")
+        .then(res => res.json())
+        .then(data => {
+            statsData[2].value = data;
+        })
+        .catch(err => console.error(err));
+}
+*/
 
 
 //Gemerates welcome text based on time of day
@@ -28,11 +48,11 @@ function generateWelcomeText() {
 
     let greeting;
     if (hour >= 5 && hour < 12) {
-        greeting = "Good morning";
+        greeting = "Guten Morgen";
     } else if (hour < 18) {
-        greeting = "Good afternoon";
+        greeting = "Guten Nachmittag";
     } else {
-        greeting = "Good evening";
+        greeting = "Guten Abend";
     }
 
     welcomeTextElement.textContent = `${greeting}, Admin`;
@@ -43,7 +63,7 @@ function showLastUpdateTime() {
     const statusCardTextElement = document.getElementById("status-card-text");
     if (!statusCardTextElement) return;
 
-    statusCardTextElement.textContent = "Fetching...";
+    statusCardTextElement.textContent = "Wird geladen...";
 }
 
 
@@ -69,7 +89,12 @@ function generateDashboardStats() {
 
         const number = document.createElement("h1");
         number.className = "stat-number";
-        number.textContent = stat.value;
+        if (stat.id === "stat-card-timetable") {
+
+        }
+        else {
+            number.textContent = stat.value;
+        }
 
         content.appendChild(label);
         content.appendChild(number);
@@ -85,13 +110,42 @@ function generateDashboardStats() {
 }
 
 
+// Initialize the dashboard application
+async function initializeApp() {
+  initNavbar();
+  generateWelcomeText();
+  showLastUpdateTime();
 
-function initializeApp() {
+  try {
+    const [teachers, subjects, rooms] = await Promise.all([
+      fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json()),
+      fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json()),
+      fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json()),
+    ]);
+
+    statsData[0].value = teachers;
+    statsData[1].value = subjects;
+    statsData[2].value = rooms;
+
+  } catch (e) {
+    console.error("Fehler beim Laden:", e);
+  }
+
+  generateDashboardStats();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
+
+
+// Initialize the dashboard application
+/*function initializeApp() {
+    loadRoomStats();
     loadTeacherStats();
+    loadSubjectStats();
     initNavbar();
     generateWelcomeText();
     showLastUpdateTime();
     setTimeout(generateDashboardStats, 50);
 }
-
+*/
 document.addEventListener("DOMContentLoaded", initializeApp);

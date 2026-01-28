@@ -46,6 +46,131 @@
 }
 
 
+/* ------------------MAIN CONTENT BOX--------------------- */
+#main-content {
+    background-color: var(--leo-background-color);
+    width: 80vw;
+    height: 100vh;
+    position: relative;
+
+    overflow-y: hidden;
+
+}
+
+#header-text {
+    font-weight: bold;
+    font-size: 3rem;
+    color: var(--leo-text-color);
+
+    margin-left: 5vw;
+    margin-top: 2vh;
+    margin-right: 43vw;
+}
+
+#header-subtext {
+    opacity: 0.4;
+    font-weight: bold;
+    font-size: 2.25rem;
+    color: var(--leo-text-color);
+
+    margin-left: 5vw;
+}
+
+
+/* ------------------ CONTROLS CSS SUCH AS SEARCH AND ADD BUTTON---------------------*/
+#controls {
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    
+} 
+
+#search-bar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+
+    width: 20vw;
+
+    padding-right: 1vw;
+    padding-left: 1vw;
+    padding-top: 0.7vh;
+    padding-bottom: 0.7vh;
+
+    background-color: #D9D9D9;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-radius: 2vw;
+    border-style: none;
+    font-size: 1.75rem;
+
+    color: var(--leo-text-color);
+}
+
+#search-bar:focus-within{
+    outline: none;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
+}
+
+
+#input-field {
+    background: transparent;
+    color: var(--leo-text-color);
+    font-size: 1.5rem;
+    text-align: right;
+
+    width: 20vw;
+    margin-right: 0.5vw;
+    border: none;
+    outline: none;
+}
+
+#search-icon{
+    color: var(--leo-text-color);
+    width: 1.5vw;
+    height: 1.5vw;
+
+    justify-self: center;
+}
+
+
+#add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    width: 15vw;
+
+    font-weight: semi-bold;
+
+    margin-top: 1.5vh;
+
+    padding-left: 1vw;
+    padding-right: 1vw;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+
+    border-radius: 43px;
+
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+
+    cursor: pointer;
+
+    transition: all 200ms ease-in;
+}
+
+#add-btn:hover {
+    background-color: var(--leo-primary-color2);
+    scale: 1.02;
+}
+
+
 /* ------------------NAVIGATION BAR--------------------- */
 #nav-bar {
     height: 100%;

@@ -1,11 +1,11 @@
 
 // Nav items configuration
 const navItems = [
-    { id: "nav-item-dashboard", icon: "fa-regular fa-chart-bar", text: "Dashboard", path: "./dashboard.html" },
-    { id: "nav-item-teacher", icon: "fa-regular fa-address-card", text: "Teacher", path: "./teacher.html" },
-    { id: "nav-item-subjects", icon: "fa-regular fa-newspaper", text: "Subjects", path: "./subjects.html" },
-    { id: "nav-item-rooms", icon: "fa-regular fa-compass", text: "Rooms", path: "./rooms.html" },
-    { id: "nav-item-timetable", icon: "fa-regular fa-calendar-days", text: "Timetable", path: "./timetable.html" },
+    { id: "nav-item-dashboard", icon: "fa-regular fa-chart-bar", text: "Startseite", path: "./dashboard.html" },
+    { id: "nav-item-teacher", icon: "fa-regular fa-address-card", text: "Lehrer", path: "./teacher.html" },
+    { id: "nav-item-subjects", icon: "fa-regular fa-newspaper", text: "Fächer", path: "./subjects.html" },
+    { id: "nav-item-rooms", icon: "fa-regular fa-compass", text: "Räume", path: "./rooms.html" },
+    { id: "nav-item-timetable", icon: "fa-regular fa-calendar-days", text: "Stundenplan", path: "./timetable.html" },
 ];
 
 // Initializes the navigation bar

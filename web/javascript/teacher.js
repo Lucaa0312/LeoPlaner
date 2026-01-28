@@ -1,5 +1,3 @@
-
-
 let allSubjects = [];        // all Subjects from DB
 let selectedSubjects = [];  // selected Subjects for Teacher
 
@@ -72,7 +70,6 @@ function addSubject(subject) {
     container.appendChild(chip);
 }
 
-
 //add teacher to DB
 function addTeacher() {
     const teacherData = {
@@ -80,6 +77,8 @@ function addTeacher() {
         nameSymbol: document.getElementById("initials-input").value,
         teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
     };
+
+    console.log("SENDING", roomData);
 
     fetch("http://localhost:8080/api/teachers", {
         method: "POST",
@@ -119,9 +118,13 @@ function imagePreview() {
 
 
 function loadAddTeacherForm() {
+    document.getElementById("no-teachers").style.display = "none";
     
     const disableOverlay = document.getElementById("disable-overlay");
     disableOverlay.style.display = "block";
+
+    const displayTeachers = document.getElementById("display-teachers");
+    displayTeachers.style.overflowY = "hidden";
 
     const addTeacherScreen = document.getElementById("add-teacher-screen");
     addTeacherScreen.style.display = "flex";
@@ -138,29 +141,34 @@ function loadAddTeacherForm() {
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
     closeScreenButton.onclick = () => {
+        displayTeachers.style.overflowY = "scroll";
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
     };
+
+    
+    const avaterUploadDiv = document.createElement("div");
+    avaterUploadDiv.className = "avatar-upload";
+    avaterUploadDiv.innerHTML = `   
+        <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
+            <label for="teacher-image-input" class="avatar-label">
+                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
+            </label>
+            <p>Upload Photo</p>`;
+
+    
 
     const formContainer = document.createElement("div");
     formContainer.id = "form-container";
     formContainer.innerHTML = `
       <form id="add-teacher-form">
         
-        <div class="avatar-upload">
-            <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
-            <label for="teacher-image-input" class="avatar-label">
-                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
-            </label>
-            <p>Upload Photo</p>
-        </div>
-        <br>
         <input type="text" id="first-name-input" name="first-name" required placeholder="First Name">
-        <br>
+        
         <input type="text" id="last-name-input" name="last-name" required placeholder="Last Name">
-        <br>
+        
         <input type="text" id="initials-input" name="initials" required placeholder="Initials">
-        <br>
+        
         <input type="email" id="email-input" name="email" required placeholder="Email">
       </form>
 
@@ -172,9 +180,6 @@ function loadAddTeacherForm() {
 
         <div id="subject-dropdown"></div>
         <div id="selected-subjects"></div>
-        <div id="workload-input-container">
-            <input type="text" id="workload-input" name="workload" required placeholder="Workload (e.g., 22h)">
-        </div>
       </div>
     `;
 
@@ -196,16 +201,22 @@ function loadAddTeacherForm() {
     const submitButton = document.createElement("div");
     submitButton.id = "submit-teacher-btn";
     submitButton.textContent = "Submit";
-    submitButton.onclick = () => { {
-        addTeacher();
+    submitButton.onclick = () => {
+        addTeacher(); 
+
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
-        setTimeout(() => {displayTeachers();}, 80);
-    }};
+        displayTeachers.style.overflowY = "scroll";
+
+        setTimeout(() => {
+            displayTeachers();
+        }, 500); 
+    };
+
 
     headerContainer.appendChild(closeScreenButton);
 
-    addTeacherScreen.replaceChildren(headerContainer, formContainer, availabilityContainer, submitButton);
+    addTeacherScreen.replaceChildren(headerContainer, avaterUploadDiv, formContainer, availabilityContainer, submitButton);
 
     initAvailabilityDays();
     imagePreview();
@@ -216,74 +227,104 @@ function loadAddTeacherForm() {
 
 
 
-// function displayTeachers() {
-//     fetch("http://localhost:8080/api/teachers")
-//     .then(res => res.json())
-//     .then(data => {
-//         const displayContainer = document.getElementById("display-teachers");
-//         displayContainer.innerHTML = "";
-//         data.forEach(teacher => {
-//             const teacherCard = document.createElement("div");
-//             teacherCard.className = "teacher-card";
-//             teacherCard.innerHTML = `
-//                 <p class="teacher-name">${teacher.teacherName}</p>
-//                 <p class="teacher-initials">${teacher.nameSymbol}</p>
-//             `;
-//             displayContainer.appendChild(teacherCard);
-//         });
-//     })
-//     .catch(err => console.error(err));
-// }
-
 function displayTeachers() {
     fetch("http://localhost:8080/api/teachers")
         .then(res => res.json())
         .then(data => {
-            const container = document.getElementById("display-teachers");
-            container.innerHTML = "";
+            if (!data || data.length === 0) {
+                console.log("No teachers found");
+                document.getElementById("no-teachers").style.display = "block";
+                return;
+            }
+            else {
+                document.getElementById("no-teachers").style.display = "none";
 
-            data.forEach(teacher => {
-                const card = document.createElement("div");
-                card.className = "teacher-row";
+                const container = document.getElementById("display-teachers");
+                container.innerHTML = "";
 
-                // Subjects anzeigen (max 2 + rest als +X)
-                const subjects = teacher.teachingSubject || [];
-                const visibleSubjects = subjects.slice(0, 2);
-                const remaining = subjects.length - visibleSubjects.length;
-
-                const subjectsHTML = `
-                    ${visibleSubjects.map(s =>
-                        `<span class="subject-chip">${s.subjectName}</span>`
-                    ).join("")}
-                    ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
+                const tableInfo = document.createElement("div");
+                tableInfo.id = "table-info";
+                tableInfo.innerHTML = `
+                    <p id="teacher-left-section">Name</p>
+                    <p id="teacher-initials-section">K&uuml;rzel</p>
+                    <p id="teacher-subjects-section">F&auml;cher</p>
+                    <p id="teacher-workload-section">Arbeitslast</p>
+                    <p id="teacher-edit-section">Bearbeiten</p>
                 `;
+                container.appendChild(tableInfo);
+                
+                
 
-                card.innerHTML = `
-                    <div class="teacher-left">
-                        <div class="avatar-placeholder">👤</div>
-                        <div class="teacher-info">
-                            <div class="teacher-name">${teacher.teacherName}</div>
-                            <div class="teacher-email muted">example@mail.com</div>
+                data.forEach(teacher => {
+                    const card = document.createElement("div");
+                    card.className = "teacher-row";
+
+                    // Subjects anzeigen (max 2 + rest als +X)
+                    const subjects = teacher.teachingSubject || [];
+                    const visibleSubjects = subjects.slice(0, 2);
+                    const remaining = subjects.length - visibleSubjects.length;
+
+                    const subjectsHTML = `
+                        ${visibleSubjects.map(s =>
+                            `<span class="subject-chip">${s.subjectName}</span>`
+                        ).join("")}
+                        ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
+                    `;
+
+                    card.innerHTML = `
+                        <div class="teacher-left">
+                            <div class="avatar-placeholder">👤</div>
+                            <div class="teacher-info">
+                                <div class="teacher-name">${teacher.teacherName}</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="teacher-initials">${teacher.nameSymbol}</div>
+                        <div class="teacher-initials">${teacher.nameSymbol}</div>
 
-                    <div class="teacher-subjects">
-                        ${subjectsHTML}
-                    </div>
+                        <div class="teacher-subjects">
+                            ${subjectsHTML}
+                        </div>
 
-                    <div class="teacher-workload">
-                        ${teacher.workload || "—"}
-                    </div>
+                        <div class="teacher-workload">
+                            ${teacher.workload || "—"}
+                        </div>
 
-                    <div class="teacher-edit">✏️</div>
-                `;
+                        <div class="teacher-edit"><i class="fa-solid fa-pencil"></i></div>
+                    `;
 
-                container.appendChild(card);
-            });
+                    container.appendChild(card);
+                });
+
+                const breakDiv = document.createElement("div");
+                breakDiv.style.height = "6vh";
+                breakDiv.innerHTML = "&nbsp;";
+
+                container.appendChild(breakDiv);
+            }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            
+        });
+}
+
+// Search functionality for teachers
+function searchTeacher() {
+    let query = document.getElementById("input-field").value.toLowerCase();
+    let rows = document.querySelectorAll(".teacher-row");
+
+    rows.forEach(function (row) {
+        let name = row.querySelector(".teacher-name").textContent.toLowerCase();
+        let initials = row.querySelector(".teacher-initials").textContent.toLowerCase();
+        let subjects = row.querySelector(".teacher-subjects").textContent.toLowerCase();
+
+        if (query === "" || name.includes(query) || initials.includes(query) || subjects.includes(query)) {
+            row.style.display = "";
+        } 
+        else {
+            row.style.display = "none";
+        }
+    });
 }
 
 
@@ -293,3 +334,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+document.getElementById("input-field").addEventListener("input", searchTeacher);

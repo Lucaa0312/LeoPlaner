@@ -1,162 +1,10 @@
-
-/* ------------------MAIN CONTENT BOX--------------------- */
-#main-content {
-    background-color: var(--leo-background-color);
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-
-    overflow-y: hidden;
-
-}
-
-#header-text {
-    font-weight: bold;
-    font-size: 3rem;
-    color: var(--leo-text-color);
-
-    margin-left: 5vw;
-    margin-top: 2vh;
-    margin-right: 43vw;
-}
-
-#header-subtext {
-    opacity: 0.4;
-    font-weight: bold;
-    font-size: 2.25rem;
-    color: var(--leo-text-color);
-
-    margin-left: 5vw;
-}
-
-
-/* ------------------TEACHER CONTROLS---------------------*/
-#teacher-controls {
-    margin-top: 2vh;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-
-    
-} 
-
-#teacher-search-bar{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-
-    width: 20vw;
-
-    padding-right: 1vw;
-    padding-left: 1vw;
-    padding-top: 0.7vh;
-    padding-bottom: 0.7vh;
-
-    background-color: #D9D9D9;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
-    border-radius: 2vw;
-    border-style: none;
-    font-size: 1.75rem;
-
-    color: var(--leo-text-color);
-}
-
-#teacher-search-bar:focus-within{
-    outline: none;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
-}
-
-
-#teacher-search {
-    background: transparent;
-    font-size: 1.75rem;
-    color: var(--leo-text-color);
-    text-align: right;
-
-    width: 12vw;
-
-    margin-right: 0.5vw;
-
-    border: none;
-    outline: none;
-}
-
-#search-icon{
-    color: var(--leo-text-color);
-    width: 1.5vw;
-    height: 1.5vw;
-
-    justify-self: center;
-}
-
-/* #teacher-search {
-    width: 20vw;
-    text-align: right;
-
-    padding-right: 3vw;
-    padding-top: 0.5vh;
-    padding-bottom: 0.5vh;
-
-    background-color: #D9D9D9;
-
-    border-radius: 31px;
-    border-style: none;
-    font-size: 1.75rem;
-
-    color: var(--leo-text-color);
-}
-
-#search-icon{
-    position: fixed;
-    width: 1.5vw;
-    top: 2.70vh;
-    right: 1.25vw;
-    color: var(--leo-text-color);
-} */
-
-#add-teacher-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 1.75rem;
-    width: 12vw;
-
-    font-weight: semi-bold;
-
-    margin-top: 1.5vh;
-
-    padding-left: 1vw;
-    padding-right: 1vw;
-    padding-top: 1vh;
-    padding-bottom: 1vh;
-
-    border-radius: 43px;
-
-    background-color: var(--leo-primary-color1);
-    color: white;
-
-
-    cursor: pointer;
-
-    transition: all 200ms ease-in;
-}
-
-#add-teacher-btn:hover {
-    background-color: var(--leo-primary-color2);
-    scale: 1.02;
-}
-
-
 /* ------------------add-teacher-screen--------------------- */
 #disable-overlay {
     display: none;
-    width: 100%;
+    width: 80vw;
     position: fixed;
     top: 0;
-    left: 17.5vw;
+    left: 20vw;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
 }
@@ -183,10 +31,14 @@
     align-items: center;
     justify-content: center;
 
+    border-radius: 2vw 2vw 0 0;
+
     padding-left: 3vw;
     padding-right: 3vw;
     padding-top: 2vh;
     padding-bottom: 2vh;
+
+    height: 5vh;
 }
 
 #add-teacher-header {
@@ -197,8 +49,8 @@
 
 #close-add-teacher-screen-btn {
     position: absolute;
-    right: 2vw;
-    top: 2vh;
+    right: 1.5vw;
+    top: 1vh;
     cursor: pointer;
 
     font-size: 3rem;
@@ -220,23 +72,33 @@
     row-gap: 0vh;
     column-gap: 0vw;
 
-    margin-top: 5vh;
+    margin-top: 2vh;
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 50vw;
 }
 
 
 #add-teacher-form {
     display: flex;
     flex-direction: column;
+    gap: 2vh;
+    margin-left: auto;
+    margin-right: auto;
 
-    margin-left: 5vw;
+    width: auto;
 
-    width: 20vw;
 }
 
 
 .avatar-upload {
     display: flex;
-    margin-bottom: 20px;
+    margin-top: 2vh;
+    /* background-color: red; */
+    width: 20vw;
+    margin-left: 5vw;
+    padding-left: 1.5vw;
 }
 
 #teacher-image-input {
@@ -296,7 +158,7 @@
 #last-name-input,
 #initials-input,
 #email-input {
-    width: 15vw;
+    width: 20vw;
 
     padding-right: 1vw;
     padding-left: 1vw;
@@ -328,7 +190,9 @@
 /* ------------------add-subjects-container--------------------- */
 
 #add-subjects-container{
-    margin-top: 13.5vh;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
 }
 
 #subject-input-container{
@@ -337,7 +201,7 @@
     align-items: center;
     justify-content: flex-end;
 
-    width: 15vw;
+    width: 20vw;
 
     padding-right: 1vw;
     padding-left: 1vw;
@@ -365,7 +229,7 @@
     color: var(--leo-text-color);
     text-align: right;
 
-    width: 12vw;
+    width: 18vw;
 
     margin-right: 0.5vw;
 
@@ -394,11 +258,12 @@
     margin-left: 0.5vw;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-    width: 16vw;
+    width: 20vw;
 }
 
 .dropdown-item {
-    padding: 8px;
+    padding: 0.5vw;
+    border-radius: 0.5vw;
     cursor: pointer;
 }
 
@@ -410,7 +275,9 @@
     display: grid;
     grid-template-columns: auto auto;
     
-    width: 15vw;
+    margin-left: 5vh;
+
+    width: 10vw;
 }
 
 .subject-chip {
@@ -435,39 +302,13 @@
 }
 
 
-#workload-input-container{
-    margin-top: 16vh;
-}
-#workload-input{
-    width: 15vw;
-
-    padding-right: 1vw;
-    padding-left: 1vw;
-    padding-top: 0.7vh;
-    padding-bottom: 0.7vh;
-
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
-    border-radius: 2vw;
-    border-style: none;
-    font-size: 1.75rem;
-
-    border: none;
-    outline: none;
-
-    color: var(--leo-text-color);
-}
-
-#workload-input:focus {
-    outline: none;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
-}
 
 /* ------------------ Availability Days --------------------- */
 #availability-container {
-    width: 50vw;
-    margin: 5vh auto 0 auto; 
+    margin-top: 5vh;
+    margin-left: auto;
+    margin-right: auto;
+
 }
 
 #availability-header {
@@ -513,8 +354,12 @@
 
 #submit-teacher-btn {
     margin-top: 5vh;
+
     margin-left: auto;
     margin-right: auto;
+    
+    text-align: center;
+    width: 10vw;
 
     padding-left: 2.5vw;
     padding-right: 2.5vw;
@@ -546,12 +391,82 @@
 #display-teachers{
     margin-left: auto;
     margin-right: auto;
-    margin-top: 3vh;
+
+
+
+    margin-top: 10vh;
 
     width: 80vw;
-    height: 85vh;
+    height: 80vh;
 
     overflow-y: scroll;
+}
+
+#table-info{
+    display: grid;
+    grid-template-columns: 2fr 1fr 3fr 1fr auto;
+    gap: 0.3vw;
+    align-items: center;
+
+    width: 60vw;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2vh;
+
+    font-size: 1.2rem;
+
+    color: var(--leo-text-color);
+}
+
+#teacher-left-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: -2vw;
+    padding-right: auto;
+    opacity: 0.7;
+
+}
+#teacher-initials-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -0.3vw;
+
+    opacity: 0.7;
+}
+#teacher-subjects-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -1vw;
+
+    opacity: 0.7;
+}
+#teacher-workload-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: auto;
+
+    margin-left: -2vw;
+
+    opacity: 0.7;
+}
+#teacher-edit-section {
+    font-weight: bold;
+    text-align: center;
+
+    padding-left: auto;
+    padding-right: 0;
+    opacity: 0.7;
 }
 
 .teacher-row {
@@ -559,8 +474,13 @@
     grid-template-columns: 2fr 1fr 3fr 1fr auto;
     align-items: center;
 
+    width: 55vw;
+    margin-left: auto;
+    margin-right: auto;
+
+
     background: white;
-    border: 2px solid #4f46e5;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 20px;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
@@ -609,7 +529,7 @@
 
 .teacher-subjects {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.1rem;
     flex-wrap: wrap;
 }
 
@@ -632,4 +552,18 @@
 .teacher-edit {
     cursor: pointer;
     font-size: 1.2rem;
+}
+
+/* ------------------ No Teachers Message --------------------- */
+#no-teachers {
+    display: block;
+    position: absolute;
+    top: 30vh;
+    left: 18vw;
+    text-align: center;
+    
+    color: var(--leo-text-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0.8;
 }

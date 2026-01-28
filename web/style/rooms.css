@@ -1,0 +1,356 @@
+#display-rooms{
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
+    width: 80vw;
+    height: 80vh;
+}
+
+.room-box{
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 1vw;
+
+    padding: 1vw;
+
+    width: 10vw;
+    height: 12vh;
+
+    display: grid;
+    grid-template-rows: 10vh 2vw;
+}
+
+.grid-layout{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 1vw;
+
+    width: 70vw;
+    margin-left: 5vw;
+}
+
+.room-name{
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--leo-text-color);
+}
+.room-types{
+    margin-top: 1vh;
+    font-size: 1rem;
+    color: var(--leo-text-color);
+    font-weight: 600;
+}
+
+
+.room-edit{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-self: end;
+
+    margin-right: -0.5vw;
+    margin-top: -0.25vw;
+
+    width: 2vw;
+    height: 2vw;
+
+    font-size: 1.75rem;
+    color: var(--leo-primary-color1);
+
+    cursor: pointer;
+}
+
+/* ------------------ Add Room Screen --------------------- */
+#disable-overlay{
+    display: none;
+    width: 80vw;
+    position: fixed;
+    top: 0;
+    left: 20vw;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+#add-room-screen{
+    position: fixed;
+    top: 5vh;
+    left: 35vw;
+
+    width: 50vw;
+    height: 80vh;
+
+    background-color: var(--leo-background-color);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-radius: 2vw;
+
+    display: none;
+}
+
+
+#add-room-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 2vw 2vw 0 0;
+
+    padding-left: 3vw;
+    padding-right: 3vw;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+
+    height: 5vh;
+}
+
+#add-room-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--leo-text-color);
+}
+
+#close-add-room-screen-btn {
+    position: absolute;
+    right: 1.5vw;
+    top: 1vh;
+    cursor: pointer;
+
+    font-size: 3rem;
+    color: rgb(197, 0, 0);
+
+    transition: all 200ms ease-in-out;
+}
+
+#close-add-room-screen-btn:hover {
+    color: rgb(255, 0, 0);
+    scale: 1.05;
+}
+
+
+/* ------------------ Form Container --------------------- */
+
+#room-modal-content{
+    margin-top: 10vh;
+    display: flex;
+    flex-direction: column;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 40vw;
+}
+
+#form-field{
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.form-name-initials-inputs{
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+    margin-bottom: 2vh;
+}
+.form-number-prefix-suffix-inputs{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3vw;
+    margin-bottom: 2vh;
+}
+
+#form-number-prefix-suffix-inputs{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3vw;
+}
+
+#name-input{
+    padding: 1.25vh;
+    width: 30vw;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
+
+    border-radius: 1vw;
+    border: none;
+    outline: none;
+
+    font-size: 1.75rem;
+    color: var(--leo-text-color);
+}
+
+#initials-input,
+#number-input,
+#prefix-input,
+#suffix-input{
+    padding: 1.25vh;
+    width: 10vw;
+    text-align: center;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
+
+    border-radius: 1vw;
+    border: none;
+    outline: none;
+
+    font-size: 1.75rem;
+    color: var(--leo-text-color);
+}
+
+
+/* ---------- Roomtype block ---------- */
+#roomtype-block{
+    width: 40vw;
+    margin-top: 0.5vh;
+}
+
+#roomtype-input-container{
+    display: flex;
+    flex-direction: row;
+    gap: 1vw;
+
+    padding: 1.25vh;
+    width: 26vw;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
+
+    border-radius: 1vw;
+    border: none;
+    outline: none;
+
+    font-size: 1.75rem;
+    color: var(--leo-text-color);
+}
+
+#roomtype-input-container:focus-within{
+    outline: none;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
+}
+
+#roomtype-input{
+    background: transparent;
+    color: var(--leo-text-color);
+    font-size: 1.5rem;
+    text-align: left;
+
+    width: 20vw;
+    margin-right: 0.5vw;
+    border: none;
+    outline: none;
+}
+
+#add-room-img {
+    color: var(--leo-text-color);
+    width: 1.5vw;
+    height: 1.5vw;
+
+    justify-self: center;
+}
+
+
+#roomtype-dropdown{
+    position: fixed;
+    display: block;
+    background-color: #F3F4F6;
+    border-radius: 0.5vw;
+    margin-top: 0.5vh;
+    margin-left: 0.5vw;
+    box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
+
+    width: 26vw;
+    z-index: 2000;
+}
+
+
+.dropdown-item {
+    padding: 0.5vw;
+    border-radius: 0.5vw;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+
+#selected-roomtypes{
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+
+    margin-top: 1.5vh;
+    width: 10vw;
+}
+
+.roomtype-chip{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #5b4bff;
+    color: white;
+    padding: 0.25vw 0.5vw;
+    border-radius: 2vw;
+
+    cursor: pointer;
+    width: 8vw;
+    font-weight: 700;
+    letter-spacing: 0.05vw;
+}
+
+
+.remove-chip {
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+#confirm-room-btn {
+    position: fixed;
+    bottom: 20vh;
+    left: 47vw;
+
+    margin-left: auto;
+    margin-right: auto;
+    
+    text-align: center;
+    width: 20vw;
+
+    padding-left: 2.5vw;
+    padding-right: 2.5vw;
+    padding-top: 1.5vh;
+    padding-bottom: 1.5vh;
+
+    font-size: 2.5rem;
+    font-weight: bold;
+
+    border-radius: 2vw;
+
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+    cursor: pointer;
+
+    transition: all 200ms ease-in;
+}
+
+#confirm-room-btn:hover {
+    background-color: var(--leo-primary-color2);
+    scale: 1.02;
+}
+
+/* ------------------ No Rooms Message --------------------- */
+#no-rooms{
+    display: block;
+    position: absolute;
+    top: 30vh;
+    left: 18vw;
+    text-align: center;
+    
+    color: var(--leo-text-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0.8;
+}
