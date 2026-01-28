@@ -198,17 +198,17 @@ function createLayout(data) {
                 }
         
             }
-            currentPeriod += duration
+            //currentPeriod += duration
 
         });
-        gridBox.innerHTML = content;
+        //gridBox.innerHTML = content;
     });
 }
 
 function clearLayout(){
     let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach(day => {
-        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
+        const gridBox = document.getElementById(day).querySelector(".periods");
         gridBox.innerHTML = "";
     });
 }
