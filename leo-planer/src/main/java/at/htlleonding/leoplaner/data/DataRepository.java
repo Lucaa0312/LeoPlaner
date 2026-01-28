@@ -43,13 +43,6 @@ public class DataRepository {
         return allClassSubjects.getResultList();
     }
 
-    public List<ClassSubject> getAllClassSubjectsByClass(String className) {
-        TypedQuery<ClassSubject> allClassSubjects = this.entityManager
-                .createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class);
-        allClassSubjects.setParameter("filter", className);
-        return allClassSubjects.getResultList();
-    }
-
     public List<ClassSubject> getAllClassSubjectsWithClass(String className) {
         TypedQuery<ClassSubject> allClassSubjectsByClassName = this.entityManager
                 .createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class);

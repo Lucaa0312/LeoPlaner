@@ -42,19 +42,23 @@ public class TimeTableResource {
 
         for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
             if (csi.getPeriod().isLunchBreak()) {
-                classSubjectInstanceDTOs.add(new ClassSubjectInstanceDTO(1, null, 
-                    new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(), csi.getPeriod().isLunchBreak()), 
-                    null));
+                classSubjectInstanceDTOs.add(new ClassSubjectInstanceDTO(1, null,
+                        new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(),
+                                csi.getPeriod().isLunchBreak()),
+                        null));
                 continue;
             }
 
-            if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null) continue;
+            if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null)
+                continue;
 
             classSubjectInstanceDTOs.add(UtilBuildFunctions.createClassSubjectInstanceDTO(csi));
         }
 
-        return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs);
-        //return Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
+        return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs,
+                timetable.getCostOfTimetable(), timetable.getTempAtTimetable());
+        // return
+        // Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
     }
 
     @GET
@@ -66,18 +70,19 @@ public class TimeTableResource {
         return Response.status(Response.Status.OK)
                 .build();
     }
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByDay/{day}")
     public Response getClassSubjectInstancesByDay(@PathParam("day") String day) {
-      List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable().getClassSubjectInstances().stream()
-              .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase()))
-              .sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour())
-              .map(csi -> UtilBuildFunctions.createClassSubjectInstanceDTO(csi))
-              .toList();
+        List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable()
+                .getClassSubjectInstances().stream()
+                .filter(e -> e.getPeriod().getSchoolDays() == SchoolDays.valueOf(day.toUpperCase()))
+                .sorted((e1, e2) -> e1.getPeriod().getSchoolHour() - e2.getPeriod().getSchoolHour())
+                .map(csi -> UtilBuildFunctions.createClassSubjectInstanceDTO(csi))
+                .toList();
 
-      return Response.status(Response.Status.OK).entity(timetableByDay).build();
+        return Response.status(Response.Status.OK).entity(timetableByDay).build();
     }
 
     @GET
@@ -88,12 +93,11 @@ public class TimeTableResource {
         final Teacher teacher = this.dataRepository.getTeacherByID(id);
 
         return new TeacherTimetableDTO(
-              new TeacherNoSubjectDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(), teacher.getTeacher_non_working_hours().stream().map(e -> new TeacherNonWorkingHourDTO(e.getDay(), e.getSchoolHour())).toList(),
-              teacher.getTeacher_non_preferred_hours().stream()
-                                    .map(e -> new TeacherNonPreferredHourDTO(e.getDay(), e.getSchoolHour())).toList()), 
-
-              new TimetableDTO(timetableTeacher.getTotalWeeklyHours(), 
-                              timetableTeacher.getClassSubjectInstances().stream().map(csi ->
-                              UtilBuildFunctions.createClassSubjectInstanceDTO(csi)).toList()));
+                new TeacherNoSubjectDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(),
+                        teacher.getTeacher_non_working_hours().stream()
+                                .map(e -> new TeacherNonWorkingHourDTO(e.getDay(), e.getSchoolHour())).toList(),
+                        teacher.getTeacher_non_preferred_hours().stream()
+                                .map(e -> new TeacherNonPreferredHourDTO(e.getDay(), e.getSchoolHour())).toList()),
+                UtilBuildFunctions.createTimetableDTO(timetableTeacher));
     }
 }

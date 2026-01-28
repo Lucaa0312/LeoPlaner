@@ -40,7 +40,6 @@ public class ClassSubject {
         return id;
     }
 
-
     public static String getQueryFindAll() {
         return QUERY_FIND_ALL;
     }
