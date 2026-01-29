@@ -50,7 +50,8 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].split(";");
             if (line.length != 6) {
-                //throw new IllegalArgumentException("Teacher CSV is only allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+                // throw new IllegalArgumentException("Teacher CSV is only allowed to have 6
+                // columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
             // (.CHEM is roomtype)
@@ -58,13 +59,16 @@ public class CSVManager {
             final String teacherName = line[0].trim();
             final String nameSymbol = line[1].trim();
 
-            final ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes with ..);
+            final ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes
+                                                                        // with ..);
             final String[] subjects = line[2].split(",");
             for (final String subjectName : subjects) {
-                final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
+                final Subject subject = dataRepository
+                        .getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
 
                 if (subject == null) {
-                    throw new IllegalArgumentException("Subject " + subjectName + " does not exist. Please check the CSV.");
+                    throw new IllegalArgumentException(
+                            "Subject " + subjectName + " does not exist. Please check the CSV.");
                 }
                 takenSubjects.add(subject);
             }
@@ -74,8 +78,7 @@ public class CSVManager {
             teacher.setNameSymbol(nameSymbol);
             teacher.setTeachingSubject(takenSubjects);
 
-
-            //CSV FORMAT Nonworking/Nonpreferred   ;Day-hour,hour:Day2-hour,hour
+            // CSV FORMAT Nonworking/Nonpreferred ;Day-hour,hour:Day2-hour,hour
             List<TeacherNonWorkingHours> nonWorkingHours = new ArrayList<>();
             parseDayHourString(line[3], parsed -> {
                 final TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
@@ -85,7 +88,6 @@ public class CSVManager {
                 nonWorkingHours.add(nwh);
             });
             teacher.setTeacher_non_working_hours(nonWorkingHours);
-
 
             List<TeacherNonPreferredHours> nonPreferredHours = new ArrayList<>();
             parseDayHourString(line[4], parsed -> {
@@ -102,7 +104,8 @@ public class CSVManager {
     }
 
     private static void parseDayHourString(String stringValue, Consumer<ParsedDayHour> consumerBob) {
-        if (stringValue == null || stringValue.isBlank()) return;
+        if (stringValue == null || stringValue.isBlank())
+            return;
 
         String[] allNonWorkingDays = stringValue.split(":");
 
@@ -124,7 +127,8 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
             if (line.length != 5) {
-                throw new IllegalArgumentException("Room CSV is only allowed to have 5 columns! Found " + line.length + " columns in row " + i);
+                throw new IllegalArgumentException(
+                        "Room CSV is only allowed to have 5 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
 
@@ -162,7 +166,12 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
             if (line.length != 3) {
-                throw new IllegalArgumentException("Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); //TODO Has to be changed
+                throw new IllegalArgumentException(
+                        "Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); // TODO
+                                                                                                                         // Has
+                                                                                                                         // to
+                                                                                                                         // be
+                                                                                                                         // changed
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
@@ -180,23 +189,29 @@ public class CSVManager {
                         requiredRoomTypes[index] = roomType;
                         index++;
                     } catch (final IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Roomtype " + roomTypeString + " does not exist. Please check CSV.");
+                        throw new IllegalArgumentException(
+                                "Roomtype " + roomTypeString + " does not exist. Please check CSV.");
                     }
                     subject.setRequiredRoomTypes(Arrays.asList(requiredRoomTypes));
                 }
             }
             final String[] colorCodes = subjectColor.split(",");
-            subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]), Integer.parseInt(colorCodes[2])));
+            subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]),
+                    Integer.parseInt(colorCodes[2])));
             subject.setSubjectName(subjectName);
             dataRepository.addSubject(subject);
         }
     }
 
-    public static void createClassSubjectFromCSV(final String[] lines, final DataRepository dataRepository) { // TODO add unit tests
+    public static void createClassSubjectFromCSV(final String[] lines, final DataRepository dataRepository) { // TODO
+                                                                                                              // add
+                                                                                                              // unit
+                                                                                                              // tests
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
             if (line.length != 6) {
-                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 6 columns! Found "
+                        + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
             final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
@@ -214,14 +229,13 @@ public class CSVManager {
                 throw new IllegalArgumentException("Teacher " + line[1] + " does not exist. Please check the CSV.");
             }
 
-
             final ClassSubject classSubject = new ClassSubject();
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);
             classSubject.setWeeklyHours(weeklyHours);
             classSubject.setRequiresDoublePeriod(requiresDoublePeriod);
             classSubject.setBetterDoublePeriod(isBetterDoublePeriod);
-            classSubject.setClassName(className);
+            // classSubject.setClassName(className);
             dataRepository.addClassSubject(classSubject);
         }
     }
