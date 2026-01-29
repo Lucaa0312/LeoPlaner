@@ -3,13 +3,33 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+
 import java.util.Comparator;
 
+@Entity
 public class Timetable {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany
+    @JoinTable(name = "timetable_classSubjectInstances", joinColumns = @JoinColumn(name = "timetable_id"), inverseJoinColumns = @JoinColumn(name = "class_subject_instance_id"))
     private List<ClassSubjectInstance> classSubjectInstances;
     private int totalWeeklyHours; // all durations summed up
     private int costOfTimetable = 0;
     private double tempAtTimetable = 0;
+
+    @OneToOne
+    @JoinColumn(name = "class_id")
+    private SchoolClass schoolClass;
 
     public Timetable(final List<ClassSubjectInstance> classSubjectInstances) {
         this.classSubjectInstances = classSubjectInstances;

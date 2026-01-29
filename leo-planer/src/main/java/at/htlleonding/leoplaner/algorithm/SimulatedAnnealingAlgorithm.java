@@ -208,7 +208,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {
-        return teacher.getTakenUpPeriods().contains(period);
+        return teacher.getTakenUpPeriods().stream().anyMatch(e -> e.period() == period);
     }
 
     public void chooseRandomNeighborFunction(final int index1, final int index2) { // TODO add random function to change

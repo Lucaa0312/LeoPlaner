@@ -1,8 +1,6 @@
 package at.htlleonding.leoplaner.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jdk.jfr.Name;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
@@ -24,21 +22,17 @@ public class Room {
     private String roomName;
     private String roomPrefix;
     private String roomSuffix;
-    @ElementCollection(targetClass = RoomTypes.class, fetch = FetchType.EAGER)
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @CollectionTable( //create new join table
-            name = "room_roomtypes",
-            joinColumns = @JoinColumn(name = "room_id")
-    )
-    @Column(name = "room_type")
-    @JsonIgnore
+    @CollectionTable( // create new join table
+            name = "room_roomtypes", joinColumns = @JoinColumn(name = "room_id"))
     private List<RoomTypes> roomTypes;
 
     public static final String QUERY_FIND_ALL = "Room.findAll";
     public static final String QUERY_FIND_BY_ID = "Room.findByID";
     public static final String QUERY_FIND_BY_NUMBER = "Room.findByNumber";
     public static final String QUERY_GET_COUNT = "Room.getCount";
-
 
     public short getRoomNumber() {
         return roomNumber;

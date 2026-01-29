@@ -5,7 +5,6 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 

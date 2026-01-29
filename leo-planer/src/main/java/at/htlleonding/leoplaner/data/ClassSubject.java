@@ -6,11 +6,12 @@ import org.hibernate.annotations.NamedQuery;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @NamedQueries({
         @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c"),
-        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c where LOWER(c.className) = LOWER(:filter)")
+        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c join c.schoolClass sc where LOWER(sc.className) = LOWER(:filter)")
 })
 
 @Entity
@@ -19,15 +20,19 @@ public class ClassSubject {
     @GeneratedValue
     private Long id;
     @ManyToOne
+    @JoinColumn(name = "teacher_id")
     private Teacher teacher;
     @ManyToOne
+    @JoinColumn(name = "subject_id")
     private Subject subject;
 
     private int weeklyHours;
     private boolean requiresDoublePeriod;
     private boolean isBetterDoublePeriod;
 
-    private String className;
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    private SchoolClass schoolClass;
 
     static public final String QUERY_FIND_ALL = "ClassSubject.findAll";
     static public final String QUERY_FIND_ALL_BY_CLASSNAME = "ClassSubject.findAllByClassName";
@@ -80,19 +85,23 @@ public class ClassSubject {
         this.id = id;
     }
 
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(final String className) {
-        this.className = className;
-    }
-
     public boolean isRequiresDoublePeriod() {
         return requiresDoublePeriod;
     }
 
     public boolean isBetterDoublePeriod() {
         return isBetterDoublePeriod;
+    }
+
+    public SchoolClass getSchoolClass() {
+        return schoolClass;
+    }
+
+    public void setSchoolClass(SchoolClass schoolClass) {
+        this.schoolClass = schoolClass;
+    }
+
+    public static String getQueryFindAllByClassname() {
+        return QUERY_FIND_ALL_BY_CLASSNAME;
     }
 }
