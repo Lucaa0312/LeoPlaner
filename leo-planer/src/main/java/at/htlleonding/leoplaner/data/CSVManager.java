@@ -84,7 +84,7 @@ public class CSVManager {
                 final TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
                 nwh.setDay(parsed.day());
                 nwh.setSchoolHour(parsed.hour());
-                nwh.setTeacher(teacher);
+                // nwh.setTeacher(teacher);
                 nonWorkingHours.add(nwh);
             });
             teacher.setTeacher_non_working_hours(nonWorkingHours);
@@ -94,7 +94,7 @@ public class CSVManager {
                 TeacherNonPreferredHours nph = new TeacherNonPreferredHours();
                 nph.setDay(parsed.day());
                 nph.setSchoolHour(parsed.hour());
-                nph.setTeacher(teacher);
+                // nph.setTeacher(teacher);
                 nonPreferredHours.add(nph);
             });
             teacher.setTeacher_non_preferred_hours(nonPreferredHours);

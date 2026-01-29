@@ -31,12 +31,12 @@ public class Teacher {
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({ "teacher" })
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "teacher_non_working_hours", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherNonWorkingHours> teacher_non_working_hours = new ArrayList<>();
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({ "teacher" })
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "teacher_non_preferred_hours", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)

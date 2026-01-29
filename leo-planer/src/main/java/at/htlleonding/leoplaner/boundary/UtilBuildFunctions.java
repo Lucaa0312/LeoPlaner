@@ -55,7 +55,7 @@ public class UtilBuildFunctions {
 
     public static ClassSubjectDTO createClassSubjectDTO(ClassSubject classSubject) {
         return new ClassSubjectDTO(classSubject.getWeeklyHours(), classSubject.isRequiresDoublePeriod(),
-                classSubject.isBetterDoublePeriod(), classSubject.getClassName(),
+                classSubject.isBetterDoublePeriod(), classSubject.getSchoolClass().getClassName(),
                 UtilBuildFunctions.createTeacherSubjectLinkDTO(classSubject.getTeacher()),
                 UtilBuildFunctions.createSubjectClassLinkDTO(classSubject.getSubject()));
     }

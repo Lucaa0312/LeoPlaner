@@ -27,6 +27,9 @@ public class Timetable {
     private int costOfTimetable = 0;
     private double tempAtTimetable = 0;
 
+    public Timetable() {
+    }
+
     @OneToOne
     @JoinColumn(name = "class_id")
     private SchoolClass schoolClass;

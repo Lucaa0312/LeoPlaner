@@ -44,6 +44,18 @@ public class ClassSubjectInstance {
         this.duration = duration;
     }
 
+    public ClassSubjectInstance(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void assignClassRoomIfNoSpecialRoomType() {
 
     }

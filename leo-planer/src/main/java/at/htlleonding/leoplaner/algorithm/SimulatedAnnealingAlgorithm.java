@@ -99,7 +99,7 @@ public class SimulatedAnnealingAlgorithm {
         for (ClassSubjectInstance csi : classSubjectInstancesList) {
             final Period period = csi.getPeriod();
             final ClassSubject classSubject = csi.getClassSubject();
-            final String className = classSubject.getClassName();
+            final String className = classSubject.getSchoolClass().getClassName();
             final Teacher teacher = classSubject.getTeacher();
 
             teacher.getTakenUpPeriods().add(new TeacherTakenPeriod(period, className));
