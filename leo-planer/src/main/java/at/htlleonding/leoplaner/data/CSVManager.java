@@ -126,18 +126,17 @@ public class CSVManager {
     public static void createRoomFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 5) {
+            if (line.length != 4) {
                 throw new IllegalArgumentException(
-                        "Room CSV is only allowed to have 5 columns! Found " + line.length + " columns in row " + i);
+                        "Room CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
 
             final short roomNumber = Short.parseShort(line[0]);
             final String roomName = line[1].trim();
-            final String roomPrefix = line[2].trim();
-            final String roomSuffix = line[3].trim();
+            final String nameShort = line[2].trim();
 
-            final String[] roomTypesStrings = line[4].split(","); // TODO handle empty prefix/suffix
+            final String[] roomTypesStrings = line[3].split(","); // TODO handle empty prefix/suffix
             final RoomTypes[] roomTypesArray = new RoomTypes[roomTypesStrings.length];
 
             int index = 0;
@@ -155,8 +154,7 @@ public class CSVManager {
             final Room room = new Room();
             room.setRoomNumber(roomNumber);
             room.setRoomName(roomName);
-            room.setRoomPrefix(roomPrefix);
-            room.setRoomSuffix(roomSuffix);
+            room.setNameShort(nameShort);
             room.setRoomTypes(Arrays.stream(roomTypesArray).toList());
             dataRepository.addRoom(room);
         }
@@ -230,11 +228,16 @@ public class CSVManager {
             }
 
             final ClassSubject classSubject = new ClassSubject();
+            final SchoolClass schoolClass = new SchoolClass();
+            schoolClass.setClassName(className);
+            dataRepository.addSchoolClass(schoolClass);
+
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);
             classSubject.setWeeklyHours(weeklyHours);
             classSubject.setRequiresDoublePeriod(requiresDoublePeriod);
             classSubject.setBetterDoublePeriod(isBetterDoublePeriod);
+            classSubject.setSchoolClass(schoolClass);
             // classSubject.setClassName(className);
             dataRepository.addClassSubject(classSubject);
         }

@@ -45,8 +45,8 @@ public class UtilBuildFunctions {
     }
 
     public static RoomDTO createRoomDTO(Room room) {
-        return new RoomDTO(room.getId(), room.getRoomNumber(), room.getRoomName(), room.getRoomPrefix(),
-                room.getRoomSuffix(), room.getRoomTypes());
+        return new RoomDTO(room.getId(), room.getRoomNumber(), room.getRoomName(), room.getNameShort(),
+                room.getRoomTypes());
     }
 
     public static PeriodDTO createPeriodDTO(Period period) {

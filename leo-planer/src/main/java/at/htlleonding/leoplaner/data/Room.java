@@ -20,8 +20,7 @@ public class Room {
     private Long id;
     private short roomNumber;
     private String roomName;
-    private String roomPrefix;
-    private String roomSuffix;
+    private String nameShort;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -42,16 +41,8 @@ public class Room {
         return roomName;
     }
 
-    public String getRoomPrefix() {
-        return roomPrefix;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String getRoomSuffix() {
-        return roomSuffix;
     }
 
     public List<RoomTypes> getRoomTypes() {
@@ -70,12 +61,32 @@ public class Room {
         this.roomName = roomName;
     }
 
-    public void setRoomPrefix(final String roomPrefix) {
-        this.roomPrefix = roomPrefix;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setRoomSuffix(final String roomSuffix) {
-        this.roomSuffix = roomSuffix;
+    public String getNameShort() {
+        return nameShort;
+    }
+
+    public void setNameShort(String nameShort) {
+        this.nameShort = nameShort;
+    }
+
+    public static String getQueryFindAll() {
+        return QUERY_FIND_ALL;
+    }
+
+    public static String getQueryFindById() {
+        return QUERY_FIND_BY_ID;
+    }
+
+    public static String getQueryFindByNumber() {
+        return QUERY_FIND_BY_NUMBER;
+    }
+
+    public static String getQueryGetCount() {
+        return QUERY_GET_COUNT;
     }
 
     public void setRoomTypes(final List<RoomTypes> roomTypes) {
