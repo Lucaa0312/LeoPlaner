@@ -1,6 +1,6 @@
-from typing import Required
 from faker import Faker
 import random
+import csv
 
 fake = Faker()
 
@@ -18,8 +18,9 @@ days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
 roomTypes = ["CLASSROOM", "EDV", "CHEM", "PHY", "SPORT", "WORKSHOP"]
 classNames = ["4CHITM", "4AHITM", "3CHITM", "3IHF", "1CHIF", "1CHITM"]
 possibleHours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-teachers = {}
-classSubjects = {}
+teachers = []
+classSubjects = []
+rooms = []
 
 
 def createRandomClasses(count):
@@ -32,8 +33,6 @@ def createRandomClasses(count):
 
 
 def createRandomRooms(count=20):
-    csvHeader = "room;number;name;prefix;suffix;types"
-
     for _ in range(count):
         roomNumber = random.randint(10, 500)
         roomName = fake.last_name().upper()
@@ -42,17 +41,24 @@ def createRandomRooms(count=20):
         numOfTypes = random.randint(1, 2)
         selectedTypes = ",".join(random.sample(roomTypes, k=numOfTypes))
 
-        row = f"{roomNumber};{roomName};{nameShort};{selectedTypes}"
+        room = {
+            "number": roomNumber,
+            "name": roomName,
+            "nameShort": nameShort,
+            "roomTypes": selectedTypes,
+        }
+        rooms.append(room)
+
+        exportToCsv("rooms.csv", ["number", "name", "nameShort", "roomTypes"], rooms)
 
 
 def createRandomTeachers(count=20):
-    for i in range(count):
+    for _ in range(count):
         teacherName = fake.name()
         teacherInitials = teacherName.split()[0][0] + teacherName.split()[1][0]
 
         numOfSubjects = random.randint(1, 3)
-        teacherSubjects = []
-        teacherSubjects.append(random.sample(subjects, k=numOfSubjects))
+        teacherSubjects = ",".join(random.sample(subjects, k=numOfSubjects))
 
         numOfNonWorkingDays = random.randint(1, 2)
         numOfNonWorkingHoursOnDay = random.randint(1, 8)
@@ -74,19 +80,29 @@ def createRandomTeachers(count=20):
             "name": teacherName,
             "initials": teacherInitials,
             "subjects": teacherSubjects,
-            "teacherNonWorking": nonWorkingDays,
-            "teacherNonPreferred": nonPreferredDays,
+            "teacherNonWorking": formatDayDict(nonWorkingDays),
+            "teacherNonPreferred": formatDayDict(nonPreferredDays),
         }
 
-        teachers[i] = teacher
+        teachers.append(teacher)
+
+        exportToCsv(
+            "teachers.csv",
+            [
+                "name",
+                "initials",
+                "subjects",
+                "teacherNonWorking",
+                "teacherNonPreferred",
+            ],
+            teachers,
+        )
 
 
 def createRandomClassSubjects(classesCount, className):
-    csvHeader = "classsubject;subjectname;teachername;weeklyHours;requiresDoublePeriod;isBetterDoublePeriod;className"
-
-    for i in range(classesCount):
-        className = random.sample(classNames, k=1)
-        subject = random.sample(subjects, k=1)
+    for _ in range(classesCount):
+        className = random.choice(classNames)
+        subject = random.choice(subjects)
         weeklyHours = random.randint(1, 3)
         betterDoublePeriod = fake.boolean()
         requiredDoublePeriod = fake.boolean()
@@ -96,13 +112,42 @@ def createRandomClassSubjects(classesCount, className):
             "weeklyHours": weeklyHours,
             "betterDoublePeriod": betterDoublePeriod,
             "requiresDoublePeriod": requiredDoublePeriod,
-            "classname": className,
+            "className": className,
         }
 
-        classSubjects[i] = classSubject
+        classSubjects.append(classSubject)
+
+    exportToCsv(
+        "classSubjects.csv",
+        [
+            "subject",
+            "weeklyHours",
+            "betterDoublePeriod",
+            "requiresDoublePeriod",
+            "className",
+        ],
+        classSubjects,
+    )
+
+
+def formatDayDict(data_dict):
+    day_strings = []
+    for day, hours in data_dict.items():
+        hours_str = ",".join(map(str, sorted(hours)))
+        day_strings.append(f"{day}-{hours_str}")
+
+    return ":".join(day_strings)
+
+
+def exportToCsv(filename, fieldnames, data):
+    with open(filename, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
 
 
 if __name__ == "__main__":
+    createRandomRooms(10)
     createRandomTeachers(20)
     createRandomClasses(5)
-    print(classSubjects)
