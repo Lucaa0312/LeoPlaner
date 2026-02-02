@@ -21,6 +21,8 @@ public class SchoolClass {
     @GeneratedValue
     private Long id;
     private String className;
+
+    @OneToOne
     private Room classRoom;
 
     public Room getClassRoom() {

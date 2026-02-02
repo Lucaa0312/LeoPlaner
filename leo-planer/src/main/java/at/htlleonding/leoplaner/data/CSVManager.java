@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class CSVManager {
     final static String teacherType = "teacher";
     final static String roomType = "room";
-    final static String subjectType = "subject";
+    final static String subjectType = "subjectnew";
     final static String classSubjectType = "classsubject"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
@@ -27,16 +27,16 @@ public class CSVManager {
         final String type = lines[0].split(";")[0].toLowerCase();
 
         switch (type) {
-            case teacherType:
+            case "name":
                 createTeacherFromCSV(lines, dataRepository);
                 break;
-            case roomType:
+            case "number":
                 createRoomFromCSV(lines, dataRepository);
                 break;
             case subjectType:
                 createSubjectFromCSV(lines, dataRepository);
                 break;
-            case classSubjectType:
+            case "subject":
                 createClassSubjectFromCSV(lines, dataRepository);
                 break;
             default:
@@ -207,8 +207,8 @@ public class CSVManager {
                                                                                                               // tests
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 6) {
-                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 6 columns! Found "
+            if (line.length != 7) {
+                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 7 columns! Found "
                         + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
@@ -235,7 +235,6 @@ public class CSVManager {
                 schoolClass = new SchoolClass();
                 schoolClass.setClassName(className);
                 dataRepository.addSchoolClass(schoolClass);
-
             }
 
             Room classRoom = dataRepository.getRoomByNumberName(numberName);

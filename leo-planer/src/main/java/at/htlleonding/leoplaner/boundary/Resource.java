@@ -49,8 +49,8 @@ public class Resource {
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);
-        CSVManager.processCSV(classSubjectCSVPath, dataRepository);
         CSVManager.processCSV(roomCSVPath, dataRepository);
+        CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
         this.dataRepository.initRandomTimetableForAllClasses();
     }

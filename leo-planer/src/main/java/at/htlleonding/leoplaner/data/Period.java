@@ -8,6 +8,10 @@ public class Period {
     private int schoolHour;
     private boolean lunchBreak;
 
+    public Period() {
+
+    }
+
     public Period(boolean lunchBreak) {
         this.lunchBreak = lunchBreak;
     }

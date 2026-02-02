@@ -1,61 +1,61 @@
-subject;weeklyHours;betterDoublePeriod;requiresDoublePeriod;className;classRoom
-Biology;3;False;True;1CHITM;78BENNETT
-PE;3;True;True;1CHITM;78BENNETT
-History;1;False;True;1CHITM;78BENNETT
-CS;3;True;False;1CHITM;78BENNETT
-History;1;False;True;1CHITM;78BENNETT
-History;3;False;True;1CHITM;78BENNETT
-Math;3;False;False;1CHITM;78BENNETT
-Biology;1;False;False;1CHITM;78BENNETT
-Biology;3;False;False;1CHITM;78BENNETT
-History;2;True;True;1CHITM;78BENNETT
-Math;1;False;False;3CHITM;342ORR
-Chemistry;3;True;False;3CHITM;342ORR
-Biology;3;True;True;3CHITM;342ORR
-History;2;False;True;3CHITM;342ORR
-Biology;2;False;True;3CHITM;342ORR
-Math;2;False;True;3CHITM;342ORR
-Biology;2;False;True;3CHITM;342ORR
-Math;3;False;False;3CHITM;342ORR
-Art;3;False;True;3CHITM;342ORR
-Art;1;True;True;3CHITM;342ORR
-Biology;3;True;True;1CHIF;22JACKSON
-Chemistry;3;False;True;1CHIF;22JACKSON
-Art;2;True;False;1CHIF;22JACKSON
-CS;2;False;True;1CHIF;22JACKSON
-PE;2;True;True;1CHIF;22JACKSON
-CS;3;False;True;1CHIF;22JACKSON
-PE;2;False;True;1CHIF;22JACKSON
-Art;2;True;True;1CHIF;22JACKSON
-History;1;False;True;1CHIF;22JACKSON
-Chemistry;3;True;True;1CHIF;22JACKSON
-Biology;3;True;False;4CHITM;172WRIGHT
-Art;1;False;False;4CHITM;172WRIGHT
-History;2;True;False;4CHITM;172WRIGHT
-CS;2;False;True;4CHITM;172WRIGHT
-PE;2;False;False;4CHITM;172WRIGHT
-History;1;True;False;4CHITM;172WRIGHT
-Art;3;True;False;4CHITM;172WRIGHT
-Art;3;False;False;4CHITM;172WRIGHT
-Chemistry;3;False;True;4CHITM;172WRIGHT
-Math;1;False;True;4CHITM;172WRIGHT
-Art;2;False;False;3IHF;440OLSON
-CS;2;True;True;3IHF;440OLSON
-Physics;3;False;True;3IHF;440OLSON
-Biology;2;False;False;3IHF;440OLSON
-Chemistry;1;True;False;3IHF;440OLSON
-CS;2;True;True;3IHF;440OLSON
-PE;1;False;False;3IHF;440OLSON
-Chemistry;3;True;True;3IHF;440OLSON
-CS;2;True;True;3IHF;440OLSON
-Chemistry;3;False;False;3IHF;440OLSON
-Biology;2;True;False;4AHITM;171ENGLISH
-History;3;True;True;4AHITM;171ENGLISH
-Chemistry;1;False;True;4AHITM;171ENGLISH
-Physics;1;False;False;4AHITM;171ENGLISH
-Art;2;False;True;4AHITM;171ENGLISH
-Art;1;False;False;4AHITM;171ENGLISH
-CS;1;True;False;4AHITM;171ENGLISH
-Art;1;False;True;4AHITM;171ENGLISH
-Biology;3;True;False;4AHITM;171ENGLISH
-Physics;3;False;True;4AHITM;171ENGLISH
+subject;teacher;weeklyHours;betterDoublePeriod;requiresDoublePeriod;className;classRoom
+Physics;Debra Stewart;3;True;True;4AHITM;479ROSALES
+Biology;Debra Stewart;2;False;False;4AHITM;479ROSALES
+law;Debra Stewart;2;False;False;4AHITM;479ROSALES
+English;Debra Stewart;1;True;True;4AHITM;479ROSALES
+law;Debra Stewart;2;True;True;4AHITM;479ROSALES
+Insy;Debra Stewart;2;True;False;4AHITM;479ROSALES
+MEDTPD;Debra Stewart;1;False;True;4AHITM;479ROSALES
+ITP;Debra Stewart;1;True;True;4AHITM;479ROSALES
+English;Debra Stewart;2;True;True;4AHITM;479ROSALES
+Math;Debra Stewart;1;False;True;4AHITM;479ROSALES
+Physics;Timothy Freeman;3;False;False;3IHF;141CARRILLO
+German;Timothy Freeman;1;True;True;3IHF;141CARRILLO
+MEDT3D;Timothy Freeman;1;False;True;3IHF;141CARRILLO
+Insy;Timothy Freeman;1;True;False;3IHF;141CARRILLO
+Physics;Timothy Freeman;3;False;False;3IHF;141CARRILLO
+English;Timothy Freeman;2;False;True;3IHF;141CARRILLO
+German;Timothy Freeman;2;False;True;3IHF;141CARRILLO
+Math;Timothy Freeman;2;True;False;3IHF;141CARRILLO
+Chemistry;Timothy Freeman;1;True;True;3IHF;141CARRILLO
+Physics;Timothy Freeman;2;True;True;3IHF;141CARRILLO
+Physics;Susan Turner;1;True;True;3CHITM;10COX
+Chemistry;Susan Turner;3;True;True;3CHITM;10COX
+Economy;Susan Turner;1;False;True;3CHITM;10COX
+Religion;Susan Turner;2;False;True;3CHITM;10COX
+Chemistry;Susan Turner;2;False;True;3CHITM;10COX
+Physics;Susan Turner;1;True;True;3CHITM;10COX
+MEDTFI;Susan Turner;1;True;False;3CHITM;10COX
+MEDTMC;Susan Turner;1;False;True;3CHITM;10COX
+Math;Susan Turner;2;False;True;3CHITM;10COX
+German;Susan Turner;1;True;True;3CHITM;10COX
+MEDTMC;Donna Nelson;3;True;True;1CHITM;302COLE
+MEDTMC;Donna Nelson;1;False;True;1CHITM;302COLE
+German;Donna Nelson;1;True;True;1CHITM;302COLE
+law;Donna Nelson;1;True;False;1CHITM;302COLE
+Chemistry;Donna Nelson;1;False;True;1CHITM;302COLE
+MEDTPD;Donna Nelson;3;True;True;1CHITM;302COLE
+SEW;Donna Nelson;3;False;True;1CHITM;302COLE
+Economy;Donna Nelson;2;True;True;1CHITM;302COLE
+Physics;Donna Nelson;1;False;True;1CHITM;302COLE
+Biology;Donna Nelson;2;True;True;1CHITM;302COLE
+MEDTFI;Bonnie Meyers;1;True;False;1CHIF;365ZIMMERMAN
+law;Bonnie Meyers;3;True;True;1CHIF;365ZIMMERMAN
+law;Bonnie Meyers;3;False;False;1CHIF;365ZIMMERMAN
+ITP;Bonnie Meyers;1;False;False;1CHIF;365ZIMMERMAN
+English;Bonnie Meyers;3;False;True;1CHIF;365ZIMMERMAN
+Religion;Bonnie Meyers;1;False;True;1CHIF;365ZIMMERMAN
+English;Bonnie Meyers;3;True;True;1CHIF;365ZIMMERMAN
+History;Bonnie Meyers;1;False;False;1CHIF;365ZIMMERMAN
+Insy;Bonnie Meyers;2;True;True;1CHIF;365ZIMMERMAN
+Physics;Bonnie Meyers;1;True;False;1CHIF;365ZIMMERMAN
+English;Anthony Stephens;3;True;True;4CHITM;157CISNEROS
+ITP;Anthony Stephens;2;True;False;4CHITM;157CISNEROS
+MEDT3D;Anthony Stephens;1;False;False;4CHITM;157CISNEROS
+law;Anthony Stephens;3;True;True;4CHITM;157CISNEROS
+MEDTPD;Anthony Stephens;2;False;False;4CHITM;157CISNEROS
+Insy;Anthony Stephens;1;False;True;4CHITM;157CISNEROS
+German;Anthony Stephens;2;False;True;4CHITM;157CISNEROS
+ITP;Anthony Stephens;2;False;False;4CHITM;157CISNEROS
+MEDTPD;Anthony Stephens;3;False;False;4CHITM;157CISNEROS
+History;Anthony Stephens;3;False;True;4CHITM;157CISNEROS

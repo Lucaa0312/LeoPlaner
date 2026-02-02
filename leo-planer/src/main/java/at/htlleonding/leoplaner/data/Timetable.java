@@ -38,6 +38,11 @@ public class Timetable {
         this.classSubjectInstances = classSubjectInstances;
     }
 
+    public Timetable(final List<ClassSubjectInstance> classSubjectInstances, final SchoolClass schoolClass) {
+        this.classSubjectInstances = classSubjectInstances;
+        this.schoolClass = schoolClass;
+    }
+
     public void sortTimetableBySchoolhour() {
         this.classSubjectInstances.sort(Comparator.comparingInt(e -> e.getPeriod().getSchoolHour()));
     }

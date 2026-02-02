@@ -134,6 +134,7 @@ public class DataRepository {
 
     public Room getRoomByNumberName(String numberName) {
         TypedQuery<Room> query = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBERNAME, Room.class);
+        query.setParameter("filter", numberName);
         return query.getSingleResultOrNull();
     }
 
@@ -145,6 +146,26 @@ public class DataRepository {
 
         this.entityManager.persist(classSubject);
         return classSubject;
+    }
+
+    @Transactional
+    public ClassSubjectInstance addClassSubjectInstance(final ClassSubjectInstance classSubjectInstance) {
+        if (this.entityManager.contains(classSubjectInstance)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(classSubjectInstance);
+        return classSubjectInstance;
+    }
+
+    @Transactional
+    public Timetable addTimetable(final Timetable timetable) {
+        if (this.entityManager.contains(timetable)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(timetable);
+        return timetable;
     }
 
     @Transactional
@@ -236,7 +257,10 @@ public class DataRepository {
                 if (checkIfPeriodIsFree(occupiedHours, schoolHour, randomDuration, randomSchoolDay)
                         && (hoursCounter - randomDuration) >= 0) {
                     final Period period = new Period(randomSchoolDay, schoolHour);
-                    result.add(new ClassSubjectInstance(classSubject, period, classRoom, randomDuration));
+                    ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance(classSubject, period,
+                            classRoom, randomDuration);
+                    result.add(classSubjectInstance);
+                    addClassSubjectInstance(classSubjectInstance);
 
                     // for each duration, add a placeholder in the hasmap to reserve space
                     reserveHoursInOccupiesHours(occupiedHours, schoolHour, randomDuration, randomSchoolDay);
@@ -285,11 +309,18 @@ public class DataRepository {
     }
 
     public void createTimetableForClassNew(final String className, final Room classRoom) {
+        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+                SchoolClass.class);
+        query.setParameter("filter", className);
+        final SchoolClass schoolClass = query.getSingleResultOrNull();
+
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
         final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
                 classRoom);
-        this.currentTimetableList.put(className, new Timetable(classSubjectInstances)); // TODO maybe change with id, or
-                                                                                        // make name id
+        final Timetable timetable = new Timetable(classSubjectInstances, schoolClass);
+        this.currentTimetableList.put(className, timetable); // TODO maybe change with id, or
+                                                             // make name id
+        addTimetable(timetable);
     }
 
     public void createTimetableForClass(final String className, final Room classRoom) {

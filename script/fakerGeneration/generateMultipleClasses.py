@@ -11,9 +11,20 @@ subjects = [
     "History",
     "Biology",
     "Chemistry",
-    "Art",
-    "PE",
-    "CS",
+    "law",
+    "Economy",
+    "English",
+    "Geography",
+    "SEW",
+    "German",
+    "Insy",
+    "ITP",
+    "Religion",
+    "MEDTPD",
+    "MEDTMC",
+    "MEDTFI",
+    "MEDTSM",
+    "MEDT3D",
 ]
 days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
 roomTypes = ["CLASSROOM", "EDV", "CHEM", "PHY", "SPORT", "WORKSHOP"]
@@ -105,6 +116,10 @@ def createRandomClassSubjects(classesCount, className):
     classRoom = str(roomChosen["number"]) + roomChosen["name"]
     rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
 
+    teacherChosen = random.choice(teachers)
+    teacher = teacherChosen["name"]
+    teachers.remove(teacherChosen)
+
     for _ in range(classesCount):
         subject = random.choice(subjects)
         weeklyHours = random.randint(1, 3)
@@ -113,6 +128,7 @@ def createRandomClassSubjects(classesCount, className):
 
         classSubject = {
             "subject": subject,
+            "teacher": teacher,
             "weeklyHours": weeklyHours,
             "betterDoublePeriod": betterDoublePeriod,
             "requiresDoublePeriod": requiredDoublePeriod,
@@ -126,6 +142,7 @@ def createRandomClassSubjects(classesCount, className):
         "classSubjects.csv",
         [
             "subject",
+            "teacher",
             "weeklyHours",
             "betterDoublePeriod",
             "requiresDoublePeriod",
