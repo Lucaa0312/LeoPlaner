@@ -5,6 +5,7 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Room;
+import at.htlleonding.leoplaner.data.SchoolClass;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.DataRepository;
@@ -65,8 +66,8 @@ public class TimeTableResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/randomize")
     public Response randomizeTimeTable() {
-        Room room = this.dataRepository.getRoomByNumber(24);
-        this.dataRepository.createTimetable("4chitm", room);
+        Room room = this.dataRepository.getRandomRoom();
+        this.dataRepository.createTimetableForClass("4chitm", room);
         return Response.status(Response.Status.OK)
                 .build();
     }
@@ -83,6 +84,15 @@ public class TimeTableResource {
                 .toList();
 
         return Response.status(Response.Status.OK).entity(timetableByDay).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getByClass/{id}")
+    public TimetableDTO getTimetableByClass(@PathParam("id") final Long id) {
+        final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(id);
+        return UtilBuildFunctions
+                .createTimetableDTO(this.dataRepository.getCurrentTimetableList().get(schoolClass.getClassName()));
     }
 
     @GET

@@ -12,7 +12,8 @@ import jakarta.persistence.OneToOne;
 
 @NamedQueries({
         @NamedQuery(name = SchoolClass.QUERY_FIND_ALL, query = "select s from SchoolClass s"),
-        @NamedQuery(name = SchoolClass.QUERY_CHECK_IF_EXISTS, query = "select s from SchoolClass s where s.className = :filter")
+        @NamedQuery(name = SchoolClass.QUERY_CHECK_IF_EXISTS, query = "select s from SchoolClass s where s.className = :filter"),
+        @NamedQuery(name = SchoolClass.QUERY_FIND_BY_ID, query = "select s from SchoolClass s where s.id= :filter")
 })
 
 @Entity
@@ -40,6 +41,7 @@ public class SchoolClass {
     private Timetable timetable;
 
     public static final String QUERY_FIND_ALL = "SchoolClass.findAll";
+    public static final String QUERY_FIND_BY_ID = "SchoolClass.findById";
     public static final String QUERY_CHECK_IF_EXISTS = "SchoolClass.checkIfExists";
 
     public Long getId() {

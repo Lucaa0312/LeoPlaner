@@ -80,10 +80,44 @@ public class DataRepository {
         return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
     }
 
+    public Room getRandomRoom() {
+        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_GET_RANDOM, Room.class);
+        return room.getSingleResultOrNull();
+    }
+
+    public Map<String, Timetable> getCurrentTimetableList() {
+        return currentTimetableList;
+    }
+
+    public void setCurrentTimetableList(Map<String, Timetable> currentTimetableList) {
+        this.currentTimetableList = currentTimetableList;
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     public Room getRoomByNumber(final int number) {
         final TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class);
         rooms.setParameter("filter", number);
         return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
+    }
+
+    public Room getRoomByName(final String name) {
+        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NAME, Room.class);
+        room.setParameter("filter", name);
+        return room.getSingleResultOrNull();
+    }
+
+    public SchoolClass getSchoolClassById(final Long id) {
+        final TypedQuery<SchoolClass> scoolClass = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
+                SchoolClass.class);
+        scoolClass.setParameter("filter", id);
+        return scoolClass.getSingleResultOrNull();
     }
 
     public Long getRoomCount() {
