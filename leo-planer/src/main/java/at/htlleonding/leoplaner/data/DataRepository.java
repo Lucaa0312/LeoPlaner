@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class DataRepository {
     private Timetable currentTimetable; // volatile, algorithms keep updating this value at the moment
+    private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
 
     @Inject
     EntityManager entityManager;
@@ -106,6 +107,19 @@ public class DataRepository {
         return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
+    public List<SchoolClass> returnAllSchoolClasses() {
+        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
+                SchoolClass.class);
+        return query.getResultList();
+    }
+
+    public SchoolClass checkIfSchoolClassExists(String className) {
+        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+                SchoolClass.class);
+        query.setParameter("filter", className);
+        return query.getSingleResultOrNull();
+    }
+
     public ArrayList<ClassSubject> getClassSubjects() {
         return null;
     }
@@ -116,6 +130,11 @@ public class DataRepository {
 
     public ArrayList<Room> getRooms() {
         return null;
+    }
+
+    public Room getRoomByNumberName(String numberName) {
+        TypedQuery<Room> query = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBERNAME, Room.class);
+        return query.getSingleResultOrNull();
     }
 
     @Transactional
@@ -258,7 +277,22 @@ public class DataRepository {
         occupiedHours.put(schoolDay, updatedListOnDay);
     }
 
-    public void createTimetable(final String className, final Room classRoom) {
+    public void initRandomTimetableForAllClasses() {
+        final TypedQuery<SchoolClass> allClasses = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
+                SchoolClass.class);
+        allClasses.getResultList().stream()
+                .forEach(e -> createTimetableForClassNew(e.getClassName(), e.getClassRoom()));
+    }
+
+    public void createTimetableForClassNew(final String className, final Room classRoom) {
+        final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
+        final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
+                classRoom);
+        this.currentTimetableList.put(className, new Timetable(classSubjectInstances)); // TODO maybe change with id, or
+                                                                                        // make name id
+    }
+
+    public void createTimetableForClass(final String className, final Room classRoom) {
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
         final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
                 classRoom);

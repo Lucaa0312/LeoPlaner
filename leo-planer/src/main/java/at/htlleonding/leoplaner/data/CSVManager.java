@@ -218,6 +218,7 @@ public class CSVManager {
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
             final String className = line[5].trim();
+            final String numberName = line[6].trim();
 
             if (subject == null) {
                 throw new IllegalArgumentException("Subject " + line[0] + " does not exist. Please check the CSV.");
@@ -228,9 +229,18 @@ public class CSVManager {
             }
 
             final ClassSubject classSubject = new ClassSubject();
-            final SchoolClass schoolClass = new SchoolClass();
-            schoolClass.setClassName(className);
-            dataRepository.addSchoolClass(schoolClass);
+
+            SchoolClass schoolClass = dataRepository.checkIfSchoolClassExists(className);
+            if (schoolClass == null) {
+                schoolClass = new SchoolClass();
+                schoolClass.setClassName(className);
+                dataRepository.addSchoolClass(schoolClass);
+
+            }
+
+            Room classRoom = dataRepository.getRoomByNumberName(numberName);
+            // TODO add null check
+            schoolClass.setClassRoom(classRoom);
 
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);

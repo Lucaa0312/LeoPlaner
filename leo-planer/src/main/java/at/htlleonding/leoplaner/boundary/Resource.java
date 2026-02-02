@@ -19,7 +19,7 @@ public class Resource {
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
 
-    @Path("run/testCsv")
+    @Path("run/testCsvOriginal")
     @GET
     public void injectTestCsvData() {
         final String teacherCSVPath = "src/files/csvFiles/test1/testTeacher.csv";
@@ -27,14 +27,32 @@ public class Resource {
         final String classSubjectCSVPath = "src/files/csvFiles/test1/testClassSubject.csv";
         final String roomCSVPath = "src/files/csvFiles/test1/testRoom.csv";
 
-
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
         CSVManager.processCSV(roomCSVPath, dataRepository);
         Room room = this.dataRepository.getRoomByNumber(24);
 
-        this.dataRepository.createTimetable("4chitm", room);
+        this.dataRepository.createTimetableForClass("4chitm", room);
+    }
+
+    @Path("run/testCsvNew")
+    @GET
+    public void injectTestCsvDataNew() {
+        final String baseDir = "../script/fakerGeneration/csvOutput/";
+
+        final String teacherCSVPath = baseDir + "teachers.csv";
+        final String classSubjectCSVPath = baseDir + "classSubjects.csv";
+        final String roomCSVPath = baseDir + "rooms.csv";
+
+        final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
+
+        CSVManager.processCSV(subjectCSVPath, dataRepository);
+        CSVManager.processCSV(teacherCSVPath, dataRepository);
+        CSVManager.processCSV(classSubjectCSVPath, dataRepository);
+        CSVManager.processCSV(roomCSVPath, dataRepository);
+
+        this.dataRepository.initRandomTimetableForAllClasses();
     }
 
     @Path("run/algorithm")

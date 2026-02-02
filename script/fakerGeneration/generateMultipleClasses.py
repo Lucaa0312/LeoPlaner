@@ -1,6 +1,7 @@
 from faker import Faker
 import random
 import csv
+import os
 
 fake = Faker()
 
@@ -100,8 +101,11 @@ def createRandomTeachers(count=20):
 
 
 def createRandomClassSubjects(classesCount, className):
+    roomChosen = random.choice(rooms)
+    classRoom = str(roomChosen["number"]) + roomChosen["name"]
+    rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
+
     for _ in range(classesCount):
-        className = random.choice(classNames)
         subject = random.choice(subjects)
         weeklyHours = random.randint(1, 3)
         betterDoublePeriod = fake.boolean()
@@ -113,6 +117,7 @@ def createRandomClassSubjects(classesCount, className):
             "betterDoublePeriod": betterDoublePeriod,
             "requiresDoublePeriod": requiredDoublePeriod,
             "className": className,
+            "classRoom": classRoom,
         }
 
         classSubjects.append(classSubject)
@@ -125,6 +130,7 @@ def createRandomClassSubjects(classesCount, className):
             "betterDoublePeriod",
             "requiresDoublePeriod",
             "className",
+            "classRoom",
         ],
         classSubjects,
     )
@@ -139,8 +145,13 @@ def formatDayDict(data_dict):
     return ":".join(day_strings)
 
 
-def exportToCsv(filename, fieldnames, data):
-    with open(filename, mode="w", newline="", encoding="utf-8") as f:
+def exportToCsv(filename, fieldnames, data, folder="csvOutput"):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    filepath = os.path.join(folder, filename)
+
+    with open(filepath, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
         writer.writeheader()
         for row in data:
