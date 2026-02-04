@@ -89,11 +89,11 @@ def createRandomTeachers(count=20):
             )
 
         teacher = {
-            "name": teacherName,
+            "teacherName": teacherName,
             "initials": teacherInitials,
             "subjects": teacherSubjects,
-            "teacherNonWorking": formatDayDict(nonWorkingDays),
-            "teacherNonPreferred": formatDayDict(nonPreferredDays),
+            "nonWorking": formatDayDict(nonWorkingDays),
+            "nonPreferred": formatDayDict(nonPreferredDays),
         }
 
         teachers.append(teacher)
@@ -101,7 +101,7 @@ def createRandomTeachers(count=20):
         exportToCsv(
             "teachers.csv",
             [
-                "name",
+                "teacherName",
                 "initials",
                 "subjects",
                 "teacherNonWorking",

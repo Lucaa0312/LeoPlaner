@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CSVManager {
-    final static String teacherType = "teacher";
+    final static String teacherName = "teacherName";
     final static String roomType = "room";
     final static String subjectType = "subjectnew";
     final static String classSubjectType = "classsubject"; // TODO make finals name UPPERCASE
@@ -27,7 +27,7 @@ public class CSVManager {
         final String type = lines[0].split(";")[0].toLowerCase();
 
         switch (type) {
-            case "name":
+            case teacherName:
                 createTeacherFromCSV(lines, dataRepository);
                 break;
             case "number":
