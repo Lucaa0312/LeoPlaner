@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CSVManager {
-    final static String teacherName = "teacherName";
-    final static String roomType = "room";
-    final static String subjectType = "subjectnew";
-    final static String classSubjectType = "classsubject"; // TODO make finals name UPPERCASE
+    final static String teacherType = "teacherName";
+    final static String roomType = "roomNumber";
+    final static String subjectType = "subjectName";
+    final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
         final String[] lines = getLinesFromCSV(filePath);
@@ -27,16 +27,16 @@ public class CSVManager {
         final String type = lines[0].split(";")[0].toLowerCase();
 
         switch (type) {
-            case teacherName:
+            case teacherType:
                 createTeacherFromCSV(lines, dataRepository);
                 break;
-            case "number":
+            case roomType:
                 createRoomFromCSV(lines, dataRepository);
                 break;
             case subjectType:
                 createSubjectFromCSV(lines, dataRepository);
                 break;
-            case "subject":
+            case classSubjectType:
                 createClassSubjectFromCSV(lines, dataRepository);
                 break;
             default:

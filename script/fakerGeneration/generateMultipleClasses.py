@@ -54,14 +54,20 @@ def createRandomRooms(count=20):
         selectedTypes = ",".join(random.sample(roomTypes, k=numOfTypes))
 
         room = {
-            "number": roomNumber,
+            "roomNumber": roomNumber,
             "name": roomName,
-            "nameShort": nameShort,
+            "shortName": nameShort,
             "roomTypes": selectedTypes,
         }
         rooms.append(room)
 
-        exportToCsv("rooms.csv", ["number", "name", "nameShort", "roomTypes"], rooms)
+        exportToCsv("rooms.csv", 
+                    ["roomNumber",
+                    "name",
+                    "shortName",
+                    "roomTypes"],
+                    rooms
+                    )
 
 
 def createRandomTeachers(count=20):
@@ -104,8 +110,8 @@ def createRandomTeachers(count=20):
                 "teacherName",
                 "initials",
                 "subjects",
-                "teacherNonWorking",
-                "teacherNonPreferred",
+                "nonWorking",
+                "nonPreferred",
             ],
             teachers,
         )
@@ -127,13 +133,13 @@ def createRandomClassSubjects(classesCount, className):
         requiredDoublePeriod = fake.boolean()
 
         classSubject = {
-            "subject": subject,
-            "teacher": teacher,
+            "subjectName": subject,
+            "teacherName": teacher,
             "weeklyHours": weeklyHours,
-            "betterDoublePeriod": betterDoublePeriod,
             "requiresDoublePeriod": requiredDoublePeriod,
-            "className": className,
-            "classRoom": classRoom,
+            "betterDoublePeriod": betterDoublePeriod,
+            "className": className
+            # "classRoom": classRoom,
         }
 
         classSubjects.append(classSubject)
@@ -141,13 +147,13 @@ def createRandomClassSubjects(classesCount, className):
     exportToCsv(
         "classSubjects.csv",
         [
-            "subject",
-            "teacher",
+            "subjectName",
+            "teacherName",
             "weeklyHours",
-            "betterDoublePeriod",
             "requiresDoublePeriod",
-            "className",
-            "classRoom",
+            "betterDoublePeriod",
+            "className"
+            # "classRoom",
         ],
         classSubjects,
     )
