@@ -24,11 +24,8 @@ public class Subject {
     @ElementCollection(targetClass = RoomTypes.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable( // create new join table
-            name = "subject_required_roomtypes",
-            joinColumns = @JoinColumn(name = "subject_id")
-    )
+            name = "subject_required_roomtypes", joinColumns = @JoinColumn(name = "subject_id"))
     @Column(name = "room_type")
-    @JsonIgnore
     private List<RoomTypes> requiredRoomTypes;
 
     public static final String QUERY_FIND_ALL = "Subject.findAll";

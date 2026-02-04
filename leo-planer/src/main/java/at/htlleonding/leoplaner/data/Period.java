@@ -1,10 +1,20 @@
 package at.htlleonding.leoplaner.data;
 
+import jakarta.persistence.Embeddable;
 
+@Embeddable
 public class Period {
     private SchoolDays schoolDays;
     private int schoolHour;
     private boolean lunchBreak;
+
+    public Period() {
+
+    }
+
+    public Period(boolean lunchBreak) {
+        this.lunchBreak = lunchBreak;
+    }
 
     public Period(final SchoolDays schoolDays, final int schoolHour) {
         this.schoolDays = schoolDays;

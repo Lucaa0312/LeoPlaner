@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class CSVManager {
     final static String teacherType = "teacher";
     final static String roomType = "room";
-    final static String subjectType = "subject";
+    final static String subjectType = "subjectnew";
     final static String classSubjectType = "classsubject"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
@@ -27,16 +27,16 @@ public class CSVManager {
         final String type = lines[0].split(";")[0].toLowerCase();
 
         switch (type) {
-            case teacherType:
+            case "name":
                 createTeacherFromCSV(lines, dataRepository);
                 break;
-            case roomType:
+            case "number":
                 createRoomFromCSV(lines, dataRepository);
                 break;
             case subjectType:
                 createSubjectFromCSV(lines, dataRepository);
                 break;
-            case classSubjectType:
+            case "subject":
                 createClassSubjectFromCSV(lines, dataRepository);
                 break;
             default:
@@ -50,7 +50,8 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].split(";");
             if (line.length != 6) {
-                //throw new IllegalArgumentException("Teacher CSV is only allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+                // throw new IllegalArgumentException("Teacher CSV is only allowed to have 6
+                // columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: ;John Doe;JD;math,physics,chemistry.CHEM,HISTORY;
             // (.CHEM is roomtype)
@@ -58,13 +59,16 @@ public class CSVManager {
             final String teacherName = line[0].trim();
             final String nameSymbol = line[1].trim();
 
-            final ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes with ..);
+            final ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes
+                                                                        // with ..);
             final String[] subjects = line[2].split(",");
             for (final String subjectName : subjects) {
-                final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
+                final Subject subject = dataRepository
+                        .getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
 
                 if (subject == null) {
-                    throw new IllegalArgumentException("Subject " + subjectName + " does not exist. Please check the CSV.");
+                    throw new IllegalArgumentException(
+                            "Subject " + subjectName + " does not exist. Please check the CSV.");
                 }
                 takenSubjects.add(subject);
             }
@@ -74,25 +78,23 @@ public class CSVManager {
             teacher.setNameSymbol(nameSymbol);
             teacher.setTeachingSubject(takenSubjects);
 
-
-            //CSV FORMAT Nonworking/Nonpreferred   ;Day-hour,hour:Day2-hour,hour
+            // CSV FORMAT Nonworking/Nonpreferred ;Day-hour,hour:Day2-hour,hour
             List<TeacherNonWorkingHours> nonWorkingHours = new ArrayList<>();
             parseDayHourString(line[3], parsed -> {
                 final TeacherNonWorkingHours nwh = new TeacherNonWorkingHours();
                 nwh.setDay(parsed.day());
                 nwh.setSchoolHour(parsed.hour());
-                nwh.setTeacher(teacher);
+                // nwh.setTeacher(teacher);
                 nonWorkingHours.add(nwh);
             });
             teacher.setTeacher_non_working_hours(nonWorkingHours);
-
 
             List<TeacherNonPreferredHours> nonPreferredHours = new ArrayList<>();
             parseDayHourString(line[4], parsed -> {
                 TeacherNonPreferredHours nph = new TeacherNonPreferredHours();
                 nph.setDay(parsed.day());
                 nph.setSchoolHour(parsed.hour());
-                nph.setTeacher(teacher);
+                // nph.setTeacher(teacher);
                 nonPreferredHours.add(nph);
             });
             teacher.setTeacher_non_preferred_hours(nonPreferredHours);
@@ -102,7 +104,8 @@ public class CSVManager {
     }
 
     private static void parseDayHourString(String stringValue, Consumer<ParsedDayHour> consumerBob) {
-        if (stringValue == null || stringValue.isBlank()) return;
+        if (stringValue == null || stringValue.isBlank())
+            return;
 
         String[] allNonWorkingDays = stringValue.split(":");
 
@@ -123,17 +126,17 @@ public class CSVManager {
     public static void createRoomFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 5) {
-                throw new IllegalArgumentException("Room CSV is only allowed to have 5 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 4) {
+                throw new IllegalArgumentException(
+                        "Room CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
 
             final short roomNumber = Short.parseShort(line[0]);
             final String roomName = line[1].trim();
-            final String roomPrefix = line[2].trim();
-            final String roomSuffix = line[3].trim();
+            final String nameShort = line[2].trim();
 
-            final String[] roomTypesStrings = line[4].split(","); // TODO handle empty prefix/suffix
+            final String[] roomTypesStrings = line[3].split(","); // TODO handle empty prefix/suffix
             final RoomTypes[] roomTypesArray = new RoomTypes[roomTypesStrings.length];
 
             int index = 0;
@@ -151,8 +154,7 @@ public class CSVManager {
             final Room room = new Room();
             room.setRoomNumber(roomNumber);
             room.setRoomName(roomName);
-            room.setRoomPrefix(roomPrefix);
-            room.setRoomSuffix(roomSuffix);
+            room.setNameShort(nameShort);
             room.setRoomTypes(Arrays.stream(roomTypesArray).toList());
             dataRepository.addRoom(room);
         }
@@ -162,7 +164,12 @@ public class CSVManager {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
             if (line.length != 3) {
-                throw new IllegalArgumentException("Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); //TODO Has to be changed
+                throw new IllegalArgumentException(
+                        "Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); // TODO
+                                                                                                                         // Has
+                                                                                                                         // to
+                                                                                                                         // be
+                                                                                                                         // changed
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
@@ -180,23 +187,29 @@ public class CSVManager {
                         requiredRoomTypes[index] = roomType;
                         index++;
                     } catch (final IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Roomtype " + roomTypeString + " does not exist. Please check CSV.");
+                        throw new IllegalArgumentException(
+                                "Roomtype " + roomTypeString + " does not exist. Please check CSV.");
                     }
                     subject.setRequiredRoomTypes(Arrays.asList(requiredRoomTypes));
                 }
             }
             final String[] colorCodes = subjectColor.split(",");
-            subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]), Integer.parseInt(colorCodes[2])));
+            subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]),
+                    Integer.parseInt(colorCodes[2])));
             subject.setSubjectName(subjectName);
             dataRepository.addSubject(subject);
         }
     }
 
-    public static void createClassSubjectFromCSV(final String[] lines, final DataRepository dataRepository) { // TODO add unit tests
+    public static void createClassSubjectFromCSV(final String[] lines, final DataRepository dataRepository) { // TODO
+                                                                                                              // add
+                                                                                                              // unit
+                                                                                                              // tests
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 6) {
-                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 6 columns! Found " + line.length + " columns in row " + i);
+            if (line.length != 7) {
+                throw new IllegalArgumentException("ClassSubject CSV is ONLY allowed to have 7 columns! Found "
+                        + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
             final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
@@ -205,6 +218,7 @@ public class CSVManager {
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
             final String className = line[5].trim();
+            final String numberName = line[6].trim();
 
             if (subject == null) {
                 throw new IllegalArgumentException("Subject " + line[0] + " does not exist. Please check the CSV.");
@@ -214,14 +228,26 @@ public class CSVManager {
                 throw new IllegalArgumentException("Teacher " + line[1] + " does not exist. Please check the CSV.");
             }
 
-
             final ClassSubject classSubject = new ClassSubject();
+
+            SchoolClass schoolClass = dataRepository.checkIfSchoolClassExists(className);
+            if (schoolClass == null) {
+                schoolClass = new SchoolClass();
+                schoolClass.setClassName(className);
+                dataRepository.addSchoolClass(schoolClass);
+            }
+
+            Room classRoom = dataRepository.getRoomByNumberName(numberName);
+            // TODO add null check
+            schoolClass.setClassRoom(classRoom);
+
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);
             classSubject.setWeeklyHours(weeklyHours);
             classSubject.setRequiresDoublePeriod(requiresDoublePeriod);
             classSubject.setBetterDoublePeriod(isBetterDoublePeriod);
-            classSubject.setClassName(className);
+            classSubject.setSchoolClass(schoolClass);
+            // classSubject.setClassName(className);
             dataRepository.addClassSubject(classSubject);
         }
     }

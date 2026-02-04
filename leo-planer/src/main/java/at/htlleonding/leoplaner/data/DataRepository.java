@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.data;
 
-
 import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,7 +10,8 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DataRepository {
-    private Timetable currentTimetable; //volatile, algorithms keep updating this value at the moment
+    private Timetable currentTimetable; // volatile, algorithms keep updating this value at the moment
+    private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
 
     @Inject
     EntityManager entityManager;
@@ -25,35 +25,42 @@ public class DataRepository {
         return this.currentTimetable;
     }
 
-    public void setCurrentTimetable(Timetable currentTimetable) {
+    public void setCurrentTimetable(final Timetable currentTimetable) {
         this.currentTimetable = currentTimetable;
     }
 
-    public Timetable getCurrentTeacherTimetable(Long id) {
+    public Timetable getCurrentTeacherTimetable(final Long id) {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
         return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
-                              .filter(e -> e.getClassSubject() != null && e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList());
-        }
+                .filter(e -> e.getClassSubject() != null
+                        && e.getClassSubject().getTeacher().getId().equals(teacher.getId()))
+                .toList());
+    }
 
     public List<ClassSubject> getAllClassSubjects() {
-        TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class); //change name to literal not final instance
+        final TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(
+                ClassSubject.QUERY_FIND_ALL,
+                ClassSubject.class); // change name to literal not final instance
         return allClassSubjects.getResultList();
     }
 
-    public List<ClassSubject> getAllClassSubjectsWithClass(String className) {
-        TypedQuery<ClassSubject> allClassSubjectsByClassName = this.entityManager.createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class);
+    public List<ClassSubject> getAllClassSubjectsWithClass(final String className) {
+        final TypedQuery<ClassSubject> allClassSubjectsByClassName = this.entityManager
+                .createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class);
         allClassSubjectsByClassName.setParameter("filter", className.toLowerCase());
         return allClassSubjectsByClassName.getResultList();
     }
 
     public List<Teacher> getAllTeachers() {
-        TypedQuery<Teacher> allTeachers = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_ALL, Teacher.class);
+        final TypedQuery<Teacher> allTeachers = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_ALL,
+                Teacher.class);
         return allTeachers.getResultList();
     }
 
-    public Teacher getTeacherByID(Long id) {
-        TypedQuery<Teacher> teacher = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_ID, Teacher.class);
+    public Teacher getTeacherByID(final Long id) {
+        final TypedQuery<Teacher> teacher = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_ID,
+                Teacher.class);
         teacher.setParameter("filter", id);
         return teacher.getSingleResult();
     }
@@ -63,20 +70,54 @@ public class DataRepository {
     }
 
     public List<Room> getAllRooms() {
-        TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
+        final TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
         return allRooms.getResultList();
     }
 
-    public Room getRoomByID(Long id) {
-        TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_ID, Room.class);
+    public Room getRoomByID(final Long id) {
+        final TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_ID, Room.class);
         rooms.setParameter("filter", id);
         return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
     }
 
-    public Room getRoomByNumber(int number) {
-        TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class);
+    public Room getRandomRoom() {
+        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_GET_RANDOM, Room.class);
+        return room.getSingleResultOrNull();
+    }
+
+    public Map<String, Timetable> getCurrentTimetableList() {
+        return currentTimetableList;
+    }
+
+    public void setCurrentTimetableList(Map<String, Timetable> currentTimetableList) {
+        this.currentTimetableList = currentTimetableList;
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public Room getRoomByNumber(final int number) {
+        final TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class);
         rooms.setParameter("filter", number);
         return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
+    }
+
+    public Room getRoomByName(final String name) {
+        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NAME, Room.class);
+        room.setParameter("filter", name);
+        return room.getSingleResultOrNull();
+    }
+
+    public SchoolClass getSchoolClassById(final Long id) {
+        final TypedQuery<SchoolClass> scoolClass = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
+                SchoolClass.class);
+        scoolClass.setParameter("filter", id);
+        return scoolClass.getSingleResultOrNull();
     }
 
     public Long getRoomCount() {
@@ -84,18 +125,33 @@ public class DataRepository {
     }
 
     public List<Subject> getAllSubjects() {
-        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_ALL, Subject.class);
+        final TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_ALL,
+                Subject.class);
         return allSubjects.getResultList();
     }
 
-    public Subject getSubjectByName(String name) {
-        TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME, Subject.class);
+    public Subject getSubjectByName(final String name) {
+        final TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME,
+                Subject.class);
         allSubjects.setParameter("filter", name);
         return allSubjects.getResultList().isEmpty() ? null : allSubjects.getResultList().get(0);
     }
 
     public Long getSubjectCount() {
         return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
+    }
+
+    public List<SchoolClass> returnAllSchoolClasses() {
+        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
+                SchoolClass.class);
+        return query.getResultList();
+    }
+
+    public SchoolClass checkIfSchoolClassExists(String className) {
+        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+                SchoolClass.class);
+        query.setParameter("filter", className);
+        return query.getSingleResultOrNull();
     }
 
     public ArrayList<ClassSubject> getClassSubjects() {
@@ -110,8 +166,14 @@ public class DataRepository {
         return null;
     }
 
+    public Room getRoomByNumberName(String numberName) {
+        TypedQuery<Room> query = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBERNAME, Room.class);
+        query.setParameter("filter", numberName);
+        return query.getSingleResultOrNull();
+    }
+
     @Transactional
-    public ClassSubject addClassSubject(ClassSubject classSubject) { //TODO correct return type???
+    public ClassSubject addClassSubject(final ClassSubject classSubject) { // TODO correct return type???
         if (this.entityManager.contains(classSubject)) {
             throw new IllegalArgumentException();
         }
@@ -121,7 +183,37 @@ public class DataRepository {
     }
 
     @Transactional
-    public Teacher addTeacher(Teacher teacher) {
+    public ClassSubjectInstance addClassSubjectInstance(final ClassSubjectInstance classSubjectInstance) {
+        if (this.entityManager.contains(classSubjectInstance)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(classSubjectInstance);
+        return classSubjectInstance;
+    }
+
+    @Transactional
+    public Timetable addTimetable(final Timetable timetable) {
+        if (this.entityManager.contains(timetable)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(timetable);
+        return timetable;
+    }
+
+    @Transactional
+    public SchoolClass addSchoolClass(final SchoolClass schoolClass) {
+        if (this.entityManager.contains(schoolClass)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(schoolClass);
+        return schoolClass;
+    }
+
+    @Transactional
+    public Teacher addTeacher(final Teacher teacher) {
         if (this.entityManager.contains(teacher)) {
             throw new IllegalArgumentException();
         }
@@ -131,7 +223,7 @@ public class DataRepository {
     }
 
     @Transactional
-    public Room addRoom(Room room) {
+    public Room addRoom(final Room room) {
         if (this.entityManager.contains(room)) {
             throw new IllegalArgumentException();
         }
@@ -141,7 +233,7 @@ public class DataRepository {
     }
 
     @Transactional
-    public Subject addSubject(Subject subject) {
+    public Subject addSubject(final Subject subject) {
         if (this.entityManager.contains(subject)) {
             throw new IllegalArgumentException();
         }
@@ -150,32 +242,40 @@ public class DataRepository {
         return subject;
     }
 
-    public Subject getSubjectByNameAndCheckIfExists(String subjectName) {
+    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
         Subject subject;
         try {
             subject = getSubjectByName(subjectName);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
         return subject;
     }
 
-    public Teacher getTeacherByNameAndCheckIfExists(String teacherName) {
-        TypedQuery<Teacher> query = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_NAME, Teacher.class); // TODO move this to a modular function
+    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
+        final TypedQuery<Teacher> query = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_NAME,
+                Teacher.class); // TODO
+        // move
+        // this
+        // to
+        // a
+        // modular
+        // function
         query.setParameter("filter", teacherName);
         return query.getResultList().isEmpty() ? null : query.getResultList().get(0);
     }
 
-    public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(List<ClassSubject> classSubjects, Room classRoom) {
-        //List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
-        SchoolDays[] schoolDays = SchoolDays.values();
-        HashMap<SchoolDays, ArrayList<Integer>> occupiedHours = new HashMap<>();
-        ArrayList<ClassSubjectInstance> result = new ArrayList<>();
-        Random random = new Random();
+    public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(final List<ClassSubject> classSubjects,
+            final Room classRoom) {
+        // List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
+        final SchoolDays[] schoolDays = SchoolDays.values();
+        final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours = new HashMap<>();
+        final ArrayList<ClassSubjectInstance> result = new ArrayList<>();
+        final Random random = new Random();
         final int MAX_HOUR = 9;
         final int MIN_HOUR = 1;
 
-        for (ClassSubject classSubject : classSubjects) {
+        for (final ClassSubject classSubject : classSubjects) {
             SchoolDays randomSchoolDay;
             int schoolHour;
             int randomDuration;
@@ -186,15 +286,18 @@ public class DataRepository {
                 randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
                 schoolHour = random.nextInt(MIN_HOUR, MAX_HOUR);
 
-                randomDuration = random.nextInt(1, WEEKLY_HOURS + 1); //weeklyHoursBounds == 1 ? 1 :
+                randomDuration = random.nextInt(1, WEEKLY_HOURS + 1); // weeklyHoursBounds == 1 ? 1 :
 
-                  if (checkIfPeriodIsFree(occupiedHours,  schoolHour, randomDuration, randomSchoolDay)
-                  && (hoursCounter - randomDuration) >= 0) {
-                    Period period = new Period(randomSchoolDay, schoolHour);
-                    result.add(new ClassSubjectInstance(classSubject, period, classRoom, randomDuration));
+                if (checkIfPeriodIsFree(occupiedHours, schoolHour, randomDuration, randomSchoolDay)
+                        && (hoursCounter - randomDuration) >= 0) {
+                    final Period period = new Period(randomSchoolDay, schoolHour);
+                    ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance(classSubject, period,
+                            classRoom, randomDuration);
+                    result.add(classSubjectInstance);
+                    addClassSubjectInstance(classSubjectInstance);
 
-                    //for each duration, add a placeholder in the hasmap to reserve space
-                    reserveHoursInOccupiesHours(occupiedHours,  schoolHour, randomDuration, randomSchoolDay);
+                    // for each duration, add a placeholder in the hasmap to reserve space
+                    reserveHoursInOccupiesHours(occupiedHours, schoolHour, randomDuration, randomSchoolDay);
 
                     hoursCounter -= randomDuration;
                 }
@@ -204,10 +307,12 @@ public class DataRepository {
         return result;
     }
 
-    public boolean checkIfPeriodIsFree(HashMap<SchoolDays, ArrayList<Integer>> occupiedHours, int schoolHour, int duration, SchoolDays schoolDay) {
-        ArrayList<Integer> allOccupiedHoursOnDay = occupiedHours.get(schoolDay);
+    public boolean checkIfPeriodIsFree(final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours,
+            final int schoolHour,
+            final int duration, final SchoolDays schoolDay) {
+        final ArrayList<Integer> allOccupiedHoursOnDay = occupiedHours.get(schoolDay);
 
-        if (allOccupiedHoursOnDay == null) { //entire day is free
+        if (allOccupiedHoursOnDay == null) { // entire day is free
             return true;
         }
 
@@ -219,8 +324,10 @@ public class DataRepository {
         return true;
     }
 
-    public void reserveHoursInOccupiesHours(HashMap<SchoolDays, ArrayList<Integer>> occupiedHours, int schoolHour, int duration, SchoolDays schoolDay) {
-        ArrayList<Integer> updatedListOnDay = occupiedHours.getOrDefault(schoolDay, new ArrayList<>());
+    public void reserveHoursInOccupiesHours(final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours,
+            final int schoolHour,
+            final int duration, final SchoolDays schoolDay) {
+        final ArrayList<Integer> updatedListOnDay = occupiedHours.getOrDefault(schoolDay, new ArrayList<>());
 
         for (int i = 0; i < duration; i++) {
             updatedListOnDay.add(schoolHour + i);
@@ -228,9 +335,32 @@ public class DataRepository {
         occupiedHours.put(schoolDay, updatedListOnDay);
     }
 
-    public void createTimetable(String className, Room classRoom) {
-        List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
-        ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects, classRoom);
+    public void initRandomTimetableForAllClasses() {
+        final TypedQuery<SchoolClass> allClasses = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
+                SchoolClass.class);
+        allClasses.getResultList().stream()
+                .forEach(e -> createTimetableForClassNew(e.getClassName(), e.getClassRoom()));
+    }
+
+    public void createTimetableForClassNew(final String className, final Room classRoom) {
+        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+                SchoolClass.class);
+        query.setParameter("filter", className);
+        final SchoolClass schoolClass = query.getSingleResultOrNull();
+
+        final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
+        final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
+                classRoom);
+        final Timetable timetable = new Timetable(classSubjectInstances, schoolClass);
+        this.currentTimetableList.put(className, timetable); // TODO maybe change with id, or
+                                                             // make name id
+        addTimetable(timetable);
+    }
+
+    public void createTimetableForClass(final String className, final Room classRoom) {
+        final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
+        final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
+                classRoom);
         this.currentTimetable = new Timetable(classSubjectInstances);
     }
 }

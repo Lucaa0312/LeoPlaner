@@ -11,6 +11,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -27,15 +28,15 @@ public class ClassSubjectResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ClassSubjectDTO> getAllClassSubjects() {
-        return dataRepository.getAllClassSubjects().stream().map(e ->
-                  UtilBuildFunctions.createClassSubjectDTO(e)).toList();
+        return dataRepository.getAllClassSubjects().stream().map(e -> UtilBuildFunctions.createClassSubjectDTO(e))
+                .toList();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response addClassSubject(ClassSubject classSubject) {
-        ClassSubject createdClassSubject = this.dataRepository.addClassSubject(classSubject);  // TODO add Error handling
+        ClassSubject createdClassSubject = this.dataRepository.addClassSubject(classSubject); // TODO add Error handling
 
         UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
         uriBuilder.path(Long.toString(createdClassSubject.getId()));
@@ -43,5 +44,12 @@ public class ClassSubjectResource {
         return Response.created(uriBuilder.build()).build();
     }
 
-
+    @Path("/getByClass/{className}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ClassSubjectDTO> getAllClassSubjects(@PathParam("className") String className) {
+        return dataRepository.getAllClassSubjectsWithClass(className).stream()
+                .map(e -> UtilBuildFunctions.createClassSubjectDTO(e))
+                .toList();
+    }
 }

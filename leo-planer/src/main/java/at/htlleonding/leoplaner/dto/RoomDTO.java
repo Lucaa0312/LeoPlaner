@@ -4,10 +4,10 @@ import java.util.List;
 
 import at.htlleonding.leoplaner.data.RoomTypes;
 
-public record RoomDTO(Long id, short roomNumber, String roomName, String roomPrefix, String roomSuffix,
-    List<RoomTypes> roomTypes) {
+public record RoomDTO(Long id, short roomNumber, String roomName, String nameShort,
+        List<RoomTypes> roomTypes) {
 
-  public RoomDTO {
-    roomTypes = List.copyOf(roomTypes);
-  }
+    public RoomDTO {
+        roomTypes = List.copyOf(roomTypes);
+    }
 }

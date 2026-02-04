@@ -1,4 +1,4 @@
-room;number;name;prefix;suffix;types
-101;EDUARD;EDU;U;CHEM,PHY
-202;CHIN;CH;N;CHEM
-24;ch;CH;N;CLASSROOM
+room;number;name;shortName;types
+101;EDUARD;EDU;CHEM,PHY
+202;CHIN;CH;CHEM
+24;ch;CH;CLASSROOM

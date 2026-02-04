@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
@@ -25,20 +26,22 @@ public class Teacher {
     private String nameSymbol; // Lehrerkürzel
 
     @ManyToMany(fetch = FetchType.EAGER)
-    //@JsonIgnore // TODO later on add dtos maybe
+    // @JsonIgnore // TODO later on add dtos maybe
     @JoinTable( // create new table
             name = "teacher_subject", joinColumns = @JoinColumn(name = "teacher_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private List<Subject> teachingSubject = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({"teacher"})
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "teacher_non_working_hours", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherNonWorkingHours> teacher_non_working_hours = new ArrayList<>();
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({"teacher"})
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "teacher_non_preferred_hours", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 
-    //TODO later on add list for periods the teacher does (not) want to (cant) teach
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "teacher_periods", joinColumns = @JoinColumn(name = "teacher_id"))
+    private List<TeacherTakenPeriod> takenUpPeriods = new ArrayList<>();
 
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
@@ -107,5 +110,21 @@ public class Teacher {
 
     public void setTeacher_non_preferred_hours(List<TeacherNonPreferredHours> teacher_non_preferred_hours) {
         this.teacher_non_preferred_hours = teacher_non_preferred_hours;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setTeachingSubject(List<Subject> teachingSubject) {
+        this.teachingSubject = teachingSubject;
+    }
+
+    public List<TeacherTakenPeriod> getTakenUpPeriods() {
+        return takenUpPeriods;
+    }
+
+    public void setTakenUpPeriods(List<TeacherTakenPeriod> takenUpPeriods) {
+        this.takenUpPeriods = takenUpPeriods;
     }
 }
