@@ -119,11 +119,11 @@ def createRandomTeachers(count=20):
 
 def createRandomClassSubjects(classesCount, className):
     roomChosen = random.choice(rooms)
-    classRoom = str(roomChosen["number"]) + roomChosen["name"]
+    # classRoom = str(roomChosen["roomNumber"]) + roomChosen["name"]
     rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
 
     teacherChosen = random.choice(teachers)
-    teacher = teacherChosen["name"]
+    teacher = teacherChosen["teacherName"]
     teachers.remove(teacherChosen)
 
     for _ in range(classesCount):
