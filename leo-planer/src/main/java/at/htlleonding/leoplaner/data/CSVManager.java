@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class CSVManager {
     final static String teacherType = "teacherName";
     final static String roomType = "roomNumber";
-    final static String subjectType = "subjectName";
+    final static String subjectType = "subjectName"; // Todo
     final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
@@ -24,7 +24,7 @@ public class CSVManager {
             return false;
         }
 
-        final String type = lines[0].split(";")[0].toLowerCase();
+        final String type = lines[0].split(";")[0];
 
         switch (type) {
             case teacherType:

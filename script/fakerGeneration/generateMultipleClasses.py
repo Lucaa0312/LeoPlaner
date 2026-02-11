@@ -133,7 +133,7 @@ def createRandomClassSubjects(classesCount, className):
         requiredDoublePeriod = fake.boolean()
 
         classSubject = {
-            "subjectName": subject,
+            "classSubjectName": subject,
             "teacherName": teacher,
             "weeklyHours": weeklyHours,
             "requiresDoublePeriod": requiredDoublePeriod,
@@ -147,7 +147,7 @@ def createRandomClassSubjects(classesCount, className):
     exportToCsv(
         "classSubjects.csv",
         [
-            "subjectName",
+            "classSubjectName",
             "teacherName",
             "weeklyHours",
             "requiresDoublePeriod",
