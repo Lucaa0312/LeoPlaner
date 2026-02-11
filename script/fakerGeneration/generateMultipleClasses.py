@@ -119,7 +119,7 @@ def createRandomTeachers(count=20):
 
 def createRandomClassSubjects(classesCount, className):
     roomChosen = random.choice(rooms)
-    # classRoom = str(roomChosen["roomNumber"]) + roomChosen["name"]
+    classRoom = str(roomChosen["roomNumber"]) + roomChosen["name"]
     rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
 
     teacherChosen = random.choice(teachers)
@@ -138,8 +138,8 @@ def createRandomClassSubjects(classesCount, className):
             "weeklyHours": weeklyHours,
             "requiresDoublePeriod": requiredDoublePeriod,
             "betterDoublePeriod": betterDoublePeriod,
-            "className": className
-            # "classRoom": classRoom,
+            "className": className,
+            "classRoom": classRoom
         }
 
         classSubjects.append(classSubject)
@@ -152,8 +152,8 @@ def createRandomClassSubjects(classesCount, className):
             "weeklyHours",
             "requiresDoublePeriod",
             "betterDoublePeriod",
-            "className"
-            # "classRoom",
+            "className",
+            "classRoom",
         ],
         classSubjects,
     )

@@ -1,61 +1,61 @@
-subjectName;teacherName;weeklyHours;requiresDoublePeriod;betterDoublePeriod;className
-English;Victoria Case;1;False;True;4CHITM
-Math;Victoria Case;2;True;False;4CHITM
-Math;Victoria Case;3;False;False;4CHITM
-MEDT3D;Victoria Case;2;False;True;4CHITM
-Biology;Victoria Case;3;False;False;4CHITM
-Math;Victoria Case;1;True;True;4CHITM
-SEW;Victoria Case;2;True;False;4CHITM
-MEDTMC;Victoria Case;1;False;False;4CHITM
-ITP;Victoria Case;2;True;False;4CHITM
-Chemistry;Victoria Case;2;True;True;4CHITM
-History;Tyler Johnson;2;True;True;1CHIF
-MEDTFI;Tyler Johnson;3;False;False;1CHIF
-MEDTFI;Tyler Johnson;3;False;True;1CHIF
-Economy;Tyler Johnson;2;True;False;1CHIF
-MEDT3D;Tyler Johnson;3;False;True;1CHIF
-Insy;Tyler Johnson;3;True;True;1CHIF
-German;Tyler Johnson;2;True;False;1CHIF
-Geography;Tyler Johnson;2;False;True;1CHIF
-MEDTMC;Tyler Johnson;3;False;True;1CHIF
-Geography;Tyler Johnson;3;True;False;1CHIF
-MEDTFI;Rebecca Gallegos;3;False;False;4AHITM
-MEDTSM;Rebecca Gallegos;2;False;True;4AHITM
-ITP;Rebecca Gallegos;3;True;True;4AHITM
-MEDTFI;Rebecca Gallegos;3;False;True;4AHITM
-Biology;Rebecca Gallegos;1;False;False;4AHITM
-Chemistry;Rebecca Gallegos;2;True;True;4AHITM
-Insy;Rebecca Gallegos;1;True;True;4AHITM
-MEDTMC;Rebecca Gallegos;2;False;False;4AHITM
-MEDT3D;Rebecca Gallegos;1;False;False;4AHITM
-Physics;Rebecca Gallegos;3;False;False;4AHITM
-English;Dr. Kevin Phillips II;2;True;True;3IHF
-Physics;Dr. Kevin Phillips II;1;True;False;3IHF
-Religion;Dr. Kevin Phillips II;1;True;False;3IHF
-Biology;Dr. Kevin Phillips II;3;True;True;3IHF
-Physics;Dr. Kevin Phillips II;3;False;False;3IHF
-Insy;Dr. Kevin Phillips II;1;False;False;3IHF
-MEDTFI;Dr. Kevin Phillips II;3;False;False;3IHF
-ITP;Dr. Kevin Phillips II;3;True;True;3IHF
-MEDTMC;Dr. Kevin Phillips II;3;False;False;3IHF
-SEW;Dr. Kevin Phillips II;1;True;True;3IHF
-Insy;Sharon Blake;1;True;False;3CHITM
-SEW;Sharon Blake;3;False;False;3CHITM
-English;Sharon Blake;2;True;True;3CHITM
-Religion;Sharon Blake;3;True;True;3CHITM
-SEW;Sharon Blake;3;False;False;3CHITM
-Physics;Sharon Blake;3;True;False;3CHITM
-Economy;Sharon Blake;1;False;True;3CHITM
-Insy;Sharon Blake;3;False;True;3CHITM
-Religion;Sharon Blake;1;True;False;3CHITM
-Economy;Sharon Blake;1;True;False;3CHITM
-Biology;Joseph Parker;1;False;True;1CHITM
-Physics;Joseph Parker;1;True;True;1CHITM
-MEDTPD;Joseph Parker;2;True;False;1CHITM
-ITP;Joseph Parker;1;True;True;1CHITM
-History;Joseph Parker;1;False;False;1CHITM
-MEDTSM;Joseph Parker;3;False;True;1CHITM
-Biology;Joseph Parker;3;True;True;1CHITM
-MEDTSM;Joseph Parker;2;False;True;1CHITM
-MEDTMC;Joseph Parker;1;False;False;1CHITM
-SEW;Joseph Parker;1;False;True;1CHITM
+classSubjectName;teacherName;weeklyHours;requiresDoublePeriod;betterDoublePeriod;className;classRoom
+History;Jacqueline Rodriguez;3;True;False;4CHITM;500BEASLEY
+law;Jacqueline Rodriguez;1;True;True;4CHITM;500BEASLEY
+German;Jacqueline Rodriguez;3;False;True;4CHITM;500BEASLEY
+MEDTFI;Jacqueline Rodriguez;1;False;True;4CHITM;500BEASLEY
+MEDTPD;Jacqueline Rodriguez;3;True;False;4CHITM;500BEASLEY
+Math;Jacqueline Rodriguez;2;False;False;4CHITM;500BEASLEY
+MEDTSM;Jacqueline Rodriguez;3;True;False;4CHITM;500BEASLEY
+Physics;Jacqueline Rodriguez;3;False;False;4CHITM;500BEASLEY
+ITP;Jacqueline Rodriguez;3;False;False;4CHITM;500BEASLEY
+MEDTFI;Jacqueline Rodriguez;3;True;True;4CHITM;500BEASLEY
+Insy;Sandra Rodriguez;1;False;False;3CHITM;470JONES
+MEDTMC;Sandra Rodriguez;2;False;False;3CHITM;470JONES
+Math;Sandra Rodriguez;2;True;False;3CHITM;470JONES
+Religion;Sandra Rodriguez;1;False;True;3CHITM;470JONES
+Math;Sandra Rodriguez;3;False;False;3CHITM;470JONES
+Physics;Sandra Rodriguez;2;True;True;3CHITM;470JONES
+Economy;Sandra Rodriguez;1;False;True;3CHITM;470JONES
+law;Sandra Rodriguez;3;False;False;3CHITM;470JONES
+English;Sandra Rodriguez;2;False;False;3CHITM;470JONES
+History;Sandra Rodriguez;3;True;False;3CHITM;470JONES
+MEDTPD;Robert Schmidt;1;False;True;3IHF;463HODGES
+MEDTMC;Robert Schmidt;3;False;True;3IHF;463HODGES
+MEDTPD;Robert Schmidt;1;True;False;3IHF;463HODGES
+ITP;Robert Schmidt;1;True;True;3IHF;463HODGES
+SEW;Robert Schmidt;3;False;False;3IHF;463HODGES
+Chemistry;Robert Schmidt;2;False;True;3IHF;463HODGES
+law;Robert Schmidt;1;False;True;3IHF;463HODGES
+History;Robert Schmidt;3;True;False;3IHF;463HODGES
+Chemistry;Robert Schmidt;3;True;False;3IHF;463HODGES
+ITP;Robert Schmidt;2;True;False;3IHF;463HODGES
+MEDTPD;Robert Barajas;2;False;False;1CHITM;250FORD
+MEDTSM;Robert Barajas;3;True;False;1CHITM;250FORD
+History;Robert Barajas;3;False;False;1CHITM;250FORD
+Chemistry;Robert Barajas;3;False;False;1CHITM;250FORD
+Physics;Robert Barajas;1;True;True;1CHITM;250FORD
+MEDTFI;Robert Barajas;1;False;False;1CHITM;250FORD
+Economy;Robert Barajas;1;True;True;1CHITM;250FORD
+ITP;Robert Barajas;3;False;False;1CHITM;250FORD
+MEDTFI;Robert Barajas;3;False;True;1CHITM;250FORD
+Biology;Robert Barajas;3;False;False;1CHITM;250FORD
+MEDTMC;Christopher Thomas;1;False;False;1CHIF;392TYLER
+German;Christopher Thomas;1;True;False;1CHIF;392TYLER
+MEDTPD;Christopher Thomas;2;True;False;1CHIF;392TYLER
+Insy;Christopher Thomas;2;False;False;1CHIF;392TYLER
+Religion;Christopher Thomas;2;False;False;1CHIF;392TYLER
+SEW;Christopher Thomas;2;True;True;1CHIF;392TYLER
+Insy;Christopher Thomas;1;False;False;1CHIF;392TYLER
+law;Christopher Thomas;3;False;True;1CHIF;392TYLER
+Economy;Christopher Thomas;2;False;True;1CHIF;392TYLER
+Geography;Christopher Thomas;2;False;True;1CHIF;392TYLER
+Religion;Amber Gregory;1;False;False;4AHITM;249BASS
+MEDTMC;Amber Gregory;3;True;False;4AHITM;249BASS
+SEW;Amber Gregory;1;True;False;4AHITM;249BASS
+Chemistry;Amber Gregory;1;False;True;4AHITM;249BASS
+SEW;Amber Gregory;2;True;False;4AHITM;249BASS
+Math;Amber Gregory;3;True;True;4AHITM;249BASS
+Chemistry;Amber Gregory;3;False;True;4AHITM;249BASS
+ITP;Amber Gregory;2;True;False;4AHITM;249BASS
+MEDTFI;Amber Gregory;3;True;True;4AHITM;249BASS
+Insy;Amber Gregory;1;False;True;4AHITM;249BASS

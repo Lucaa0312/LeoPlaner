@@ -1,18 +1,18 @@
-classSubjectName;teacherName;weeklyHours;requiresDoublePeriod;isBetterDoublePeriod;className
-math;John Doe;2;false;false;4CHITM
-physics;John Doe;2;true;false;4CHITM
-history;Alexandro Buller;1;false;true;4CHITM
-sew;smash Ham;2;false;true;4CHITM
-insy;smash Ham;3;false;true;4CHITM
-itp;Sebastian Koch;6;false;true;4CHITM
-english;Marline Lehner;2;false;true;4CHITM
-biology;Mone Bauer;2;false;true;4CHITM
-law;Lori Jut;2;false;true;4CHITM
-geography;Mone Bauer;1;false;false;4CHITM
-economy;David Martiz;1;false;false;4CHITM
-religion;Lori Jut;2;false;true;4CHITM
-german;Luca Pres;2;false;false;4CHITM
-medtpd;Benedikt Lauer;2;false;false;4CHITM
-medtsm;Benedikt Lauer;1;false;false;4CHITM
-medt3d;Lara Krapfen;2;true;true;4CHITM
-medtfi;Lara Krapfen;1;false;false;4CHITM
+classSubjectName;teacherName;weeklyHours;requiresDoublePeriod;isBetterDoublePeriod;className;classRoom
+math;John Doe;2;false;false;4CHITM;101EDUARD
+physics;John Doe;2;true;false;4CHITM;101EDUARD
+history;Alexandro Buller;1;false;true;4CHITM;101EDUARD
+sew;smash Ham;2;false;true;4CHITM;101EDUARD
+insy;smash Ham;3;false;true;4CHITM;101EDUARD
+itp;Sebastian Koch;6;false;true;4CHITM;101EDUARD
+english;Marline Lehner;2;false;true;4CHITM;101EDUARD
+biology;Mone Bauer;2;false;true;4CHITM;101EDUARD
+law;Lori Jut;2;false;true;4CHITM;101EDUARD
+geography;Mone Bauer;1;false;false;4CHITM;101EDUARD
+economy;David Martiz;1;false;false;4CHITM;101EDUARD
+religion;Lori Jut;2;false;true;4CHITM;101EDUARD
+german;Luca Pres;2;false;false;4CHITM;101EDUARD
+medtpd;Benedikt Lauer;2;false;false;4CHITM;101EDUARD
+medtsm;Benedikt Lauer;1;false;false;4CHITM;101EDUARD
+medt3d;Lara Krapfen;2;true;true;4CHITM;101EDUARD
+medtfi;Lara Krapfen;1;false;false;4CHITM;101EDUARD
