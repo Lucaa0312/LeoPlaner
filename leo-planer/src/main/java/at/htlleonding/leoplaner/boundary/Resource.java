@@ -55,9 +55,9 @@ public class Resource {
         this.dataRepository.initRandomTimetableForAllClasses();
     }
 
-    @Path("run/algorithm")
+    @Path("run/algorithmAllClasses")
     @GET
     public void runAlgorithm() {
-        simulatedAnnealingAlgorithm.algorithmLoop();
+        simulatedAnnealingAlgorithm.initAlgorithmForAllClasses();
     }
 }
