@@ -232,8 +232,8 @@ function displaySubjects() {
 }
 
 function initializeApp() {
-    initPicker();
     initNavbar();
+    displaySubjects();
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
