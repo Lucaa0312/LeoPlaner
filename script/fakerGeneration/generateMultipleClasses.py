@@ -54,14 +54,20 @@ def createRandomRooms(count=20):
         selectedTypes = ",".join(random.sample(roomTypes, k=numOfTypes))
 
         room = {
-            "number": roomNumber,
+            "roomNumber": roomNumber,
             "name": roomName,
-            "nameShort": nameShort,
+            "shortName": nameShort,
             "roomTypes": selectedTypes,
         }
         rooms.append(room)
 
-        exportToCsv("rooms.csv", ["number", "name", "nameShort", "roomTypes"], rooms)
+        exportToCsv("rooms.csv", 
+                    ["roomNumber",
+                    "name",
+                    "shortName",
+                    "roomTypes"],
+                    rooms
+                    )
 
 
 def createRandomTeachers(count=20):
@@ -89,11 +95,11 @@ def createRandomTeachers(count=20):
             )
 
         teacher = {
-            "name": teacherName,
+            "teacherName": teacherName,
             "initials": teacherInitials,
             "subjects": teacherSubjects,
-            "teacherNonWorking": formatDayDict(nonWorkingDays),
-            "teacherNonPreferred": formatDayDict(nonPreferredDays),
+            "nonWorking": formatDayDict(nonWorkingDays),
+            "nonPreferred": formatDayDict(nonPreferredDays),
         }
 
         teachers.append(teacher)
@@ -101,11 +107,11 @@ def createRandomTeachers(count=20):
         exportToCsv(
             "teachers.csv",
             [
-                "name",
+                "teacherName",
                 "initials",
                 "subjects",
-                "teacherNonWorking",
-                "teacherNonPreferred",
+                "nonWorking",
+                "nonPreferred",
             ],
             teachers,
         )
@@ -113,11 +119,11 @@ def createRandomTeachers(count=20):
 
 def createRandomClassSubjects(classesCount, className):
     roomChosen = random.choice(rooms)
-    classRoom = str(roomChosen["number"]) + roomChosen["name"]
+    classRoom = str(roomChosen["roomNumber"]) + roomChosen["name"]
     rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
 
     teacherChosen = random.choice(teachers)
-    teacher = teacherChosen["name"]
+    teacher = teacherChosen["teacherName"]
     teachers.remove(teacherChosen)
 
     for _ in range(classesCount):
@@ -127,13 +133,13 @@ def createRandomClassSubjects(classesCount, className):
         requiredDoublePeriod = fake.boolean()
 
         classSubject = {
-            "subject": subject,
-            "teacher": teacher,
+            "classSubjectName": subject,
+            "teacherName": teacher,
             "weeklyHours": weeklyHours,
-            "betterDoublePeriod": betterDoublePeriod,
             "requiresDoublePeriod": requiredDoublePeriod,
+            "betterDoublePeriod": betterDoublePeriod,
             "className": className,
-            "classRoom": classRoom,
+            "classRoom": classRoom
         }
 
         classSubjects.append(classSubject)
@@ -141,11 +147,11 @@ def createRandomClassSubjects(classesCount, className):
     exportToCsv(
         "classSubjects.csv",
         [
-            "subject",
-            "teacher",
+            "classSubjectName",
+            "teacherName",
             "weeklyHours",
-            "betterDoublePeriod",
             "requiresDoublePeriod",
+            "betterDoublePeriod",
             "className",
             "classRoom",
         ],

@@ -1,4 +1,4 @@
-subjectNew;name;requiredRoomTypes;color
+subjectName;requiredRoomTypes;color
 Chemistry;CHEM,PHY;222,209,214
 Math;;20,112,250
 History;;104,0,214
