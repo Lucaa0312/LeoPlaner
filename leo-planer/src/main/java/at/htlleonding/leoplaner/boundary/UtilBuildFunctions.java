@@ -45,15 +45,25 @@ public class UtilBuildFunctions {
     }
 
     public static RoomDTO createRoomDTO(Room room) {
+        if (room == null) {
+            return null;
+        }
         return new RoomDTO(room.getId(), room.getRoomNumber(), room.getRoomName(), room.getNameShort(),
                 room.getRoomTypes());
     }
 
     public static PeriodDTO createPeriodDTO(Period period) {
+        if (period == null) {
+            return null;
+        }
         return new PeriodDTO(period.getSchoolDays(), period.getSchoolHour(), period.isLunchBreak());
     }
 
     public static ClassSubjectDTO createClassSubjectDTO(ClassSubject classSubject) {
+        if (classSubject == null) {
+            return null;
+        }
+
         return new ClassSubjectDTO(classSubject.getWeeklyHours(), classSubject.isRequiresDoublePeriod(),
                 classSubject.isBetterDoublePeriod(), classSubject.getSchoolClass().getClassName(),
                 UtilBuildFunctions.createTeacherSubjectLinkDTO(classSubject.getTeacher()),

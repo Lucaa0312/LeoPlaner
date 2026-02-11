@@ -54,6 +54,7 @@ public class TestCSV {
 
         assertFalse(worked);
     }
+
     @Test
     public void t02_1_testLoadCorrectSubjectsWithFirstSubject() {
         CSVManager.processCSV(subjectCSVPath, dataRepository);
@@ -61,13 +62,12 @@ public class TestCSV {
         expectedRoomTypes.add(RoomTypes.CHEM);
         expectedRoomTypes.add(RoomTypes.PHY);
 
-        Record expectedColor = new RgbColor(222,209,214);
+        Record expectedColor = new RgbColor(222, 209, 214);
 
         assertEquals("chemistry", dataRepository.getAllSubjects().getFirst().getSubjectName());
         assertEquals(expectedRoomTypes, dataRepository.getAllSubjects().getFirst().getRequiredRoomTypes());
         assertEquals(expectedColor, dataRepository.getAllSubjects().getFirst().getSubjectColor());
     }
-
 
     @Test
     public void t02_2_testLoadCorrectTeachersWithFirstTeacher() {
@@ -91,8 +91,6 @@ public class TestCSV {
 
         assertEquals(101, dataRepository.getAllRooms().getFirst().getRoomNumber());
         assertEquals("eduard", dataRepository.getAllRooms().getFirst().getRoomName());
-        assertEquals("edu", dataRepository.getAllRooms().getFirst().getRoomPrefix());
-        assertEquals("u", dataRepository.getAllRooms().getFirst().getRoomSuffix());
         assertEquals(expectedRoomTypes, dataRepository.getAllRooms().getFirst().getRoomTypes());
     }
 
@@ -128,8 +126,11 @@ public class TestCSV {
             CSVManager.processCSV(csvWithTooLongColumn2, dataRepository);
         });
 
-        assertEquals("Teacher CSV is only allowed to have 3 columns! Found 8 columns in row 1", exceptionTeacher.getMessage());
-        assertEquals("Subject CSV is only allowed to have 3 columns! Found 4 columns in row 1", exceptionSubject.getMessage());
-        assertEquals("Room CSV is only allowed to have 5 columns! Found 7 columns in row 1", exceptionRoom.getMessage());
+        assertEquals("Teacher CSV is only allowed to have 3 columns! Found 8 columns in row 1",
+                exceptionTeacher.getMessage());
+        assertEquals("Subject CSV is only allowed to have 3 columns! Found 4 columns in row 1",
+                exceptionSubject.getMessage());
+        assertEquals("Room CSV is only allowed to have 5 columns! Found 7 columns in row 1",
+                exceptionRoom.getMessage());
     }
 }
