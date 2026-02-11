@@ -4,17 +4,16 @@ import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.DataRepository;
-import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
 import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
-import at.htlleonding.leoplaner.dto.PeriodDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,6 +23,9 @@ import java.util.Random;
 
 @ApplicationScoped
 public class SimulatedAnnealingAlgorithm {
+    @Inject
+    DataRepository dataRepository;
+
     private static final Map<SchoolDays, Integer> costOfEachDay = new HashMap<>();
     static {
         costOfEachDay.put(SchoolDays.MONDAY, 5);
@@ -34,24 +36,24 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, 100);
     }
 
-    private Timetable currTimeTable;
-    private Timetable nextTimeTable;
-    private ArrayList<Room> rooms;
-    private ArrayList<Teacher> teachers;
-    private double temperature = 1000.0; // could also go in the small number range like 1-0
     private final int ITERATIONS = 1000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
-    @Inject
-    DataRepository dataRepository;
+    public void initAlgorithmForAllClasses() {
+        for (String className : this.dataRepository.getCurrentTimetableList().keySet()) {
+            algorithmLoop(this.dataRepository.getCurrentTimetableList().get(className), className);
+        }
+    }
 
-    public void algorithmLoop() {
-        this.currTimeTable = this.dataRepository.getCurrentTimetable();
+    public void algorithmLoop(Timetable currTimetable, String className) {
+        double temperature = 1000.0; // could also go in the small number range like 1-0
+        Timetable nextTimeTable = new Timetable();
+
         final Random random = new Random();
         for (int i = 0; i < ITERATIONS; i++) { // main loop
-            final int indexesAmount = this.currTimeTable.getClassSubjectInstances().size();
+            final int indexesAmount = currTimetable.getClassSubjectInstances().size();
             final int ranIndex1 = random.nextInt(0, indexesAmount);
             int ranIndex2;
 
@@ -60,29 +62,29 @@ public class SimulatedAnnealingAlgorithm {
             } while (ranIndex2 == ranIndex1);
             // create 2 random non equal indexes
 
-            if (this.currTimeTable.getClassSubjectInstances().get(ranIndex1).getPeriod().isLunchBreak()
-                    || this.currTimeTable.getClassSubjectInstances().get(ranIndex2).getPeriod().isLunchBreak()) {
+            if (currTimetable.getClassSubjectInstances().get(ranIndex1).getPeriod().isLunchBreak()
+                    || currTimetable.getClassSubjectInstances().get(ranIndex2).getPeriod().isLunchBreak()) {
                 continue; // no reason to play around with lunch breaks only causes problems
             } // if more checks are needed then itll be moved to a helper method
 
-            chooseRandomNeighborFunction(ranIndex1, ranIndex2);
+            nextTimeTable = chooseRandomNeighborFunction(ranIndex1, ranIndex2, currTimetable, nextTimeTable);
 
-            final int costCurrTimeTable = determineCost(this.currTimeTable);
-            final int costNextTimeTable = determineCost(this.nextTimeTable);
+            final int costCurrTimeTable = determineCost(currTimetable);
+            final int costNextTimeTable = determineCost(nextTimeTable);
 
-            final boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable);
+            final boolean acceptSolution = acceptSolution(costCurrTimeTable, costNextTimeTable, temperature);
             if (acceptSolution) {
-                this.currTimeTable = this.nextTimeTable;
+                currTimetable = nextTimeTable;
             }
 
-            setAttributesOfTimetable(this.currTimeTable, costCurrTimeTable, this.temperature);
+            setAttributesOfTimetable(currTimetable, costCurrTimeTable, temperature);
 
-            decreaseTemperature();
-            this.dataRepository.setCurrentTimetable(currTimeTable);
+            decreaseTemperature(temperature);
+            this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
         }
 
-        repairTimetable(currTimeTable);
-        this.dataRepository.setCurrentTimetable(currTimeTable); // secure stuff
+        repairTimetable(currTimetable);
+        this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
     }
 
     public void setAttributesOfTimetable(Timetable timetableToSet, int cost, double temperature) { // maybe make Generic
@@ -211,24 +213,22 @@ public class SimulatedAnnealingAlgorithm {
         return teacher.getTakenUpPeriods().stream().anyMatch(e -> e.period() == period);
     }
 
-    public void chooseRandomNeighborFunction(final int index1, final int index2) { // TODO add random function to change
-                                                                                   // isntance duration, maybe split?
-                                                                                   // isntance in multiple or another
-                                                                                   // random generator
+    public Timetable chooseRandomNeighborFunction(final int index1, final int index2, Timetable currTimetable,
+            Timetable nextTimetable) {
         final Random random = new Random();
         final int ranNumber = random.nextInt(1, 2);
+
         switch (ranNumber) {
             case 1:
-                changePeriod(index1);
-                // swapPeriods(index1, index2);
-                break;
+                return changePeriod(index1, currTimetable);
+            // swapPeriods(index1, index2);
             case 2:
-                changePeriod(index1);
-                break;
+                return changePeriod(index1, currTimetable);
         }
+        return null;
     }
 
-    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
+    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable, final double temperature) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable;
 
         if (deltaCost < 0) { // next solution is better, always accept
@@ -244,12 +244,12 @@ public class SimulatedAnnealingAlgorithm {
 
     }
 
-    public void swapPeriods(final int firstIndex, final int secondIndex) {
-        this.nextTimeTable = this.currTimeTable.switchTwoClassSubjectInstancesAndReturn(firstIndex, secondIndex);
+    public Timetable swapPeriods(final int firstIndex, final int secondIndex, Timetable currTimetable) {
+        return currTimetable.switchTwoClassSubjectInstancesAndReturn(firstIndex, secondIndex);
     }
 
-    public void changePeriod(final int index) {
-        this.nextTimeTable = this.currTimeTable.giveClassSubjectRandomPeriodAndReturn(index);
+    public Timetable changePeriod(final int index, final Timetable currTimeTable) {
+        return currTimeTable.giveClassSubjectRandomPeriodAndReturn(index);
     }
 
     public boolean changeRoom(final ClassSubjectInstance classSubject) {
@@ -260,44 +260,7 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
-    public void decreaseTemperature() {
-        this.temperature *= COOLING_RATE;
+    public void decreaseTemperature(double temperature) {
+        temperature *= COOLING_RATE;
     }
-
-    public Timetable getCurrTimeTable() {
-        return currTimeTable;
-    }
-
-    public void setCurrTimeTable(final Timetable currTimeTable) {
-        this.currTimeTable = currTimeTable;
-    }
-
-    public Timetable getNextTimeTable() {
-        return nextTimeTable;
-    }
-
-    public void setNextTimeTable(final Timetable nextTimeTable) {
-        this.nextTimeTable = nextTimeTable;
-    }
-
-    public ArrayList<Room> getRooms() {
-        return rooms;
-    }
-
-    public void setRooms(final ArrayList<Room> rooms) {
-        this.rooms = rooms;
-    }
-
-    public ArrayList<Teacher> getTeachers() {
-        return teachers;
-    }
-
-    public void setTeachers(final ArrayList<Teacher> teachers) {
-        this.teachers = teachers;
-    }
-
-    public static void fillMapWithElements(Map<SchoolDays, Integer> map) {
-
-    }
-
 }
