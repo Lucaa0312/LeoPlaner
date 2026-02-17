@@ -6,8 +6,8 @@ import jakarta.inject.Inject;
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
-import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.Period;
+import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Timetable;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -19,10 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @QuarkusTest
-public class TeacherOverlap {
-    @Inject
-    DataRepository dataRepository;
-
+public class RoomOverlap {
     @BeforeEach
     public void injectTestCsvDataNew() {
         final String baseDir = "../script/fakerGeneration/csvOutput/";
@@ -42,9 +39,12 @@ public class TeacherOverlap {
         this.dataRepository.initRandomTimetableForAllClasses();
     }
 
+    @Inject
+    DataRepository dataRepository;
+
     @Test
-    void testTeachersNotOverlappingInMultipleClasses() {
-        Map<Teacher, List<Period>> teacherTakenPeriods = new HashMap<>();
+    void testRoomNotOverlappingInMultipleClasses() {
+        Map<Room, List<Period>> roomTakenPeriods = new HashMap<>();
         var timetablesAllClasses = this.dataRepository.getCurrentTimetableList()
                 .values();
 
@@ -53,24 +53,24 @@ public class TeacherOverlap {
                 if (csi == null || csi.getClassSubject() == null) {
                     continue;
                 }
-                final Teacher teacher = csi.getClassSubject().getTeacher();
+                final Room room = csi.getRoom();
                 final Period period = csi.getPeriod();
 
-                List<Period> takenPeriods = teacherTakenPeriods.computeIfAbsent(teacher, k -> new ArrayList<>());
+                List<Period> takenPeriods = roomTakenPeriods.computeIfAbsent(room, k -> new ArrayList<>());
 
                 for (Period periodTaken : takenPeriods) {
                     if (periodTaken.getSchoolDays() == period.getSchoolDays()
                             && periodTaken.getSchoolHour() == period.getSchoolHour()) {
-                        fail(teacher.getTeacherName() + " is double fouled like two classes at the same time "
+                        fail(room.getRoomName() + " is double fouled like two classes at the same time "
                                 + period.getSchoolDays() + " " + period.getSchoolHour());
                     }
                 }
 
-                List<Period> takenPeriodListForTeacher = teacherTakenPeriods
-                        .get(teacher);
-                takenPeriodListForTeacher.add(period);
+                List<Period> takenPeriodListForRoom = roomTakenPeriods
+                        .get(room);
+                takenPeriodListForRoom.add(period);
 
-                teacherTakenPeriods.put(teacher, takenPeriodListForTeacher);
+                roomTakenPeriods.put(room, takenPeriodListForRoom);
             }
         }
     }

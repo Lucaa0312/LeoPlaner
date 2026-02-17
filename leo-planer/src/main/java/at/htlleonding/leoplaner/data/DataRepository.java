@@ -16,6 +16,11 @@ public class DataRepository {
     @Inject
     EntityManager entityManager;
 
+    public void clearTimetableData() {
+        this.currentTimetableList = new HashMap<>();
+        this.currentTimetable = null;
+    }
+
     public Timetable getCurrentTimetable() {
         return this.currentTimetable;
     }
