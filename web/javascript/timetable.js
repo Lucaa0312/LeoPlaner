@@ -194,6 +194,7 @@ function createLayout(data) {
 
         //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SUPPOSED TO BE INSERTED
         let itemCount = 0;
+        let currentPeriod = 0;
 
         // Create HTML 
         classSubjects.forEach(item => {
@@ -206,6 +207,13 @@ function createLayout(data) {
             const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
             const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
+            const period = item.period.schoolHour
+
+            // Fill empty periods
+            while (currentPeriod < period) {
+                content += `<div class="period-styling"></div>`
+                currentPeriod++
+            }
 
             if (itemCount == breakAfterPeriod) {
                 gridBox.innerHTML += `<div class="period-break"></div>\n`;
@@ -236,7 +244,7 @@ function createLayout(data) {
                 `;
                 }
             }
-            // currentPeriod += duration;
+            currentPeriod += duration;
         });
         gridBox.innerHTML = content;
     });
