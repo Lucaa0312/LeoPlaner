@@ -146,7 +146,7 @@ public class DataRepository {
         return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
     }
 
-    public List<SchoolClass> returnAllSchoolClasses() {
+    public List<SchoolClass> getAllSchoolClasses() {
         TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
                 SchoolClass.class);
         return query.getResultList();

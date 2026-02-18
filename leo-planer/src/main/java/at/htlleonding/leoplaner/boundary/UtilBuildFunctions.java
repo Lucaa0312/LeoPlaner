@@ -76,4 +76,12 @@ public class UtilBuildFunctions {
                 timetable.getCostOfTimetable(), timetable.getTempAtTimetable());
     }
 
+    public static SchoolClassDTO createSchoolClassDTO(SchoolClass schoolClass) {
+        return new SchoolClassDTO(schoolClass.getId(), schoolClass.getClassName());
+    }
+
+    public static List<SchoolClassDTO> createListOfSchoolclassDTOs(List<SchoolClass> schoolClasses) {
+        return schoolClasses.stream().map(e -> createSchoolClassDTO(e)).toList();
+    }
+
 }
