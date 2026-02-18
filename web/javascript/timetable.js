@@ -186,9 +186,14 @@ function createLayout(data) {
 
     // value, key
     map.forEach((classSubjects, day) => {
-        const gridBox = document.getElementById(day).querySelector(".gridBoxDays");
-        let content = ""
-        let currentPeriod = 0
+        let content = ``;
+        const gridBox = document.getElementById(day).querySelector(".periods");
+
+        gridBox.innerHTML = "";
+
+        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SOPOSED TO BE INSERTED
+        let itemCount = 0;
+
         // Create HTML 
         classSubjects.forEach(item => {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
@@ -226,9 +231,9 @@ function createLayout(data) {
                 `;
                 }
             }
-            currentPeriod += duration;
+            // currentPeriod += duration;
         });
-        //gridBox.innerHTML = content;
+        gridBox.innerHTML = content;
     });
 }
 
