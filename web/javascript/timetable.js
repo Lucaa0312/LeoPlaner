@@ -29,6 +29,13 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
             getTimetableByTeacher(data);
         }
 
+        if (selectedCategory === 'classes') {
+            getTimetableByClass(data);
+        }
+
+        if (selectedCategory === 'rooms') {
+            getTimetableByRoom(data);
+        }
         // Add more conditions HERE
     });
 });
@@ -109,6 +116,34 @@ function getTimetableByTeacher(teacherId) {
 
         }).catch(error => {
             console.error('Error loading Timetable by teacher:', error)
+        })
+}
+
+function getTimetableByClass(classId) {
+    fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            
+            createLayout(data.timetableDTO.classSubjectInstances)
+
+        }).catch(error => {
+            console.error('Error loading Timetable by class:', error)
+        })
+}
+
+function getTimetableByRoom(roomId) {
+    fetch(`http://localhost:8080/api/timetable/getByClass/${roomId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            
+            createLayout(data.timetableDTO.classSubjectInstances)
+
+        }).catch(error => {
+            console.error('Error loading Timetable by class:', error)
         })
 }
 
