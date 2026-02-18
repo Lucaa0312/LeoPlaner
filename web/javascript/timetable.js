@@ -118,6 +118,7 @@ function clearChoice() {
 }
 
 function createRedArea(teacher) {
+    console.log("Teacher data:", teacher);
     const noWorkingHours = [];
 
     for (let i = 0; i < teacher.teacherNonWorkingHours.length; i++) {
@@ -126,7 +127,7 @@ function createRedArea(teacher) {
                 subject: {
                     id: 2,
                     subjectName: "RedArea",
-                    subjectColor: { red: 255, green: 0, blue: 0 }
+                    subjectColor: { red: 255, green: 1, blue: 1 }
                 },
                 teacher: {
                     id: teacher.id,
@@ -142,7 +143,7 @@ function createRedArea(teacher) {
         });
     }
 
-    console.log("Red area data:", noWorkingHours);
+    console.log("No working hours:", noWorkingHours);
     createLayout(noWorkingHours);
 }
 
@@ -191,7 +192,7 @@ function createLayout(data) {
 
         gridBox.innerHTML = "";
 
-        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SOPOSED TO BE INSERTED
+        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SUPPOSED TO BE INSERTED
         let itemCount = 0;
 
         // Create HTML 
@@ -199,6 +200,9 @@ function createLayout(data) {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
             const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
             const duration = item.duration || 1;
+
+            // WARNING: Will overwrite 0 rgb values, so choose 1
+            // e.g. red = rgb(255, 1, 1) instead of rgb(255, 0, 0)
             const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
             const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
@@ -212,7 +216,7 @@ function createLayout(data) {
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson" && subjectName !== "RedArea") {
                     content += `
-                    <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
                         <p>${subjectName}</p>
                         <p>${teacherSymbol}</p>
                     </div>
@@ -220,7 +224,8 @@ function createLayout(data) {
                 }
                 else if (subjectName === "RedArea") {
                     content += `
-                    <div class="periodStyling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                        <p> No working hour</p>
                     </div>
                 `;
                 }
