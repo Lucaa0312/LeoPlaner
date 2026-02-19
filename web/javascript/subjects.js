@@ -151,9 +151,82 @@ function loadAddSubjectForm() {
 }
 
 
+// Fetch and display all subjects
+function loadSubjects() {
+    fetch("http://localhost:8080/api/subjects")
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            if (!data || data.length === 0) {
+                console.log("No subjects found");
+                document.getElementById("no-subjects").style.display = "block";
+                return;
+            }
+            else {
+                document.getElementById("no-subjects").style.display = "none";
+                const subjectsContainer = document.getElementById("display-subjects");
+                subjectsContainer.innerHTML = "";
+
+                let counter = 0;
+
+                const gridContainer = document.createElement("div");
+                gridContainer.className = "grid-layout";
+
+                data.forEach(subject => {
+                    const subjectBox = document.createElement("div");
+                    subjectBox.className = "subject-box";
+                    subjectBox.id = `subject-${counter}`;
+
+
+                    subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.5)`;
+                    
+                    const subjectInfo = document.createElement("div");
+                    subjectInfo.className = "subject-info";
+                    subjectInfo.innerHTML = `
+                    <div class="subject-info">
+                            <h2 class="subject-name"> ${subject.subjectName.toUpperCase()}</h2>
+                    </div>
+                    `;
+
+                    if (subject.requiredRoomTypes.length < 1) {
+
+                    }
+                    else if (subject.requiredRoomTypes.length > 1) {
+                        subjectInfo.innerHTML += `
+                            <p class="subject-types">${subject.requiredRoomTypes.join("<br>")}</p>
+                        `;
+                    }
+                    else {
+                        subjectInfo.innerHTML += `
+                            <p class="subject-types">${subject.requiredRoomTypes[0]}</p>
+                        `;
+                    }
+
+                    const editDiv = document.createElement("div");
+                    editDiv.className = "subject-edit";
+                    editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+                    
+
+
+                    subjectBox.appendChild(subjectInfo);
+                    subjectBox.appendChild(editDiv);
+                    
+                    gridContainer.appendChild(subjectBox);
+
+                    subjectsContainer.appendChild(gridContainer);
+
+                    counter++;
+                });    
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+
 
 // Initialize the application
 function initializeApp() {
+    loadSubjects();
     initNavbar();
 }
 
