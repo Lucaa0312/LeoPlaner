@@ -75,7 +75,7 @@
     top: 5vh;
     left: 35vw;
 
-    width: 50vw;
+    width: 40vw;
     height: 80vh;
 
     background-color: var(--leo-background-color);
@@ -128,15 +128,21 @@
 /* ------------------ Form Container --------------------- */
 
 #subject-modal-content{
-    margin-top: 10vh;
+    margin-top: 2vh;
     display: flex;
     flex-direction: column;
 
     margin-left: auto;
     margin-right: auto;
 
-    width: 40vw;
+    height: fit-content;
+    width: 35vw;
 }
+
+.subject-form-grid{
+    height: 25vh;
+}
+
 
 #form-field{
     display: grid;
@@ -147,19 +153,6 @@
     display: flex;
     flex-direction: row;
     gap: 2vw;
-    margin-bottom: 2vh;
-}
-.form-number-prefix-suffix-inputs{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 3vw;
-    margin-bottom: 2vh;
-}
-
-#form-number-prefix-suffix-inputs{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 3vw;
 }
 
 #name-input{
@@ -177,10 +170,7 @@
     color: var(--leo-text-color);
 }
 
-#initials-input,
-#number-input,
-#prefix-input,
-#suffix-input{
+#initials-input{
     padding: 1.25vh;
     width: 10vw;
     text-align: center;
@@ -197,18 +187,18 @@
 }
 
 /* ---------- Subject type block ---------- */
-#subjecttype-block{
-    width: 40vw;
+#roomtype-block{
     margin-top: 0.5vh;
+    height: 100%;
 }
 
-#subjecttype-input-container{
+#roomtype-input-container{
     display: flex;
     flex-direction: row;
     gap: 1vw;
 
-    padding: 1.25vh;
-    width: 26vw;
+    padding: 1.75vh;
+    width: 20vw;
 
     background-color: #F3F4F6;
     box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
@@ -221,12 +211,12 @@
     color: var(--leo-text-color);
 }
 
-#subjecttype-input-container:focus-within{
+#roomtype-input-container:focus-within{
     outline: none;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
 }
 
-#subjecttype-input{
+#roomtype-input{
     background: transparent;
     color: var(--leo-text-color);
     font-size: 1.5rem;
@@ -238,7 +228,7 @@
     outline: none;
 }
 
-#add-subject-img {
+#add-room-img {
     color: var(--leo-text-color);
     width: 1.5vw;
     height: 1.5vw;
@@ -246,7 +236,7 @@
     justify-self: center;
 }
 
-#subjecttype-dropdown{
+#roomtype-dropdown{
     position: fixed;
     display: block;
     background-color: #F3F4F6;
@@ -255,7 +245,7 @@
     margin-left: 0.5vw;
     box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
 
-    width: 26vw;
+    width: 20vw;
     z-index: 2000;
 }
 
@@ -269,16 +259,18 @@
     background: #f0f0f0;
 }
 
-#selected-subjecttypes{
+#selected-roomtypes{
     display: flex;
     flex-direction: column;
     gap: 1vh;
 
-    margin-top: 1.5vh;
+
+    margin-top: -6vh;
+    margin-left: 24vw;
     width: 10vw;
 }
 
-.subjecttype-chip{
+.roomtype-chip{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -294,7 +286,7 @@
     letter-spacing: 0.05vw;
 }
 
-.remove-chip {
+.remove-roomtype-chip {
     margin-left: 8px;
     cursor: pointer;
 }
@@ -302,7 +294,7 @@
 #confirm-subject-btn {
     position: fixed;
     bottom: 20vh;
-    left: 47vw;
+    left: 42.5vw;
 
     margin-left: auto;
     margin-right: auto;
@@ -345,4 +337,16 @@
     font-size: 2.5rem;
     font-weight: bold;
     opacity: 0.8;
+}
+
+
+
+/* color-selection-container  */
+
+#color-selection-container{
+    height: 30vh;
+    width: 35vw;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: red;
 }
