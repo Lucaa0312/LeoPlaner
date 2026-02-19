@@ -49,6 +49,8 @@ public class ClassSubjectInstance {
         this.id = id;
     }
 
+    public ClassSubjectInstance() {};
+
     public Long getId() {
         return id;
     }

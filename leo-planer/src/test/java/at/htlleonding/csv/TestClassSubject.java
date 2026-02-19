@@ -15,11 +15,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
+// Do not annotate Transaction here - em will persist between tests
 public class TestClassSubject {
     @Inject
     EntityManager entityManager;
 
     @Test
+    // Use this instead
     @TestTransaction
     public void testGetterSetter(){
         ClassSubject classSubject = new ClassSubject();
