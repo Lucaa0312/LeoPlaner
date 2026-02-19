@@ -407,7 +407,7 @@ function loadSubjects() {
                 subjectsContainer.appendChild(breakDiv);
             }
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error(err)); 
 
 }
 
