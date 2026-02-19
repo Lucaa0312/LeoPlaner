@@ -220,7 +220,13 @@ function loadRooms() {
                     gridContainer.appendChild(roomBox);
 
                     roomsContainer.appendChild(gridContainer);
-                });    
+                });  
+                
+                const breakDiv = document.createElement("div");
+                breakDiv.style.height = "6vh";
+                breakDiv.innerHTML = "&nbsp;";
+
+                roomsContainer.appendChild(breakDiv);
             }
         })
         .catch(err => console.error(err));
