@@ -1,6 +1,7 @@
 package at.htlleonding.csv;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
+import at.htlleonding.leoplaner.data.SchoolClass;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -38,9 +39,17 @@ public class TestClassSubject {
         ClassSubject classSubject2 = new ClassSubject();
         ClassSubject classSubject3 = new ClassSubject();
 
-        // classSubject.setClassName("4CHITM");
-        // classSubject2.setClassName("4CHITM");
-        // classSubject3.setClassName("3AHIF");
+        SchoolClass schoolClass = new SchoolClass();
+        schoolClass.setClassName("4CHITM");
+        SchoolClass schoolClass2 = new SchoolClass();
+        schoolClass2.setClassName("3AHITM");
+
+        entityManager.persist(schoolClass);
+        entityManager.persist(schoolClass2);
+
+        classSubject.setSchoolClass(schoolClass);
+        classSubject2.setSchoolClass(schoolClass);
+        classSubject3.setSchoolClass(schoolClass2);
 
         entityManager.persist(classSubject);
         entityManager.persist(classSubject2);
@@ -52,7 +61,6 @@ public class TestClassSubject {
                 .getResultList();
 
         assertEquals(2, classSubjects.size());
-        // assertEquals("4CHITM", classSubjects.getFirst().getClassName());
-        // assertEquals("4CHITM", classSubjects.get(1).getClassName());
+        assertEquals("4CHITM", classSubjects.getFirst().getSchoolClass().getClassName());
     }
 }
