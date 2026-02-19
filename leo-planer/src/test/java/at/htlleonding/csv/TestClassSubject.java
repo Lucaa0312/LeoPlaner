@@ -2,10 +2,12 @@ package at.htlleonding.csv;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.SchoolClass;
+import at.htlleonding.leoplaner.data.Subject;
+import at.htlleonding.leoplaner.data.Teacher;
+import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,13 +15,48 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@Transactional
 public class TestClassSubject {
     @Inject
     EntityManager entityManager;
 
     @Test
-    public void findAll() {
+    @TestTransaction
+    public void testGetterSetter(){
+        ClassSubject classSubject = new ClassSubject();
+
+        Teacher teacher = new Teacher();
+        teacher.setTeacherName("Adolf");
+        entityManager.persist(teacher);
+        Subject subject = new Subject();
+        subject.setSubjectName("Fliegen");
+        entityManager.persist(subject);
+        SchoolClass schoolClass = new SchoolClass();
+        schoolClass.setClassName("4CHITM");
+        entityManager.persist(schoolClass);
+
+        classSubject.setTeacher(teacher);
+        classSubject.setSubject(subject);
+        classSubject.setSchoolClass(schoolClass);
+        classSubject.setWeeklyHours(2);
+        classSubject.setBetterDoublePeriod(true);
+        classSubject.setRequiresDoublePeriod(false);
+        entityManager.persist(classSubject);
+        Long id = classSubject.getId();
+
+        ClassSubject result = entityManager.find(ClassSubject.class, id);
+        assertEquals("Adolf", result.getTeacher().getTeacherName());
+        assertEquals("Fliegen", result.getSubject().getSubjectName());
+        assertEquals("4CHITM", result.getSchoolClass().getClassName());
+        assertEquals(2, result.getWeeklyHours());
+        assertEquals(true, result.isBetterDoublePeriod());
+        assertEquals(false, result.isRequiresDoublePeriod());
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    @Test
+    @TestTransaction
+    public void testFindAll() {
         ClassSubject classSubject = new ClassSubject();
         ClassSubject classSubject2 = new ClassSubject();
 
@@ -31,10 +68,13 @@ public class TestClassSubject {
                 .getResultList();
 
         assertEquals(2, classSubjects.size());
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
-    public void findAllByClassname() {
+    @TestTransaction
+    public void testFindAllByClassname() {
         ClassSubject classSubject = new ClassSubject();
         ClassSubject classSubject2 = new ClassSubject();
         ClassSubject classSubject3 = new ClassSubject();
@@ -62,5 +102,7 @@ public class TestClassSubject {
 
         assertEquals(2, classSubjects.size());
         assertEquals("4CHITM", classSubjects.getFirst().getSchoolClass().getClassName());
+        entityManager.flush();
+        entityManager.clear();
     }
 }
