@@ -17,3 +17,4 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 20.02.2026
 - Created markdown file
+- Tried making different variants
