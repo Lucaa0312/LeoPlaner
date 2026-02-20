@@ -66,7 +66,7 @@ function addRoomTypeChip(type) {
 
 
 
-// Function to initialize color selection UI (AI optimised code [NOT VIBE CODED THO!])
+// Function to initialize color selection UI (AI optimised code [NOT VIBE CODED! JUST OPTIMISED!])
 function initColorSelection() {
     const container = document.getElementById("color-selection-container");
     if (!container) return;
@@ -367,7 +367,7 @@ function loadSubjects() {
                     subjectInfo.className = "subject-info";
                     subjectInfo.innerHTML = `
                     <div class="subject-info">
-                            <h2 class="subject-name"> ${subject.subjectName}</h2>
+                            <h2 class="subject-name">${subject.subjectName.charAt(0).toUpperCase() + subject.subjectName.slice(1).toLowerCase()}</h2>
                     </div>
                     `;
 
