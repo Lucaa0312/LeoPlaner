@@ -51,7 +51,7 @@ document.addEventListener('click', event => {
 });
 
 // JavaScript for Timetable Page
-let breakAfterPeriod = 2;
+let breakAfterPeriod = 3;
 
 const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
@@ -195,6 +195,12 @@ function createLayout(data) {
         map.get(item.period.schoolDays).push(item)
     });
 
+    for (const [day, entries] of map) {
+        entries.sort((a, b) =>
+            a.period.schoolHour - b.period.schoolHour
+        );
+    }
+
     console.log('Map:', map)
     let timesBuilder = ``;
     let linePlacer = ``;
@@ -227,8 +233,6 @@ function createLayout(data) {
 
         gridBox.innerHTML = "";
 
-        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SUPPOSED TO BE INSERTED
-        let itemCount = 0;
         let currentPeriod = 0;
 
         // Create HTML 
@@ -249,12 +253,6 @@ function createLayout(data) {
                 content += `<div class="period-styling"></div>`
                 currentPeriod++
             }
-
-            if (itemCount == breakAfterPeriod) {
-                gridBox.innerHTML += `<div class="period-break"></div>\n`;
-            }
-
-            itemCount++;
 
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson" && subjectName !== "RedArea") {
