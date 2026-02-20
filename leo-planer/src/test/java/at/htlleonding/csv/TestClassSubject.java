@@ -23,7 +23,7 @@ public class TestClassSubject {
     @Test
     // Use this instead
     @TestTransaction
-    public void testGetterSetter(){
+    public void t01_testGetterSetter(){
         ClassSubject classSubject = new ClassSubject();
 
         Teacher teacher = new Teacher();
@@ -58,7 +58,7 @@ public class TestClassSubject {
 
     @Test
     @TestTransaction
-    public void testFindAll() {
+    public void t02_testFindAll() {
         ClassSubject classSubject = new ClassSubject();
         ClassSubject classSubject2 = new ClassSubject();
 
@@ -76,7 +76,7 @@ public class TestClassSubject {
 
     @Test
     @TestTransaction
-    public void testFindAllByClassname() {
+    public void t03_testFindAllByClassname() {
         ClassSubject classSubject = new ClassSubject();
         ClassSubject classSubject2 = new ClassSubject();
         ClassSubject classSubject3 = new ClassSubject();
