@@ -71,14 +71,14 @@ function init() {
 
 function load() {
     clearLayout();
-    fetch("http://localhost:8080/api/timetable")
+    fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then(response => {
             return response.json()
         }).then(data => {
             createLayout(data.classSubjectInstances)
         }).catch(error => {
             console.error('Error loading Timetable:', error)
-        })
+        });
 }
 
 function getRandomizedTimeTable() {
@@ -112,7 +112,7 @@ function getTimetableByTeacher(teacherId) {
             return response.json()
         }).then(data => {
             console.log(`Fetched data:`, data)
-            createLayout(data.timetableDTO.classSubjectInstances)
+            createLayout(data.classSubjectInstances)
             createRedArea(data.teacher);
         }).catch(error => {
             console.error('Error loading Timetable by teacher:', error)
@@ -125,8 +125,8 @@ function getTimetableByClass(classId) {
             return response.json()
         }).then(data => {
             console.log(data)
-            
-            createLayout(data.timetableDTO.classSubjectInstances)
+
+            createLayout(data.classSubjectInstances)
 
         }).catch(error => {
             console.error('Error loading Timetable by class:', error)
@@ -134,16 +134,16 @@ function getTimetableByClass(classId) {
 }
 
 function getTimetableByRoom(roomId) {
-    fetch(`http://localhost:8080/api/timetable/getByClass/${roomId}`)
+    fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
         .then(response => {
             return response.json()
         }).then(data => {
             console.log(data)
-            
-            createLayout(data.timetableDTO.classSubjectInstances)
+
+            createLayout(data.classSubjectInstances)
 
         }).catch(error => {
-            console.error('Error loading Timetable by class:', error)
+            console.error('Error loading Timetable by room:', error)
         })
 }
 
@@ -253,7 +253,7 @@ function createLayout(data) {
             if (itemCount == breakAfterPeriod) {
                 gridBox.innerHTML += `<div class="period-break"></div>\n`;
             }
-            
+
             itemCount++;
 
             for (let d = 0; d < duration; d++) {
@@ -285,12 +285,67 @@ function createLayout(data) {
     });
 }
 
-function clearLayout(){
+function clearLayout() {
     let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach(day => {
         const gridBox = document.getElementById(day).querySelector(".periods");
         gridBox.innerHTML = "";
     });
+
+    loadClasses();
+    loadTeachers();
+    loadRooms();
+}
+
+function loadClasses() {
+    fetch(`http://localhost:8080/api/getAllClasses`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('classes').querySelector('.select-menu');
+
+            data.forEach(clazz => {
+                dorpdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all classes into dropdown: ', error)
+        });
+}
+
+function loadTeachers() {
+    fetch(`http://localhost:8080/api/teachers`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('teachers').querySelector('.select-menu');
+
+            data.forEach(teach => {
+                dorpdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all teachers into dropdown: ', error)
+        });
+}
+
+function loadRooms() {
+    fetch(`http://localhost:8080/api/rooms`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('rooms').querySelector('.select-menu');
+
+            data.forEach(room => {
+                dorpdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all rooms into dropdown: ', error)
+        });
 }
 
 function initializeApp() {
