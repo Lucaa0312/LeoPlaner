@@ -1,51 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fächer</title>
+    <title>F&auml;cher</title>
     <link rel="stylesheet" href="../style/essentials.css">
     <link rel="stylesheet" href="../style/subjects.css">
     <script defer src="../javascript/subjects.js"></script>
     <script defer src="../javascript/navbar.js"></script>
+
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
-
 <body>
     <div class="flex-container">
+
         <div id="nav-bar"></div>
 
         <div id="main-content">
-            <div class="flex-row" id="subject-header">
+            <div class="flex-row" id="subjects-header">
                 <div id="header-section">
-                    <h1 id="header-text">Fächer</h1>
-                    <p id="header-subtext">Verwalten Sie Ihre Fächer</p>
+                    <h1 id="header-text">F&auml;cher</h1>
+                    <p id="header-subtext">Verwalten Sie Ihre F&auml;cher</p>
                 </div>
-                <div id="subject-controls">
-                    <div id="subject-search-bar">
-                        <input type="text" id="subject-search" placeholder="Nach Fächern suchen">
-                        <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Search Icon">
+                <div id="controls">
+                    <div id="search-bar">
+                        <input type="text" id="input-field" placeholder="Nach F&auml;chern suchen">
+                        <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Suchsymbol">
                     </div>
-                    <div id="add-subject-btn" onclick="loadAddSubjectForm()"><i class="fa-solid fa-plus"></i>
-                        <p>Fach hinzufügen</p>
-                    </div>
+                    <div id="add-btn" onclick="loadAddSubjectForm()"><i class="fa-solid fa-plus"></i><p>Fach hinzufügen</p></div>
                 </div>
             </div>
 
             <div id="display-subjects">
                 <!-- Generated in JavaScript -->
             </div>
-            
 
-            <div id="subject-overlay" class="hide">
+            <div id="disable-overlay">
                 <div id="add-subject-screen">
                 <!-- Generated in JavaScript -->
                 </div>
             </div>
 
-        </div>
-    </div>
-</body>
 
+            <div id="no-subjects" style="display: block;">
+                <p>Es wurden noch keine F&auml;cher hinzugefügt.</p>
+                <p>...</p>
+            </div>
+        </div>
+
+    </div>
+    
+</body>
 </html>
