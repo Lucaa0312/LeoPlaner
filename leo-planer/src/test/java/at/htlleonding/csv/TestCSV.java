@@ -109,7 +109,7 @@ public class TestCSV {
             CSVManager.processCSV(csvWithWrongType, dataRepository);
         });
 
-        assertEquals("Unknown Type: randomtype", exception.getMessage());
+        assertEquals("Unknown Type: randomType", exception.getMessage());
     }
 
     @Test

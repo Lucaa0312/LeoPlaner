@@ -1,5 +1,5 @@
-teacher;name;Symbol;teachingSubjects
-John Doe;JD;Maht,Physics
-Luca Pres;LP;German,Chemistry.CHEM
-Alexandro Buller;AB;History
-Andires Lop;AL;Math,Physics.PHY.CHEM
+teacherName;initials;subjects;nonWorking;nonPreferred
+John Doe;JD;Physics,Maht;MONDAY-3,5,7,8,9,10;WEDNESDAY-3,4,5,7,8,9
+Luca Pres;LP;German,Chemistry;MONDAY-3,5,7,8,9,10;WEDNESDAY-3,4,5,7,8,9
+Adolf Buller;AB;History;MONDAY-3,5,7,8,9,10;WEDNESDAY-3,4,5,7,8,9
+Andires Lop;AL;Math,Physics;MONDAY-3,5,7,8,9,10;WEDNESDAY-3,4,5,7,8,9

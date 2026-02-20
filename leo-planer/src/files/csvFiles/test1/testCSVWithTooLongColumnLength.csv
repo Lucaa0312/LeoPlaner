@@ -1,5 +1,5 @@
-teacher;name;Symbol;teachingSubjects
-John Doe;JD;Math,Physics;aaa;a;a;a;a
-Luca Pres;LP;German,Chemistry.CHEM
-Alexandro Buller;AB;History
-Andires Lop;AL;Math,Physics.PHY.CHEM
+teacherName;initials;subjects;nonWorking;nonPreferred
+John Doe;JD;physics;aaa;a;a;a;a
+Luca Pres;LP;German,Chemistry
+Adolf Buller;AB;History
+Andires Lop;AL;Math,Physics
