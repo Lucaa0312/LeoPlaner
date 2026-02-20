@@ -209,7 +209,7 @@ function createLayout(data) {
 
         timesBuilder += `<div class="period-box">
         <p class="period-started">${times[i]}</p>
-        <p class="current-period">${i}. EH</p>
+        <p class="current-period">${i/2}. EH</p>
         <p class="period-ended">${times[i + 1] || ""}</p>
         </div>\n`;
 
