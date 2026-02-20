@@ -193,7 +193,7 @@ function loadRooms() {
                     roomInfo.className = "room-info";
                     roomInfo.innerHTML = `
                     <div class="room-info">
-                            <h2 class="room-name">${room.roomName.toUpperCase()} - ${room.roomPrefix.toUpperCase()}</h2>
+                            <h2 class="room-name"> ${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase() + room.roomName.slice(1).toLowerCase()}</h2>
                     </div>
                     `;
 
@@ -220,7 +220,13 @@ function loadRooms() {
                     gridContainer.appendChild(roomBox);
 
                     roomsContainer.appendChild(gridContainer);
-                });    
+                });  
+                
+                const breakDiv = document.createElement("div");
+                breakDiv.style.height = "6vh";
+                breakDiv.innerHTML = "&nbsp;";
+
+                roomsContainer.appendChild(breakDiv);
             }
         })
         .catch(err => console.error(err));
