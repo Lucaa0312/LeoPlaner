@@ -40,7 +40,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.TUESDAY, costOfEachDegree.get(CostDegree.LOW));
         costOfEachDay.put(SchoolDays.WEDNESDAY, costOfEachDegree.get(CostDegree.LOW));
         costOfEachDay.put(SchoolDays.THURSDAY, costOfEachDegree.get(CostDegree.LOW));
-        costOfEachDay.put(SchoolDays.FRIDAY, costOfEachDegree.get(CostDegree.HIGH));
+        costOfEachDay.put(SchoolDays.FRIDAY, costOfEachDegree.get(CostDegree.SEVERE));
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
@@ -178,6 +178,7 @@ public class SimulatedAnnealingAlgorithm {
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
         int cost = 0;
+        Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
             final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
             final Period period = classSubjectInstance.getPeriod();
@@ -215,8 +216,29 @@ public class SimulatedAnnealingAlgorithm {
                 cost += costOfEachDegree.get(CostDegree.MID); // TODO handle required double period check when creating
                                                               // random timetable
             }
+
+            if (countOfClassesPerDay.containsKey(period.getSchoolDays())) {
+                Integer currCount = countOfClassesPerDay.get(period.getSchoolDays());
+                countOfClassesPerDay.put(period.getSchoolDays(), currCount++);
+            } else {
+                countOfClassesPerDay.put(period.getSchoolDays(), 0);
+            }
         }
+        cost += determineCostForSpreadOutClasses(countOfClassesPerDay);
+
         return cost;
+    }
+
+    public int determineCostForSpreadOutClasses(Map<SchoolDays, Integer> countOfClassesPerDay) {
+        int determinedCost = 0;
+
+        for (int countOfClasses : countOfClassesPerDay.values()) {
+            if (countOfClasses < 3) {
+                determinedCost += costOfEachDegree.get(CostDegree.SEVERE);
+            }
+        }
+
+        return determinedCost;
     }
 
     public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {
