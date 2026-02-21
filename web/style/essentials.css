@@ -202,6 +202,8 @@
     align-items: center;
     gap: 1rem;
     
+    width: 15vw;
+
     margin-top: 2vh;
     margin-left: 2vw;
     margin-right: 2vw;
