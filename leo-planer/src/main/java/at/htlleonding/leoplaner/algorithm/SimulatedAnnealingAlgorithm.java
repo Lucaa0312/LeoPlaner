@@ -13,7 +13,6 @@ import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,17 +25,26 @@ public class SimulatedAnnealingAlgorithm {
     @Inject
     DataRepository dataRepository;
 
-    private static final Map<SchoolDays, Integer> costOfEachDay = new HashMap<>();
+    private static final Map<CostDegree, Integer> costOfEachDegree = new HashMap<>();
     static {
-        costOfEachDay.put(SchoolDays.MONDAY, 5);
-        costOfEachDay.put(SchoolDays.TUESDAY, 3);
-        costOfEachDay.put(SchoolDays.WEDNESDAY, 4);
-        costOfEachDay.put(SchoolDays.THURSDAY, 5);
-        costOfEachDay.put(SchoolDays.FRIDAY, 30);
-        costOfEachDay.put(SchoolDays.SATURDAY, 100);
+        costOfEachDegree.put(CostDegree.LOW, 5);
+        costOfEachDegree.put(CostDegree.MID, 20);
+        costOfEachDegree.put(CostDegree.HIGH, 50);
+        costOfEachDegree.put(CostDegree.SEVERE, 100);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 99999);
     }
 
-    private final int ITERATIONS = 1000;
+    private static final Map<SchoolDays, Integer> costOfEachDay = new HashMap<>();
+    static {
+        costOfEachDay.put(SchoolDays.MONDAY, costOfEachDegree.get(CostDegree.LOW));
+        costOfEachDay.put(SchoolDays.TUESDAY, costOfEachDegree.get(CostDegree.LOW));
+        costOfEachDay.put(SchoolDays.WEDNESDAY, costOfEachDegree.get(CostDegree.LOW));
+        costOfEachDay.put(SchoolDays.THURSDAY, costOfEachDegree.get(CostDegree.LOW));
+        costOfEachDay.put(SchoolDays.FRIDAY, costOfEachDegree.get(CostDegree.SEVERE));
+        costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
+    }
+
+    private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.995;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -170,12 +178,13 @@ public class SimulatedAnnealingAlgorithm {
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
         int cost = 0;
+        Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
             final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
             final Period period = classSubjectInstance.getPeriod();
 
             if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
-                return cost + 999999;
+                return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE);
             }
 
             final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
@@ -183,7 +192,7 @@ public class SimulatedAnnealingAlgorithm {
             teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
             if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher()
                     .checkIfHourExistsInNonWorkingList(teacherNonWorkingHour)) {
-                return cost + 999999; // is to be never be accepted
+                return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be accepted
             }
 
             final TeacherNonPreferredHours teacherNonPreferredHours = new TeacherNonPreferredHours();
@@ -191,22 +200,45 @@ public class SimulatedAnnealingAlgorithm {
             teacherNonPreferredHours.setSchoolHour(period.getSchoolHour());
             if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher()
                     .checkIfHourExistsInNonPreferredList(teacherNonPreferredHours)) {
-                cost += 50;
+                cost += costOfEachDegree.get(CostDegree.SEVERE);
             }
 
             cost += costOfEachDay.get(period.getSchoolDays()); // cost of being in each day, replacing the switch case
 
             if (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 > 6) {
-                cost += (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 - 5) * 10;
+                cost += (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 - 5)
+                        * costOfEachDegree.get(CostDegree.LOW);
             }
 
             if (classSubjectInstance.getClassSubject() != null
                     && classSubjectInstance.getClassSubject().isBetterDoublePeriod()
                     && classSubjectInstance.getDuration() == 1) {
-                cost += 30; // TODO handle required double period check when creating random timetable
+                cost += costOfEachDegree.get(CostDegree.MID); // TODO handle required double period check when creating
+                                                              // random timetable
+            }
+
+            if (countOfClassesPerDay.containsKey(period.getSchoolDays())) {
+                Integer currCount = countOfClassesPerDay.get(period.getSchoolDays());
+                countOfClassesPerDay.put(period.getSchoolDays(), currCount++);
+            } else {
+                countOfClassesPerDay.put(period.getSchoolDays(), 0);
             }
         }
+        cost += determineCostForSpreadOutClasses(countOfClassesPerDay);
+
         return cost;
+    }
+
+    public int determineCostForSpreadOutClasses(Map<SchoolDays, Integer> countOfClassesPerDay) {
+        int determinedCost = 0;
+
+        for (int countOfClasses : countOfClassesPerDay.values()) {
+            if (countOfClasses < 3) {
+                determinedCost += costOfEachDegree.get(CostDegree.SEVERE);
+            }
+        }
+
+        return determinedCost;
     }
 
     public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {

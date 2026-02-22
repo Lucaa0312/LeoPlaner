@@ -66,7 +66,7 @@ function addRoomTypeChip(type) {
 
 
 
-// Function to initialize color selection UI (AI optimised code [NOT VIBE CODED THO!])
+// Function to initialize color selection UI (AI optimised code [NOT VIBE CODED! JUST OPTIMISED!])
 function initColorSelection() {
     const container = document.getElementById("color-selection-container");
     if (!container) return;
@@ -367,7 +367,7 @@ function loadSubjects() {
                     subjectInfo.className = "subject-info";
                     subjectInfo.innerHTML = `
                     <div class="subject-info">
-                            <h2 class="subject-name"> ${subject.subjectName}</h2>
+                            <h2 class="subject-name">${subject.subjectName.charAt(0).toUpperCase() + subject.subjectName.slice(1).toLowerCase()}</h2>
                     </div>
                     `;
 
@@ -376,12 +376,12 @@ function loadSubjects() {
                     }
                     else if (subject.requiredRoomTypes.length > 1) {
                         subjectInfo.innerHTML += `
-                            <p class="subject-types">${subject.requiredRoomTypes.join("<br>")}</p>
+                            <p class="room-types">${subject.requiredRoomTypes.join("<br>")}</p>
                         `;
                     }
                     else {
                         subjectInfo.innerHTML += `
-                            <p class="subject-types">${subject.requiredRoomTypes[0]}</p>
+                            <p class="room-types">${subject.requiredRoomTypes[0]}</p>
                         `;
                     }
 
@@ -412,6 +412,24 @@ function loadSubjects() {
 }
 
 
+// Search functionality for Subjects
+function searchSubjects() {
+    let query = document.getElementById("input-field").value.toLowerCase();
+    let rows = document.querySelectorAll(".subject-box");
+
+    rows.forEach(function (row) {
+        let name = row.querySelector(".subject-name").textContent.toLowerCase();
+
+        if (query === "" || name.includes(query)) {
+            row.style.display = "";
+        } 
+        else {
+            row.style.display = "none";
+        }
+    });
+}
+
+
 
 // Initialize the application
 function initializeApp() {
@@ -420,3 +438,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+document.getElementById("input-field").addEventListener("input", searchSubjects);

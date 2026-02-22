@@ -41,7 +41,7 @@ def createRandomClasses(count):
     classesSelected = random.sample(classNames, k=count)
 
     for className in classesSelected:
-        createRandomClassSubjects(10, className)
+        createRandomClassSubjects(12, className)
 
 
 def createRandomRooms(count=20):
@@ -61,13 +61,9 @@ def createRandomRooms(count=20):
         }
         rooms.append(room)
 
-        exportToCsv("rooms.csv", 
-                    ["roomNumber",
-                    "name",
-                    "shortName",
-                    "roomTypes"],
-                    rooms
-                    )
+        exportToCsv(
+            "rooms.csv", ["roomNumber", "name", "shortName", "roomTypes"], rooms
+        )
 
 
 def createRandomTeachers(count=20):
@@ -122,11 +118,11 @@ def createRandomClassSubjects(classesCount, className):
     classRoom = str(roomChosen["roomNumber"]) + roomChosen["name"]
     rooms.remove(roomChosen)  # TODO maybe change in a duplicate list to delete
 
-    teacherChosen = random.choice(teachers)
-    teacher = teacherChosen["teacherName"]
-    teachers.remove(teacherChosen)
-
     for _ in range(classesCount):
+        teacherChosen = random.choice(teachers)
+        teacher = teacherChosen["teacherName"]
+        # teachers.remove(teacherChosen) might get empty before classesCount
+
         subject = random.choice(subjects)
         weeklyHours = random.randint(1, 3)
         betterDoublePeriod = fake.boolean()
@@ -139,7 +135,7 @@ def createRandomClassSubjects(classesCount, className):
             "requiresDoublePeriod": requiredDoublePeriod,
             "betterDoublePeriod": betterDoublePeriod,
             "className": className,
-            "classRoom": classRoom
+            "classRoom": classRoom,
         }
 
         classSubjects.append(classSubject)
