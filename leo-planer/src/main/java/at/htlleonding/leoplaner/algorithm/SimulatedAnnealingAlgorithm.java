@@ -180,8 +180,13 @@ public class SimulatedAnnealingAlgorithm {
         int cost = 0;
         Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
-            final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
             final Period period = classSubjectInstance.getPeriod();
+
+            if (period.isLunchBreak()) {
+                continue; // lunch break will cause breaks
+            }
+
+            final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
 
             if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
                 return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE);
