@@ -10,7 +10,6 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 - Small Figma/Design Rework
 - Different Variants/New Approach
 - Maybe Landing Page?
-- Teacher Page Availability Rework
 ---
 
 ## Change log
@@ -21,3 +20,4 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 23.02.2026
 - Experimenting with new designs
+- Teacher Page Availability Rework
