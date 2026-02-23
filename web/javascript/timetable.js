@@ -124,7 +124,7 @@ function getTimetableByTeacher(teacherId) {
             return response.json()
         }).then(data => {
             console.log(`Fetched data:`, data)
-            createLayout(data.classSubjectInstances)
+            createLayout(data.timetableDTO.classSubjectInstances);
             createRedArea(data.teacher);
         }).catch(error => {
             console.error('Error loading Timetable by teacher:', error)
