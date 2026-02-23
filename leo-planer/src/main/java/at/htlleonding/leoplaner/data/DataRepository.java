@@ -34,13 +34,30 @@ public class DataRepository {
         this.currentTimetable = currentTimetable;
     }
 
-    public Timetable getCurrentTeacherTimetable(final Long id) {
+    public Timetable getCurrentTeacherTimetableSingleClass(final Long id) {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
         return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
                 .filter(e -> e.getClassSubject() != null
                         && e.getClassSubject().getTeacher().getId().equals(teacher.getId()))
                 .toList());
+    }
+
+    public Timetable getCurrentTeacherTimetable(final Long id) {
+        final Teacher teacher = getTeacherByID(id);
+        List<ClassSubjectInstance> teacherTakenClasses = new ArrayList<>();
+
+        for (Timetable timetable : this.currentTimetableList.values()) {
+            for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+                if (csi.getClassSubject() == null || csi.getPeriod().isLunchBreak()) {
+                    continue;
+                }
+                if (csi.getClassSubject().getTeacher().getId().equals(teacher.getId())) {
+                    teacherTakenClasses.add(csi);
+                }
+            }
+        }
+        return new Timetable(teacherTakenClasses);
     }
 
     public List<ClassSubject> getAllClassSubjects() {
