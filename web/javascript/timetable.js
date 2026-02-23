@@ -93,16 +93,28 @@ function getRandomizedTimeTable() {
         })
 }
 
+// function getOptimizedTimetable() {
+//     clearLayout();
+//     fetch("http://localhost:8080/api/run/algorithmAllClasses")
+//         .then(response => {
+//             return response.json()
+//         }).then(data => {
+//             console.log(data);
+            
+//             createLayout(data.classSubjectInstances)
+//         }).catch(error => {
+//             console.error('Error optimizing Timetable:', error)
+//         })
+// }
+
 function getOptimizedTimetable() {
     clearLayout();
-    fetch("http://localhost:8080/api/run/algorithm")
-        .then(response => {
-            return response.json()
-        }).then(data => {
-            createLayout(data.classSubjectInstances)
-        }).catch(error => {
-            console.error('Error optimizing Timetable:', error)
+    fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
+        .then(res => {
+            if (!res.ok) throw new Error("Request failed: " + res.status);
+            load();
         })
+        .catch(console.error);
 }
 
 function getTimetableByTeacher(teacherId) {
@@ -302,6 +314,7 @@ function loadClasses() {
         }).then(data => {
             console.log(data)
             const dorpdown = document.getElementById('classes').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
 
             data.forEach(clazz => {
                 dorpdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
@@ -319,6 +332,7 @@ function loadTeachers() {
         }).then(data => {
             console.log(data)
             const dorpdown = document.getElementById('teachers').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
 
             data.forEach(teach => {
                 dorpdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
@@ -336,6 +350,7 @@ function loadRooms() {
         }).then(data => {
             console.log(data)
             const dorpdown = document.getElementById('rooms').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
 
             data.forEach(room => {
                 dorpdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;

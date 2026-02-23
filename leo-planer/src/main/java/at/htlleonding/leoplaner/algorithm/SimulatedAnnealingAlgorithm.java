@@ -1,9 +1,16 @@
 package at.htlleonding.leoplaner.algorithm;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
-import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
@@ -12,13 +19,6 @@ import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 @ApplicationScoped
 public class SimulatedAnnealingAlgorithm {
@@ -180,12 +180,12 @@ public class SimulatedAnnealingAlgorithm {
         int cost = 0;
         Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
-            final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
+            //final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
             final Period period = classSubjectInstance.getPeriod();
 
-            if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
-                return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE);
-            }
+            // if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
+            //     return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE);
+            // }
 
             final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
             teacherNonWorkingHour.setDay(period.getSchoolDays());
