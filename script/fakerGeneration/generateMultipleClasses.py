@@ -41,7 +41,7 @@ def createRandomClasses(count):
     classesSelected = random.sample(classNames, k=count)
 
     for className in classesSelected:
-        createRandomClassSubjects(12, className)
+        createRandomClassSubjects(15, className)
 
 
 def createRandomRooms(count=20):

@@ -34,13 +34,20 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.IMPOSSIBLE, 99999);
     }
 
+    private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
+                                                                                                // accepted
+    private static final Integer SEVERE_COST = costOfEachDegree.get(CostDegree.SEVERE);
+    private static final Integer HIGH_COST = costOfEachDegree.get(CostDegree.HIGH);
+    private static final Integer MID_COST = costOfEachDegree.get(CostDegree.MID);
+    private static final Integer LOW_COST = costOfEachDegree.get(CostDegree.LOW);
+
     private static final Map<SchoolDays, Integer> costOfEachDay = new HashMap<>();
     static {
         costOfEachDay.put(SchoolDays.MONDAY, costOfEachDegree.get(CostDegree.LOW));
         costOfEachDay.put(SchoolDays.TUESDAY, costOfEachDegree.get(CostDegree.LOW));
         costOfEachDay.put(SchoolDays.WEDNESDAY, costOfEachDegree.get(CostDegree.LOW));
         costOfEachDay.put(SchoolDays.THURSDAY, costOfEachDegree.get(CostDegree.LOW));
-        costOfEachDay.put(SchoolDays.FRIDAY, costOfEachDegree.get(CostDegree.SEVERE));
+        costOfEachDay.put(SchoolDays.FRIDAY, costOfEachDegree.get(CostDegree.MID));
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
@@ -87,7 +94,7 @@ public class SimulatedAnnealingAlgorithm {
 
             setAttributesOfTimetable(currTimetable, costCurrTimeTable, temperature);
 
-            decreaseTemperature(temperature);
+            temperature = decreaseTemperature(temperature);
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
         }
 
@@ -181,45 +188,30 @@ public class SimulatedAnnealingAlgorithm {
         Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
         for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
             final Period period = classSubjectInstance.getPeriod();
-
-            if (period.isLunchBreak()) {
+            if (period.isLunchBreak() || classSubjectInstance.getClassSubject() == null) {
                 continue; // lunch break will cause breaks
             }
 
             final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
-
             if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
-                return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE);
+                return cost + IMPOSSIBLE_COST;
             }
 
-            final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
-            teacherNonWorkingHour.setDay(period.getSchoolDays());
-            teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
-            if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher()
-                    .checkIfHourExistsInNonWorkingList(teacherNonWorkingHour)) {
-                return cost + costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be accepted
-            }
-
-            final TeacherNonPreferredHours teacherNonPreferredHours = new TeacherNonPreferredHours();
-            teacherNonPreferredHours.setDay(period.getSchoolDays());
-            teacherNonPreferredHours.setSchoolHour(period.getSchoolHour());
-            if (classSubjectInstance.getClassSubject() != null && classSubjectInstance.getClassSubject().getTeacher()
-                    .checkIfHourExistsInNonPreferredList(teacherNonPreferredHours)) {
-                cost += costOfEachDegree.get(CostDegree.SEVERE);
-            }
+            // cost stuff
+            cost += determineCostForTeacherHours(teacher, period); // teacher non preffered / non working hours
 
             cost += costOfEachDay.get(period.getSchoolDays()); // cost of being in each day, replacing the switch case
 
             if (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 > 6) {
                 cost += (period.getSchoolHour() + classSubjectInstance.getDuration() - 1 - 5)
-                        * costOfEachDegree.get(CostDegree.LOW);
+                        * MID_COST;
             }
 
             if (classSubjectInstance.getClassSubject() != null
                     && classSubjectInstance.getClassSubject().isBetterDoublePeriod()
                     && classSubjectInstance.getDuration() == 1) {
-                cost += costOfEachDegree.get(CostDegree.MID); // TODO handle required double period check when creating
-                                                              // random timetable
+                cost += MID_COST; // TODO handle required double period check when creating
+                                  // random timetable
             }
 
             if (countOfClassesPerDay.containsKey(period.getSchoolDays())) {
@@ -234,12 +226,30 @@ public class SimulatedAnnealingAlgorithm {
         return cost;
     }
 
+    public int determineCostForTeacherHours(final Teacher teacher, final Period period) {
+        final TeacherNonWorkingHours teacherNonWorkingHour = new TeacherNonWorkingHours();
+        teacherNonWorkingHour.setDay(period.getSchoolDays());
+        teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
+        if (teacher.checkIfHourExistsInNonWorkingList(teacherNonWorkingHour)) {
+            return IMPOSSIBLE_COST; // is to be never be accepted
+        }
+
+        final TeacherNonPreferredHours teacherNonPreferredHours = new TeacherNonPreferredHours();
+        teacherNonPreferredHours.setDay(period.getSchoolDays());
+        teacherNonPreferredHours.setSchoolHour(period.getSchoolHour());
+        if (teacher.checkIfHourExistsInNonPreferredList(teacherNonPreferredHours)) {
+            return SEVERE_COST;
+        }
+
+        return 0;
+    }
+
     public int determineCostForSpreadOutClasses(Map<SchoolDays, Integer> countOfClassesPerDay) {
         int determinedCost = 0;
 
         for (int countOfClasses : countOfClassesPerDay.values()) {
             if (countOfClasses < 3) {
-                determinedCost += costOfEachDegree.get(CostDegree.SEVERE);
+                determinedCost += SEVERE_COST;
             }
         }
 
@@ -297,7 +307,7 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
-    public void decreaseTemperature(double temperature) {
-        temperature *= COOLING_RATE;
+    public double decreaseTemperature(double temperature) {
+        return temperature * COOLING_RATE;
     }
 }
