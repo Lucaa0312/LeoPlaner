@@ -21,3 +21,7 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 ### 23.02.2026
 - Experimenting with new designs
 - Teacher Page Availability Rework
+
+### 24.02.2026
+- Reworked Timetable Page
+- Tried new designs
