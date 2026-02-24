@@ -383,15 +383,13 @@
         radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) right/20px 20px,
         #00000000;
     background-repeat: no-repeat;
-    filter: blur(4px) contrast(10);
     animation: l14 1s infinite;
 
     position: absolute;
     z-index: 10000;
-    top: 48vh;
+    top: 38vh;
     left: 57vw;
-    scale: 3;
-
+    scale: 1.2;
 }
 @keyframes l14 {
   100%  {background-position:right,left,center,right}
@@ -402,10 +400,10 @@
     display: none;
     width: 80vw;
     position: fixed;
-    top: 0;
+    bottom: 0vh;
     left: 20vw;
-    height: 100%;
-    background-color: rgba(126, 126, 126, 0.4);
+    height: 91.99vh;
+    background-color: var(--leo-background-color);
     z-index: 100;
 }
 
@@ -413,10 +411,11 @@
 #optimizing-text{
     position: absolute;
     z-index: 10001;
-    top: 55vh;
-    left: 48vw;
+    top: 35vh;
+    left: 48.8vw;
     font-size: 1.75rem;
     color: var(--leo-primary-color1);
     text-align: center;
     font-weight: bold;
+    
 }
