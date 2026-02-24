@@ -63,11 +63,6 @@ const times = [
     "22:10"
 ]
 
-/* Doesn't work yet
-function init() {
-    fetch("http://localhost:8080/api/run/testCsv")
-}
-*/
 
 function load() {
     clearLayout();
@@ -96,19 +91,6 @@ function getRandomizedTimeTable() {
         })
 }
 
-// function getOptimizedTimetable() {
-//     clearLayout();
-//     fetch("http://localhost:8080/api/run/algorithmAllClasses")
-//         .then(response => {
-//             return response.json()
-//         }).then(data => {
-//             console.log(data);
-            
-//             createLayout(data.classSubjectInstances)
-//         }).catch(error => {
-//             console.error('Error optimizing Timetable:', error)
-//         })
-// }
 
 function getOptimizedTimetable() {
     showLoader();
