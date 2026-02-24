@@ -362,7 +362,7 @@
     position: fixed;
     bottom: 0vh;
     left: 20vw;
-    height: 91.99vh;
+    height: 91vh;
     background-color: var(--leo-background-color);
     z-index: 100;
 }
