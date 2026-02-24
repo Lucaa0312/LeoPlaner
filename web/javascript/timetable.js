@@ -369,11 +369,13 @@ function loadRooms() {
 function showLoader() {
     document.querySelector(".loader").style.display = "grid";
     document.getElementById("disable-overlay").style.display = "block";
+    document.getElementById("optimizing-text").style.display = "block";
 }
 
 function hideLoader() {
     document.querySelector(".loader").style.display = "none";
     document.getElementById("disable-overlay").style.display = "none";
+    document.getElementById("optimizing-text").style.display = "none";
 }
 
 

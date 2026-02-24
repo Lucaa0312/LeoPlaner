@@ -331,7 +331,7 @@
 
 
 /* Loader animation */
-.loader {
+/* .loader {
     --s: 20px;
     
     --_d: calc(0.353*var(--s));
@@ -366,7 +366,37 @@
     50% {transform:translate(30px,30px)}
     75% {transform:translate(0,30px)}
     100%{transform:translate(0,0)}
+} */
+
+
+
+/* loader from: https://css-loaders.com/ */
+.loader {
+    height: 50px;
+    aspect-ratio: 2;
+    border: 10px solid #00000000;
+    box-sizing: border-box;
+    background: 
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) center/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) right/20px 20px,
+        #00000000;
+    background-repeat: no-repeat;
+    filter: blur(4px) contrast(10);
+    animation: l14 1s infinite;
+
+    position: absolute;
+    z-index: 10000;
+    top: 48vh;
+    left: 57vw;
+    scale: 3;
+
 }
+@keyframes l14 {
+  100%  {background-position:right,left,center,right}
+}
+
 
 #disable-overlay {
     display: none;
@@ -375,6 +405,18 @@
     top: 0;
     left: 20vw;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(126, 126, 126, 0.4);
     z-index: 100;
+}
+
+
+#optimizing-text{
+    position: absolute;
+    z-index: 10001;
+    top: 55vh;
+    left: 48vw;
+    font-size: 1.75rem;
+    color: var(--leo-primary-color1);
+    text-align: center;
+    font-weight: bold;
 }
