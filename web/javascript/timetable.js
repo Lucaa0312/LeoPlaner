@@ -70,6 +70,7 @@ function init() {
 */
 
 function load() {
+    document.querySelector(".loader").style.display = "none"; // Hide loader
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then(response => {
@@ -112,6 +113,8 @@ function getOptimizedTimetable() {
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
         .then(res => {
             if (!res.ok) throw new Error("Request failed: " + res.status);
+
+            document.querySelector(".loader").style.display = "block"; // Show loader
             load();
         })
         .catch(console.error);
@@ -360,6 +363,16 @@ function loadRooms() {
             console.error('Error loading all rooms into dropdown: ', error)
         });
 }
+
+
+function showLoader() {
+    document.querySelector(".loader").style.display = "grid";
+}
+
+function hideLoader() {
+    document.querySelector(".loader").style.display = "none";
+}
+
 
 function initializeApp() {
     load();
