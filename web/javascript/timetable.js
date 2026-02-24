@@ -70,7 +70,6 @@ function init() {
 */
 
 function load() {
-    document.querySelector(".loader").style.display = "none"; // Hide loader
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then(response => {
@@ -79,6 +78,9 @@ function load() {
             createLayout(data.classSubjectInstances)
         }).catch(error => {
             console.error('Error loading Timetable:', error)
+        })
+        .finally(() => {
+            hideLoader();
         });
 }
 
@@ -109,12 +111,11 @@ function getRandomizedTimeTable() {
 // }
 
 function getOptimizedTimetable() {
+    showLoader();
     clearLayout();
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
         .then(res => {
             if (!res.ok) throw new Error("Request failed: " + res.status);
-
-            document.querySelector(".loader").style.display = "block"; // Show loader
             load();
         })
         .catch(console.error);
@@ -367,10 +368,12 @@ function loadRooms() {
 
 function showLoader() {
     document.querySelector(".loader").style.display = "grid";
+    document.getElementById("disable-overlay").style.display = "block";
 }
 
 function hideLoader() {
     document.querySelector(".loader").style.display = "none";
+    document.getElementById("disable-overlay").style.display = "none";
 }
 
 
