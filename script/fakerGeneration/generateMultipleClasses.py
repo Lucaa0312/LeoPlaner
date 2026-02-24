@@ -5,27 +5,28 @@ import os
 
 fake = Faker()
 
-subjects = [
-    "Math",
-    "Physics",
-    "History",
-    "Biology",
-    "Chemistry",
-    "law",
-    "Economy",
-    "English",
-    "Geography",
-    "SEW",
-    "German",
-    "Insy",
-    "ITP",
-    "Religion",
-    "MEDTPD",
-    "MEDTMC",
-    "MEDTFI",
-    "MEDTSM",
-    "MEDT3D",
-]
+subjects = {
+    "Math": 0,
+    "Physics": 0,
+    "History": 0,
+    "Biology": 0,
+    "Chemistry": 0,
+    "law": 0,
+    "Economy": 0,
+    "English": 0,
+    "Geography": 0,
+    "SEW": 0,
+    "German": 0,
+    "Insy": 0,
+    "ITP": 0,
+    "Religion": 0,
+    "MEDTPD": 0,
+    "MEDTMC": 0,
+    "MEDTFI": 0,
+    "MEDTSM": 0,
+    "MEDT3D": 0,
+}
+subjectsList = list(subjects.keys())
 days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
 roomTypes = ["CLASSROOM", "EDV", "CHEM", "PHY", "SPORT", "WORKSHOP"]
 classNames = ["4CHITM", "4AHITM", "3CHITM", "3IHF", "1CHIF", "1CHITM"]
@@ -42,7 +43,6 @@ def createRandomClasses(count):
 
     for className in classesSelected:
         createRandomClassSubjects(15, className)
-
 
 def createRandomRooms(count=20):
     for _ in range(count):
@@ -72,7 +72,7 @@ def createRandomTeachers(count=20):
         teacherInitials = teacherName.split()[0][0] + teacherName.split()[1][0]
 
         numOfSubjects = random.randint(1, 3)
-        teacherSubjects = ",".join(random.sample(subjects, k=numOfSubjects))
+        teacherSubjects = ",".join(random.sample(subjectsList, k=numOfSubjects))
 
         numOfNonWorkingDays = random.randint(1, 2)
         numOfNonWorkingHoursOnDay = random.randint(1, 8)
@@ -123,7 +123,18 @@ def createRandomClassSubjects(classesCount, className):
         teacher = teacherChosen["teacherName"]
         # teachers.remove(teacherChosen) might get empty before classesCount
 
-        subject = random.choice(subjects)
+        subject = random.choice(subjectsList)
+        subjectCount = subjects[subject]
+    
+        while subjectCount >= 5:
+            if subjectCount >= 5:
+                subject = random.choice(subjectsList)
+                subjectCount = subjects[subject]
+            else:                break
+            
+        subjects[subject] += 1
+        print("Subject: " + subject + ", Count: " + str(subjects[subject]))
+
         weeklyHours = random.randint(1, 3)
         betterDoublePeriod = fake.boolean()
         requiredDoublePeriod = fake.boolean()
