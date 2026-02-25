@@ -417,3 +417,24 @@
     font-weight: bold;
     
 }
+
+#cost-container {
+    position: absolute;
+    z-index: 10001;
+    bottom: 5vh;
+    right: 2%;
+    font-size: 1.75rem;
+    text-align: center;
+    font-weight: bold;
+    background-color: white;
+    width: 20vw;
+    height: 5vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    box-shadow: #0000004d 0px 5px 5px;
+    text-align: left;
+    align-content: center;
+    padding-left: 2vw;
+    border-color: rgb(220, 220, 220);
+    border-width: 0.1px;
+    border-style: solid;
+}
