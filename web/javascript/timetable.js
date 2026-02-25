@@ -255,15 +255,16 @@ function createLayout(data) {
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson" && subjectName !== "RedArea") {
                     content += `
-                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
-                        <p>${subjectName}</p>
-                        <p>${teacherSymbol}</p>
+                    <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
+                        <p class="subject-styling">${subjectName}</p>
+                        <p class="teacher-styling">${teacherSymbol}</p>
+                        <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
                     </div>
                 `;
                 }
                 else if (subjectName === "RedArea") {
                     content += `
-                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
+                    <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
                         <p> No working hour</p>
                     </div>
                 `;

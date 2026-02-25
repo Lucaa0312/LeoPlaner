@@ -189,7 +189,7 @@
     box-sizing: border-box;
 
     font-size: large;
-    font-weight: bold;
+    /*font-weight: bold;*/
     font-family: alte-haas-grotesk;
 }
 
@@ -237,6 +237,7 @@
 }
 
 #timetable-background>div {
+    opacity: 0.3;
     border-bottom: black dashed 2px;
 }
 
@@ -261,6 +262,7 @@
     margin-top: 5px;
     height: var(--period-height);
     box-sizing: border-box;
+    opacity: 0.8;
 }
 
 .break-box {
@@ -301,7 +303,8 @@
 }
 
 .period-styling {
-    width: 90%;
+    /*width: 90%;*/
+    width: 100%;
     height: var(--period-height);
 
     margin-bottom: 5px;
@@ -309,14 +312,34 @@
     box-sizing: border-box;
 
     border: none;
-    border-radius: 0.5em;
+    /*border-radius: 0.5em;*/
+    border-radius: 0.2em;
 
-    font-size: 1.25em;
+    /*font-size: 1.25em;*/
 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.subject-styling {
+    font-weight: 900;
+    font-size: 0.8em;
+}
+
+.teacher-styling {
+    font-size: 0.8em;
+}
+
+.subject-color-line {
+    width: 0.15vw;
+    /*height: var(--period-height);*/
+    height: 8vh;
+
+    border-radius: 0.1vw;
+    position: absolute;
+    margin-left: -3.5vw;
 }
 
 .period-break {
