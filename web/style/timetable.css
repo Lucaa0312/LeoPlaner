@@ -295,7 +295,7 @@
         flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 45%;
+    width: 55%;
 }
 
 .period-styling:nth-child(4) {
@@ -335,7 +335,7 @@
 .subject-color-line {
     width: 0.15vw;
     /*height: var(--period-height);*/
-    height: 8vh;
+    height: 7.7vh;
 
     border-radius: 0.1vw;
     position: absolute;
@@ -387,7 +387,7 @@
     position: fixed;
     bottom: 0vh;
     left: 20vw;
-    height: 91vh;
+    height: 92.2vh;
     background-color: var(--leo-background-color);
     z-index: 100;
 }
