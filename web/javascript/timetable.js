@@ -159,8 +159,7 @@ function createRedArea(teacher) {
             classSubject: {
                 subject: {
                     id: 2,
-                    subjectName: "RedArea",
-                    subjectColor: { red: 255, green: 1, blue: 1 }
+                    subjectName: "RedArea"
                 },
                 teacher: {
                     id: teacher.id,
@@ -264,8 +263,8 @@ function createLayout(data) {
                 }
                 else if (subjectName === "RedArea") {
                     content += `
-                    <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
-                        <p> No working hour</p>
+                    <div class="period-styling non-working-stripes">
+                    <p>Nicht Verfügbar</p>
                     </div>
                 `;
                 }

@@ -323,6 +323,19 @@
     align-items: end;
 }
 
+.non-working-stripes {
+    background: repeating-linear-gradient(
+    45deg,
+    rgba(168, 168, 168, 0.4),
+    rgba(168, 168, 168, 0.4) 7px,
+    rgba(65, 65, 65, 0) 7px,
+    rgba(65, 65, 65, 0) 15px
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .subject-styling {
     font-weight: 900;
     font-size: 0.8em;
