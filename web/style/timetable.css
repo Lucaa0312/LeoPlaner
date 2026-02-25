@@ -336,6 +336,11 @@
     justify-content: center;
 }
 
+.non-working-stripes p {
+    font-weight: bold;
+    font-size: medium;
+}
+
 .subject-styling {
     font-weight: 900;
     font-size: 0.8em;
