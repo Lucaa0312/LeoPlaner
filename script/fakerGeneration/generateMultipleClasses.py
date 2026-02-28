@@ -44,6 +44,7 @@ def createRandomClasses(count):
     for className in classesSelected:
         createRandomClassSubjects(15, className)
 
+
 def createRandomRooms(count=20):
     for _ in range(count):
         roomNumber = random.randint(10, 500)
@@ -125,13 +126,14 @@ def createRandomClassSubjects(classesCount, className):
 
         subject = random.choice(subjectsList)
         subjectCount = subjects[subject]
-    
+
         while subjectCount >= 5:
             if subjectCount >= 5:
                 subject = random.choice(subjectsList)
                 subjectCount = subjects[subject]
-            else:                break
-            
+            else:
+                break
+
         subjects[subject] += 1
         print("Subject: " + subject + ", Count: " + str(subjects[subject]))
 
@@ -190,5 +192,5 @@ def exportToCsv(filename, fieldnames, data, folder="csvOutput"):
 
 if __name__ == "__main__":
     createRandomRooms(10)
-    createRandomTeachers(20)
+    createRandomTeachers(40)
     createRandomClasses(5)

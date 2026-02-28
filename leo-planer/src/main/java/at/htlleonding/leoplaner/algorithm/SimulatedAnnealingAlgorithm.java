@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Period;
@@ -15,7 +14,6 @@ import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
-import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -58,7 +56,7 @@ public class SimulatedAnnealingAlgorithm {
 
     public void algorithmLoop() {
         double temperature = 1000.0; // could also go in the small number range like 1-0
-        Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
+        final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
         Timetable currTimetable;
@@ -66,7 +64,7 @@ public class SimulatedAnnealingAlgorithm {
 
         final Random random = new Random();
         for (int i = 0; i < ITERATIONS; i++) { // main loop
-            int randomClassIndex = random.nextInt(schoolSchedule.size());
+            final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
                     .getSchoolClass().getClassName();
@@ -86,11 +84,11 @@ public class SimulatedAnnealingAlgorithm {
             } // if more checks are needed then itll be moved to a helper method
 
             nextTimeTable = chooseRandomNeighborFunction(ranIndex1, ranIndex2, currTimetable);
-            // repairTimetable(nextTimeTable);
+            repairTimetable(nextTimeTable);
 
             final int costCurrSchoolSchedule = determineCost(schoolSchedule);
 
-            List<Timetable> nextSchoolSchedule = new ArrayList<>(schoolSchedule);
+            final List<Timetable> nextSchoolSchedule = new ArrayList<>(schoolSchedule);
             nextSchoolSchedule.set(randomClassIndex, nextTimeTable);
             final int costNextSchoolSchedule = determineCost(nextSchoolSchedule);
 
@@ -106,7 +104,9 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public void setAttributesOfTimetable(Timetable timetableToSet, int cost, double temperature) { // maybe make Generic
+    public void setAttributesOfTimetable(final Timetable timetableToSet, final int cost, final double temperature) { // maybe
+                                                                                                                     // make
+                                                                                                                     // Generic
         // for dynamic
         timetableToSet.setCostOfTimetable(cost);
         timetableToSet.setTempAtTimetable(temperature);
@@ -114,34 +114,30 @@ public class SimulatedAnnealingAlgorithm {
 
     // TODO maybe advance with just being able to get new Changes instead of entire
     // timetable
-    public void setTeacherTakenPeriod(final Timetable timetable) {
-        final List<ClassSubjectInstance> classSubjectInstancesList = timetable.getClassSubjectInstances();
+    public void setTeacherTakenPeriod(final Teacher teacher, final Timetable timetable) {
+        final List<ClassSubjectInstance> classSubjectInstancesList = timetable.getClassSubjectInstances().stream()
+                .filter(e -> e.getClassSubject() != null)
+                .filter(e -> e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList();
 
-        for (ClassSubjectInstance csi : classSubjectInstancesList) {
+        for (final ClassSubjectInstance csi : classSubjectInstancesList) {
             final Period period = csi.getPeriod();
-            final ClassSubject classSubject = csi.getClassSubject();
-            final String className = classSubject.getSchoolClass().getClassName();
-            final Teacher teacher = classSubject.getTeacher();
-
-            teacher.getTakenUpPeriods().add(new TeacherTakenPeriod(period, className));
+            teacher.getTakenUpPeriods().add(period);
         }
     }
 
-    public void resetAllTeacherTakenPeriodInClass(final String className) {
-        List<Teacher> teachers = this.dataRepository.getAllTeachers();
-
-        teachers.stream().forEach(
-                teacher -> resetTeacherTakenPeriod(teacher, className));
+    public void resetAllTeacherTakenPeriod(final List<Teacher> teachers) {
+        teachers.stream().forEach(teacher -> teacher.setTakenUpPeriods(new ArrayList<>()));
     }
 
-    public void resetTeacherTakenPeriod(final Teacher teacher, String className) {
-        teacher.getTakenUpPeriods().removeAll(
-                teacher.getTakenUpPeriods().stream().filter(e -> e.className().equals(className)).toList());
+    public void resetTeacherTakenPeriod(final Teacher teacher) {
+        teacher.setTakenUpPeriods(new ArrayList<>());
     }
 
-    public void repairTimetable(Timetable timetable) {
-        for (SchoolDays day : SchoolDays.values()) {
-            List<ClassSubjectInstance> classesOnDay = timetable.getClassSubjectInstances().stream()
+    public void repairTimetable(final Timetable timetable) {
+        timetable.getClassSubjectInstances()
+                .removeIf(csi -> csi.getClassSubject() == null && !csi.getPeriod().isLunchBreak());
+        for (final SchoolDays day : SchoolDays.values()) {
+            final List<ClassSubjectInstance> classesOnDay = timetable.getClassSubjectInstances().stream()
                     .filter(e -> e.getPeriod().getSchoolDays() == day)
                     .sorted(Comparator.comparingInt(e -> e.getPeriod().getSchoolHour())).toList();
 
@@ -151,22 +147,23 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public void moveDayToStartAtFirstHour(Timetable timetable, List<ClassSubjectInstance> classesOnDay) {
+    public void moveDayToStartAtFirstHour(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay) {
         if (classesOnDay.isEmpty()) {
             return;
         }
 
-        Period firstClassOfTheDay = classesOnDay.getFirst().getPeriod();
+        final Period firstClassOfTheDay = classesOnDay.getFirst().getPeriod();
 
         if (firstClassOfTheDay.getSchoolHour() != 1) {
             firstClassOfTheDay.setSchoolHour(1);
         }
     }
 
-    public void closeAllGapsBetweenInstances(Timetable timetable, List<ClassSubjectInstance> classesOnDay) {
+    public void closeAllGapsBetweenInstances(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay) {
         for (int i = 0; i < classesOnDay.size() - 1; i++) {
-            int currentEndOfClass = classesOnDay.get(i).getPeriod().getSchoolHour() + classesOnDay.get(i).getDuration();
-            Period nextPeriod = classesOnDay.get(i + 1).getPeriod();
+            final int currentEndOfClass = classesOnDay.get(i).getPeriod().getSchoolHour()
+                    + classesOnDay.get(i).getDuration();
+            final Period nextPeriod = classesOnDay.get(i + 1).getPeriod();
 
             if (nextPeriod.getSchoolHour() > currentEndOfClass) { // just means if the next class starts at a time
                 // bigger than what the previous class ended, hence
@@ -176,11 +173,48 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public void searchAndImplementLunchBreaks(Timetable timetable, List<ClassSubjectInstance> classesOnDay,
-            SchoolDays day) {
+    public void searchAndImplementLunchBreaks(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay,
+            final SchoolDays day) {
         if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6)) {
             timetable.implementRandomLunchBreakOnDay(day);
         }
+    }
+
+    public List<Teacher> getAllTeachersInSchoolSchedule(final List<Timetable> schoolSchedule) {
+        return schoolSchedule.stream()
+                .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
+                .map(csi -> csi.getClassSubject())
+                .filter(cs -> cs != null)
+                .map(cs -> cs.getTeacher())
+                .filter(teacher -> teacher != null)
+                .distinct()
+                .toList();
+
+    }
+
+    public int determineTeacherWorkloadCost(final Teacher teacher) {
+        int cost = 0;
+        final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
+
+        final List<Period> takenUpPeriods = teacher.getTakenUpPeriods();
+
+        for (final Period period : takenUpPeriods) {
+            if (period.isLunchBreak())
+                continue;
+
+            hoursPerDay.merge(period.getSchoolDays(), 1, Integer::sum);
+        }
+
+        for (final int hours : hoursPerDay.values()) {
+            if (hours > 0 && hours < 2) {
+                cost += SEVERE_COST;
+            } else if (hours > 0 && hours < 3) {
+                cost += HIGH_COST;
+            } else if (hours > 0 && hours < 4) {
+                cost += MID_COST;
+            }
+        }
+        return cost;
     }
 
     public int determineCost(final List<Timetable> schoolSchedule) {
@@ -189,21 +223,35 @@ public class SimulatedAnnealingAlgorithm {
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
         int cost = 0;
-        for (Timetable timetable : schoolSchedule) {
-            Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
-            for (ClassSubjectInstance classSubjectInstance : new ArrayList<>(timetable.getClassSubjectInstances())) {
+
+        final List<Teacher> allTeachers = getAllTeachersInSchoolSchedule(schoolSchedule);
+        resetAllTeacherTakenPeriod(allTeachers);
+
+        for (final Timetable timetable : schoolSchedule) {
+
+            for (final Teacher teacher : allTeachers) {
+                setTeacherTakenPeriod(teacher, timetable);
+                // cost += determineTeacherWorkloadCost(teacher);
+            }
+
+            final Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
+
+            for (final ClassSubjectInstance classSubjectInstance : new ArrayList<>(
+                    timetable.getClassSubjectInstances())) {
                 final Period period = classSubjectInstance.getPeriod();
+
                 if (period.isLunchBreak() || classSubjectInstance.getClassSubject() == null) {
                     continue; // lunch break will cause breaks
                 }
 
                 final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
                 if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
-                    return cost + IMPOSSIBLE_COST;
+                    // return cost + IMPOSSIBLE_COST;
                 }
 
                 // cost stuff
-                cost += determineCostForTeacherHours(teacher, period); // teacher non preffered / non working hours
+                cost += determineCostForTeacherHours(teacher, period); // teacher non
+                // preffered / non working hours
 
                 cost += costOfEachDay.get(period.getSchoolDays()); // cost of being in each day, replacing the switch
                                                                    // case
@@ -251,10 +299,10 @@ public class SimulatedAnnealingAlgorithm {
         return 0;
     }
 
-    public int determineCostForSpreadOutClasses(Map<SchoolDays, Integer> countOfClassesPerDay) {
+    public int determineCostForSpreadOutClasses(final Map<SchoolDays, Integer> countOfClassesPerDay) {
         int determinedCost = 0;
 
-        for (int countOfClasses : countOfClassesPerDay.values()) {
+        for (final int countOfClasses : countOfClassesPerDay.values()) {
             if (countOfClasses < 3) {
                 determinedCost += SEVERE_COST;
             }
@@ -264,10 +312,11 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {
-        return teacher.getTakenUpPeriods().stream().anyMatch(e -> e.period() == period);
+        return teacher.getTakenUpPeriods().stream().anyMatch(
+                e -> e.getSchoolDays() == period.getSchoolDays() && e.getSchoolHour() == period.getSchoolHour());
     }
 
-    public Timetable chooseRandomNeighborFunction(final int index1, final int index2, Timetable currTimetable) {
+    public Timetable chooseRandomNeighborFunction(final int index1, final int index2, final Timetable currTimetable) {
         final Random random = new Random();
         final int ranNumber = random.nextInt(1, 2);
 
@@ -297,7 +346,7 @@ public class SimulatedAnnealingAlgorithm {
 
     }
 
-    public Timetable swapPeriods(final int firstIndex, final int secondIndex, Timetable currTimetable) {
+    public Timetable swapPeriods(final int firstIndex, final int secondIndex, final Timetable currTimetable) {
         return currTimetable.switchTwoClassSubjectInstancesAndReturn(firstIndex, secondIndex);
     }
 
@@ -313,7 +362,7 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
-    public double decreaseTemperature(double temperature) {
+    public double decreaseTemperature(final double temperature) {
         return temperature * COOLING_RATE;
     }
 }
