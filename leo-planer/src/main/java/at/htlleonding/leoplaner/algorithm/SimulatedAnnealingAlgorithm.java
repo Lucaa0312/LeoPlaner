@@ -55,6 +55,9 @@ public class SimulatedAnnealingAlgorithm {
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
+    public record History(int iteration, double temperature, int cost) {
+    }
+
     public void algorithmLoop() {
         double temperature = 1000.0; // could also go in the small number range like 1-0
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
@@ -87,7 +90,7 @@ public class SimulatedAnnealingAlgorithm {
             nextTimeTable = chooseRandomNeighborFunction(ranIndex1, ranIndex2, currTimetable);
             repairTimetable(nextTimeTable);
 
-            final int costCurrSchoolSchedule = determineCost(schoolSchedule);
+            int costCurrSchoolSchedule = determineCost(schoolSchedule);
 
             final List<Timetable> nextSchoolSchedule = new ArrayList<>(schoolSchedule);
             nextSchoolSchedule.set(randomClassIndex, nextTimeTable);
@@ -96,11 +99,15 @@ public class SimulatedAnnealingAlgorithm {
             final boolean acceptSolution = acceptSolution(costCurrSchoolSchedule, costNextSchoolSchedule, temperature);
             if (acceptSolution) {
                 schoolSchedule = nextSchoolSchedule;
+                costCurrSchoolSchedule = costNextSchoolSchedule;
             }
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, temperature);
             temperature = decreaseTemperature(temperature);
 
+            if (i % 50 == 0) {
+                this.dataRepository.getHistoryList().add(new History(i, temperature, costCurrSchoolSchedule));
+            }
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
         }
     }
