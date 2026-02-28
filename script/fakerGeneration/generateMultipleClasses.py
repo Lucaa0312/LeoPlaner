@@ -192,5 +192,5 @@ def exportToCsv(filename, fieldnames, data, folder="csvOutput"):
 
 if __name__ == "__main__":
     createRandomRooms(10)
-    createRandomTeachers(40)
+    createRandomTeachers(20)
     createRandomClasses(5)
