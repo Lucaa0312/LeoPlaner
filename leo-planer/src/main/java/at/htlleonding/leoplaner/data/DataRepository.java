@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.data;
 
 import java.util.*;
 
+import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -12,6 +13,15 @@ import jakarta.transaction.Transactional;
 public class DataRepository {
     private Timetable currentTimetable; // volatile, algorithms keep updating this value at the moment
     private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
+    private List<History> historyList = new ArrayList<>();
+
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
+    }
 
     @Inject
     EntityManager entityManager;
