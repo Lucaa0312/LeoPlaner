@@ -58,6 +58,6 @@ public class Resource {
     @Path("run/algorithmAllClasses")
     @GET
     public void runAlgorithm() {
-        simulatedAnnealingAlgorithm.initAlgorithmForAllClasses();
+        simulatedAnnealingAlgorithm.algorithmLoop();
     }
 }
