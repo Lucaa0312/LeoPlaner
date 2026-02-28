@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 @NamedQueries({
         @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
         @NamedQuery(name = Teacher.QUERY_FIND_BY_NAME, query = "select t from Teacher t where LOWER(t.teacherName) like LOWER(:filter)"),
@@ -41,7 +39,7 @@ public class Teacher {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "teacher_periods", joinColumns = @JoinColumn(name = "teacher_id"))
-    private List<TeacherTakenPeriod> takenUpPeriods = new ArrayList<>();
+    private List<Period> takenUpPeriods = new ArrayList<>();
 
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
@@ -120,11 +118,11 @@ public class Teacher {
         this.teachingSubject = teachingSubject;
     }
 
-    public List<TeacherTakenPeriod> getTakenUpPeriods() {
+    public List<Period> getTakenUpPeriods() {
         return takenUpPeriods;
     }
 
-    public void setTakenUpPeriods(List<TeacherTakenPeriod> takenUpPeriods) {
+    public void setTakenUpPeriods(List<Period> takenUpPeriods) {
         this.takenUpPeriods = takenUpPeriods;
     }
 }
