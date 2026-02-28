@@ -361,13 +361,13 @@ public class DataRepository {
         final TypedQuery<SchoolClass> allClasses = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
                 SchoolClass.class);
         allClasses.getResultList().stream()
-                .forEach(e -> createTimetableForClassNew(e.getClassName(), e.getClassRoom()));
+                .forEach(e -> createTimetableForClassNew(e.getId(), e.getClassName(), e.getClassRoom()));
     }
 
-    public void createTimetableForClassNew(final String className, final Room classRoom) {
-        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+    public void createTimetableForClassNew(final Long id, final String className, final Room classRoom) {
+        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
                 SchoolClass.class);
-        query.setParameter("filter", className);
+        query.setParameter("filter", id);
         final SchoolClass schoolClass = query.getSingleResultOrNull();
 
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);

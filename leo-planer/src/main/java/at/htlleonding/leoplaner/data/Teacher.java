@@ -39,7 +39,7 @@ public class Teacher {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "teacher_periods", joinColumns = @JoinColumn(name = "teacher_id"))
-    private List<Period> takenUpPeriods = new ArrayList<>();
+    private List<TeacherTakenPeriod> takenUpPeriods = new ArrayList<>();
 
     public static final String QUERY_FIND_ALL = "Teacher.findAll";
     public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
@@ -118,11 +118,12 @@ public class Teacher {
         this.teachingSubject = teachingSubject;
     }
 
-    public List<Period> getTakenUpPeriods() {
+    public List<TeacherTakenPeriod> getTakenUpPeriods() {
         return takenUpPeriods;
     }
 
-    public void setTakenUpPeriods(List<Period> takenUpPeriods) {
+    public void setTakenUpPeriods(List<TeacherTakenPeriod> takenUpPeriods) {
         this.takenUpPeriods = takenUpPeriods;
     }
+
 }

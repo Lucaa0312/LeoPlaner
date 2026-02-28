@@ -14,6 +14,7 @@ import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
+import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -50,7 +51,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.995;
+    private final double COOLING_RATE = 0.998;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
@@ -121,12 +122,15 @@ public class SimulatedAnnealingAlgorithm {
 
         for (final ClassSubjectInstance csi : classSubjectInstancesList) {
             final Period period = csi.getPeriod();
-            teacher.getTakenUpPeriods().add(period);
+            teacher.getTakenUpPeriods().add(new TeacherTakenPeriod(period, timetable.getSchoolClass().getClassName()));
         }
     }
 
-    public void resetAllTeacherTakenPeriod(final List<Teacher> teachers) {
-        teachers.stream().forEach(teacher -> teacher.setTakenUpPeriods(new ArrayList<>()));
+    public void resetAllTeacherTakenPeriodForClass(final List<Teacher> teachers, String className) {
+        for (Teacher teacher : teachers) {
+            List<TeacherTakenPeriod> takenPeriodsList = teacher.getTakenUpPeriods();
+            takenPeriodsList.removeIf(e -> e.className().equals(className));
+        }
     }
 
     public void resetTeacherTakenPeriod(final Teacher teacher) {
@@ -196,7 +200,7 @@ public class SimulatedAnnealingAlgorithm {
         int cost = 0;
         final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
 
-        final List<Period> takenUpPeriods = teacher.getTakenUpPeriods();
+        final List<Period> takenUpPeriods = teacher.getTakenUpPeriods().stream().map(e -> e.period()).toList();
 
         for (final Period period : takenUpPeriods) {
             if (period.isLunchBreak())
@@ -223,15 +227,17 @@ public class SimulatedAnnealingAlgorithm {
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
         int cost = 0;
-
         final List<Teacher> allTeachers = getAllTeachersInSchoolSchedule(schoolSchedule);
-        resetAllTeacherTakenPeriod(allTeachers);
 
         for (final Timetable timetable : schoolSchedule) {
 
             for (final Teacher teacher : allTeachers) {
+                if (timetable.getSchoolClass() == null) {
+                    continue;
+                }
+                resetAllTeacherTakenPeriodForClass(allTeachers, timetable.getSchoolClass().getClassName());
                 setTeacherTakenPeriod(teacher, timetable);
-                // cost += determineTeacherWorkloadCost(teacher);
+                cost += determineTeacherWorkloadCost(teacher);
             }
 
             final Map<SchoolDays, Integer> countOfClassesPerDay = new HashMap<>();
@@ -245,8 +251,12 @@ public class SimulatedAnnealingAlgorithm {
                 }
 
                 final Teacher teacher = classSubjectInstance.getClassSubject().getTeacher();
-                if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period)) {
-                    // return cost + IMPOSSIBLE_COST;
+                String className = "";
+                if (timetable.getSchoolClass() != null) {
+                    className = timetable.getSchoolClass().getClassName();
+                    if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, className)) {
+                        return cost + IMPOSSIBLE_COST;
+                    }
                 }
 
                 // cost stuff
@@ -311,9 +321,12 @@ public class SimulatedAnnealingAlgorithm {
         return determinedCost;
     }
 
-    public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period) {
-        return teacher.getTakenUpPeriods().stream().anyMatch(
-                e -> e.getSchoolDays() == period.getSchoolDays() && e.getSchoolHour() == period.getSchoolHour());
+    public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period,
+            final String currentClassName) {
+        return teacher.getTakenUpPeriods().stream()
+                .anyMatch(e -> e.period().getSchoolDays() == period.getSchoolDays() &&
+                        e.period().getSchoolHour() == period.getSchoolHour() &&
+                        !e.className().equals(currentClassName));
     }
 
     public Timetable chooseRandomNeighborFunction(final int index1, final int index2, final Timetable currTimetable) {
