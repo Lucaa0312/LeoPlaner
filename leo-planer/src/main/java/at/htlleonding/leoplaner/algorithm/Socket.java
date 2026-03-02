@@ -3,10 +3,10 @@ package at.htlleonding.leoplaner.algorithm;
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
 import java.util.HashSet;
 import java.util.Set;
-import org.hibernate.Session;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnOpen;
@@ -28,8 +28,13 @@ public class Socket {
     }
 
     public void onProgressUpdate(@Observes AlgorithmProgressDTO progress) {
-    String json = "{...}"; 
-    // Now you just loop the set
+    String json = String.format("{\"iteration\":\"%d\"},"
+                              + "{\"temperature\":\"%f\"},"
+                              + "{\"currentCost\":\"%d\"},"
+                              + "{\"finished\":\"%s\"}"
+
+    ,progress.iteration(), progress.temperature(), progress.currentCost(), progress.finished()); 
+    
     sessions.forEach(s -> s.getAsyncRemote().sendText(json));
 }
 }
