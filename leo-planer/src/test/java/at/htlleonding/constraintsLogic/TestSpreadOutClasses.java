@@ -37,7 +37,7 @@ public class TestSpreadOutClasses {
         this.dataRepository.clearTimetableData();
         this.dataRepository.initRandomTimetableForAllClasses();
 
-        simulatedAnnealingAlgorithm.initAlgorithmForAllClasses();
+        simulatedAnnealingAlgorithm.algorithmLoop();
     }
 
     @Test

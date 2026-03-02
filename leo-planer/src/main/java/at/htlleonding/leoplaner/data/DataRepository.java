@@ -15,6 +15,9 @@ public class DataRepository {
     private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
     private List<History> historyList = new ArrayList<>();
 
+    @Inject
+    EntityManager entityManager;
+
     public List<History> getHistoryList() {
         return historyList;
     }
@@ -22,9 +25,6 @@ public class DataRepository {
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
     }
-
-    @Inject
-    EntityManager entityManager;
 
     public void clearTimetableData() {
         this.currentTimetableList = new HashMap<>();

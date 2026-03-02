@@ -16,6 +16,7 @@ import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
 import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
+import at.htlleonding.leoplaner.data.TimetableManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -112,12 +113,12 @@ public class SimulatedAnnealingAlgorithm {
         }
     }
 
-    public void setAttributesOfTimetable(final Timetable timetableToSet, final int cost, final double temperature) { // maybe
-                                                                                                                     // make
-                                                                                                                     // Generic
+    public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) { // maybe
+                                                                                                                // make
+                                                                                                                // Generic
         // for dynamic
-        timetableToSet.setCostOfTimetable(cost);
-        timetableToSet.setTempAtTimetable(temperature);
+        timetable.setCostOfTimetable(cost);
+        timetable.setTempAtTimetable(temperature);
     }
 
     // TODO maybe advance with just being able to get new Changes instead of entire
@@ -187,7 +188,7 @@ public class SimulatedAnnealingAlgorithm {
     public void searchAndImplementLunchBreaks(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay,
             final SchoolDays day) {
         if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6)) {
-            timetable.implementRandomLunchBreakOnDay(day);
+            TimetableManager.implementRandomLunchBreakOnDay(timetable, day);
         }
     }
 
@@ -342,10 +343,10 @@ public class SimulatedAnnealingAlgorithm {
 
         switch (ranNumber) {
             case 1:
-                return changePeriod(index1, currTimetable);
+                return changePeriod(currTimetable, index1, currTimetable);
             // swapPeriods(index1, index2);
             case 2:
-                return changePeriod(index1, currTimetable);
+                return changePeriod(currTimetable, index1, currTimetable);
         }
         return null;
     }
@@ -366,12 +367,13 @@ public class SimulatedAnnealingAlgorithm {
 
     }
 
-    public Timetable swapPeriods(final int firstIndex, final int secondIndex, final Timetable currTimetable) {
-        return currTimetable.switchTwoClassSubjectInstancesAndReturn(firstIndex, secondIndex);
+    public Timetable swapPeriods(final Timetable timetable, final int firstIndex, final int secondIndex,
+            final Timetable currTimetable) {
+        return TimetableManager.switchTwoClassSubjectInstancesAndReturn(timetable, firstIndex, secondIndex);
     }
 
-    public Timetable changePeriod(final int index, final Timetable currTimeTable) {
-        return currTimeTable.giveClassSubjectRandomPeriodAndReturn(index);
+    public Timetable changePeriod(final Timetable timetable, final int index, final Timetable currTimeTable) {
+        return TimetableManager.giveClassSubjectRandomPeriodAndReturn(timetable, index);
     }
 
     public boolean changeRoom(final ClassSubjectInstance classSubject) {
