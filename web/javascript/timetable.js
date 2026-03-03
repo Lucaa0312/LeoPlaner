@@ -248,6 +248,8 @@ function createLayout(data) {
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
             const period = item.period.schoolHour
 
+            const roomNumber = item.room?.roomNumber;
+
             // Fill empty periods
             while (currentPeriod < period) {
                 content += `<div class="period-styling"></div>`
@@ -256,11 +258,22 @@ function createLayout(data) {
 
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson" && subjectName !== "RedArea") {
+                    /*Wird geändert nachdem Alessandro  die Kürzel einbaut*/
+                    let subjectShort = "";
+                    subjectShort = subjectShort + subjectName;
+                    if (subjectShort.length > 6) {   
+                        subjectShort = subjectShort.substring(0, 3);
+                    }
+                    /**/
                     content += `
                     <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
-                        <p class="subject-styling">${subjectName}</p>
-                        <p class="teacher-styling">${teacherSymbol}</p>
-                        <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
+                    <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
+                        <div class="subject-infos">
+                            <p class="subject-styling">${subjectShort}</p>
+                            <p></p>
+                            <p class="room-styling">E${roomNumber}</p>
+                            <p class="teacher-styling">${teacherSymbol}</p>
+                        </div>
                     </div>
                 `;
                 }

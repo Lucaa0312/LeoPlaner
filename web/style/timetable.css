@@ -318,9 +318,9 @@
     /*font-size: 1.25em;*/
 
     display: flex;
-    flex-direction: column;
+    /*flex-direction: column;*/
     justify-content:space-between;
-    align-items: end;
+    align-items: start;
 }
 
 .non-working-stripes {
@@ -343,21 +343,34 @@
 
 .subject-styling {
     font-weight: 900;
-    font-size: 0.8em;
+    justify-self: start;
 }
 
 .teacher-styling {
+    justify-self: end;
+    align-self: flex-end;
+}
+
+.room-styling {
+    justify-self: start;
+    align-self: flex-end;
+}
+
+.subject-infos {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto auto;
+    margin-left: 0.2vw;
     font-size: 0.8em;
 }
 
 .subject-color-line {
     width: 0.15vw;
-    /*height: var(--period-height);*/
-    height: 7.7vh;
+    height: 100%;
 
     border-radius: 0.1vw;
-    position: absolute;
-    /*margin-left: -3.5vw;*/
     display: block;
     align-self: self-start;
 }
