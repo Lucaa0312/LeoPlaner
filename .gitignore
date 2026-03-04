@@ -5,6 +5,7 @@ stopApplication.sh
 .quarkus-dev.log
 .quarkus-dev.pid
 .venv
+node_modules/
 .demo/websockets-quickstart
  
 leo-planer/.gitignore
