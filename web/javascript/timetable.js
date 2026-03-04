@@ -71,7 +71,6 @@ function load() {
             return response.json()
         }).then(data => {
             createLayout(data.classSubjectInstances)
-            getTimetableCost(data);
         }).catch(error => {
             console.error('Error loading Timetable:', error)
         })
@@ -127,7 +126,6 @@ function getTimetableByClass(classId) {
             console.log(data)
 
             createLayout(data.classSubjectInstances)
-            getTimetableCost(data);
         }).catch(error => {
             console.error('Error loading Timetable by class:', error)
         })
@@ -367,28 +365,15 @@ function showLoader() {
     document.querySelector(".loader").style.display = "grid";
     document.getElementById("disable-overlay").style.display = "block";
     document.getElementById("optimizing-text").style.display = "block";
-    document.getElementById("cost-container").style.display = "none";
 }
 
 function hideLoader() {
     document.querySelector(".loader").style.display = "none";
     document.getElementById("disable-overlay").style.display = "none";
     document.getElementById("optimizing-text").style.display = "none";
-    document.getElementById("cost-container").style.display = "block";
 }
 
 function hideTimetableCost() {
-    document.getElementById("cost-container").style.display = "none";
-}
-
-function showTimetableCost() {
-    document.getElementById("cost-container").style.display = "block";
-}
-
-function getTimetableCost(data) {
-    showTimetableCost();
-    console.log(data);
-    document.getElementById("cost-container").innerText = `Kosten: ${data.cost}`;
 }
 
 function initializeApp() {
