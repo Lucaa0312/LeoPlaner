@@ -227,7 +227,7 @@ function createLayout(data) {
     document.getElementById("timetable-background").innerHTML = linePlacer;
 
     // value, key
-    map.forEach((classSubjects, day) => {
+    map.forEach((classSubjectInstances, day) => {
         let content = ``;
         const gridBox = document.getElementById(day).querySelector(".periods");
 
@@ -236,7 +236,7 @@ function createLayout(data) {
         let currentPeriod = 0;
 
         // Create HTML 
-        classSubjects.forEach(item => {
+        classSubjectInstances.forEach(item => {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
             const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
             const duration = item.duration || 1;
@@ -249,6 +249,7 @@ function createLayout(data) {
             const period = item.period.schoolHour
 
             const roomNumber = item.room?.roomNumber;
+            const lunchBreak = item.period.lunchBreak;
 
             // Fill empty periods
             while (currentPeriod < period) {
@@ -257,7 +258,7 @@ function createLayout(data) {
             }
 
             for (let d = 0; d < duration; d++) {
-                if (subjectName !== "No lesson" && subjectName !== "RedArea") {
+                if (!lunchBreak && subjectName !== "No lesson" && subjectName !== "RedArea") {
                     /*Wird geändert nachdem Alessandro  die Kürzel einbaut*/
                     let subjectShort = "";
                     subjectShort = subjectShort + subjectName;
@@ -275,20 +276,18 @@ function createLayout(data) {
                             <p class="teacher-styling">${teacherSymbol}</p>
                         </div>
                     </div>
-                `;
-                }
-                else if (subjectName === "RedArea") {
+                    `;
+                } else if (subjectName === "RedArea") {
                     content += `
                     <div class="period-styling non-working-stripes">
                     <p>Nicht Verfügbar</p>
                     </div>
                 `;
-                }
-                else {
-                    gridBox.innerHTML += `
+                } else {
+                    content += `
                     <div class="period-styling">
                     </div>
-                `;
+                    `;
                 }
             }
             currentPeriod += duration;
