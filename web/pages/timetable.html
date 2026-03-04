@@ -10,6 +10,7 @@
     <script defer src="../javascript/timetable.js"></script>
     <script defer src="../javascript/navbar.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
+    <script type="module" src="../javascript/graph.js"></script>
 </head>
 
 <body>
@@ -70,6 +71,7 @@
             </div>
 
             <!--New Timetable-->
+            <div id="flex-inner-container">
             <div id="timetable">
                 <div id="timetable-content">
                     <div id="timetable-day-name">
@@ -118,6 +120,15 @@
                     </div>
                 </div>
             </div>
+            <div id="graph-container">
+                <div class="graph-box">
+                    <div id="temperatureChart" style="width: 21vw;height:40vh;"></div>
+                </div>
+                <div class="graph-box">
+                    <div id="costChart" style="width: 21vw;height:40vh;"></div>
+                </div>
+            </div>
+            </div>
 
 
             <!--Old Timetable
@@ -164,10 +175,11 @@
                 </div>
             </div>
         -->
-            
         </div>
-
+        
     </div>
+    
+    <!--<div id="cost-container">Kosten: </div>-->
 
 </body>
 

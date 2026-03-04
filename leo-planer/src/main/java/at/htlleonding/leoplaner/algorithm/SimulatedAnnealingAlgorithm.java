@@ -65,6 +65,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
+        int costFinal = 0;
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
@@ -105,6 +106,7 @@ public class SimulatedAnnealingAlgorithm {
             if (acceptSolution) {
                 schoolSchedule = nextSchoolSchedule;
                 costCurrSchoolSchedule = costNextSchoolSchedule;
+                costFinal = costCurrSchoolSchedule;
             }
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, this.temperature);
@@ -120,8 +122,9 @@ public class SimulatedAnnealingAlgorithm {
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, temperature, costCurrSchoolSchedule, true));
         }
+        progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, this.temperature, costFinal, true));
+        
     }
 
     public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) { // maybe
