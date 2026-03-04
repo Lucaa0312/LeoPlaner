@@ -7,3 +7,6 @@ stopApplication.sh
 .venv
 .demo/websockets-quickstart
  
+leo-planer/.gitignore
+
+.vscode
