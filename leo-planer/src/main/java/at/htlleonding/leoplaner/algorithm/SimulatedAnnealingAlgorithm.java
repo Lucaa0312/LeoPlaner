@@ -51,6 +51,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
+    private double temperature = 1000.0; // could also go in the small number range like 1-0
     private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.998;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
@@ -60,7 +61,6 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
-        double temperature = 1000.0; // could also go in the small number range like 1-0
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
@@ -97,17 +97,21 @@ public class SimulatedAnnealingAlgorithm {
             nextSchoolSchedule.set(randomClassIndex, nextTimeTable);
             final int costNextSchoolSchedule = determineCost(nextSchoolSchedule);
 
-            final boolean acceptSolution = acceptSolution(costCurrSchoolSchedule, costNextSchoolSchedule, temperature);
+            final boolean acceptSolution = acceptSolution(costCurrSchoolSchedule, costNextSchoolSchedule);
             if (acceptSolution) {
                 schoolSchedule = nextSchoolSchedule;
                 costCurrSchoolSchedule = costNextSchoolSchedule;
             }
 
-            setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, temperature);
-            temperature = decreaseTemperature(temperature);
+            setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, this.temperature);
 
             if (i % 50 == 0) {
-                this.dataRepository.getHistoryList().add(new History(i, temperature, costCurrSchoolSchedule));
+                this.dataRepository.getHistoryList().add(new History(i, this.temperature, costCurrSchoolSchedule));
+                try {
+                    // Thread.sleep(300);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
             }
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
         }
@@ -188,6 +192,7 @@ public class SimulatedAnnealingAlgorithm {
     public void searchAndImplementLunchBreaks(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay,
             final SchoolDays day) {
         if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6)) {
+            System.out.println("going in");
             TimetableManager.implementRandomLunchBreakOnDay(timetable, day);
         }
     }
@@ -351,20 +356,24 @@ public class SimulatedAnnealingAlgorithm {
         return null;
     }
 
-    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable, final double temperature) {
+    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable;
 
         if (deltaCost < 0) { // next solution is better, always accept
             return true;
         }
 
-        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * temperature));
+        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * this.temperature));
 
         return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {
+        this.temperature = +pushAmount;
+    }
 
+    public void setTemperature(final double temperature) {
+        this.temperature = temperature;
     }
 
     public Timetable swapPeriods(final Timetable timetable, final int firstIndex, final int secondIndex,
@@ -384,7 +393,7 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
-    public double decreaseTemperature(final double temperature) {
-        return temperature * COOLING_RATE;
+    public void decreaseTemperature() {
+        this.temperature *= COOLING_RATE;
     }
 }

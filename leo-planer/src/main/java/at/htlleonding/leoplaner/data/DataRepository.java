@@ -166,7 +166,7 @@ public class DataRepository {
         final TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME,
                 Subject.class);
         allSubjects.setParameter("filter", name);
-        return allSubjects.getResultList().isEmpty() ? null : allSubjects.getResultList().get(0);
+        return allSubjects.getSingleResultOrNull();
     }
 
     public Long getSubjectCount() {

@@ -1,7 +1,11 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import jakarta.inject.Inject;
+
 import java.util.ArrayList;
 
 public class TimetableManager {
@@ -76,23 +80,52 @@ public class TimetableManager {
                 .filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
                 .min().getAsInt(); // get lowest Schoolhour
 
-        final Random random = new Random();
-        final int randSchoolHour = random.nextInt(LOWEST_SCHOOLHOUR + 2, HIGHEST_SCHOOLHOUR + 1);
+        Random random = new Random();
 
-        final boolean LUNCHBREAK = true;
-        final Period lunchBreakPeriod = new Period(schoolday, randSchoolHour, LUNCHBREAK);
+        int randBob = random.nextInt(LOWEST_SCHOOLHOUR + 2, HIGHEST_SCHOOLHOUR + 1);
+
+        boolean LUNCHBREAK = true;
 
         timetable.getClassSubjectInstances().stream().filter(
-                e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randSchoolHour)
+                e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randBob)
                 .forEach(e -> e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1)); // move each class after
                                                                                                // lunch break one hour
                                                                                                // later
 
-        timetable.getClassSubjectInstances().add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1)); // place
-                                                                                                             // holder
-                                                                                                             // fake
+        Period lunchBreakPeriod = new Period(schoolday, randBob + 1, LUNCHBREAK);
+        if (!checkIfPeriodIsFreeOnDay(timetable, randBob, 1, schoolday)) {
+            lunchBreakPeriod.setSchoolHour(lunchBreakPeriod.getSchoolHour() + 1);
+        }
+
+        timetable.getClassSubjectInstances().add(
+                new ClassSubjectInstance(null, lunchBreakPeriod, null, 1)); // place
+                                                                            // holder
+                                                                            // fake
         // csi for lunch
         // break
+    }
+
+    public static boolean checkIfPeriodIsFreeOnDay(final Timetable timetable, final int schoolHour,
+            final int duration, final SchoolDays schoolDay) {
+
+        List<Integer> allOccupiedHoursOnDay = new ArrayList<>();
+
+        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+            for (int i = 0; i < csi.getDuration(); i++) {
+                allOccupiedHoursOnDay.add(csi.getPeriod().getSchoolHour());
+            }
+        }
+
+        if (allOccupiedHoursOnDay.isEmpty()) { // entire day is free
+            return true;
+        }
+
+        for (int i = 0; i < duration; i++) {
+            if (allOccupiedHoursOnDay.contains(schoolHour + i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList(final Timetable timetable) { // deep
