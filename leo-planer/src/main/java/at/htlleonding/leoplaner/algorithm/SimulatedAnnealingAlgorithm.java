@@ -113,6 +113,7 @@ public class SimulatedAnnealingAlgorithm {
                     // TODO: handle exception
                 }
             }
+            decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
         }
     }
@@ -192,7 +193,6 @@ public class SimulatedAnnealingAlgorithm {
     public void searchAndImplementLunchBreaks(final Timetable timetable, final List<ClassSubjectInstance> classesOnDay,
             final SchoolDays day) {
         if (classesOnDay.stream().anyMatch(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6)) {
-            System.out.println("going in");
             TimetableManager.implementRandomLunchBreakOnDay(timetable, day);
         }
     }
@@ -369,7 +369,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void pushTemperature(final double pushAmount) {
-        this.temperature = +pushAmount;
+        this.temperature += pushAmount;
     }
 
     public void setTemperature(final double temperature) {

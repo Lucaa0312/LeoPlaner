@@ -92,8 +92,8 @@ public class TimetableManager {
                                                                                                // lunch break one hour
                                                                                                // later
 
-        Period lunchBreakPeriod = new Period(schoolday, randBob + 1, LUNCHBREAK);
-        if (!checkIfPeriodIsFreeOnDay(timetable, randBob, 1, schoolday)) {
+        Period lunchBreakPeriod = new Period(schoolday, randBob, LUNCHBREAK);
+        while (!checkIfPeriodIsFreeOnDay(timetable, randBob, 1, schoolday)) {
             lunchBreakPeriod.setSchoolHour(lunchBreakPeriod.getSchoolHour() + 1);
         }
 
@@ -110,7 +110,8 @@ public class TimetableManager {
 
         List<Integer> allOccupiedHoursOnDay = new ArrayList<>();
 
-        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances().stream()
+                .filter(e -> e.getPeriod().getSchoolDays() == schoolDay).toList()) {
             for (int i = 0; i < csi.getDuration(); i++) {
                 allOccupiedHoursOnDay.add(csi.getPeriod().getSchoolHour());
             }
