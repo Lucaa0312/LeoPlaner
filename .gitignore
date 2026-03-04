@@ -6,4 +6,5 @@ stopApplication.sh
 .quarkus-dev.pid
 .venv
 node_modules/
+.demo/websockets-quickstart
  
