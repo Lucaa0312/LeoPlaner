@@ -120,9 +120,10 @@
     background: transparent;
     color: var(--leo-text-color);
     font-size: 1.5rem;
-    text-align: right;
+    /*text-align: right;*/
 
-    width: 20vw;
+    width: 15vw;
+    /*width: 20vw;*/
     margin-right: 0.5vw;
     border: none;
     outline: none;
@@ -202,6 +203,8 @@
     align-items: center;
     gap: 1rem;
     
+    width: 15vw;
+
     margin-top: 2vh;
     margin-left: 2vw;
     margin-right: 2vw;

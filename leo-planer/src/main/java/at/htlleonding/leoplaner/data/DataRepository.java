@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.data;
 
 import java.util.*;
 
+import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -12,9 +13,18 @@ import jakarta.transaction.Transactional;
 public class DataRepository {
     private Timetable currentTimetable; // volatile, algorithms keep updating this value at the moment
     private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
+    private List<History> historyList = new ArrayList<>();
 
     @Inject
     EntityManager entityManager;
+
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
+    }
 
     public void clearTimetableData() {
         this.currentTimetableList = new HashMap<>();
@@ -34,13 +44,30 @@ public class DataRepository {
         this.currentTimetable = currentTimetable;
     }
 
-    public Timetable getCurrentTeacherTimetable(final Long id) {
+    public Timetable getCurrentTeacherTimetableSingleClass(final Long id) {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
         return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
                 .filter(e -> e.getClassSubject() != null
                         && e.getClassSubject().getTeacher().getId().equals(teacher.getId()))
                 .toList());
+    }
+
+    public Timetable getCurrentTeacherTimetable(final Long id) {
+        final Teacher teacher = getTeacherByID(id);
+        List<ClassSubjectInstance> teacherTakenClasses = new ArrayList<>();
+
+        for (Timetable timetable : this.currentTimetableList.values()) {
+            for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+                if (csi.getClassSubject() == null || csi.getPeriod().isLunchBreak()) {
+                    continue;
+                }
+                if (csi.getClassSubject().getTeacher().getId().equals(teacher.getId())) {
+                    teacherTakenClasses.add(csi);
+                }
+            }
+        }
+        return new Timetable(teacherTakenClasses);
     }
 
     public List<ClassSubject> getAllClassSubjects() {
@@ -345,13 +372,13 @@ public class DataRepository {
         final TypedQuery<SchoolClass> allClasses = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
                 SchoolClass.class);
         allClasses.getResultList().stream()
-                .forEach(e -> createTimetableForClassNew(e.getClassName(), e.getClassRoom()));
+                .forEach(e -> createTimetableForClassNew(e.getId(), e.getClassName(), e.getClassRoom()));
     }
 
-    public void createTimetableForClassNew(final String className, final Room classRoom) {
-        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
+    public void createTimetableForClassNew(final Long id, final String className, final Room classRoom) {
+        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
                 SchoolClass.class);
-        query.setParameter("filter", className);
+        query.setParameter("filter", id);
         final SchoolClass schoolClass = query.getSingleResultOrNull();
 
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);

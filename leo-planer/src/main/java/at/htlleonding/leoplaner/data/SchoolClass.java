@@ -12,7 +12,7 @@ import jakarta.persistence.OneToOne;
 
 @NamedQueries({
         @NamedQuery(name = SchoolClass.QUERY_FIND_ALL, query = "select s from SchoolClass s"),
-        @NamedQuery(name = SchoolClass.QUERY_CHECK_IF_EXISTS, query = "select s from SchoolClass s where s.className = :filter"),
+        @NamedQuery(name = SchoolClass.QUERY_CHECK_IF_EXISTS, query = "select s from SchoolClass s where LOWER(s.className) = LOWER(:filter)"),
         @NamedQuery(name = SchoolClass.QUERY_FIND_BY_ID, query = "select s from SchoolClass s where s.id= :filter")
 })
 

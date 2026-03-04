@@ -71,7 +71,7 @@
 
 .select-trigger {
     position: relative;
-    z-index: 2;
+    z-index: 6;
     cursor: pointer;
     font-size: 1em;
 
@@ -90,7 +90,7 @@
 .select-menu {
     display: none;
 
-    z-index: 1;
+    z-index: 5;
     position: absolute;
     background-color: white;
     width: 100%;
@@ -189,7 +189,7 @@
     box-sizing: border-box;
 
     font-size: large;
-    font-weight: bold;
+    /*font-weight: bold;*/
     font-family: alte-haas-grotesk;
 }
 
@@ -237,6 +237,7 @@
 }
 
 #timetable-background>div {
+    opacity: 0.3;
     border-bottom: black dashed 2px;
 }
 
@@ -261,6 +262,7 @@
     margin-top: 5px;
     height: var(--period-height);
     box-sizing: border-box;
+    opacity: 0.8;
 }
 
 .break-box {
@@ -293,10 +295,16 @@
         flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 55%;
+}
+
+.period-styling:nth-child(4) {
+    margin-top: calc(var(--break-height) + 3px);
 }
 
 .period-styling {
-    width: 90%;
+    /*width: 90%;*/
+    width: 100%;
     height: var(--period-height);
 
     margin-bottom: 5px;
@@ -304,14 +312,67 @@
     box-sizing: border-box;
 
     border: none;
-    border-radius: 0.5em;
+    /*border-radius: 0.5em;*/
+    border-radius: 0.2em;
 
-    font-size: 1.25em;
+    /*font-size: 1.25em;*/
 
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    /*flex-direction: column;*/
+    justify-content:space-between;
+    align-items: start;
+}
+
+.non-working-stripes {
+    background: repeating-linear-gradient(
+    45deg,
+    rgba(168, 168, 168, 0.4),
+    rgba(168, 168, 168, 0.4) 7px,
+    rgba(65, 65, 65, 0) 7px,
+    rgba(65, 65, 65, 0) 15px
+    );
+    display: flex;
     align-items: center;
+    justify-content: center;
+}
+
+.non-working-stripes p {
+    font-weight: bold;
+    font-size: medium;
+}
+
+.subject-styling {
+    font-weight: 900;
+    justify-self: start;
+}
+
+.teacher-styling {
+    justify-self: end;
+    align-self: flex-end;
+}
+
+.room-styling {
+    justify-self: start;
+    align-self: flex-end;
+}
+
+.subject-infos {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto auto;
+    margin-left: 0.2vw;
+    font-size: 0.8em;
+}
+
+.subject-color-line {
+    width: 0.15vw;
+    height: 100%;
+
+    border-radius: 0.1vw;
+    display: block;
+    align-self: self-start;
 }
 
 .period-break {
@@ -321,4 +382,77 @@
 
 .period {
     margin-top: 5vh;
+}
+
+
+/* Loader animation */
+/* loader from: https://css-loaders.com/ */
+.loader {
+    height: 50px;
+    aspect-ratio: 2;
+    border: 10px solid #00000000;
+    box-sizing: border-box;
+    background: 
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) center/20px 20px,
+        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) right/20px 20px,
+        #00000000;
+    background-repeat: no-repeat;
+    animation: l14 1s infinite;
+
+    position: absolute;
+    z-index: 10000;
+    top: 38vh;
+    left: 57vw;
+    scale: 1.2;
+}
+@keyframes l14 {
+  100%  {background-position:right,left,center,right}
+}
+
+
+#disable-overlay {
+    display: none;
+    width: 80vw;
+    position: fixed;
+    bottom: 0vh;
+    left: 20vw;
+    height: 92.2vh;
+    background-color: var(--leo-background-color);
+    z-index: 100;
+}
+
+
+#optimizing-text{
+    position: absolute;
+    z-index: 10001;
+    top: 35vh;
+    left: 48.8vw;
+    font-size: 1.75rem;
+    color: var(--leo-primary-color1);
+    text-align: center;
+    font-weight: bold;
+    
+}
+
+#cost-container {
+    position: absolute;
+    z-index: 10001;
+    bottom: 5vh;
+    right: 2%;
+    font-size: 1.75rem;
+    text-align: center;
+    font-weight: bold;
+    background-color: white;
+    width: 20vw;
+    height: 5vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    box-shadow: #0000004d 0px 5px 5px;
+    text-align: left;
+    align-content: center;
+    padding-left: 2vw;
+    border-color: rgb(220, 220, 220);
+    border-width: 0.1px;
+    border-style: solid;
 }

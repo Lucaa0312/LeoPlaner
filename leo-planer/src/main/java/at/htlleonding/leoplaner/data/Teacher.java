@@ -125,4 +125,5 @@ public class Teacher {
     public void setTakenUpPeriods(List<TeacherTakenPeriod> takenUpPeriods) {
         this.takenUpPeriods = takenUpPeriods;
     }
+
 }

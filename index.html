@@ -6,6 +6,14 @@
     <title>LeoPlaner</title>
 </head>
 <body>
+    <script>
+        fetch("http://localhost:8080/api/run/testCsvNew", { method: "GET" })
+        .then(res => {
+            if (!res.ok) throw new Error("Request failed: " + res.status);
+            
+        })
+        .catch(console.error);
+    </script>
     <h1>Welcome to LeoPlaner</h1>
     <a href="./web/pages/dashboard.html">Go to Dashboard</a>
     <a href="./web/pages/teacher.html">Go to Settings</a>

@@ -29,6 +29,13 @@ document.querySelectorAll('.top-bar-select').forEach(wrapper => {
             getTimetableByTeacher(data);
         }
 
+        if (selectedCategory === 'classes') {
+            getTimetableByClass(data);
+        }
+
+        if (selectedCategory === 'rooms') {
+            getTimetableByRoom(data);
+        }
         // Add more conditions HERE
     });
 });
@@ -44,7 +51,7 @@ document.addEventListener('click', event => {
 });
 
 // JavaScript for Timetable Page
-let breakAfterPeriod = 2;
+let breakAfterPeriod = 3;
 
 const times = [
     "07:05", "07:55", "08:00", "08:50", "08:55",
@@ -56,22 +63,21 @@ const times = [
     "22:10"
 ]
 
-/* Doesn't work yet
-function init() {
-    fetch("http://localhost:8080/api/run/testCsv")
-}
-*/
 
 function load() {
     clearLayout();
-    fetch("http://localhost:8080/api/timetable")
+    fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then(response => {
             return response.json()
         }).then(data => {
             createLayout(data.classSubjectInstances)
+            getTimetableCost(data);
         }).catch(error => {
             console.error('Error loading Timetable:', error)
         })
+        .finally(() => {
+            hideLoader();
+        });
 }
 
 function getRandomizedTimeTable() {
@@ -86,16 +92,16 @@ function getRandomizedTimeTable() {
         })
 }
 
+
 function getOptimizedTimetable() {
+    showLoader();
     clearLayout();
-    fetch("http://localhost:8080/api/run/algorithm")
-        .then(response => {
-            return response.json()
-        }).then(data => {
-            createLayout(data.classSubjectInstances)
-        }).catch(error => {
-            console.error('Error optimizing Timetable:', error)
+    fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
+        .then(res => {
+            if (!res.ok) throw new Error("Request failed: " + res.status);
+            load();
         })
+        .catch(console.error);
 }
 
 function getTimetableByTeacher(teacherId) {
@@ -105,10 +111,40 @@ function getTimetableByTeacher(teacherId) {
             return response.json()
         }).then(data => {
             console.log(`Fetched data:`, data)
-            createLayout(data.timetableDTO.classSubjectInstances)
+            createLayout(data.timetableDTO.classSubjectInstances);
             createRedArea(data.teacher);
+            hideTimetableCost();
         }).catch(error => {
             console.error('Error loading Timetable by teacher:', error)
+        })
+}
+
+function getTimetableByClass(classId) {
+    fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+
+            createLayout(data.classSubjectInstances)
+            getTimetableCost(data);
+        }).catch(error => {
+            console.error('Error loading Timetable by class:', error)
+        })
+}
+
+function getTimetableByRoom(roomId) {
+    fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+
+            createLayout(data.classSubjectInstances)
+            hideTimetableCost();
+
+        }).catch(error => {
+            console.error('Error loading Timetable by room:', error)
         })
 }
 
@@ -126,8 +162,7 @@ function createRedArea(teacher) {
             classSubject: {
                 subject: {
                     id: 2,
-                    subjectName: "RedArea",
-                    subjectColor: { red: 255, green: 1, blue: 1 }
+                    subjectName: "RedArea"
                 },
                 teacher: {
                     id: teacher.id,
@@ -160,6 +195,12 @@ function createLayout(data) {
         map.get(item.period.schoolDays).push(item)
     });
 
+    for (const [day, entries] of map) {
+        entries.sort((a, b) =>
+            a.period.schoolHour - b.period.schoolHour
+        );
+    }
+
     console.log('Map:', map)
     let timesBuilder = ``;
     let linePlacer = ``;
@@ -174,7 +215,7 @@ function createLayout(data) {
 
         timesBuilder += `<div class="period-box">
         <p class="period-started">${times[i]}</p>
-        <p class="current-period">${i}. EH</p>
+        <p class="current-period">${i/2}. EH</p>
         <p class="period-ended">${times[i + 1] || ""}</p>
         </div>\n`;
 
@@ -192,8 +233,6 @@ function createLayout(data) {
 
         gridBox.innerHTML = "";
 
-        //TODO IT IS NOT POSSIBLE TO TRACK WHEN A BREAK IS SUPPOSED TO BE INSERTED
-        let itemCount = 0;
         let currentPeriod = 0;
 
         // Create HTML 
@@ -209,31 +248,39 @@ function createLayout(data) {
             const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
             const period = item.period.schoolHour
 
+            const roomNumber = item.room?.roomNumber;
+
             // Fill empty periods
             while (currentPeriod < period) {
                 content += `<div class="period-styling"></div>`
                 currentPeriod++
             }
 
-            if (itemCount == breakAfterPeriod) {
-                gridBox.innerHTML += `<div class="period-break"></div>\n`;
-            }
-            
-            itemCount++;
-
             for (let d = 0; d < duration; d++) {
                 if (subjectName !== "No lesson" && subjectName !== "RedArea") {
+                    /*Wird geändert nachdem Alessandro  die Kürzel einbaut*/
+                    let subjectShort = "";
+                    subjectShort = subjectShort + subjectName;
+                    if (subjectShort.length > 6) {   
+                        subjectShort = subjectShort.substring(0, 3);
+                    }
+                    /**/
                     content += `
-                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
-                        <p>${subjectName}</p>
-                        <p>${teacherSymbol}</p>
+                    <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
+                    <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
+                        <div class="subject-infos">
+                            <p class="subject-styling">${subjectShort}</p>
+                            <p></p>
+                            <p class="room-styling">E${roomNumber}</p>
+                            <p class="teacher-styling">${teacherSymbol}</p>
+                        </div>
                     </div>
                 `;
                 }
                 else if (subjectName === "RedArea") {
                     content += `
-                    <div class="period-styling" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});">
-                        <p> No working hour</p>
+                    <div class="period-styling non-working-stripes">
+                    <p>Nicht Verfügbar</p>
                     </div>
                 `;
                 }
@@ -250,12 +297,99 @@ function createLayout(data) {
     });
 }
 
-function clearLayout(){
+function clearLayout() {
     let days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach(day => {
         const gridBox = document.getElementById(day).querySelector(".periods");
         gridBox.innerHTML = "";
     });
+
+    loadClasses();
+    loadTeachers();
+    loadRooms();
+}
+
+function loadClasses() {
+    fetch(`http://localhost:8080/api/getAllClasses`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('classes').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
+
+            data.forEach(clazz => {
+                dorpdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all classes into dropdown: ', error)
+        });
+}
+
+function loadTeachers() {
+    fetch(`http://localhost:8080/api/teachers`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('teachers').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
+
+            data.forEach(teach => {
+                dorpdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all teachers into dropdown: ', error)
+        });
+}
+
+function loadRooms() {
+    fetch(`http://localhost:8080/api/rooms`)
+        .then(response => {
+            return response.json()
+        }).then(data => {
+            console.log(data)
+            const dorpdown = document.getElementById('rooms').querySelector('.select-menu');
+            dorpdown.innerHTML = "";
+
+            data.forEach(room => {
+                dorpdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;
+            });
+
+        }).catch(error => {
+            console.error('Error loading all rooms into dropdown: ', error)
+        });
+}
+
+
+function showLoader() {
+    document.querySelector(".loader").style.display = "grid";
+    document.getElementById("disable-overlay").style.display = "block";
+    document.getElementById("optimizing-text").style.display = "block";
+    document.getElementById("cost-container").style.display = "none";
+}
+
+function hideLoader() {
+    document.querySelector(".loader").style.display = "none";
+    document.getElementById("disable-overlay").style.display = "none";
+    document.getElementById("optimizing-text").style.display = "none";
+    document.getElementById("cost-container").style.display = "block";
+}
+
+function hideTimetableCost() {
+    document.getElementById("cost-container").style.display = "none";
+}
+
+function showTimetableCost() {
+    document.getElementById("cost-container").style.display = "block";
+}
+
+function getTimetableCost(data) {
+    showTimetableCost();
+    console.log(data);
+    document.getElementById("cost-container").innerText = `Kosten: ${data.cost}`;
 }
 
 function initializeApp() {

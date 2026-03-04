@@ -134,7 +134,7 @@ function loadAddTeacherForm() {
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-teacher-header-container";
     headerContainer.innerHTML = `
-      <h1 id="add-teacher-header">Add new Teacher</h1>`;
+      <h1 id="add-teacher-header">Einen neuen Lehrer hinzufügen</h1>`;
 
     const closeScreenButton = document.createElement("div");
     closeScreenButton.id = "close-add-teacher-screen-btn";
@@ -154,7 +154,7 @@ function loadAddTeacherForm() {
             <label for="teacher-image-input" class="avatar-label">
                 <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
             </label>
-            <p>Upload Photo</p>`;
+            <p>Profilbild hochladen</p>`;
 
     
 
@@ -163,18 +163,18 @@ function loadAddTeacherForm() {
     formContainer.innerHTML = `
       <form id="add-teacher-form">
         
-        <input type="text" id="first-name-input" name="first-name" required placeholder="First Name">
+        <input type="text" id="first-name-input" name="first-name" required placeholder="Vorname">
         
-        <input type="text" id="last-name-input" name="last-name" required placeholder="Last Name">
+        <input type="text" id="last-name-input" name="last-name" required placeholder="Nachname">
         
-        <input type="text" id="initials-input" name="initials" required placeholder="Initials">
+        <input type="text" id="initials-input" name="initials" required placeholder="Initialen">
         
         <input type="email" id="email-input" name="email" required placeholder="Email">
       </form>
 
       <div id="add-subjects-container">
         <div id="subject-input-container">
-            <input type="text" id="subject-input" placeholder="Add Subject"/>
+            <input type="text" id="subject-input" placeholder="Fach hinzufügen"/>
             <img id="add-subject-img" src="../assets/img/magnifyingGlass.png" alt="Add Subject"/>
         </div>
 
@@ -187,7 +187,7 @@ function loadAddTeacherForm() {
     availabilityContainer.id = "availability-container";
     availabilityContainer.innerHTML = `
         <div id="availability-header">
-            Set Availability
+            <p>Verfügbarkeit:</p>
         </div>
         <div id="availability-grid">
             <div class="day active">Mo</div>
@@ -200,7 +200,7 @@ function loadAddTeacherForm() {
 
     const submitButton = document.createElement("div");
     submitButton.id = "submit-teacher-btn";
-    submitButton.textContent = "Submit";
+    submitButton.textContent = "Bestätigen";
     submitButton.onclick = () => {
         addTeacher(); 
 
