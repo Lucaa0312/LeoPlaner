@@ -1,5 +1,10 @@
 package at.htlleonding.csv;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+
 import at.htlleonding.leoplaner.data.ClassSubject;
 import at.htlleonding.leoplaner.data.SchoolClass;
 import at.htlleonding.leoplaner.data.Subject;
@@ -8,11 +13,6 @@ import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 // Do not annotate Transaction here - em will persist between tests
