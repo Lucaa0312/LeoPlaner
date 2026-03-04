@@ -8,3 +8,6 @@ stopApplication.sh
 node_modules/
 .demo/websockets-quickstart
  
+leo-planer/.gitignore
+
+.vscode

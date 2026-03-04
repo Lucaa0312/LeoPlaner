@@ -17,6 +17,7 @@ import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
 import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import at.htlleonding.leoplaner.data.TimetableManager;
+import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -24,6 +25,9 @@ import jakarta.inject.Inject;
 public class SimulatedAnnealingAlgorithm {
     @Inject
     DataRepository dataRepository;
+
+    @Inject
+    jakarta.enterprise.event.Event<AlgorithmProgressDTO> progressEvent;
 
     private static final Map<CostDegree, Integer> costOfEachDegree = new HashMap<>();
     static {
@@ -106,15 +110,17 @@ public class SimulatedAnnealingAlgorithm {
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, this.temperature);
 
             if (i % 50 == 0) {
-                this.dataRepository.getHistoryList().add(new History(i, this.temperature, costCurrSchoolSchedule));
                 try {
                     // Thread.sleep(300);
                 } catch (Exception e) {
                     // TODO: handle exception
                 }
+                this.dataRepository.getHistoryList().add(new History(i, temperature, costCurrSchoolSchedule));
+                progressEvent.fire(new AlgorithmProgressDTO(i, temperature, costCurrSchoolSchedule, false));
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
+            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, temperature, costCurrSchoolSchedule, true));
         }
     }
 
