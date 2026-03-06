@@ -1,3 +1,5 @@
+import  initNavbar  from "./navbar.js";
+
 //Dashboard id and Label mapping
 type StatItem = {
   id: string;
@@ -85,26 +87,26 @@ function generateDashboardStats() {
 
 // Initialize the dashboard application
 async function initializeApp() {
-  /*initNavbar();*/
-  generateWelcomeText();
-  showLastUpdateTime();
+    initNavbar();
+    generateWelcomeText();
+    showLastUpdateTime();
 
-  try {
-    const [teachers, subjects, rooms] = await Promise.all([
-        fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json() as Promise<number>),
-        fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json() as Promise<number>),
-        fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json() as Promise<number>),
-    ]);
+    try {
+        const [teachers, subjects, rooms] = await Promise.all([
+            fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json() as Promise<number>),
+            fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json() as Promise<number>),
+            fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json() as Promise<number>),
+        ]);
 
-    statsData[0]!.value = Number(teachers ?? 0);
-    statsData[1]!.value = Number(subjects ?? 0);
-    statsData[2]!.value = Number(rooms ?? 0);
+        statsData[0]!.value = Number(teachers ?? 0);
+        statsData[1]!.value = Number(subjects ?? 0);
+        statsData[2]!.value = Number(rooms ?? 0);
 
-  } catch (e) {
-    console.error("Fehler beim Laden:", e);
-  }
+    } catch (e) {
+        console.error("Fehler beim Laden:", e);
+    }
 
-  generateDashboardStats();
-}
+    generateDashboardStats();
+    }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

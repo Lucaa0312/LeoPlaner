@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 // Nav items configuration
 const navItems = [
     { id: "nav-item-dashboard", icon: "fa-regular fa-chart-bar", text: "Startseite", path: "./dashboard.html" },
@@ -9,7 +7,7 @@ const navItems = [
     { id: "nav-item-timetable", icon: "fa-regular fa-calendar-days", text: "Stundenplan", path: "./timetable.html" },
 ];
 // Initializes the navigation bar
-function initNavbar() {
+export default function initNavbar() {
     const navBar = document.getElementById("nav-bar");
     if (!navBar)
         return;

@@ -9,7 +9,7 @@ const navItems = [
 ];
 
 // Initializes the navigation bar
-function initNavbar() {
+export default function initNavbar() {
     const navBar = document.getElementById("nav-bar");
     if (!navBar) return;
 

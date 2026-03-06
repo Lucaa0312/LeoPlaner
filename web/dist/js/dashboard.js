@@ -1,5 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+import initNavbar from "./navbar.js";
 const statsData = [
     { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
     { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
@@ -64,7 +63,7 @@ function generateDashboardStats() {
 }
 // Initialize the dashboard application
 async function initializeApp() {
-    /*initNavbar();*/
+    initNavbar();
     generateWelcomeText();
     showLastUpdateTime();
     try {
