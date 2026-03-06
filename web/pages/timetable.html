@@ -7,7 +7,7 @@
     <title>Timetable</title>
     <link rel="stylesheet" href="../style/essentials.css">
     <link rel="stylesheet" href="../style/timetable.css">
-    <script defer src="../javascript/timetable.js"></script>
+    <script type="module" src="../javascript/timetable.js"></script>
     <script defer src="../javascript/navbar.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
     <script type="module" src="../javascript/graph.js"></script>
@@ -65,7 +65,7 @@
                     <div><i class="fa-solid fa-dice"></i></div>
                 </div>
 
-                <div class="top-bar-btn" id="algorithmButton" onclick="getOptimizedTimetable()">
+                <div class="top-bar-btn" id="algorithmButton">
                     <div><i class="fa-solid fa-chart-line"></i></div>
                 </div>
             </div>
@@ -121,10 +121,13 @@
                 </div>
             </div>
             <div id="graph-container">
-                <div class="graph-box">
-                    <div id="temperatureChart" style="width: 21vw;height:40vh;"></div>
+                <div class="graph-box" style="padding: 0.3vw;">
+                    <div id="temperatureChart" style="width: 20vw;height:40vh;"></div>
                 </div>
-                <div class="graph-box">
+                <div id="slider-container">
+                    <input type="range" min="0" max="1000" value="0" id="temperatureSlider" autocomplete="off">
+                </div>
+                <div class="graph-box" style="padding: 0.3vw;">
                     <div id="costChart" style="width: 21vw;height:40vh;"></div>
                 </div>
             </div>
