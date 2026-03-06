@@ -1,3 +1,4 @@
+export {};
 /*
 import  initNavbar  from "./navbar.js";
 
@@ -273,7 +274,7 @@ function loadAddSubjectForm() {
     const addSubjectScreen = document.getElementById("add-subject-screen");
     addSubjectScreen.style.display = "flex";
     addSubjectScreen.style.flexDirection = "column";
-    if (!addSubjectScreen) return; 
+    if (!addSubjectScreen) return;
 
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-subject-header-container";
@@ -401,7 +402,7 @@ function loadSubjects() {
 
                     subjectsContainer.appendChild(gridContainer);
 
-                }); 
+                });
                 
                 const breakDiv = document.createElement("div");
                 breakDiv.style.height = "6vh";
@@ -410,7 +411,7 @@ function loadSubjects() {
                 subjectsContainer.appendChild(breakDiv);
             }
         })
-        .catch(err => console.error(err)); 
+        .catch(err => console.error(err));
 
 }
 
@@ -425,7 +426,7 @@ function searchSubjects() {
 
         if (query === "" || name.includes(query)) {
             row.style.display = "";
-        } 
+        }
         else {
             row.style.display = "none";
         }
@@ -441,4 +442,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-document.getElementById("input-field").addEventListener("input", searchSubjects);*/
+document.getElementById("input-field").addEventListener("input", searchSubjects);*/ 

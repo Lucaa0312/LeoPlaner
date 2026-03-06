@@ -1,3 +1,4 @@
+export {};
 /*import  initNavbar  from "./navbar.js";
 
 let allSubjects = [];        // all Subjects from DB
@@ -32,7 +33,7 @@ function initSubjectSearch() {
 
         if (matches.length === 0) {
             dropdown.innerHTML = `<div class="dropdown-item">No subjects found</div>`;
-        }   
+        }
 
         matches.forEach(subject => {
             const item = document.createElement("div");
@@ -131,7 +132,7 @@ function loadAddTeacherForm() {
     const addTeacherScreen = document.getElementById("add-teacher-screen");
     addTeacherScreen.style.display = "flex";
     addTeacherScreen.style.flexDirection = "column";
-    if (!addTeacherScreen) return; 
+    if (!addTeacherScreen) return;
 
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-teacher-header-container";
@@ -151,7 +152,7 @@ function loadAddTeacherForm() {
     
     const avaterUploadDiv = document.createElement("div");
     avaterUploadDiv.className = "avatar-upload";
-    avaterUploadDiv.innerHTML = `   
+    avaterUploadDiv.innerHTML = `
         <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
             <label for="teacher-image-input" class="avatar-label">
                 <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
@@ -204,7 +205,7 @@ function loadAddTeacherForm() {
     submitButton.id = "submit-teacher-btn";
     submitButton.textContent = "Bestätigen";
     submitButton.onclick = () => {
-        addTeacher(); 
+        addTeacher();
 
         addTeacherScreen.style.display = "none";
         disableOverlay.style.display = "none";
@@ -212,7 +213,7 @@ function loadAddTeacherForm() {
 
         setTimeout(() => {
             displayTeachers();
-        }, 500); 
+        }, 500);
     };
 
 
@@ -322,7 +323,7 @@ function searchTeacher() {
 
         if (query === "" || name.includes(query) || initials.includes(query) || subjects.includes(query)) {
             row.style.display = "";
-        } 
+        }
         else {
             row.style.display = "none";
         }
@@ -336,4 +337,4 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-document.getElementById("input-field").addEventListener("input", searchTeacher);*/
+document.getElementById("input-field").addEventListener("input", searchTeacher);*/ 
