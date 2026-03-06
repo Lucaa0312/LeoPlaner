@@ -1,16 +1,15 @@
-/*
 import  initNavbar  from "./navbar.js";
 
 // room types available
 const allRoomTypes = ["CLASSROOM", "EDV", "CHEM", "PHY", "SPORT", "WORKSHOP"];
-let selectedRoomTypes = [];
+let selectedRoomTypes: string[] = [];
 let selectedColorRGB = { red: 222, green: 209, blue: 214 };
 
 
 // Function to initialize room type search
 function initRoomTypeSearch() {
-    const input = document.getElementById("roomtype-input");
-    const dropdown = document.getElementById("roomtype-dropdown");
+    const input: HTMLInputElement = document.getElementById("roomtype-input") as HTMLInputElement;
+    const dropdown: HTMLElement = document.getElementById("roomtype-dropdown") as HTMLElement;
 
     input.addEventListener("input", () => {
         const query = input.value.toUpperCase().trim();
@@ -43,17 +42,19 @@ function initRoomTypeSearch() {
 
    
     document.addEventListener("click", (e) => {
-        if (!e.target.closest("#roomtype-input-container")) {
+        const target = e.target as Element | null;
+        if (!target?.closest("#roomtype-input-container")) {
             dropdown.innerHTML = "";
         }
     });
 }
 
 // Function to add a room type chip
-function addRoomTypeChip(type) {
+function addRoomTypeChip(type: string) {
     selectedRoomTypes.push(type);
 
-    const container = document.getElementById("selected-roomtypes");
+    const container: HTMLElement | null = document.getElementById("selected-roomtypes") as HTMLElement | null;
+    if (!container) return;
 
     const chip = document.createElement("div");
     chip.className = "roomtype-chip";
@@ -71,7 +72,7 @@ function addRoomTypeChip(type) {
 
 // Function to initialize color selection UI (AI optimised code [NOT VIBE CODED! JUST OPTIMISED!])
 function initColorSelection() {
-    const container = document.getElementById("color-selection-container");
+    const container: HTMLElement | null = document.getElementById("color-selection-container") as HTMLElement | null;
     if (!container) return;
 
     container.innerHTML = `
@@ -97,12 +98,12 @@ function initColorSelection() {
       </div>
     `;
 
-    const canvas = document.getElementById("color-wheel");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    const lightness = document.getElementById("lightness");
-    const preview = document.getElementById("color-preview");
-    const hexEl = document.getElementById("color-hex");
-    const rgbEl = document.getElementById("color-rgb");
+    const canvas: HTMLCanvasElement = document.getElementById("color-wheel") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
+    const lightness: HTMLInputElement = document.getElementById("lightness") as HTMLInputElement;
+    const preview: HTMLElement = document.getElementById("color-preview") as HTMLElement;
+    const hexEl: HTMLElement = document.getElementById("color-hex") as HTMLElement;
+    const rgbEl: HTMLElement = document.getElementById("color-rgb") as HTMLElement;
 
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
@@ -114,7 +115,7 @@ function initColorSelection() {
     let lig = 0.85;  // 0..1 (wird vom slider gesteuert)
     let dragging = false;
 
-    function hslToRgb(h, s, l) {
+    function hslToRgb(h: number, s: number, l: number) {
         // h: 0..360, s/l: 0..1
         h = (h % 360 + 360) % 360;
         const c = (1 - Math.abs(2*l - 1)) * s;
@@ -135,8 +136,8 @@ function initColorSelection() {
         return { red: r, green: g, blue: b };
     }
 
-    function rgbToHex({red, green, blue}) {
-        const to2 = n => n.toString(16).padStart(2, "0");
+    function rgbToHex({red, green, blue}: {red: number; green: number; blue: number}) {
+        const to2 = (n: number) => n.toString(16).padStart(2, "0");
         return `#${to2(red)}${to2(green)}${to2(blue)}`;
     }
 
@@ -186,7 +187,7 @@ function initColorSelection() {
         ctx.stroke();
     }
 
-    function setFromPoint(clientX, clientY) {
+    function setFromPoint(clientX: number, clientY: number) {
         const rect = canvas.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
@@ -241,7 +242,7 @@ function initColorSelection() {
 // Function to add a new room
 function addSubject() {
     const subjectData = {
-        subjectName: document.getElementById("name-input").value,
+        subjectName: (document.getElementById("name-input") as HTMLInputElement)?.value.trim() || "",
         requiredRoomTypes: selectedRoomTypes,
         subjectColor: selectedColorRGB
     };
@@ -259,20 +260,23 @@ function addSubject() {
 
 // Function to load the Add Subject form
 function loadAddSubjectForm() {
-    selectedSubjectTypes = [];
+    selectedRoomTypes = [];
 
   
-    document.getElementById("no-subjects").style.display = "none";
-        
-    const disableOverlay = document.getElementById("disable-overlay");
-    disableOverlay.style.display = "block";
+    const noSubjects: HTMLElement | null = document.getElementById("no-subjects") as HTMLElement | null;
+    if (noSubjects) noSubjects.style.display = "none";
 
-    const displaySubjects = document.getElementById("display-subjects");
-    displaySubjects.style.overflowY = "hidden";
+    const disableOverlay: HTMLElement | null = document.getElementById("disable-overlay") as HTMLElement | null;
+    if (disableOverlay) disableOverlay.style.display = "block";
 
-    const addSubjectScreen = document.getElementById("add-subject-screen");
-    addSubjectScreen.style.display = "flex";
-    addSubjectScreen.style.flexDirection = "column";
+    const displaySubjects: HTMLElement | null = document.getElementById("display-subjects") as HTMLElement | null;
+    if (displaySubjects) displaySubjects.style.overflowY = "hidden";
+
+    const addSubjectScreen: HTMLElement | null = document.getElementById("add-subject-screen") as HTMLElement | null;
+    if (addSubjectScreen) {
+        addSubjectScreen.style.display = "flex";
+        addSubjectScreen.style.flexDirection = "column";
+    }
     if (!addSubjectScreen) return; 
 
     const headerContainer = document.createElement("div");
@@ -285,9 +289,9 @@ function loadAddSubjectForm() {
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
     closeScreenButton.onclick = () => {
-        displaySubjects.style.overflowY = "scroll";
-        addSubjectScreen.style.display = "none";
-        disableOverlay.style.display = "none";
+        if (displaySubjects) displaySubjects.style.overflowY = "scroll";
+        if (addSubjectScreen) addSubjectScreen.style.display = "none";
+        if (disableOverlay) disableOverlay.style.display = "none";
     };
 
     const content = document.createElement("div");
@@ -323,9 +327,9 @@ function loadAddSubjectForm() {
     confirmBtn.onclick = () => {
         addSubject();
 
-        addSubjectScreen.style.display = "none";
-        disableOverlay.style.display = "none";
-        displaySubjects.style.overflowY = "scroll";
+        if (addSubjectScreen) addSubjectScreen.style.display = "none";
+        if (disableOverlay) disableOverlay.style.display = "none";
+        if (displaySubjects) displaySubjects.style.overflowY = "scroll";
 
         setTimeout(() => {
             loadSubjects();
@@ -349,18 +353,21 @@ function loadSubjects() {
             console.log(data);
             if (!data || data.length === 0) {
                 console.log("No subjects found");
-                document.getElementById("no-subjects").style.display = "block";
+                const noSubjects: HTMLElement | null = document.getElementById("no-subjects") as HTMLElement | null;
+                if (noSubjects) noSubjects.style.display = "block";
                 return;
             }
             else {
-                document.getElementById("no-subjects").style.display = "none";
-                const subjectsContainer = document.getElementById("display-subjects");
+                const noSubjects: HTMLElement | null = document.getElementById("no-subjects") as HTMLElement | null;
+                if (noSubjects) noSubjects.style.display = "none";
+                const subjectsContainer: HTMLElement | null = document.getElementById("display-subjects") as HTMLElement | null;
+                if (!subjectsContainer) return;
                 subjectsContainer.innerHTML = "";
 
                 const gridContainer = document.createElement("div");
                 gridContainer.className = "grid-layout";
 
-                data.forEach(subject => {
+                data.forEach((subject: { subjectName: string; subjectColor: { red: number; green: number; blue: number }; requiredRoomTypes: string[] }) => {
                     const subjectBox = document.createElement("div");
                     subjectBox.className = "subject-box";
 
@@ -399,7 +406,9 @@ function loadSubjects() {
                     
                     gridContainer.appendChild(subjectBox);
 
-                    subjectsContainer.appendChild(gridContainer);
+                    if (subjectsContainer) {
+                        subjectsContainer.appendChild(gridContainer);
+                    }
 
                 }); 
                 
@@ -407,7 +416,9 @@ function loadSubjects() {
                 breakDiv.style.height = "6vh";
                 breakDiv.innerHTML = "&nbsp;";
 
-                subjectsContainer.appendChild(breakDiv);
+                if (subjectsContainer) {
+                    subjectsContainer.appendChild(breakDiv);
+                }
             }
         })
         .catch(err => console.error(err)); 
@@ -417,17 +428,17 @@ function loadSubjects() {
 
 // Search functionality for Subjects
 function searchSubjects() {
-    let query = document.getElementById("input-field").value.toLowerCase();
+    let query = (document.getElementById("input-field") as HTMLInputElement)?.value.toLowerCase();
     let rows = document.querySelectorAll(".subject-box");
 
     rows.forEach(function (row) {
-        let name = row.querySelector(".subject-name").textContent.toLowerCase();
+        let name = row.querySelector(".subject-name")?.textContent.toLowerCase();
 
-        if (query === "" || name.includes(query)) {
-            row.style.display = "";
+        if (query === "" || name?.includes(query)) {
+            (row as HTMLElement).style.display = "";
         } 
         else {
-            row.style.display = "none";
+            (row as HTMLElement).style.display = "none";
         }
     });
 }
@@ -438,7 +449,13 @@ function searchSubjects() {
 function initializeApp() {
     loadSubjects();
     initNavbar();
+
+    const addBtn = document.getElementById("add-btn");
+    addBtn?.addEventListener("click", loadAddSubjectForm);
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-document.getElementById("input-field").addEventListener("input", searchSubjects);*/
+const inputField = document.getElementById("input-field");
+if (inputField) {
+    inputField.addEventListener("input", searchSubjects);
+}
