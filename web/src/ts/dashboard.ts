@@ -1,42 +1,16 @@
 //Dashboard id and Label mapping
-const statsData = [
-    { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
-    { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
-    { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
-    { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
+type StatItem = {
+  id: string;
+  label: string;
+  value: number;
+};
+
+const statsData: StatItem[] = [
+  { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
+  { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
+  { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
+  { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
-
-/*
-load teacher stats from Backend API
-function loadTeacherStats() {
-    fetch("http://localhost:8080/api/teachers/getTeacherCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[0].value = data;
-        })
-        .catch(err => console.error(err));
-}
-
-load subject stats from Backend API
-function loadSubjectStats() {
-    fetch("http://localhost:8080/api/subjects/getSubjectCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[1].value = data;
-        })
-        .catch(err => console.error(err));
-}
-
-load room stats from Backend API
-function loadRoomStats() {
-    fetch("http://localhost:8080/api/rooms/getRoomCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[2].value = data;
-        })
-        .catch(err => console.error(err));
-}
-*/
 
 
 //Gemerates welcome text based on time of day
@@ -67,7 +41,6 @@ function showLastUpdateTime() {
 }
 
 
-
 // Generates dashboard statistics cards
 function generateDashboardStats() {
     const statsContainer = document.getElementById("stat-card-container");
@@ -93,7 +66,7 @@ function generateDashboardStats() {
 
         }
         else {
-           /* numb.textContent = stat.value;*/
+            numb.textContent = String(stat.value);
         }
 
         content.appendChild(label);
@@ -118,14 +91,14 @@ async function initializeApp() {
 
   try {
     const [teachers, subjects, rooms] = await Promise.all([
-      fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json()),
-      fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json()),
-      fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json()),
+        fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json() as Promise<number>),
+        fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json() as Promise<number>),
+        fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json() as Promise<number>),
     ]);
 
-    /*statsData[0].value = teachers;
-    statsData[1].value = subjects;
-    statsData[2].value = rooms;*/
+    statsData[0]!.value = Number(teachers ?? 0);
+    statsData[1]!.value = Number(subjects ?? 0);
+    statsData[2]!.value = Number(rooms ?? 0);
 
   } catch (e) {
     console.error("Fehler beim Laden:", e);
@@ -134,18 +107,4 @@ async function initializeApp() {
   generateDashboardStats();
 }
 
-document.addEventListener("DOMContentLoaded", initializeApp);
-
-
-// Initialize the dashboard application
-/*function initializeApp() {
-    loadRoomStats();
-    loadTeacherStats();
-    loadSubjectStats();
-    initNavbar();
-    generateWelcomeText();
-    showLastUpdateTime();
-    setTimeout(generateDashboardStats, 50);
-}
-*/
 document.addEventListener("DOMContentLoaded", initializeApp);

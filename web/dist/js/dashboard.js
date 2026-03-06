@@ -6,37 +6,6 @@ const statsData = [
     { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
 
-/*
-load teacher stats from Backend API
-function loadTeacherStats() {
-    fetch("http://localhost:8080/api/teachers/getTeacherCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[0].value = data;
-        })
-        .catch(err => console.error(err));
-}
-
-load subject stats from Backend API
-function loadSubjectStats() {
-    fetch("http://localhost:8080/api/subjects/getSubjectCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[1].value = data;
-        })
-        .catch(err => console.error(err));
-}
-
-load room stats from Backend API
-function loadRoomStats() {
-    fetch("http://localhost:8080/api/rooms/getRoomCount")
-        .then(res => res.json())
-        .then(data => {
-            statsData[2].value = data;
-        })
-        .catch(err => console.error(err));
-}
-*/
 
 
 //Gemerates welcome text based on time of day
@@ -134,18 +103,4 @@ async function initializeApp() {
   generateDashboardStats();
 }
 
-document.addEventListener("DOMContentLoaded", initializeApp);
-
-
-// Initialize the dashboard application
-/*function initializeApp() {
-    loadRoomStats();
-    loadTeacherStats();
-    loadSubjectStats();
-    initNavbar();
-    generateWelcomeText();
-    showLastUpdateTime();
-    setTimeout(generateDashboardStats, 50);
-}
-*/
 document.addEventListener("DOMContentLoaded", initializeApp);
