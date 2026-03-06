@@ -1,7 +1,7 @@
-/*import  initNavbar  from "./navbar.js";
+import  initNavbar  from "./navbar.js";
 
-let allSubjects = [];        // all Subjects from DB
-let selectedSubjects = [];  // selected Subjects for Teacher
+let allSubjects: { id: number; subjectName: string }[] = [];        // all Subjects from DB
+let selectedSubjects: { id: number; subjectName: string }[] = [];  // selected Subjects for Teacher
 
 //load subjects from DB
 function loadSubjects() {
@@ -16,8 +16,8 @@ function loadSubjects() {
 
 // Initialize subject search functionality
 function initSubjectSearch() {
-    const input = document.getElementById("subject-input");
-    const dropdown = document.getElementById("subject-dropdown");
+    const input = document.getElementById("subject-input") as HTMLInputElement;
+    const dropdown = document.getElementById("subject-dropdown") as HTMLElement;
 
     input.addEventListener("input", () => {
         const query = input.value.toLowerCase();
@@ -52,10 +52,10 @@ function initSubjectSearch() {
 
 // Add subject to selected list
 
-function addSubject(subject) {
+function addSubject(subject: { id: number; subjectName: string }) {
     selectedSubjects.push(subject);
 
-    const container = document.getElementById("selected-subjects");
+    const container = document.getElementById("selected-subjects") as HTMLElement;
 
     const chip = document.createElement("div");
     chip.className = "subject-chip";
@@ -74,13 +74,19 @@ function addSubject(subject) {
 
 //add teacher to DB
 function addTeacher() {
+    const firstNameInput = document.getElementById("first-name-input") as HTMLInputElement;
+    const lastNameInput = document.getElementById("last-name-input") as HTMLInputElement;
+    const initialsInput = document.getElementById("initials-input") as HTMLInputElement;
+    
+    if (!firstNameInput || !lastNameInput || !initialsInput) return;
+    
     const teacherData = {
-        teacherName: document.getElementById("first-name-input").value + " " + document.getElementById("last-name-input").value,
-        nameSymbol: document.getElementById("initials-input").value,
+        teacherName: firstNameInput.value + " " + lastNameInput.value,
+        nameSymbol: initialsInput.value,
         teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
     };
 
-    console.log("SENDING", roomData);
+    console.log("SENDING", teacherData);
 
     fetch("http://localhost:8080/api/teachers", {
         method: "POST",
@@ -103,16 +109,18 @@ function initAvailabilityDays() {
 
 // Image Preview Function
 function imagePreview() {
-    const input = document.getElementById("teacher-image-input");
-    const preview = document.getElementById("avatar-preview");
+    const input = document.getElementById("teacher-image-input") as HTMLInputElement;
+    const preview = document.getElementById("avatar-preview") as HTMLImageElement;
+
+    if (!input || !preview) return;
 
     input.addEventListener("change", () => {
-        const file = input.files[0];
+        const file = input.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = () => {
-        preview.src = reader.result;
+        preview.src = reader.result as string;
         };
         reader.readAsDataURL(file);
     });
@@ -120,17 +128,21 @@ function imagePreview() {
 
 
 function loadAddTeacherForm() {
-    document.getElementById("no-teachers").style.display = "none";
+    const noTeachers = document.getElementById("no-teachers");
+    if (noTeachers) noTeachers.style.display = "none";
     
-    const disableOverlay = document.getElementById("disable-overlay");
-    disableOverlay.style.display = "block";
+    const disableOverlay: HTMLElement | null = document.getElementById("disable-overlay");
+    if (disableOverlay) disableOverlay.style.display = "block";
 
-    const displayTeachers = document.getElementById("display-teachers");
-    displayTeachers.style.overflowY = "hidden";
+    const displayTeachers: HTMLElement | null = document.getElementById("display-teachers");
+    if (displayTeachers) displayTeachers.style.overflowY = "hidden";
+    
 
-    const addTeacherScreen = document.getElementById("add-teacher-screen");
-    addTeacherScreen.style.display = "flex";
-    addTeacherScreen.style.flexDirection = "column";
+    const addTeacherScreen: HTMLElement | null = document.getElementById("add-teacher-screen");
+    if (addTeacherScreen) {
+        addTeacherScreen.style.display = "flex";
+        addTeacherScreen.style.flexDirection = "column";
+    }
     if (!addTeacherScreen) return; 
 
     const headerContainer = document.createElement("div");
@@ -143,9 +155,10 @@ function loadAddTeacherForm() {
     closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
 
     closeScreenButton.onclick = () => {
-        displayTeachers.style.overflowY = "scroll";
-        addTeacherScreen.style.display = "none";
-        disableOverlay.style.display = "none";
+        if (displayTeachers) displayTeachers.style.overflowY = "scroll";
+        if (addTeacherScreen) addTeacherScreen.style.display = "none";
+        if (disableOverlay) disableOverlay.style.display = "none";
+        
     };
 
     
@@ -207,11 +220,11 @@ function loadAddTeacherForm() {
         addTeacher(); 
 
         addTeacherScreen.style.display = "none";
-        disableOverlay.style.display = "none";
-        displayTeachers.style.overflowY = "scroll";
+        if (disableOverlay) disableOverlay.style.display = "none";
+        if (displayTeachers) displayTeachers.style.overflowY = "scroll";
 
         setTimeout(() => {
-            displayTeachers();
+            loadTeachers();
         }, 500); 
     };
 
@@ -229,19 +242,23 @@ function loadAddTeacherForm() {
 
 
 
-function displayTeachers() {
+function loadTeachers() {
     fetch("http://localhost:8080/api/teachers")
         .then(res => res.json())
         .then(data => {
             if (!data || data.length === 0) {
                 console.log("No teachers found");
-                document.getElementById("no-teachers").style.display = "block";
+                const noTeachersElement = document.getElementById("no-teachers");
+                if (noTeachersElement) noTeachersElement.style.display = "block";
                 return;
             }
             else {
-                document.getElementById("no-teachers").style.display = "none";
+                const noTeachersElement = document.getElementById("no-teachers");
+                if (noTeachersElement) noTeachersElement.style.display = "none";
 
-                const container = document.getElementById("display-teachers");
+                const container = document.getElementById("display-teachers") as HTMLElement;
+                if (!container) return;
+                
                 container.innerHTML = "";
 
                 const tableInfo = document.createElement("div");
@@ -257,7 +274,7 @@ function displayTeachers() {
                 
                 
 
-                data.forEach(teacher => {
+                data.forEach((teacher: any) => {
                     const card = document.createElement("div");
                     card.className = "teacher-row";
 
@@ -267,7 +284,7 @@ function displayTeachers() {
                     const remaining = subjects.length - visibleSubjects.length;
 
                     const subjectsHTML = `
-                        ${visibleSubjects.map(s =>
+                        ${visibleSubjects.map((s: any) =>
                             `<span class="subject-chip">${s.subjectName}</span>`
                         ).join("")}
                         ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
@@ -312,28 +329,45 @@ function displayTeachers() {
 
 // Search functionality for teachers
 function searchTeacher() {
-    let query = document.getElementById("input-field").value.toLowerCase();
+    const inputField = document.getElementById("input-field") as HTMLInputElement;
+    if (!inputField) return;
+    
+    let query = inputField.value.toLowerCase();
     let rows = document.querySelectorAll(".teacher-row");
 
     rows.forEach(function (row) {
-        let name = row.querySelector(".teacher-name").textContent.toLowerCase();
-        let initials = row.querySelector(".teacher-initials").textContent.toLowerCase();
-        let subjects = row.querySelector(".teacher-subjects").textContent.toLowerCase();
+        const nameElement = row.querySelector(".teacher-name");
+        const initialsElement = row.querySelector(".teacher-initials");
+        const subjectsElement = row.querySelector(".teacher-subjects");
+        
+        if (!nameElement || !initialsElement || !subjectsElement) return;
+        
+        let name = nameElement.textContent?.toLowerCase() || "";
+        let initials = initialsElement.textContent?.toLowerCase() || "";
+        let subjects = subjectsElement.textContent?.toLowerCase() || "";
 
+        const rowElement = row as HTMLElement;
         if (query === "" || name.includes(query) || initials.includes(query) || subjects.includes(query)) {
-            row.style.display = "";
+            rowElement.style.display = "";
         } 
         else {
-            row.style.display = "none";
+            rowElement.style.display = "none";
         }
     });
 }
 
 
 function initializeApp() {
-    displayTeachers();
+    loadTeachers();
     initNavbar();
+
+    const addBtn = document.getElementById("add-btn");
+    addBtn?.addEventListener("click", loadAddTeacherForm);
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-document.getElementById("input-field").addEventListener("input", searchTeacher);*/
+
+const inputField = document.getElementById("input-field");
+if (inputField) {
+    inputField.addEventListener("input", searchTeacher);
+}
