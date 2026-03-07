@@ -287,7 +287,7 @@ if (inputField) {
 import initNavbar from "./navbar.js";
 import { fetchRooms, createRoom } from "../api/roomApi.js";
 import { getElement } from "../utils/elementHelpers.js";
-import { openModal, closeModal } from "../components/popup.js";
+import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
 import type { CreateRoomRequest, Room } from "../types/room.js";
@@ -416,7 +416,7 @@ function openAddRoomForm(): void {
         noRooms.style.display = "none";
     }
 
-    openModal({
+    openPopup({
         modal: addRoomScreen,
         overlay,
         scrollContainer: displayRooms,
@@ -459,7 +459,7 @@ function openAddRoomForm(): void {
     });
 
     closeButton.addEventListener("click", () => {
-        closeModal({
+        closePopup({
             modal: addRoomScreen,
             overlay,
             scrollContainer: displayRooms,
@@ -476,7 +476,7 @@ function openAddRoomForm(): void {
 
             await createRoom(roomData);
 
-            closeModal({
+            closePopup({
                 modal: addRoomScreen,
                 overlay,
                 scrollContainer: displayRooms,
