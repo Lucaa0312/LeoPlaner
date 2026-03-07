@@ -274,7 +274,7 @@ public class SimulatedAnnealingAlgorithm {
                 if (timetable.getSchoolClass() != null) {
                     className = timetable.getSchoolClass().getClassName();
                     if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, className)) {
-                        return cost + IMPOSSIBLE_COST;
+                        // return cost + IMPOSSIBLE_COST;
                     }
                 }
 

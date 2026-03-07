@@ -1,25 +1,18 @@
 package at.htlleonding.leoplaner.data;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.NamedQueries;
-import org.hibernate.annotations.NamedQuery;
-
 import java.util.List;
 
-@NamedQueries({
-        @NamedQuery(name = Room.QUERY_FIND_ALL, query = "select r from Room r"),
-        @NamedQuery(name = Room.QUERY_FIND_BY_ID, query = "select r from Room r where r.id = :filter"),
-        @NamedQuery(name = Room.QUERY_GET_RANDOM, query = "select r from Room r where r.id = 1"),
-        @NamedQuery(name = Room.QUERY_FIND_BY_NUMBER, query = "select r from Room r where r.roomNumber = :filter"),
-        @NamedQuery(name = Room.QUERY_GET_COUNT, query = "select count(r) from Room r"),
-        @NamedQuery(name = Room.QUERY_FIND_BY_NUMBERNAME, query = "select r from Room r where r.roomNumber || r.roomName = :filter"),
-        @NamedQuery(name = Room.QUERY_FIND_BY_NAME, query = "select r from Room r where r.roomName = :filter")
-})
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+
 @Entity
-public class Room {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Room extends PanacheEntity {
     private short roomNumber;
     private String roomName;
     private String nameShort;
@@ -30,13 +23,34 @@ public class Room {
             name = "room_roomtypes", joinColumns = @JoinColumn(name = "room_id"))
     private List<RoomTypes> roomTypes;
 
-    public static final String QUERY_FIND_ALL = "Room.findAll";
-    public static final String QUERY_FIND_BY_ID = "Room.findByID";
-    public static final String QUERY_FIND_BY_NUMBER = "Room.findByNumber";
-    public static final String QUERY_FIND_BY_NAME = "Room.findByName";
-    public static final String QUERY_FIND_BY_NUMBERNAME = "Room.findByNumberName";
-    public static final String QUERY_GET_COUNT = "Room.getCount";
-    public static final String QUERY_GET_RANDOM = "Room.getRandom";
+    public static List<Room> getAllRooms() {
+        return listAll();
+    }
+
+    public static Room getById(final Long id) {
+        return findById(id);
+    }
+
+    public static Room getByNumber(final int number) {
+        return find("roomNumber", number).firstResult();
+    }
+
+    public static Room getByName(final String name) {
+        return find("LOWER(roomName) like LOWER(?1)", "%" + name + "%").firstResult();
+    }
+
+    public static Room getByNumberAndName(final String filter) {
+        return find("CONCAT(roomNumber, LOWER(roomName)) LIKE LOWER(?1)",
+                "%" + filter + "%").firstResult();
+    }
+
+    public static long getCountOfAllRooms() {
+        return count();
+    }
+
+    public static Room getRandomRoom() {
+        return find("ORDER BY random()").firstResult();
+    }
 
     public short getRoomNumber() {
         return roomNumber;
@@ -66,7 +80,7 @@ public class Room {
         this.roomName = roomName;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -74,24 +88,8 @@ public class Room {
         return nameShort;
     }
 
-    public void setNameShort(String nameShort) {
+    public void setNameShort(final String nameShort) {
         this.nameShort = nameShort;
-    }
-
-    public static String getQueryFindAll() {
-        return QUERY_FIND_ALL;
-    }
-
-    public static String getQueryFindById() {
-        return QUERY_FIND_BY_ID;
-    }
-
-    public static String getQueryFindByNumber() {
-        return QUERY_FIND_BY_NUMBER;
-    }
-
-    public static String getQueryGetCount() {
-        return QUERY_GET_COUNT;
     }
 
     public void setRoomTypes(final List<RoomTypes> roomTypes) {

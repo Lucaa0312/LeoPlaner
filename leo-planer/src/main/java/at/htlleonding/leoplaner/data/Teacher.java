@@ -3,23 +3,17 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.*;
-
-import org.hibernate.annotations.NamedQueries;
-import org.hibernate.annotations.NamedQuery;
-
-@NamedQueries({
-        @NamedQuery(name = Teacher.QUERY_FIND_ALL, query = "select t from Teacher t"),
-        @NamedQuery(name = Teacher.QUERY_FIND_BY_NAME, query = "select t from Teacher t where LOWER(t.teacherName) like LOWER(:filter)"),
-        @NamedQuery(name = Teacher.QUERY_FIND_BY_ID, query = "select t from Teacher t where t.id = :filter"),
-        @NamedQuery(name = Teacher.QUERY_GET_COUNT, query = "select count(t) from Teacher t")
-})
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Entity
-public class Teacher {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Teacher extends PanacheEntity {
     private String teacherName;
     private String nameSymbol; // Lehrerkürzel
 
@@ -41,20 +35,35 @@ public class Teacher {
     @CollectionTable(name = "teacher_periods", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherTakenPeriod> takenUpPeriods = new ArrayList<>();
 
-    public static final String QUERY_FIND_ALL = "Teacher.findAll";
-    public static final String QUERY_FIND_BY_NAME = "Teacher.findByName";
-    public static final String QUERY_FIND_BY_ID = "Teacher.findByID";
-    public static final String QUERY_GET_COUNT = "Teacher.getCount";
+    public static List<Teacher> getByName(final String filter) {
+        return find("LOWER(teacherName) like LOWER(?1)", "%" + filter + "%").list();
+    }
 
-    public boolean checkIfHourExistsInNonWorkingList(TeacherNonWorkingHours tnw) {
+    public static Teacher getFirstByName(final String filter) {
+        return find("LOWER(teacherName) like LOWER(?1)", "%" + filter + "%").firstResult();
+    }
+
+    public static Teacher getById(final Long id) {
+        return find("id", id).firstResult();
+    }
+
+    public static List<Teacher> getAllTeachers() {
+        return Teacher.listAll();
+    }
+
+    public static long getCountOfAllTeachers() {
+        return Teacher.count();
+    }
+
+    public boolean checkIfHourExistsInNonWorkingList(final TeacherNonWorkingHours tnw) {
         return listContainsHour(this.teacher_non_working_hours, tnw);
     }
 
-    public boolean checkIfHourExistsInNonPreferredList(TeacherNonPreferredHours tnw) {
+    public boolean checkIfHourExistsInNonPreferredList(final TeacherNonPreferredHours tnw) {
         return listContainsHour(this.teacher_non_preferred_hours, tnw);
     }
 
-    public <T extends HoursPeriod> boolean listContainsHour(List<T> list, T hour) {
+    public <T extends HoursPeriod> boolean listContainsHour(final List<T> list, final T hour) {
         return list.stream().anyMatch(e -> e.getDay() == hour.getDay() && e.getSchoolHour() == hour.getSchoolHour());
     }
 
@@ -98,7 +107,7 @@ public class Teacher {
         return teacher_non_working_hours;
     }
 
-    public void setTeacher_non_working_hours(List<TeacherNonWorkingHours> teacher_non_working_hours) {
+    public void setTeacher_non_working_hours(final List<TeacherNonWorkingHours> teacher_non_working_hours) {
         this.teacher_non_working_hours = teacher_non_working_hours;
     }
 
@@ -106,15 +115,15 @@ public class Teacher {
         return teacher_non_preferred_hours;
     }
 
-    public void setTeacher_non_preferred_hours(List<TeacherNonPreferredHours> teacher_non_preferred_hours) {
+    public void setTeacher_non_preferred_hours(final List<TeacherNonPreferredHours> teacher_non_preferred_hours) {
         this.teacher_non_preferred_hours = teacher_non_preferred_hours;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
-    public void setTeachingSubject(List<Subject> teachingSubject) {
+    public void setTeachingSubject(final List<Subject> teachingSubject) {
         this.teachingSubject = teachingSubject;
     }
 
@@ -122,7 +131,7 @@ public class Teacher {
         return takenUpPeriods;
     }
 
-    public void setTakenUpPeriods(List<TeacherTakenPeriod> takenUpPeriods) {
+    public void setTakenUpPeriods(final List<TeacherTakenPeriod> takenUpPeriods) {
         this.takenUpPeriods = takenUpPeriods;
     }
 
