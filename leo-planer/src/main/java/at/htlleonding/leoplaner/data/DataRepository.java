@@ -1,12 +1,15 @@
 package at.htlleonding.leoplaner.data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
@@ -22,7 +25,7 @@ public class DataRepository {
         return historyList;
     }
 
-    public void setHistoryList(List<History> historyList) {
+    public void setHistoryList(final List<History> historyList) {
         this.historyList = historyList;
     }
 
@@ -44,6 +47,14 @@ public class DataRepository {
         this.currentTimetable = currentTimetable;
     }
 
+    public Map<String, Timetable> getCurrentTimetableList() {
+        return currentTimetableList;
+    }
+
+    public void setCurrentTimetableList(final Map<String, Timetable> currentTimetableList) {
+        this.currentTimetableList = currentTimetableList;
+    }
+
     public Timetable getCurrentTeacherTimetableSingleClass(final Long id) {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
@@ -55,10 +66,10 @@ public class DataRepository {
 
     public Timetable getCurrentTeacherTimetable(final Long id) {
         final Teacher teacher = getTeacherByID(id);
-        List<ClassSubjectInstance> teacherTakenClasses = new ArrayList<>();
+        final List<ClassSubjectInstance> teacherTakenClasses = new ArrayList<>();
 
-        for (Timetable timetable : this.currentTimetableList.values()) {
-            for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+        for (final Timetable timetable : this.currentTimetableList.values()) {
+            for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
                 if (csi.getClassSubject() == null || csi.getPeriod().isLunchBreak()) {
                     continue;
                 }
@@ -71,137 +82,89 @@ public class DataRepository {
     }
 
     public List<ClassSubject> getAllClassSubjects() {
-        final TypedQuery<ClassSubject> allClassSubjects = this.entityManager.createNamedQuery(
-                ClassSubject.QUERY_FIND_ALL,
-                ClassSubject.class); // change name to literal not final instance
-        return allClassSubjects.getResultList();
+        return ClassSubject.getAllClassSubjects();
     }
 
     public List<ClassSubject> getAllClassSubjectsWithClass(final String className) {
-        final TypedQuery<ClassSubject> allClassSubjectsByClassName = this.entityManager
-                .createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class);
-        allClassSubjectsByClassName.setParameter("filter", className.toLowerCase());
-        return allClassSubjectsByClassName.getResultList();
+        return ClassSubject.getAllByClassName(className);
     }
 
     public List<Teacher> getAllTeachers() {
-        final TypedQuery<Teacher> allTeachers = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_ALL,
-                Teacher.class);
-        return allTeachers.getResultList();
+        return Teacher.getAllTeachers();
     }
 
     public Teacher getTeacherByID(final Long id) {
-        final TypedQuery<Teacher> teacher = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_ID,
-                Teacher.class);
-        teacher.setParameter("filter", id);
-        return teacher.getSingleResult();
+        return Teacher.getById(id);
     }
 
     public Long getTeacherCount() {
-        return this.entityManager.createNamedQuery(Teacher.QUERY_GET_COUNT, Long.class).getSingleResult();
+        return Teacher.getCountOfAllTeachers();
+    }
+
+    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
+        return Teacher.getFirstByName(teacherName);
     }
 
     public List<Room> getAllRooms() {
-        final TypedQuery<Room> allRooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class);
-        return allRooms.getResultList();
+        return Room.getAllRooms();
     }
 
     public Room getRoomByID(final Long id) {
-        final TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_ID, Room.class);
-        rooms.setParameter("filter", id);
-        return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
+        return Room.getById(id);
     }
 
     public Room getRandomRoom() {
-        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_GET_RANDOM, Room.class);
-        return room.getSingleResultOrNull();
+        return Room.getRandomRoom();
     }
 
-    public Map<String, Timetable> getCurrentTimetableList() {
-        return currentTimetableList;
-    }
-
-    public void setCurrentTimetableList(Map<String, Timetable> currentTimetableList) {
-        this.currentTimetableList = currentTimetableList;
-    }
-
-    public EntityManager getEntityManager() {
-        return entityManager;
-    }
-
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public Room getRoomByNumberName(final String numberName) {
+        return Room.getByNumberAndName(numberName);
     }
 
     public Room getRoomByNumber(final int number) {
-        final TypedQuery<Room> rooms = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class);
-        rooms.setParameter("filter", number);
-        return rooms.getResultList().isEmpty() ? null : rooms.getResultList().get(0);
+        return Room.getByNumber(number);
     }
 
     public Room getRoomByName(final String name) {
-        final TypedQuery<Room> room = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NAME, Room.class);
-        room.setParameter("filter", name);
-        return room.getSingleResultOrNull();
-    }
-
-    public SchoolClass getSchoolClassById(final Long id) {
-        final TypedQuery<SchoolClass> scoolClass = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
-                SchoolClass.class);
-        scoolClass.setParameter("filter", id);
-        return scoolClass.getSingleResultOrNull();
+        return Room.getByName(name);
     }
 
     public Long getRoomCount() {
-        return this.entityManager.createNamedQuery(Room.QUERY_GET_COUNT, Long.class).getSingleResult();
+        return Room.getCountOfAllRooms();
     }
 
-    public List<Subject> getAllSubjects() {
-        final TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_ALL,
-                Subject.class);
-        return allSubjects.getResultList();
+    public SchoolClass checkIfSchoolClassExists(final String className) {
+        return SchoolClass.getFirstByName(className);
     }
 
-    public Subject getSubjectByName(final String name) {
-        final TypedQuery<Subject> allSubjects = this.entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME,
-                Subject.class);
-        allSubjects.setParameter("filter", name);
-        return allSubjects.getSingleResultOrNull();
-    }
-
-    public Long getSubjectCount() {
-        return this.entityManager.createNamedQuery(Subject.QUERY_GET_COUNT, Long.class).getSingleResult();
+    public SchoolClass getSchoolClassById(final Long id) {
+        return SchoolClass.getById(id);
     }
 
     public List<SchoolClass> getAllSchoolClasses() {
-        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
-                SchoolClass.class);
-        return query.getResultList();
+        return SchoolClass.getAllSchoolClasss();
     }
 
-    public SchoolClass checkIfSchoolClassExists(String className) {
-        TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_CHECK_IF_EXISTS,
-                SchoolClass.class);
-        query.setParameter("filter", className);
-        return query.getSingleResultOrNull();
+    public List<Subject> getAllSubjects() {
+        return Subject.getAllSubjects();
     }
 
-    public ArrayList<ClassSubject> getClassSubjects() {
-        return null;
+    public Subject getSubjectByName(final String name) {
+        return Subject.getFirstByName(name);
     }
 
-    public ArrayList<Teacher> getTeachers() {
-        return null;
+    public Long getSubjectCount() {
+        return Subject.getCountOfAllSubjects();
     }
 
-    public ArrayList<Room> getRooms() {
-        return null;
-    }
-
-    public Room getRoomByNumberName(String numberName) {
-        TypedQuery<Room> query = this.entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBERNAME, Room.class);
-        query.setParameter("filter", numberName);
-        return query.getSingleResultOrNull();
+    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
+        Subject subject;
+        try {
+            subject = getSubjectByName(subjectName);
+        } catch (final Exception e) {
+            return null;
+        }
+        return subject;
     }
 
     @Transactional
@@ -274,29 +237,6 @@ public class DataRepository {
         return subject;
     }
 
-    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
-        Subject subject;
-        try {
-            subject = getSubjectByName(subjectName);
-        } catch (final Exception e) {
-            return null;
-        }
-        return subject;
-    }
-
-    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
-        final TypedQuery<Teacher> query = this.entityManager.createNamedQuery(Teacher.QUERY_FIND_BY_NAME,
-                Teacher.class); // TODO
-        // move
-        // this
-        // to
-        // a
-        // modular
-        // function
-        query.setParameter("filter", teacherName);
-        return query.getResultList().isEmpty() ? null : query.getResultList().get(0);
-    }
-
     public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(final List<ClassSubject> classSubjects,
             final Room classRoom) {
         // List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
@@ -323,7 +263,7 @@ public class DataRepository {
                 if (checkIfPeriodIsFree(occupiedHours, schoolHour, randomDuration, randomSchoolDay)
                         && (hoursCounter - randomDuration) >= 0) {
                     final Period period = new Period(randomSchoolDay, schoolHour);
-                    ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance(classSubject, period,
+                    final ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance(classSubject, period,
                             classRoom, randomDuration);
                     result.add(classSubjectInstance);
                     addClassSubjectInstance(classSubjectInstance);
@@ -368,21 +308,17 @@ public class DataRepository {
     }
 
     public void initRandomTimetableForAllClasses() {
-        final TypedQuery<SchoolClass> allClasses = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_ALL,
-                SchoolClass.class);
-        allClasses.getResultList().stream()
+        SchoolClass.getAllSchoolClasss().stream()
                 .forEach(e -> createTimetableForClassNew(e.getId(), e.getClassName(), e.getClassRoom()));
     }
 
     public void createTimetableForClassNew(final Long id, final String className, final Room classRoom) {
-        final TypedQuery<SchoolClass> query = this.entityManager.createNamedQuery(SchoolClass.QUERY_FIND_BY_ID,
-                SchoolClass.class);
-        query.setParameter("filter", id);
-        final SchoolClass schoolClass = query.getSingleResultOrNull();
+        final SchoolClass schoolClass = SchoolClass.getById(id);
 
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
         final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
                 classRoom);
+
         final Timetable timetable = new Timetable(classSubjectInstances, schoolClass);
         this.currentTimetableList.put(className, timetable); // TODO maybe change with id, or
                                                              // make name id

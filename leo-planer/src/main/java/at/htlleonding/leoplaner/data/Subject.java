@@ -1,22 +1,18 @@
 package at.htlleonding.leoplaner.data;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.NamedQueries;
-import org.hibernate.annotations.NamedQuery;
-
 import java.util.List;
 
-// TODO add NamedQueries
-@NamedQueries({
-        @NamedQuery(name = Subject.QUERY_FIND_ALL, query = "select s from Subject s"),
-        @NamedQuery(name = Subject.QUERY_FIND_BY_NAME, query = "select s from Subject s where LOWER(s.subjectName) = LOWER(:filter)"),
-        @NamedQuery(name = Subject.QUERY_GET_COUNT, query = "select count(s) from Subject s")
-})
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+
 @Entity
-public class Subject {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Subject extends PanacheEntity {
     private String subjectName;
     private RgbColor subjectColor;
 
@@ -27,9 +23,25 @@ public class Subject {
     @Column(name = "room_type")
     private List<RoomTypes> requiredRoomTypes;
 
-    public static final String QUERY_FIND_ALL = "Subject.findAll";
-    public static final String QUERY_FIND_BY_NAME = "Subject.findByName";
-    public static final String QUERY_GET_COUNT = "Subject.getCount";
+    public static List<Subject> getByName(final String filter) {
+        return find("LOWER(subjectName) like LOWER(?1)", "%" + filter + "%").list();
+    }
+
+    public static Subject getFirstByName(final String filter) {
+        return find("LOWER(subjectName) like LOWER(?1)", "%" + filter + "%").firstResult();
+    }
+
+    public static Subject getById(final Long id) {
+        return find("id", id).firstResult();
+    }
+
+    public static List<Subject> getAllSubjects() {
+        return Subject.listAll();
+    }
+
+    public static Long getCountOfAllSubjects() {
+        return Subject.count();
+    }
 
     public String getSubjectName() {
         return subjectName;
@@ -57,14 +69,6 @@ public class Subject {
 
     public Long getId() {
         return id;
-    }
-
-    public static String getQueryFindAll() {
-        return QUERY_FIND_ALL;
-    }
-
-    public static String getQueryFindByName() {
-        return QUERY_FIND_BY_NAME;
     }
 
 }
