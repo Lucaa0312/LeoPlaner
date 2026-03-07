@@ -47,6 +47,14 @@ public class DataRepository {
         this.currentTimetable = currentTimetable;
     }
 
+    public Map<String, Timetable> getCurrentTimetableList() {
+        return currentTimetableList;
+    }
+
+    public void setCurrentTimetableList(final Map<String, Timetable> currentTimetableList) {
+        this.currentTimetableList = currentTimetableList;
+    }
+
     public Timetable getCurrentTeacherTimetableSingleClass(final Long id) {
         this.currentTimetable.sortTimetableBySchoolhour();
         final Teacher teacher = getTeacherByID(id);
@@ -93,6 +101,10 @@ public class DataRepository {
         return Teacher.getCountOfAllTeachers();
     }
 
+    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
+        return Teacher.getFirstByName(teacherName);
+    }
+
     public List<Room> getAllRooms() {
         return Room.getAllRooms();
     }
@@ -105,20 +117,8 @@ public class DataRepository {
         return Room.getRandomRoom();
     }
 
-    public Map<String, Timetable> getCurrentTimetableList() {
-        return currentTimetableList;
-    }
-
-    public void setCurrentTimetableList(final Map<String, Timetable> currentTimetableList) {
-        this.currentTimetableList = currentTimetableList;
-    }
-
-    public EntityManager getEntityManager() {
-        return entityManager;
-    }
-
-    public void setEntityManager(final EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public Room getRoomByNumberName(final String numberName) {
+        return Room.getByNumberAndName(numberName);
     }
 
     public Room getRoomByNumber(final int number) {
@@ -129,12 +129,20 @@ public class DataRepository {
         return Room.getByName(name);
     }
 
+    public Long getRoomCount() {
+        return Room.getCountOfAllRooms();
+    }
+
+    public SchoolClass checkIfSchoolClassExists(final String className) {
+        return SchoolClass.getFirstByName(className);
+    }
+
     public SchoolClass getSchoolClassById(final Long id) {
         return SchoolClass.getById(id);
     }
 
-    public Long getRoomCount() {
-        return Room.getCountOfAllRooms();
+    public List<SchoolClass> getAllSchoolClasses() {
+        return SchoolClass.getAllSchoolClasss();
     }
 
     public List<Subject> getAllSubjects() {
@@ -149,28 +157,14 @@ public class DataRepository {
         return Subject.getCountOfAllSubjects();
     }
 
-    public List<SchoolClass> getAllSchoolClasses() {
-        return SchoolClass.getAllSchoolClasss();
-    }
-
-    public SchoolClass checkIfSchoolClassExists(final String className) {
-        return SchoolClass.getFirstByName(className);
-    }
-
-    public ArrayList<ClassSubject> getClassSubjects() {
-        return null;
-    }
-
-    public ArrayList<Teacher> getTeachers() {
-        return null;
-    }
-
-    public ArrayList<Room> getRooms() {
-        return null;
-    }
-
-    public Room getRoomByNumberName(final String numberName) {
-        return Room.getByNumberAndName(numberName);
+    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
+        Subject subject;
+        try {
+            subject = getSubjectByName(subjectName);
+        } catch (final Exception e) {
+            return null;
+        }
+        return subject;
     }
 
     @Transactional
@@ -241,20 +235,6 @@ public class DataRepository {
 
         this.entityManager.persist(subject);
         return subject;
-    }
-
-    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
-        Subject subject;
-        try {
-            subject = getSubjectByName(subjectName);
-        } catch (final Exception e) {
-            return null;
-        }
-        return subject;
-    }
-
-    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
-        return Teacher.getFirstByName(teacherName);
     }
 
     public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(final List<ClassSubject> classSubjects,
