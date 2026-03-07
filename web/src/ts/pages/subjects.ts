@@ -1,4 +1,4 @@
-import  initNavbar  from "./navbar.js";
+/*import  initNavbar  from "./navbar.js";
 
 // room types available
 const allRoomTypes = ["CLASSROOM", "EDV", "CHEM", "PHY", "SPORT", "WORKSHOP"];
@@ -458,4 +458,30 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 const inputField = document.getElementById("input-field");
 if (inputField) {
     inputField.addEventListener("input", searchSubjects);
+}*/
+
+import initNavbar from "./navbar.js";
+import { fetchSubjects, createSubject } from "../api/subjectApi.js";
+import { getElement } from "../utils/elementHelpers.js";
+import { openPopup, closePopup } from "../components/popup.js";
+import { toggleEmptyState } from "../components/emptyState.js";
+import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
+import type { CreateSubjectRequest, Subject, SubjectColor } from "../types/subject.js";
+import { initColorPicker } from "../features/colorSelector.js";
+
+
+
+
+
+function initializeApp(): void {
+    initNavbar();
+    /*void loadAndRenderRooms();
+
+    const addBtn = getElement<HTMLElement>("add-btn");
+    addBtn?.addEventListener("click", openAddRoomForm);
+
+    const inputField = getElement<HTMLInputElement>("input-field");
+    inputField?.addEventListener("input", searchRooms);*/
 }
+
+document.addEventListener("DOMContentLoaded", initializeApp);
