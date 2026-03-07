@@ -218,6 +218,43 @@ public class DataRepository {
     }
 
     @Transactional
+    public Teacher updateTeacher(Long id, Teacher teacher) {
+        Teacher teacherToUpdate = Teacher.getById(id);
+
+        teacherToUpdate.setNameSymbol(teacher.getNameSymbol());
+        teacherToUpdate.setTeacherName(teacher.getTeacherName());
+        teacherToUpdate.setTakenUpPeriods(teacher.getTakenUpPeriods());
+        teacherToUpdate.setTeacher_non_preferred_hours(teacher.getTeacher_non_preferred_hours());
+        teacherToUpdate.setTeacher_non_working_hours(teacher.getTeacher_non_working_hours());
+        teacherToUpdate.setTeachingSubject(teacher.getTeachingSubject());
+
+        return teacherToUpdate;
+    }
+
+    @Transactional
+    public Room updateRoom(Long id, Room room) {
+        Room roomToUpdate = Room.getById(id);
+
+        roomToUpdate.setNameShort(room.getNameShort());
+        roomToUpdate.setRoomNumber(room.getRoomNumber());
+        roomToUpdate.setRoomName(room.getRoomName());
+        roomToUpdate.setRoomTypes(room.getRoomTypes());
+
+        return roomToUpdate;
+    }
+
+    @Transactional
+    public Subject updateSubject(Long id, Subject subject) {
+        Subject subjectToUpdate = Subject.getById(id);
+
+        subjectToUpdate.setSubjectName(subject.getSubjectName());
+        subjectToUpdate.setSubjectColor(subject.getSubjectColor());
+        subjectToUpdate.setRequiredRoomTypes(subject.getRequiredRoomTypes());
+
+        return subjectToUpdate;
+    }
+
+    @Transactional
     public Room addRoom(final Room room) {
         if (this.entityManager.contains(room)) {
             throw new IllegalArgumentException();

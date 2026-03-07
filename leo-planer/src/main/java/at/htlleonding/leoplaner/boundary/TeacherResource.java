@@ -6,9 +6,11 @@ import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.dto.TeacherDTO;
 import jakarta.inject.Inject;
+import jakarta.websocket.server.PathParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
@@ -16,6 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("api/teachers")
 public class TeacherResource {
@@ -24,13 +27,10 @@ public class TeacherResource {
     @Context
     UriInfo uriInfo;
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<TeacherDTO> getAllTeachers() {
-        return dataRepository.getAllTeachers().stream().map(e ->
-                UtilBuildFunctions.createTeacherDTO(e)
-        ).toList();
+        return dataRepository.getAllTeachers().stream().map(e -> UtilBuildFunctions.createTeacherDTO(e)).toList();
     }
 
     @POST
@@ -52,6 +52,19 @@ public class TeacherResource {
         Long teacherCount = this.dataRepository.getTeacherCount();
         return Response.status(Response.Status.OK).entity(teacherCount).build();
     }
+
+    @PUT
+    @Path("update/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response updateTeacher(@PathParam("id") Long id, Teacher teacher) {
+        Teacher updatedTeacher = dataRepository.updateTeacher(id, teacher);
+
+        if (updatedTeacher == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(updatedTeacher).build();
+
+    }
 }
-
-
