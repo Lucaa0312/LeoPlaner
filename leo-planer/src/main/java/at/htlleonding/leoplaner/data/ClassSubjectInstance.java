@@ -1,21 +1,18 @@
 package at.htlleonding.leoplaner.data;
 
+import java.util.List;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class ClassSubjectInstance {
-    @Id
-    @GeneratedValue
-    private Long id;
-
+public class ClassSubjectInstance extends PanacheEntity {
     @ManyToOne
     @JoinColumn(name = "classSubject_id")
     private ClassSubject classSubject;
@@ -48,7 +45,12 @@ public class ClassSubjectInstance {
         this.id = id;
     }
 
-    public ClassSubjectInstance() {};
+    public ClassSubjectInstance() {
+    };
+
+    public static List<ClassSubjectInstance> getAlClassSubjectInstances() {
+        return ClassSubjectInstance.listAll();
+    }
 
     public Long getId() {
         return id;

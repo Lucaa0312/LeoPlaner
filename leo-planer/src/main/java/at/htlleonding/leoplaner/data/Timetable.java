@@ -2,9 +2,8 @@ package at.htlleonding.leoplaner.data;
 
 import java.util.List;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
@@ -13,11 +12,7 @@ import jakarta.persistence.OneToOne;
 import java.util.Comparator;
 
 @Entity
-public class Timetable {
-    @Id
-    @GeneratedValue
-    private Long id;
-
+public class Timetable extends PanacheEntity {
     @OneToMany
     @JoinTable(name = "timetable_classSubjectInstances", joinColumns = @JoinColumn(name = "timetable_id"), inverseJoinColumns = @JoinColumn(name = "class_subject_instance_id"))
     private List<ClassSubjectInstance> classSubjectInstances;
@@ -39,6 +34,10 @@ public class Timetable {
     public Timetable(final List<ClassSubjectInstance> classSubjectInstances, final SchoolClass schoolClass) {
         this.classSubjectInstances = classSubjectInstances;
         this.schoolClass = schoolClass;
+    }
+
+    public static List<Timetable> getAllTimetables() {
+        return Timetable.listAll();
     }
 
     public void sortTimetableBySchoolhour() {
