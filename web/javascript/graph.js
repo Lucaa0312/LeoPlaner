@@ -5,6 +5,10 @@ var temperatureChart = echarts.init(document.getElementById('temperatureChart'))
 var costChart = echarts.init(document.getElementById('costChart'));
 
 const slider = document.getElementById('temperatureSlider');
+let isUserTouchingSlider = false;
+
+slider.onmousedown = () => { isUserTouchingSlider = true; };
+slider.onmouseup = () => { isUserTouchingSlider = false; };
 
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
 
@@ -143,6 +147,7 @@ costChart.setOption({
 // Get data
 var temperatureChartData = [];
 var costChartData = [];
+
 socket.onmessage = function(event) {
   const data = JSON.parse(event.data);
   console.log(data)
@@ -172,8 +177,10 @@ socket.onmessage = function(event) {
   ]
   });
 
-  slider.value = data.temperature;
-
+  if (!isUserTouchingSlider) {
+    slider.value = data.temperature;
+  }
+  
   if(data.status == 'finished' || data.iteration >= 10000) {
       temperatureChart.setOption({
         series: [
@@ -239,3 +246,9 @@ slider.addEventListener('input', () => {
   console.log(newColor);
   slider.style.setProperty('--thumb-color', newColor);
 })
+
+// Send data
+slider.addEventListener('input', (event) => {
+    const val = event.target.value;
+    socket.send(val);  
+});

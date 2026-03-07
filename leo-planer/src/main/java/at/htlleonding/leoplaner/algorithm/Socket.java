@@ -9,6 +9,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import java.util.Locale;
 
@@ -29,17 +30,28 @@ public class Socket {
     }
 
     public void onProgressUpdate(@Observes AlgorithmProgressDTO progress) {
-    String json = String.format(Locale.US, "{\"iteration\": %d,"
-                          + "\"temperature\": %f,"
-                          + "\"currentCost\": %d,"
-                          + "\"finished\": %s}", 
-                          progress.iteration(), 
-                          progress.temperature(), 
-                          progress.currentCost(), 
-                          progress.finished());
+        String json = String.format(Locale.US, "{\"iteration\": %d,"
+                            + "\"temperature\": %f,"
+                            + "\"currentCost\": %d,"
+                            + "\"finished\": %s}", 
+                            progress.iteration(), 
+                            progress.temperature(), 
+                            progress.currentCost(), 
+                            progress.finished());
 
-    System.out.println(json);
-    
-    sessions.forEach(s -> s.getAsyncRemote().sendText(json));
-}
+        System.out.println(json);
+        
+        sessions.forEach(s -> s.getAsyncRemote().sendText(json));
+    }
+
+    @OnMessage
+    public void onSliderUpdate(String update) {
+        try {
+            double newTemperature = Double.parseDouble(update);
+            SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
+            
+        } catch (NumberFormatException e) {
+            System.out.println("Encountered error: " + e.getMessage());
+        }
+    }
 }

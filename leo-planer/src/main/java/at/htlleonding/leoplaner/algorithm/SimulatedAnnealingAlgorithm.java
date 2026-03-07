@@ -56,7 +56,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private final AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
+    private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
     private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.998;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
@@ -125,7 +125,7 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
             progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costCurrSchoolSchedule, true));
         }
-        progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, this.temperature, costFinal, true));
+        progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costFinal, true));
         
     }
 
@@ -405,7 +405,7 @@ public class SimulatedAnnealingAlgorithm {
         return Double.longBitsToDouble(temperature.get());
     }
 
-    public void setTemperature(double newValue) {
+    public static void setTemperature(double newValue) {
         temperature.set(Double.doubleToLongBits(newValue));
     }
 
