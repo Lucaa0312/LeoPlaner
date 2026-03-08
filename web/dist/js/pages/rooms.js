@@ -4,6 +4,7 @@ import { getElement } from "../utils/elementHelpers.js";
 import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
+import { initSearchElement } from "../features/searchElement.js";
 function formatRoomName(room) {
     return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
 }
@@ -163,31 +164,18 @@ function openAddRoomForm() {
         }
     });
 }
-function searchRooms() {
-    const inputEl = getElement("input-field");
-    if (!inputEl) {
-        return;
-    }
-    const query = inputEl.value.toLowerCase();
-    const rows = document.querySelectorAll(".room-box");
-    rows.forEach((row) => {
-        const nameEl = row.querySelector(".room-name");
-        const typesEl = row.querySelector(".room-types");
-        if (!nameEl || !typesEl) {
-            return;
-        }
-        const name = nameEl.textContent?.toLowerCase() ?? "";
-        const types = typesEl.textContent?.toLowerCase() ?? "";
-        row.style.display =
-            query === "" || name.includes(query) || types.includes(query) ? "" : "none";
-    });
-}
 function initializeApp() {
     initNavbar();
     void loadAndRenderRooms();
     const addBtn = getElement("add-btn");
     addBtn?.addEventListener("click", openAddRoomForm);
     const inputField = getElement("input-field");
-    inputField?.addEventListener("input", searchRooms);
+    inputField?.addEventListener("input", () => {
+        initSearchElement({
+            inputId: "input-field",
+            selectedRow: ".room-box",
+            values: [".room-name", ".room-types"],
+        });
+    });
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

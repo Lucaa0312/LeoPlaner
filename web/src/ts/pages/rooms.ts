@@ -5,6 +5,7 @@ import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
 import type { CreateRoomRequest, Room, RoomType } from "../types/room.js";
+import { initSearchElement } from "../features/searchElement.js";
 
 function formatRoomName(room: Room): string {
     return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
@@ -203,30 +204,6 @@ function openAddRoomForm(): void {
     });
 }
 
-function searchRooms(): void {
-    const inputEl = getElement<HTMLInputElement>("input-field");
-    if (!inputEl) {
-        return;
-    }
-
-    const query = inputEl.value.toLowerCase();
-    const rows = document.querySelectorAll(".room-box");
-
-    rows.forEach((row) => {
-        const nameEl = row.querySelector(".room-name");
-        const typesEl = row.querySelector(".room-types");
-
-        if (!nameEl || !typesEl) {
-            return;
-        }
-
-        const name = nameEl.textContent?.toLowerCase() ?? "";
-        const types = typesEl.textContent?.toLowerCase() ?? "";
-
-        (row as HTMLElement).style.display =
-            query === "" || name.includes(query) || types.includes(query) ? "" : "none";
-    });
-}
 
 function initializeApp(): void {
     initNavbar();
@@ -236,7 +213,13 @@ function initializeApp(): void {
     addBtn?.addEventListener("click", openAddRoomForm);
 
     const inputField = getElement<HTMLInputElement>("input-field");
-    inputField?.addEventListener("input", searchRooms);
+    inputField?.addEventListener("input", () => {
+        initSearchElement({
+            inputId: "input-field",
+            selectedRow: ".room-box",
+            values: [".room-name", ".room-types"],
+        });
+    });
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

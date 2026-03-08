@@ -466,6 +466,7 @@ import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
 import { initColorPicker } from "../features/colorSelector.js";
+import { initSearchElement } from "../features/searchElement.js";
 function formatSubjectName(name) {
     return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 }
@@ -630,8 +631,13 @@ function initializeApp() {
     void loadAndRenderSubjects();
     const addBtn = getElement("add-btn");
     addBtn?.addEventListener("click", openAddSubjectForm);
-    /*
-    const inputField = getElement<HTMLInputElement>("input-field");
-    inputField?.addEventListener("input", searchRooms);*/
+    const inputField = getElement("input-field");
+    inputField?.addEventListener("input", () => {
+        initSearchElement({
+            inputId: "input-field",
+            selectedRow: ".subject-box",
+            values: [".subject-name", ".room-types"],
+        });
+    });
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

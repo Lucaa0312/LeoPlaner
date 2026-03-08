@@ -470,6 +470,7 @@ import type { CreateSubjectRequest, Subject, SubjectColor } from "../types/subje
 import { initColorPicker } from "../features/colorSelector.js";
 import type { ColorPickerController } from "../features/colorSelector.js";
 import type { RoomType } from "../types/room.js";
+import { initSearchElement } from "../features/searchElement.js";
 
 
 function formatSubjectName(name: string): string {
@@ -688,9 +689,14 @@ function initializeApp(): void {
     const addBtn = getElement<HTMLElement>("add-btn");
     addBtn?.addEventListener("click", openAddSubjectForm);
 
-    /*
     const inputField = getElement<HTMLInputElement>("input-field");
-    inputField?.addEventListener("input", searchRooms);*/
+    inputField?.addEventListener("input", () => {
+        initSearchElement({
+            inputId: "input-field",
+            selectedRow: ".subject-box",
+            values: [".subject-name", ".room-types"],
+        });
+    });
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
