@@ -1,4 +1,4 @@
-import  initNavbar  from "./navbar.js";
+/*import  initNavbar  from "./navbar.js";
 
 let allSubjects: { id: number; subjectName: string }[] = [];        // all Subjects from DB
 let selectedSubjects: { id: number; subjectName: string }[] = [];  // selected Subjects for Teacher
@@ -371,3 +371,56 @@ const inputField = document.getElementById("input-field");
 if (inputField) {
     inputField.addEventListener("input", searchTeacher);
 }
+*/
+import initNavbar from "../pages/navbar.js";
+import type { Teacher } from "../types/teacher.js";
+
+function createTeacherRow(teacher: Teacher): HTMLElement {
+    const card = document.createElement("div");
+    card.className = "teacher-row";
+    
+    const teacherLeft = document.createElement("div");
+    teacherLeft.className = "teacher-left";
+    
+    const avatarPlaceholder = document.createElement("div");
+    avatarPlaceholder.className = "avatar-placeholder";
+    avatarPlaceholder.textContent = "👤";
+
+    const teacherInfo = document.createElement("div");
+    teacherInfo.className = "teacher-info";
+
+    const teacherName = document.createElement("div");
+    teacherName.className = "teacher-name";
+    teacherName.textContent = teacher.teacherName;
+
+    const teacherInitials = document.createElement("div");
+    teacherInitials.className = "teacher-initials";
+    teacherInitials.textContent = teacher.nameSymbol;
+
+    const teacherSubjects = document.createElement("div");
+    teacherSubjects.className = "teacher-subjects";
+    teacherSubjects.innerHTML = teacher.teachingSubject.map(s => `<span class="subject-chip">${s.subjectName}</span>`).join("");
+
+
+    const teacherWorkload = document.createElement("div");
+    teacherWorkload.className = "teacher-workload";
+    teacherWorkload.textContent = "—"; // Placeholder, da Arbeitslast nicht im Teacher-Objekt vorhanden ist
+
+    const teacherEdit = document.createElement("div");
+    teacherEdit.className = "teacher-edit";
+    teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+
+
+    teacherInfo.appendChild(teacherName);
+    teacherLeft.append(avatarPlaceholder, teacherInfo);
+
+    card.append(teacherLeft, teacherInitials, teacherWorkload, teacherEdit);
+    return card;
+}
+
+
+function initializeApp() {
+    initNavbar();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
