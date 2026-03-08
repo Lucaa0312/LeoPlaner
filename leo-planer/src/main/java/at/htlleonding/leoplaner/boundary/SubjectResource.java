@@ -10,8 +10,10 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -28,8 +30,7 @@ public class SubjectResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<SubjectDTO> getAllSubjects() {
-        return dataRepository.getAllSubjects().stream().map(e ->
-          UtilBuildFunctions.createSubjectDTO(e)).toList();
+        return dataRepository.getAllSubjects().stream().map(e -> UtilBuildFunctions.createSubjectDTO(e)).toList();
     }
 
     @POST
@@ -51,6 +52,19 @@ public class SubjectResource {
         Long subjectCount = this.dataRepository.getSubjectCount();
         return Response.status(Response.Status.OK).entity(subjectCount).build();
     }
+
+    @PUT
+    @Path("update/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response updateSubject(@PathParam("id") Long id, Subject subject) {
+        Subject updatedSubject = dataRepository.updateSubject(id, subject);
+
+        if (updatedSubject == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(updatedSubject).build();
+
+    }
 }
-
-

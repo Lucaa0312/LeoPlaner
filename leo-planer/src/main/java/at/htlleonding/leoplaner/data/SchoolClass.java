@@ -2,25 +2,13 @@ package at.htlleonding.leoplaner.data;
 
 import java.util.List;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
-@NamedQueries({
-        @NamedQuery(name = SchoolClass.QUERY_FIND_ALL, query = "select s from SchoolClass s"),
-        @NamedQuery(name = SchoolClass.QUERY_CHECK_IF_EXISTS, query = "select s from SchoolClass s where LOWER(s.className) = LOWER(:filter)"),
-        @NamedQuery(name = SchoolClass.QUERY_FIND_BY_ID, query = "select s from SchoolClass s where s.id= :filter")
-})
-
 @Entity
-public class SchoolClass {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class SchoolClass extends PanacheEntity {
     private String className;
 
     @OneToOne
@@ -30,7 +18,7 @@ public class SchoolClass {
         return classRoom;
     }
 
-    public void setClassRoom(Room classRoom) {
+    public void setClassRoom(final Room classRoom) {
         this.classRoom = classRoom;
     }
 
@@ -40,15 +28,31 @@ public class SchoolClass {
     @OneToOne(mappedBy = "schoolClass")
     private Timetable timetable;
 
-    public static final String QUERY_FIND_ALL = "SchoolClass.findAll";
-    public static final String QUERY_FIND_BY_ID = "SchoolClass.findById";
-    public static final String QUERY_CHECK_IF_EXISTS = "SchoolClass.checkIfExists";
+    public static List<SchoolClass> getByName(final String filter) {
+        return find("LOWER(className) like LOWER(?1)", "%" + filter + "%").list();
+    }
+
+    public static SchoolClass getFirstByName(final String filter) {
+        return find("LOWER(className) like LOWER(?1)", "%" + filter + "%").firstResult();
+    }
+
+    public static SchoolClass getById(final Long id) {
+        return find("id", id).firstResult();
+    }
+
+    public static List<SchoolClass> getAllSchoolClasss() {
+        return SchoolClass.listAll();
+    }
+
+    public static long getCountOfAllSchoolClasss() {
+        return SchoolClass.count();
+    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -56,7 +60,7 @@ public class SchoolClass {
         return className;
     }
 
-    public void setClassName(String className) {
+    public void setClassName(final String className) {
         this.className = className;
     }
 
@@ -64,7 +68,7 @@ public class SchoolClass {
         return classSubjects;
     }
 
-    public void setClassSubjects(List<ClassSubject> classSubjects) {
+    public void setClassSubjects(final List<ClassSubject> classSubjects) {
         this.classSubjects = classSubjects;
     }
 
@@ -72,7 +76,7 @@ public class SchoolClass {
         return timetable;
     }
 
-    public void setTimetable(Timetable timetable) {
+    public void setTimetable(final Timetable timetable) {
         this.timetable = timetable;
     }
 }

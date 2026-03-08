@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
@@ -35,7 +36,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.MID, 20);
         costOfEachDegree.put(CostDegree.HIGH, 50);
         costOfEachDegree.put(CostDegree.SEVERE, 100);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 99999);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 9999999);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -55,10 +56,10 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private double temperature = 1000.0; // could also go in the small number range like 1-0
-    private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.998;
-    public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
+    private final AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
+    private final int ITERATIONS = 50000;
+    private final double COOLING_RATE = 0.999;
+    public static final double BOLTZMANN_CONSTANT = 10; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
     public record History(int iteration, double temperature, int cost) {
@@ -107,7 +108,7 @@ public class SimulatedAnnealingAlgorithm {
                 costCurrSchoolSchedule = costNextSchoolSchedule;
             }
 
-            setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, this.temperature);
+            setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
 
             if (i % 50 == 0) {
                 try {
@@ -115,12 +116,12 @@ public class SimulatedAnnealingAlgorithm {
                 } catch (Exception e) {
                     // TODO: handle exception
                 }
-                this.dataRepository.getHistoryList().add(new History(i, temperature, costCurrSchoolSchedule));
-                progressEvent.fire(new AlgorithmProgressDTO(i, temperature, costCurrSchoolSchedule, false));
+                this.dataRepository.getHistoryList().add(new History(i, getTemperature(), costCurrSchoolSchedule));
+                progressEvent.fire(new AlgorithmProgressDTO(i, getTemperature(), costCurrSchoolSchedule, false));
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, temperature, costCurrSchoolSchedule, true));
+            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costCurrSchoolSchedule, true));
         }
     }
 
@@ -274,7 +275,7 @@ public class SimulatedAnnealingAlgorithm {
                 if (timetable.getSchoolClass() != null) {
                     className = timetable.getSchoolClass().getClassName();
                     if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, className)) {
-                        return cost + IMPOSSIBLE_COST;
+                        // return cost + IMPOSSIBLE_COST;
                     }
                 }
 
@@ -364,22 +365,21 @@ public class SimulatedAnnealingAlgorithm {
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable;
+        if (deltaCost >= IMPOSSIBLE_COST)
+            return false;
 
         if (deltaCost < 0) { // next solution is better, always accept
             return true;
         }
 
-        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * this.temperature));
+        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * getTemperature()));
 
         return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {
-        this.temperature += pushAmount;
-    }
-
-    public void setTemperature(final double temperature) {
-        this.temperature = temperature;
+        double current = getTemperature();
+        setTemperature(current + pushAmount);
     }
 
     public Timetable swapPeriods(final Timetable timetable, final int firstIndex, final int secondIndex,
@@ -399,7 +399,16 @@ public class SimulatedAnnealingAlgorithm {
         return true;
     }
 
+    public double getTemperature() {
+        return Double.longBitsToDouble(temperature.get());
+    }
+
+    public void setTemperature(double newValue) {
+        temperature.set(Double.doubleToLongBits(newValue));
+    }
+
     public void decreaseTemperature() {
-        this.temperature *= COOLING_RATE;
+        double current = getTemperature();
+        setTemperature(current * COOLING_RATE);
     }
 }

@@ -1,24 +1,14 @@
 package at.htlleonding.leoplaner.data;
 
-import org.hibernate.annotations.NamedQueries;
-import org.hibernate.annotations.NamedQuery;
+import java.util.List;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@NamedQueries({
-        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL, query = "Select c from ClassSubject c"),
-        @NamedQuery(name = ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, query = "Select c from ClassSubject c join c.schoolClass sc where LOWER(sc.className) = LOWER(:filter)")
-})
-
 @Entity
-public class ClassSubject {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class ClassSubject extends PanacheEntity {
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
@@ -34,8 +24,17 @@ public class ClassSubject {
     @JoinColumn(name = "class_id")
     private SchoolClass schoolClass;
 
-    static public final String QUERY_FIND_ALL = "ClassSubject.findAll";
-    static public final String QUERY_FIND_ALL_BY_CLASSNAME = "ClassSubject.findAllByClassName";
+    public static List<ClassSubject> getAllClassSubjects() {
+        return listAll();
+    }
+
+    public static List<ClassSubject> getAllByClassName(final String className) {
+        return find("LOWER(schoolClass.className) = LOWER(?1)", className).list();
+    }
+
+    public static List<ClassSubject> getByTeacher(final Teacher teacher) {
+        return find("teacher", teacher).list();
+    }
 
     public Teacher getTeacher() {
         return teacher;
@@ -43,10 +42,6 @@ public class ClassSubject {
 
     public Long getId() {
         return id;
-    }
-
-    public static String getQueryFindAll() {
-        return QUERY_FIND_ALL;
     }
 
     public Subject getSubject() {
@@ -97,11 +92,8 @@ public class ClassSubject {
         return schoolClass;
     }
 
-    public void setSchoolClass(SchoolClass schoolClass) {
+    public void setSchoolClass(final SchoolClass schoolClass) {
         this.schoolClass = schoolClass;
     }
 
-    public static String getQueryFindAllByClassname() {
-        return QUERY_FIND_ALL_BY_CLASSNAME;
-    }
 }
