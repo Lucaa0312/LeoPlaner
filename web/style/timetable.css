@@ -303,7 +303,6 @@
 }
 
 .period-styling {
-    /*width: 90%;*/
     width: 100%;
     height: var(--period-height);
 
@@ -312,12 +311,9 @@
     box-sizing: border-box;
 
     border: none;
-    /*border-radius: 0.5em;*/
     border-radius: 0.2em;
 
-    /*font-size: 1.25em;*/
-
-    display: flex;
+    display: inline-flex;
     /*flex-direction: column;*/
     justify-content:space-between;
     align-items: start;
@@ -357,13 +353,19 @@
 }
 
 .subject-infos {
-    width: 100%;
+    width: 90%;
     height: 100%;
     display: grid;
     grid-template-rows: auto auto;
-    grid-template-columns: auto auto;
+    /*grid-template-columns: auto auto;*/
     margin-left: 0.2vw;
     font-size: 0.8em;
+}
+
+.room-teacher-container {
+    display: flex;
+    justify-content: space-between; 
+    width: 100%;
 }
 
 .subject-color-line {

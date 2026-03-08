@@ -269,9 +269,10 @@ function createLayout(data) {
                     <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
                         <div class="subject-infos">
                             <p class="subject-styling">${subjectShort}</p>
-                            <p></p>
-                            <p class="room-styling">E${roomNumber}</p>
-                            <p class="teacher-styling">${teacherSymbol}</p>
+                            <div class="room-teacher-container">
+                                <p class="room-styling">E${roomNumber}</p>
+                                <p class="teacher-styling">${teacherSymbol}</p>
+                            </div>
                         </div>
                     </div>
                     `;
