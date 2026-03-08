@@ -36,7 +36,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.MID, 20);
         costOfEachDegree.put(CostDegree.HIGH, 50);
         costOfEachDegree.put(CostDegree.SEVERE, 100);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 99999);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 9999999);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -57,9 +57,9 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     private final AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
-    private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.998;
-    public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
+    private final int ITERATIONS = 50000;
+    private final double COOLING_RATE = 0.999;
+    public static final double BOLTZMANN_CONSTANT = 10; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
     public record History(int iteration, double temperature, int cost) {
@@ -365,6 +365,8 @@ public class SimulatedAnnealingAlgorithm {
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
         final int deltaCost = costNextTimeTable - costCurrTimeTable;
+        if (deltaCost >= IMPOSSIBLE_COST)
+            return false;
 
         if (deltaCost < 0) { // next solution is better, always accept
             return true;

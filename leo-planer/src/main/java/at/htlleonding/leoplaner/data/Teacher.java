@@ -87,20 +87,12 @@ public class Teacher extends PanacheEntity {
         return teachingSubject.contains(subject);
     }
 
-    public void setId(final long id) {
-        this.id = id;
-    }
-
     public void setTeacherName(final String teacherName) {
         this.teacherName = teacherName;
     }
 
     public void setNameSymbol(final String nameSymbol) {
         this.nameSymbol = nameSymbol;
-    }
-
-    public void setTeachingSubject(final ArrayList<Subject> teachingSubject) {
-        this.teachingSubject = teachingSubject;
     }
 
     public List<TeacherNonWorkingHours> getTeacher_non_working_hours() {
