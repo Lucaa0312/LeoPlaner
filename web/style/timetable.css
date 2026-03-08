@@ -298,10 +298,6 @@
     width: 55%;
 }
 
-.period-styling:nth-child(4) {
-    margin-top: calc(var(--break-height) + 3px);
-}
-
 .period-styling {
     width: 100%;
     height: var(--period-height);
