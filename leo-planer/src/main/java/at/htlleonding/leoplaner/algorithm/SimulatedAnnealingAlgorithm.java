@@ -123,7 +123,6 @@ public class SimulatedAnnealingAlgorithm {
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costCurrSchoolSchedule, true));
         }
         progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costFinal, true));
         
