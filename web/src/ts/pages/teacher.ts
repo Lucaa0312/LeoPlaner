@@ -372,8 +372,54 @@ if (inputField) {
     inputField.addEventListener("input", searchTeacher);
 }
 */
-import initNavbar from "../pages/navbar.js";
+import initNavbar from "./navbar.js";
 import type { Teacher } from "../types/teacher.js";
+import { fetchTeachers } from "../api/teacherApi.js";
+import { toggleEmptyState } from "../components/emptyState.js";
+import { getElement } from "../utils/elementHelpers.js";
+
+function createTeacherSubjectChips(subjects: Teacher["teachingSubject"]): string {
+    const visibleSubjects = subjects.slice(0, 2);
+    const remaining = subjects.length - visibleSubjects.length;
+
+    let chips = visibleSubjects
+        .map((subject) => `<span class="subject-chip">${subject.subjectName}</span>`)
+        .join("");
+
+    if (remaining > 0) {
+        chips += `<span class="subject-chip extra">+${remaining}</span>`;
+    }
+
+    return chips;
+}
+
+function createTableInfoRow(): HTMLElement {
+    const tableInfo = document.createElement("div");
+    tableInfo.id = "table-info";
+    
+    const nameHeader = document.createElement("p");
+    nameHeader.id = "teacher-left-section";
+    nameHeader.textContent = "Name";
+
+    const initialsHeader = document.createElement("p");
+    initialsHeader.id = "teacher-initials-section";
+    initialsHeader.innerHTML = "K&uuml;rzel";
+
+    const subjectsHeader = document.createElement("p");
+    subjectsHeader.id = "teacher-subjects-section";
+    subjectsHeader.innerHTML = "F&auml;cher";
+
+    const workloadHeader = document.createElement("p");
+    workloadHeader.id = "teacher-workload-section";
+    workloadHeader.textContent = "Arbeitslast";
+
+    const editHeader = document.createElement("p");
+    editHeader.id = "teacher-edit-section";
+    editHeader.textContent = "Bearbeiten";
+
+    tableInfo.append(nameHeader, initialsHeader, subjectsHeader, workloadHeader, editHeader);
+    return tableInfo;
+}
 
 function createTeacherRow(teacher: Teacher): HTMLElement {
     const card = document.createElement("div");
@@ -399,7 +445,7 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
 
     const teacherSubjects = document.createElement("div");
     teacherSubjects.className = "teacher-subjects";
-    teacherSubjects.innerHTML = teacher.teachingSubject.map(s => `<span class="subject-chip">${s.subjectName}</span>`).join("");
+    teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
 
 
     const teacherWorkload = document.createElement("div");
@@ -414,13 +460,45 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
     teacherInfo.appendChild(teacherName);
     teacherLeft.append(avatarPlaceholder, teacherInfo);
 
-    card.append(teacherLeft, teacherInitials, teacherWorkload, teacherEdit);
+    card.append(teacherLeft, teacherInitials, teacherSubjects,teacherWorkload, teacherEdit);
     return card;
+}
+
+
+async function loadAndRenderTeachers(): Promise<void> {
+    const noTeachersElement = document.getElementById("no-teachers");
+    const teachersContainer = document.getElementById("display-teachers");
+    if (!noTeachersElement || !teachersContainer) return;
+
+    try {
+        const teachers = await fetchTeachers();
+
+        toggleEmptyState(noTeachersElement, teachers.length > 0);
+        teachersContainer.replaceChildren();
+
+        if (teachers.length === 0) return;
+
+        const container = getElement<HTMLElement>("display-teachers");
+        if (!container) return;
+
+        const tableInfoRow = createTableInfoRow();
+        container.appendChild(tableInfoRow);
+
+        teachers.forEach((teacher) => {
+            const teacherRow = createTeacherRow(teacher);
+            container.appendChild(teacherRow);
+        });
+
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Lehrer: " + error);
+    }
 }
 
 
 function initializeApp() {
     initNavbar();
+    void loadAndRenderTeachers();
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
