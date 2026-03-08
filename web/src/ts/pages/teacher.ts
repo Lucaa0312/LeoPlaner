@@ -466,8 +466,8 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
 
 
 async function loadAndRenderTeachers(): Promise<void> {
-    const noTeachersElement = document.getElementById("no-teachers");
-    const teachersContainer = document.getElementById("display-teachers");
+    const noTeachersElement = getElement<HTMLElement>("no-teachers");
+    const teachersContainer = getElement<HTMLElement>("display-teachers");
     if (!noTeachersElement || !teachersContainer) return;
 
     try {
@@ -478,15 +478,15 @@ async function loadAndRenderTeachers(): Promise<void> {
 
         if (teachers.length === 0) return;
 
-        const container = getElement<HTMLElement>("display-teachers");
-        if (!container) return;
+        
+        if (!teachersContainer) return;
 
         const tableInfoRow = createTableInfoRow();
-        container.appendChild(tableInfoRow);
+        teachersContainer.appendChild(tableInfoRow);
 
         teachers.forEach((teacher) => {
             const teacherRow = createTeacherRow(teacher);
-            container.appendChild(teacherRow);
+            teachersContainer.appendChild(teacherRow);
         });
 
     }
