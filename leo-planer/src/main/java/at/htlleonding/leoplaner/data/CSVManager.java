@@ -1,15 +1,15 @@
 package at.htlleonding.leoplaner.data;
 
-import at.htlleonding.leoplaner.dto.ParsedDayHour;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+
+import at.htlleonding.leoplaner.dto.ParsedDayHour;
 
 public class CSVManager {
     final static String teacherType = "teacherName";
@@ -163,9 +163,9 @@ public class CSVManager {
     public static void createSubjectFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 3) {
+            if (line.length != 4) {
                 throw new IllegalArgumentException(
-                        "Subject CSV is only allowed to have 3 columns! Found " + line.length + " columns in row " + i); // TODO
+                        "Subject CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i); // TODO
                                                                                                                          // Has
                                                                                                                          // to
                                                                                                                          // be
@@ -173,6 +173,10 @@ public class CSVManager {
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
+            final String subjectSymbol = line[1].trim();
+            if (subjectSymbol.length() > 6){
+                throw new IllegalArgumentException("Subject symbol " + subjectSymbol + " is too long. Max length is 6 characters.");
+            }
             final String subjectColor = line[2].trim();
             final Subject subject = new Subject();
             if (!line[1].isBlank()) {
@@ -196,6 +200,7 @@ public class CSVManager {
             final String[] colorCodes = subjectColor.split(",");
             subject.setSubjectColor(new RgbColor(Integer.parseInt(colorCodes[0]), Integer.parseInt(colorCodes[1]),
                     Integer.parseInt(colorCodes[2])));
+            subject.setSubjectSymbol(subjectSymbol);
             subject.setSubjectName(subjectName);
             dataRepository.addSubject(subject);
         }

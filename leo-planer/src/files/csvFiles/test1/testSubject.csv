@@ -1,20 +1,20 @@
 subjectName;subjectSymbol;requiredRoomTypes;color
-Mathematik;M;;20,112,250
-Physik;PHY;PHY;0,207,214
-Geschichte;GEO;104,0,214
+Angewandte Mathematik;AM;;20,112,250
+Naturwissenschaften Physik;NWP;PHY;0,207,214
+Geschichte;GES;104,0,214
 Biologie;BIO;34,139,34
-Chemie;CHEM;CHEM,PHY;222,209,214
-Recht;;32,178,170
-Wirtschaft;;219,203,46
-Englisch;;0,0,255
-Geographie;;20,154,88
-Software Entwicklung;;255,192,203
-Deutsch;;201,0,0
-Informatsionssysteme;;112,128,144
-Informationstechnische Projekte;;255,165,0
-Religion;;174,115,127
-Medientechnik Print und Design;;255,192,203
-Medientechnik Mobile Computing;EDV;255,192,203
-Medientechnik Film und Audio;EDV;255,192,203
-Medientechnik Social Media;EDV;255,192,203
-Medientechnik Virtuelle Welten und Spieleentwicklung;EDV;255,192,203
+Naturwissenschaften Chemie;NWC;CHEM,PHY;222,209,214
+Recht;RECHT;;32,178,170
+Wirtschaft;WT;;219,203,46
+Englisch;ENG;;0,0,255
+Geographie;GEO;;20,154,88
+Software Entwicklung;SEW;;255,192,203
+Deutsch;DE;;201,0,0
+Informatsionssysteme;INSY;;112,128,144
+Informationstechnische Projekte;ITP;;255,165,0
+Religion;REL;;174,115,127
+Medientechnik Print und Design;MEDTPD;;255,192,203
+Medientechnik Mobile Computing;MEDTMC;;255,192,203
+Medientechnik Film und Audio;MEDTFI;;255,192,203
+Medientechnik Social Media;MEDTSM;;255,192,203
+Medientechnik Virtuelle Welten und Spieleentwicklung;MEDT3D;;255,192,203
