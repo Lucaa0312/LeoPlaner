@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
@@ -56,6 +57,8 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
+
+    private static AtomicBoolean isPaused = new AtomicBoolean(false);
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
     private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.998;
@@ -66,6 +69,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
+        int i = 0;
         int costFinal = 0;
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
@@ -74,7 +78,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        for (int i = 0; i < ITERATIONS; i++) { // main loop
+        while (!isPaused.get()) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -123,6 +127,7 @@ public class SimulatedAnnealingAlgorithm {
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
+            i++;
         }
         progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costFinal, true));
         
@@ -413,5 +418,9 @@ public class SimulatedAnnealingAlgorithm {
     public void decreaseTemperature() {
         double current = getTemperature();
         setTemperature(current * COOLING_RATE);
+    }
+
+    public static void setPaused(boolean paused) {
+        isPaused.set(paused);
     }
 }

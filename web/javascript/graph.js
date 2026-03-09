@@ -250,5 +250,11 @@ slider.addEventListener('input', () => {
 // Send data
 slider.addEventListener('input', (event) => {
     const val = event.target.value;
-    socket.send(val);  
+    socket.send('temperature:' + val);  
 });
+
+// Pause algorithm
+export function pause() {
+    socket.send('pause');
+
+}

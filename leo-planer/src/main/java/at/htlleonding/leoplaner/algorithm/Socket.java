@@ -47,11 +47,19 @@ public class Socket {
     @OnMessage
     public void onSliderUpdate(String update) {
         try {
-            double newTemperature = Double.parseDouble(update);
+        if (update.startsWith("temperature:")) {
+            double newTemperature = Double.parseDouble(update.substring("temperature:".length()));
             SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
-            
-        } catch (NumberFormatException e) {
-            System.out.println("Encountered error: " + e.getMessage());
+
+        } else if (update.startsWith("pause")) {
+            SimulatedAnnealingAlgorithm.setPaused(true);
+        } else {
+            System.out.println("Unknown message: " + update);
         }
+    } catch (NumberFormatException e) {
+        System.out.println("Encountered error: " + e.getMessage());
     }
+    }
+
+
 }
