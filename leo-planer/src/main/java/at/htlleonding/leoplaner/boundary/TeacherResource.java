@@ -8,6 +8,7 @@ import at.htlleonding.leoplaner.dto.TeacherDTO;
 import jakarta.inject.Inject;
 import jakarta.websocket.server.PathParam;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -66,5 +67,18 @@ public class TeacherResource {
 
         return Response.ok(updatedTeacher).build();
 
+    }
+
+    @DELETE
+    @Path("delete/{id}")
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response deleteTeacher(@PathParam("id") Long id) {
+        Teacher teacherToDelete = dataRepository.deleteTeacher(id);
+
+        if (teacherToDelete == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(teacherToDelete).build();
     }
 }

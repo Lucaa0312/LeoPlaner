@@ -8,6 +8,7 @@ import at.htlleonding.leoplaner.dto.RoomDTO;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.POST;
@@ -66,5 +67,18 @@ public class RoomResource {
 
         return Response.ok(updatedRoom).build();
 
+    }
+
+    @DELETE
+    @Path("delete/{id}")
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response deleteRoom(@PathParam("id") Long id) {
+        Room roomToDelete = dataRepository.deleteRoom(id);
+
+        if (roomToDelete == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(roomToDelete).build();
     }
 }
