@@ -56,16 +56,17 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private final AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
-    private final int ITERATIONS = 50000;
-    private final double COOLING_RATE = 0.999;
-    public static final double BOLTZMANN_CONSTANT = 10; // maybe adjust real constant: 1.380649e-23;
+    private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
+    private final int ITERATIONS = 10000;
+    private final double COOLING_RATE = 0.998;
+    public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
     public record History(int iteration, double temperature, int cost) {
     }
 
     public void algorithmLoop() {
+        int costFinal = 0;
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
@@ -106,6 +107,7 @@ public class SimulatedAnnealingAlgorithm {
             if (acceptSolution) {
                 schoolSchedule = nextSchoolSchedule;
                 costCurrSchoolSchedule = costNextSchoolSchedule;
+                costFinal = costCurrSchoolSchedule;
             }
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
@@ -121,8 +123,9 @@ public class SimulatedAnnealingAlgorithm {
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costCurrSchoolSchedule, true));
         }
+        progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costFinal, true));
+        
     }
 
     public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) { // maybe
@@ -403,7 +406,7 @@ public class SimulatedAnnealingAlgorithm {
         return Double.longBitsToDouble(temperature.get());
     }
 
-    public void setTemperature(double newValue) {
+    public static void setTemperature(double newValue) {
         temperature.set(Double.doubleToLongBits(newValue));
     }
 

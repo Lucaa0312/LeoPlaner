@@ -1,3 +1,5 @@
+import { clearCharts } from './graph.js';
+
 // Dopdown button trigger
 
 document.querySelectorAll('.top-bar-select').forEach(wrapper => {
@@ -91,8 +93,12 @@ function getRandomizedTimeTable() {
         })
 }
 
-
+const algorithmButton = document.getElementById('algorithmButton');
+algorithmButton.addEventListener('click', () => {
+    getOptimizedTimetable();
+})
 function getOptimizedTimetable() {
+    clearCharts();
     showLoader();
     clearLayout();
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
