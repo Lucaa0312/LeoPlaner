@@ -1,20 +1,20 @@
-subjectName;requiredRoomTypes;color
-Chemistry;CHEM,PHY;222,209,214
-Math;;20,112,250
-History;;104,0,214
-Physics;PHY;0,207,214
-German;;201,0,0
-Sew;;255,192,203
-Insy;;112,128,144
-ITP;;255,165,0
-Law;;32,178,170
-Biology;;34,139,34
-English;;0,0,255
-Geography;;20,154,88
-Economy;;219,203,46
+subjectName;subjectSymbol;requiredRoomTypes;color
+Mathematik;M;;20,112,250
+Physik;PHY;PHY;0,207,214
+Geschichte;GEO;104,0,214
+Biologie;BIO;34,139,34
+Chemie;CHEM;CHEM,PHY;222,209,214
+Recht;;32,178,170
+Wirtschaft;;219,203,46
+Englisch;;0,0,255
+Geographie;;20,154,88
+Software Entwicklung;;255,192,203
+Deutsch;;201,0,0
+Informatsionssysteme;;112,128,144
+Informationstechnische Projekte;;255,165,0
 Religion;;174,115,127
-MEDTPD;;255,192,203
-MEDTMC;EDV;255,192,203
-MEDTFI;EDV;255,192,203
-MEDTSM;EDV;255,192,203
-MEDT3D;EDV;255,192,203
+Medientechnik Print und Design;;255,192,203
+Medientechnik Mobile Computing;EDV;255,192,203
+Medientechnik Film und Audio;EDV;255,192,203
+Medientechnik Social Media;EDV;255,192,203
+Medientechnik Virtuelle Welten und Spieleentwicklung;EDV;255,192,203
