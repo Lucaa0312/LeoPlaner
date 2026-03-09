@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 public class Subject extends PanacheEntity {
     private String subjectName;
     private RgbColor subjectColor;
+    private String subjectSymbol;
 
     @ElementCollection(targetClass = RoomTypes.class)
     @Enumerated(EnumType.STRING)
@@ -69,6 +70,14 @@ public class Subject extends PanacheEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public String getSubjectSymbol() {
+        return subjectSymbol;
+    }
+
+    public void setSubjectSymbol(final String subjectSymbol) {
+        this.subjectSymbol = subjectSymbol;
     }
 
 }
