@@ -166,10 +166,10 @@
     justify-content: center;
     align-items: center;
 
-    width: 100%;
+    width: 70%;
     height: auto;
-    padding: 0 5vw;
     box-sizing: border-box;
+    margin-left: 1vw;
 }
 
 #timetable-content {
@@ -412,7 +412,7 @@
 }
 
 
-#disable-overlay {
+/*#disable-overlay {
     display: none;
     width: 80vw;
     position: fixed;
@@ -421,7 +421,7 @@
     height: 92.2vh;
     background-color: var(--leo-background-color);
     z-index: 100;
-}
+}*/
 
 
 #optimizing-text{
@@ -434,4 +434,93 @@
     text-align: center;
     font-weight: bold;
     
+}
+
+#cost-container {
+    position: absolute;
+    z-index: 10001;
+    bottom: 5vh;
+    right: 2%;
+    font-size: 1.75rem;
+    text-align: center;
+    font-weight: bold;
+    background-color: white;
+    width: 20vw;
+    height: 5vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    box-shadow: #0000004d 0px 5px 5px;
+    text-align: left;
+    align-content: center;
+    padding-left: 2vw;
+    border-color: rgb(220, 220, 220);
+    border-width: 0.1px;
+    border-style: solid;
+}
+
+.graph-box {
+    background-color: white;
+    width: 21vw;
+    height: 40vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    padding: 0;
+}
+
+#flex-inner-container {
+    display: flex;
+    gap: 1vw;
+}
+
+#graph-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    margin-right: 1vw;
+    width: 30vw;
+}
+#slider-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4vh;
+    margin-top: -4.5vh;
+    margin-bottom: -4.5vh;
+    margin-right: 2vw;
+}
+#temperatureSlider {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 15vw;
+    height: 3vh;
+    background-color: white;
+    border: 2px solid white;
+    border-radius: 10px;
+    outline: none;
+    box-shadow: inset 0 0 5px #e5e7eb;
+    transform: rotate(180deg);
+}
+
+#temperatureSlider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1vw;
+    height: 1vw;
+    border-radius: 50%;
+    background-color: var(--thumb-color, (--leo-primary-color1));
+    /*--thumb-color: var(--leo-secondary-color);*/
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    transition: background 0.1s ease;
+}
+
+#temperatureSlider::-moz-range-thumb {
+    width: 1vw;
+    height: 1vw;
+    border-radius: 50%;
+    background-color: var(--thumb-color, (--leo-primary-color1));
+    /*--thumb-color: var(--leo-secondary-color);*/
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    transition: background 0.1s ease;
 }
