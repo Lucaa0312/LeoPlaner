@@ -14,7 +14,7 @@ subjects = {
     "Recht": 0,
     "Wirtschaft": 0,
     "Englisch": 0,
-    "Geografie": 0,
+    "Geographie": 0,
     "Software Entwicklung": 0,
     "Deutsch": 0,
     "Informationssysteme": 0,

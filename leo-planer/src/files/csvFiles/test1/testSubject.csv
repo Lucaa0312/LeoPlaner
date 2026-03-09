@@ -1,8 +1,8 @@
 subjectName;subjectSymbol;requiredRoomTypes;color
 Angewandte Mathematik;AM;;20,112,250
 Naturwissenschaften Physik;NWP;PHY;0,207,214
-Geschichte;GES;104,0,214
-Biologie;BIO;34,139,34
+Geschichte;GES;;104,0,214
+Biologie;BIO;;34,139,34
 Naturwissenschaften Chemie;NWC;CHEM,PHY;222,209,214
 Recht;RECHT;;32,178,170
 Wirtschaft;WT;;219,203,46
@@ -10,7 +10,7 @@ Englisch;ENG;;0,0,255
 Geographie;GEO;;20,154,88
 Software Entwicklung;SEW;;255,192,203
 Deutsch;DE;;201,0,0
-Informatsionssysteme;INSY;;112,128,144
+Informationssysteme;INSY;;112,128,144
 Informationstechnische Projekte;ITP;;255,165,0
 Religion;REL;;174,115,127
 Medientechnik Print und Design;MEDTPD;;255,192,203
