@@ -439,8 +439,8 @@ function createTeacherRow(teacher) {
     return card;
 }
 async function loadAndRenderTeachers() {
-    const noTeachersElement = document.getElementById("no-teachers");
-    const teachersContainer = document.getElementById("display-teachers");
+    const noTeachersElement = getElement("no-teachers");
+    const teachersContainer = getElement("display-teachers");
     if (!noTeachersElement || !teachersContainer)
         return;
     try {
@@ -449,14 +449,13 @@ async function loadAndRenderTeachers() {
         teachersContainer.replaceChildren();
         if (teachers.length === 0)
             return;
-        const container = getElement("display-teachers");
-        if (!container)
+        if (!teachersContainer)
             return;
         const tableInfoRow = createTableInfoRow();
-        container.appendChild(tableInfoRow);
+        teachersContainer.appendChild(tableInfoRow);
         teachers.forEach((teacher) => {
             const teacherRow = createTeacherRow(teacher);
-            container.appendChild(teacherRow);
+            teachersContainer.appendChild(teacherRow);
         });
     }
     catch (error) {

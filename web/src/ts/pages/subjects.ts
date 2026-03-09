@@ -106,25 +106,58 @@ function collectSubjectData(selectetRoomTypes: RoomType[], selectedSubjectColor:
 function buildAddSubjectFormContent(): HTMLElement {
     const container = document.createElement("div");
     container.id = "subject-modal-content";
-    container.innerHTML = `
-        <div class="subject-form-grid">
-            <div class="form-name-initials-inputs">
-                <input type="text" id="name-input" class="subject-input" placeholder="Name">
-                <input type="text" id="initials-input" class="subject-input" placeholder="Abkürzung">
-            </div>
 
+    const formGrid = document.createElement("div");
+    formGrid.className = "subject-form-grid";
 
-            <div id="roomtype-block">
-                <div id="roomtype-input-container">
-                    <img id="add-room-img" src="../assets/img/magnifyingGlass.png" alt="Add Room"/>
-                    <input type="text" id="roomtype-input" placeholder="Benötigter Raum Typ">
-                </div>
+    // name / initials block
+    const nameInitials = document.createElement("div");
+    nameInitials.className = "form-name-initials-inputs";
 
-                <div id="roomtype-dropdown"></div>
-                <div id="selected-roomtypes"></div>
-            </div>
-        </div>
-        `;
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "name-input";
+    nameInput.className = "subject-input";
+    nameInput.placeholder = "Name";
+
+    const initialsInput = document.createElement("input");
+    initialsInput.type = "text";
+    initialsInput.id = "initials-input";
+    initialsInput.className = "subject-input";
+    initialsInput.placeholder = "Abkürzung";
+
+    nameInitials.append(nameInput, initialsInput);
+
+    // roomtype block
+    const roomtypeBlock = document.createElement("div");
+    roomtypeBlock.id = "roomtype-block";
+
+    const roomtypeInputContainer = document.createElement("div");
+    roomtypeInputContainer.id = "roomtype-input-container";
+
+    const addRoomImg = document.createElement("img");
+    addRoomImg.id = "add-room-img";
+    addRoomImg.src = "../assets/img/magnifyingGlass.png";
+    addRoomImg.alt = "Add Room";
+
+    const roomtypeInput = document.createElement("input");
+    roomtypeInput.type = "text";
+    roomtypeInput.id = "roomtype-input";
+    roomtypeInput.placeholder = "Benötigter Raum Typ";
+
+    roomtypeInputContainer.append(addRoomImg, roomtypeInput);
+
+    const roomtypeDropdown = document.createElement("div");
+    roomtypeDropdown.id = "roomtype-dropdown";
+
+    const selectedRoomtypes = document.createElement("div");
+    selectedRoomtypes.id = "selected-roomtypes";
+
+    roomtypeBlock.append(roomtypeInputContainer, roomtypeDropdown, selectedRoomtypes);
+
+    formGrid.append(nameInitials, roomtypeBlock);
+    container.appendChild(formGrid);
+
     return container;
 }
 
