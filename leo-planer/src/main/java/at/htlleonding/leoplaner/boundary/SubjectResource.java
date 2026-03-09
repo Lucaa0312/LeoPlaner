@@ -8,6 +8,7 @@ import at.htlleonding.leoplaner.dto.SubjectDTO;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -66,5 +67,18 @@ public class SubjectResource {
 
         return Response.ok(updatedSubject).build();
 
+    }
+
+    @DELETE
+    @Path("delete/{id}")
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    public Response deleteSubject(@PathParam("id") Long id) {
+        Subject subjectToDelete = dataRepository.deleteSubject(id);
+
+        if (subjectToDelete == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(subjectToDelete).build();
     }
 }

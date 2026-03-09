@@ -136,14 +136,25 @@ public class SimulatedAnnealingAlgorithm {
     // TODO maybe advance with just being able to get new Changes instead of entire
     // timetable
     public void setTeacherTakenPeriod(final Teacher teacher, final Timetable timetable) {
-        final List<ClassSubjectInstance> classSubjectInstancesList = timetable.getClassSubjectInstances().stream()
-                .filter(e -> e.getClassSubject() != null)
-                .filter(e -> e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList();
+        final List<ClassSubjectInstance> classSubjectInstancesList = dataRepository
+                .getCurrentTeacherTimetable(teacher.getId()).getClassSubjectInstances();
+        // final List<ClassSubjectInstance> classSubjectInstancesList =
+        // timetable.getClassSubjectInstances().stream()
+        // .filter(e -> e.getClassSubject() != null)
+        // .filter(e ->
+        // e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList();
+        //
+        List<TeacherTakenPeriod> takenPeriods = new ArrayList<>();
 
         for (final ClassSubjectInstance csi : classSubjectInstancesList) {
-            final Period period = csi.getPeriod();
-            teacher.getTakenUpPeriods().add(new TeacherTakenPeriod(period, timetable.getSchoolClass().getClassName()));
+            Period period = csi.getPeriod();
+            for (int i = 0; i < csi.getDuration(); i++) {
+                period.setSchoolHour(period.getSchoolHour() + i);
+                takenPeriods.add(new TeacherTakenPeriod(period, timetable.getSchoolClass().getClassName()));
+            }
         }
+
+        teacher.setTakenUpPeriods(takenPeriods);
     }
 
     public void resetAllTeacherTakenPeriodForClass(final List<Teacher> teachers, String className) {
@@ -255,8 +266,9 @@ public class SimulatedAnnealingAlgorithm {
                 if (timetable.getSchoolClass() == null) {
                     continue;
                 }
-                resetAllTeacherTakenPeriodForClass(allTeachers, timetable.getSchoolClass().getClassName());
-                setTeacherTakenPeriod(teacher, timetable);
+                // resetAllTeacherTakenPeriodForClass(allTeachers,
+                // timetable.getSchoolClass().getClassName());
+                // setTeacherTakenPeriod(teacher, timetable);
                 cost += determineTeacherWorkloadCost(teacher);
             }
 
@@ -274,8 +286,9 @@ public class SimulatedAnnealingAlgorithm {
                 String className = "";
                 if (timetable.getSchoolClass() != null) {
                     className = timetable.getSchoolClass().getClassName();
-                    if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, className)) {
-                        // return cost + IMPOSSIBLE_COST;
+                    if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, classSubjectInstance.getDuration(),
+                            className)) {
+                        return cost + IMPOSSIBLE_COST;
                     }
                 }
 
@@ -342,11 +355,22 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean checkIfTeacherPeriodIsTakenInOtherClass(final Teacher teacher, final Period period,
+            final int duration,
             final String currentClassName) {
-        return teacher.getTakenUpPeriods().stream()
-                .anyMatch(e -> e.period().getSchoolDays() == period.getSchoolDays() &&
-                        e.period().getSchoolHour() == period.getSchoolHour() &&
-                        !e.className().equals(currentClassName));
+
+        List<ClassSubjectInstance> csiList = dataRepository.getCurrentTeacherTimetable(teacher.getId())
+                .getClassSubjectInstances();
+
+        for (ClassSubjectInstance csi : csiList) {
+            final Period csiPeriod = csi.getPeriod();
+            for (int i = 0; i < duration; i++) {
+                if (period.getSchoolHour() + i == csiPeriod.getSchoolHour()
+                        && period.getSchoolDays() == csiPeriod.getSchoolDays()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public Timetable chooseRandomNeighborFunction(final int index1, final int index2, final Timetable currTimetable) {
