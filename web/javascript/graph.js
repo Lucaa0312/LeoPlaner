@@ -1,7 +1,7 @@
 import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js';
 
 // Create the echarts instance
-var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
+//var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
 var costChart = echarts.init(document.getElementById('costChart'));
 
 const slider = document.getElementById('temperatureSlider');
@@ -13,7 +13,7 @@ slider.onmouseup = () => { isUserTouchingSlider = false; };
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
 
 // Draw the charts
-temperatureChart.setOption({
+/*temperatureChart.setOption({
   title: {
     text: 'Temperatur/Iteration Diagramm'
   },
@@ -77,7 +77,7 @@ temperatureChart.setOption({
       }
     }
   ]
-});
+});*/
 
 // Draw the charts
 costChart.setOption({
@@ -94,17 +94,15 @@ costChart.setOption({
   },
   xAxis: {
     type: 'value',
-    min: 0,
-    max: 10000,
     name: 'Iterationen',
     nameLocation: 'middle',
-    nameGap: 30,
+    nameGap: 20,
     nameTextStyle: {fontWeight: 'bold'}
   },
   yAxis: {
     type: 'log',
     name: 'Kosten',
-    nameGap: 30,
+    nameGap: 20,
     nameTextStyle: {fontWeight: 'bold'}
   },
   visualMap: {
@@ -145,17 +143,17 @@ costChart.setOption({
 });
 
 // Get data
-var temperatureChartData = [];
+//var temperatureChartData = [];
 var costChartData = [];
 
 socket.onmessage = function(event) {
   const data = JSON.parse(event.data);
   console.log(data)
 
-  temperatureChartData.push([data.iteration, data.temperature]);
+  //temperatureChartData.push([data.iteration, data.temperature]);
   costChartData.push([data.iteration, data.currentCost]);
 
-  temperatureChart.setOption({
+  /*temperatureChart.setOption({
   series: [
     {
       data: temperatureChartData,
@@ -164,7 +162,7 @@ socket.onmessage = function(event) {
       }
     }
   ]
-  });
+  });*/
 
   costChart.setOption({
   series: [
@@ -182,7 +180,7 @@ socket.onmessage = function(event) {
   }
   
   if(data.status == 'finished' || data.iteration >= 10000) {
-      temperatureChart.setOption({
+      /*temperatureChart.setOption({
         series: [
           {
             markPoint: {
@@ -193,7 +191,7 @@ socket.onmessage = function(event) {
             }
           }
         ]
-      });
+      });*/
 
       costChart.setOption({
         series: [
@@ -213,7 +211,7 @@ socket.onmessage = function(event) {
 
 // Clear charts
 export function clearCharts() {
-  temperatureChartData = [];
+  //temperatureChartData = [];
   costChartData = [];
 }
 
