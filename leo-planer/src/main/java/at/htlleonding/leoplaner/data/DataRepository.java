@@ -232,6 +232,17 @@ public class DataRepository {
     }
 
     @Transactional
+    public Teacher deleteTeacher(Long id) {
+        Teacher teacherToDelete = Teacher.getById(id);
+
+        if (teacherToDelete != null) {
+            this.entityManager.remove(teacherToDelete);
+        }
+
+        return teacherToDelete;
+    }
+
+    @Transactional
     public Room updateRoom(Long id, Room room) {
         Room roomToUpdate = Room.getById(id);
 
@@ -241,6 +252,27 @@ public class DataRepository {
         roomToUpdate.setRoomTypes(room.getRoomTypes());
 
         return roomToUpdate;
+    }
+
+    @Transactional
+    public Room deleteRoom(Long id) {
+        Room roomToDelete = Room.getById(id);
+
+        if (roomToDelete != null) {
+            this.entityManager.remove(roomToDelete);
+        }
+
+        return roomToDelete;
+    }
+
+    @Transactional
+    public Room addRoom(final Room room) {
+        if (this.entityManager.contains(room)) {
+            throw new IllegalArgumentException();
+        }
+
+        this.entityManager.persist(room);
+        return room;
     }
 
     @Transactional
@@ -256,13 +288,14 @@ public class DataRepository {
     }
 
     @Transactional
-    public Room addRoom(final Room room) {
-        if (this.entityManager.contains(room)) {
-            throw new IllegalArgumentException();
+    public Subject deleteSubject(Long id) {
+        Subject subjectToDelete = Subject.getById(id);
+
+        if (subjectToDelete != null) {
+            this.entityManager.remove(subjectToDelete);
         }
 
-        this.entityManager.persist(room);
-        return room;
+        return subjectToDelete;
     }
 
     @Transactional

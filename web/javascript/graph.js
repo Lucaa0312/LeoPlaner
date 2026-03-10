@@ -210,9 +210,9 @@ const INACTIVITY_MS = 500;
 let lastMaxIteration = 0;
 let totalIterations = 0;
 
-socket.onmessage = function(event) {
-  const data = JSON.parse(event.data);
-  console.log(data)
+socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log(data)
 
   //temperatureChartData.push([data.iteration, data.temperature]);
   const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
@@ -258,20 +258,18 @@ socket.onmessage = function(event) {
 function finalizeChart() {
   /*temperatureChart.setOption({
         series: [
-          {
-            markPoint: {
-              data: [
-                {name: 'Anfang', coord: temperatureChartData[0], value: temperatureChartData[0][1], itemStyle: {color: '#F59E0B'}, label: {formatter: 'Start: {c}', distance: 40}},
-                {name: 'Ende', coord: [data.iteration, data.temperature], value: data.temperature, itemStyle: {color: '#4F46E5'}, label: {formatter: 'Ende: {c}'}}
-              ]
+            {
+                data: temperatureChartData,
+                markPoint: {
+                    data: []
+                }
             }
-          }
         ]
       });*/
 
       totalIterations += lastMaxIteration; 
 
-      costChart.setOption({
+    costChart.setOption({
         series: [
           {
             markPoint: {
@@ -279,7 +277,6 @@ function finalizeChart() {
                 {type: 'min', name: 'Min', itemStyle: {color: '#0728a2'}, label: {formatter: 'Min: {c}', position: 'bottom'}}
               ]
             }
-          }
         ]
       });
 }
@@ -297,28 +294,28 @@ window.addEventListener('load', () => {
 });
 
 function interpolateColor(color1, color2, factor) {
-  const r1 = parseInt(color1.substring(1, 3), 16);
-  const g1 = parseInt(color1.substring(3, 5), 16);
-  const b1 = parseInt(color1.substring(5, 7), 16);
+    const r1 = parseInt(color1.substring(1, 3), 16);
+    const g1 = parseInt(color1.substring(3, 5), 16);
+    const b1 = parseInt(color1.substring(5, 7), 16);
 
-  const r2 = parseInt(color2.substring(1, 3), 16);
-  const g2 = parseInt(color2.substring(3, 5), 16);
-  const b2 = parseInt(color2.substring(5, 7), 16);
+    const r2 = parseInt(color2.substring(1, 3), 16);
+    const g2 = parseInt(color2.substring(3, 5), 16);
+    const b2 = parseInt(color2.substring(5, 7), 16);
 
-  const rNew = Math.round(r1 + factor * (r2 - r1));
-  const gNew = Math.round(g1 + factor * (g2 -g1));
-  const bNew = Math.round(b1 + factor * (b2 - b1));
+    const rNew = Math.round(r1 + factor * (r2 - r1));
+    const gNew = Math.round(g1 + factor * (g2 - g1));
+    const bNew = Math.round(b1 + factor * (b2 - b1));
 
-  return `rgb(${rNew}, ${gNew}, ${bNew})`
+    return `rgb(${rNew}, ${gNew}, ${bNew})`
 }
 
 slider.addEventListener('input', () => {
   updateSlider();
   const percent = slider.value / 1000;
 
-  const newColor = interpolateColor('#4F46E5', '#F59E0B', percent);
-  console.log(newColor);
-  slider.style.setProperty('--thumb-color', newColor);
+    const newColor = interpolateColor('#4F46E5', '#F59E0B', percent);
+    console.log(newColor);
+    slider.style.setProperty('--thumb-color', newColor);
 })
 
 function updateSlider(temperature) {
@@ -342,5 +339,10 @@ function updateSlider(temperature) {
 // Send data
 slider.addEventListener('input', (event) => {
     const val = event.target.value;
-    socket.send(val);  
+    socket.send('temperature:' + val);
 });
+
+// Pause algorithm
+export function toggleAlgorithm() {
+    socket.send('toggle');
+}
