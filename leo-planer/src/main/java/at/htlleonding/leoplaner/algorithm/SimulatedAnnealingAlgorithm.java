@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
@@ -56,16 +58,19 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private final AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
-    private final int ITERATIONS = 50000;
+    private static AtomicBoolean isPaused = new AtomicBoolean(false);
+    private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
+    private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.999;
-    public static final double BOLTZMANN_CONSTANT = 10; // maybe adjust real constant: 1.380649e-23;
+    public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
     public record History(int iteration, double temperature, int cost) {
     }
 
     public void algorithmLoop() {
+        int i = 0;
+        int costFinal = 0;
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
@@ -73,7 +78,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        for (int i = 0; i < ITERATIONS; i++) { // main loop
+        while (i < ITERATIONS) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -106,6 +111,7 @@ public class SimulatedAnnealingAlgorithm {
             if (acceptSolution) {
                 schoolSchedule = nextSchoolSchedule;
                 costCurrSchoolSchedule = costNextSchoolSchedule;
+                costFinal = costCurrSchoolSchedule;
             }
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
@@ -121,8 +127,10 @@ public class SimulatedAnnealingAlgorithm {
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costCurrSchoolSchedule, true));
+            i++;
         }
+        progressEvent.fire(new AlgorithmProgressDTO(i, getTemperature(), costFinal, true));
+
     }
 
     public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) { // maybe
@@ -433,12 +441,16 @@ public class SimulatedAnnealingAlgorithm {
         return Double.longBitsToDouble(temperature.get());
     }
 
-    public void setTemperature(final double newValue) {
+    public static void setTemperature(double newValue) {
         temperature.set(Double.doubleToLongBits(newValue));
     }
 
     public void decreaseTemperature() {
         final double current = getTemperature();
         setTemperature(current * COOLING_RATE);
+    }
+
+    public static void setPaused(boolean paused) {
+        isPaused.set(paused);
     }
 }
