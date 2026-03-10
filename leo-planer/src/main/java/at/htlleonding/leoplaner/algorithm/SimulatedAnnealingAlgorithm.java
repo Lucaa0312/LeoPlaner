@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
@@ -58,9 +57,9 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private static AtomicBoolean isPaused = new AtomicBoolean(false);
+    private static AtomicBoolean isRunning = new AtomicBoolean(true);
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
-    private final int ITERATIONS = 10000;
+    // private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.999;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -69,7 +68,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
-        int i = 0;
+        int iterationCounter = 0;
         int costFinal = 0;
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
@@ -78,7 +77,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        while (i < ITERATIONS) { // main loop
+        while (getIsRunning()) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -116,20 +115,22 @@ public class SimulatedAnnealingAlgorithm {
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
 
-            if (i % 50 == 0) {
+            if (iterationCounter % 50 == 0) {
                 try {
                     // Thread.sleep(300);
                 } catch (final Exception e) {
                     // TODO: handle exception
                 }
-                this.dataRepository.getHistoryList().add(new History(i, getTemperature(), costCurrSchoolSchedule));
-                progressEvent.fire(new AlgorithmProgressDTO(i, getTemperature(), costCurrSchoolSchedule, false));
+                this.dataRepository.getHistoryList()
+                        .add(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
+                progressEvent.fire(
+                        new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
             }
             decreaseTemperature();
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
-            i++;
+            iterationCounter++;
         }
-        progressEvent.fire(new AlgorithmProgressDTO(i, getTemperature(), costFinal, true));
+        progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
 
     }
 
@@ -296,7 +297,7 @@ public class SimulatedAnnealingAlgorithm {
                     className = timetable.getSchoolClass().getClassName();
                     if (checkIfTeacherPeriodIsTakenInOtherClass(teacher, period, classSubjectInstance.getDuration(),
                             className, schoolSchedule)) {
-                        return cost + IMPOSSIBLE_COST;
+                        // return cost + IMPOSSIBLE_COST;
                     }
                 }
 
@@ -450,7 +451,16 @@ public class SimulatedAnnealingAlgorithm {
         setTemperature(current * COOLING_RATE);
     }
 
-    public static void setPaused(boolean paused) {
-        isPaused.set(paused);
+    public static void setIsRunning(boolean paused) {
+        isRunning.set(paused);
     }
+
+    public static void toggleIsRunning() {
+        isRunning.set(!getIsRunning());
+    }
+
+    public static boolean getIsRunning() {
+        return isRunning.get();
+    }
+
 }
