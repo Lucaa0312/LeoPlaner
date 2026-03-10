@@ -164,15 +164,57 @@ public class TimetableManager {
         return new Timetable(cloneClassSubjectInstanceList(timetable));
     }
 
+    public static boolean timetableHasOverlap(Timetable timetable) {
+
+        List<ClassSubjectInstance> csis = timetable.getClassSubjectInstances();
+
+        for (int i = 0; i < csis.size(); i++) {
+
+            ClassSubjectInstance a = csis.get(i);
+            Period p1 = a.getPeriod();
+
+            int start1 = p1.getSchoolHour();
+            int end1 = start1 + a.getDuration() - 1;
+
+            for (int j = i + 1; j < csis.size(); j++) {
+
+                ClassSubjectInstance b = csis.get(j);
+                Period p2 = b.getPeriod();
+
+                if (p1.getSchoolDays() != p2.getSchoolDays()) {
+                    continue;
+                }
+
+                int start2 = p2.getSchoolHour();
+                int end2 = start2 + b.getDuration() - 1;
+
+                if (start1 <= end2 && end1 >= start2) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public static Timetable switchTwoClassSubjectInstancesAndReturn(final Timetable timetable, final int index1,
             final int index2) {
         final Timetable clonedTimetable = cloneCurrentTimeTable(timetable);
         final ClassSubjectInstance csi1 = clonedTimetable.getClassSubjectInstances().get(index1);
         final ClassSubjectInstance csi2 = clonedTimetable.getClassSubjectInstances().get(index2);
 
+        if (csi1.getPeriod().isLunchBreak() || csi2.getPeriod().isLunchBreak()) {
+            return clonedTimetable;
+        }
+
         final Period tempPeriod = csi2.getPeriod();
+
         csi2.setPeriod(csi1.getPeriod());
         csi1.setPeriod(tempPeriod);
+
+        if (timetableHasOverlap(timetable)) {
+            return timetable;
+        }
 
         return clonedTimetable;
     }
