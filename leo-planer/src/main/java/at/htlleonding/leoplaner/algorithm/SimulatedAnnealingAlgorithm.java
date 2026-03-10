@@ -57,19 +57,20 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDay.put(SchoolDays.SATURDAY, costOfEachDegree.get(CostDegree.IMPOSSIBLE)); // is to never be accepted
     }
 
-    private static AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
     // private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.999;
+    private final double COOLING_RATE = 0.9994;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
-    public record History(int iteration, double temperature, int cost) {
+    public record History(long iteration, double temperature, long cost) {
     }
 
     public void algorithmLoop() {
-        int iterationCounter = 0;
-        int costFinal = 0;
+        long iterationCounter = 0;
+        long costFinal = 0;
+
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
@@ -451,15 +452,19 @@ public class SimulatedAnnealingAlgorithm {
         setTemperature(current * COOLING_RATE);
     }
 
-    public static void setIsRunning(boolean paused) {
+    public void setIsRunning(boolean paused) {
         isRunning.set(paused);
     }
 
-    public static void toggleIsRunning() {
-        isRunning.set(!getIsRunning());
+    public void toggleIsRunning() {
+        boolean newValue = !getIsRunning();
+        isRunning.set(newValue);
+        if (newValue) {
+            new Thread(this::algorithmLoop).start();
+        }
     }
 
-    public static boolean getIsRunning() {
+    public boolean getIsRunning() {
         return isRunning.get();
     }
 

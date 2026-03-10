@@ -6,6 +6,7 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.OnClose;
@@ -16,6 +17,9 @@ import java.util.Locale;
 @ServerEndpoint("/api/algorithm/progress")
 @ApplicationScoped
 public class Socket {
+    @Inject
+    SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+
     private final Set<Session> sessions = new HashSet<Session>();
 
     @OnOpen
@@ -38,8 +42,6 @@ public class Socket {
                 progress.currentCost(),
                 progress.finished());
 
-        System.out.println(json);
-
         sessions.forEach(s -> s.getAsyncRemote().sendText(json));
     }
 
@@ -50,7 +52,7 @@ public class Socket {
                 double newTemperature = Double.parseDouble(update.substring("temperature:".length()));
                 SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
             } else if (update.startsWith("toggle")) {
-                SimulatedAnnealingAlgorithm.toggleIsRunning();
+                simulatedAnnealingAlgorithm.toggleIsRunning();
             } else {
                 System.out.println("Unknown message: " + update);
             }
