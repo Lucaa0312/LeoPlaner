@@ -256,5 +256,4 @@ slider.addEventListener('input', (event) => {
 // Pause algorithm
 export function pause() {
     socket.send('pause');
-
 }

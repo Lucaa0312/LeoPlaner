@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
@@ -60,8 +61,8 @@ public class SimulatedAnnealingAlgorithm {
 
     private static AtomicBoolean isPaused = new AtomicBoolean(false);
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
-    private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.998;
+    private final int ITERATIONS  = 10000;
+    private final double COOLING_RATE = 0.999;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
 
@@ -78,7 +79,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        while (!isPaused.get()) { // main loop
+        while (i < ITERATIONS) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -129,7 +130,7 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
             i++;
         }
-        progressEvent.fire(new AlgorithmProgressDTO(ITERATIONS, getTemperature(), costFinal, true));
+        progressEvent.fire(new AlgorithmProgressDTO(i, getTemperature(), costFinal, true));
         
     }
 
