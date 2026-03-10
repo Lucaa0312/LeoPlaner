@@ -187,6 +187,8 @@
     max-height: 85vh;
     padding: 2% 5% 0 5%;
     box-sizing: border-box;
+    
+    overflow-y: scroll;
 
     font-size: large;
     /*font-weight: bold;*/
@@ -227,7 +229,6 @@
     justify-content: left;
 
     width: 100%;
-    overflow-y: scroll;
 }
 
 #timetable-background {
