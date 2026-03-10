@@ -441,12 +441,12 @@
     position: absolute;
     z-index: 10001;
     bottom: 5vh;
-    right: 2%;
+    right: 20%;
     font-size: 1.75rem;
     text-align: center;
     font-weight: bold;
     background-color: white;
-    width: 20vw;
+    width: 15vw;
     height: 5vh;
     border-radius: 0.8em 0.8em 0.8em 0.8em;
     box-shadow: #0000004d 0px 5px 5px;
@@ -456,6 +456,7 @@
     border-color: rgb(220, 220, 220);
     border-width: 0.1px;
     border-style: solid;
+    display: none;
 }
 
 .graph-box {
@@ -593,9 +594,10 @@
     justify-content: center;
     gap: 10px;
     outline: none;
+    opacity: 0.5;
 }
 
-#optimizeButton:hover {
+.optimizeButtonHover:hover {
     background-color: var(--leo-primary-color1);
     color: white;
     transform: translateY(-1px);

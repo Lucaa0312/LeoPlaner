@@ -1,4 +1,5 @@
 import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js';
+import { load } from './timetable.js';
 
 // Create the echarts instance
 //var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
@@ -107,6 +108,8 @@ costChart.setOption({
     type: 'log',
     name: 'Iterationen',
     nameLocation: 'middle',
+    min: 1,
+    max: 'dataMax',
     nameGap: 30,
     axisLabel: {
       hideOverlap: true,
@@ -121,6 +124,8 @@ costChart.setOption({
     type: 'log',
     name: 'Kosten',
     nameGap: 20,
+    min: 'dataMin',
+    max: 'dataMax',
     axisLabel: {
       hideOverlap: true,
       formatter: (value) => {
@@ -211,6 +216,7 @@ let lastMaxIteration = 0;
 let totalIterations = 0;
 let lastIterationFromServer = 0;
 let chartRun = false;
+let lastCost = 0;
 
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
@@ -229,6 +235,7 @@ socket.onmessage = function (event) {
   costChartData.push([newIteration, data.currentCost]);
 
   lastMaxIteration = newIteration;
+  lastCost = data.currentCost;
 
   /*temperatureChart.setOption({
   series: [
@@ -352,6 +359,7 @@ slider.addEventListener('input', (event) => {
 
 let paused = false;
 let optimizeButton = document.getElementById('optimizeButton');
+let costDisplay = document.getElementById('cost-container');
 
 // Pause algorithm
 optimizeButton.addEventListener('click', () => {
@@ -359,10 +367,14 @@ optimizeButton.addEventListener('click', () => {
     if(paused) {
     paused = false;
     optimizeButton.innerHTML = "Pausiere die Optimierung";
+    costDisplay.style.display = "none";
   }
   else {
+    load();
     paused = true;
     optimizeButton.innerHTML = "Setze die Optimierung fort";
+    costDisplay.style.display = "block";
+    costDisplay.innerHTML = "Kosten: " + lastCost;
   }
   socket.send('toggle');
   }
