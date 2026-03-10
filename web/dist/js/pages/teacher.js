@@ -1,381 +1,11 @@
-/*import  initNavbar  from "./navbar.js";
-
-let allSubjects: { id: number; subjectName: string }[] = [];        // all Subjects from DB
-let selectedSubjects: { id: number; subjectName: string }[] = [];  // selected Subjects for Teacher
-
-//load subjects from DB
-function loadSubjects() {
-    fetch("http://localhost:8080/api/subjects")
-        .then(res => res.json())
-        .then(data => {
-            allSubjects = data;
-        })
-        .catch(err => console.error(err));
-}
-
-
-// Initialize subject search functionality
-function initSubjectSearch() {
-    const input = document.getElementById("subject-input") as HTMLInputElement;
-    const dropdown = document.getElementById("subject-dropdown") as HTMLElement;
-
-    input.addEventListener("input", () => {
-        const query = input.value.toLowerCase();
-        dropdown.innerHTML = "";
-
-        if (!query) return;
-
-        const matches = allSubjects.filter(s =>
-            s.subjectName.toLowerCase().includes(query) &&
-            !selectedSubjects.some(sel => sel.id === s.id)
-        );
-
-        if (matches.length === 0) {
-            dropdown.innerHTML = `<div class="dropdown-item">No subjects found</div>`;
-        }
-
-        matches.forEach(subject => {
-            const item = document.createElement("div");
-            item.className = "dropdown-item";
-            item.textContent = subject.subjectName;
-
-            item.onclick = () => {
-                addSubject(subject);
-                dropdown.innerHTML = "";
-                input.value = "";
-            };
-
-            dropdown.appendChild(item);
-        });
-    });
-}
-
-// Add subject to selected list
-
-function addSubject(subject: { id: number; subjectName: string }) {
-    selectedSubjects.push(subject);
-
-    const container = document.getElementById("selected-subjects") as HTMLElement;
-
-    const chip = document.createElement("div");
-    chip.className = "subject-chip";
-    chip.innerHTML = `
-        ${subject.subjectName}
-        <span class="remove-chip">×</span>
-    `;
-
-    chip.onclick = () => {
-        selectedSubjects = selectedSubjects.filter(s => s.id !== subject.id);
-        chip.remove();
-    };
-
-    container.appendChild(chip);
-}
-
-//add teacher to DB
-function addTeacher() {
-    const firstNameInput = document.getElementById("first-name-input") as HTMLInputElement;
-    const lastNameInput = document.getElementById("last-name-input") as HTMLInputElement;
-    const initialsInput = document.getElementById("initials-input") as HTMLInputElement;
-    
-    if (!firstNameInput || !lastNameInput || !initialsInput) return;
-    
-    const teacherData = {
-        teacherName: firstNameInput.value + " " + lastNameInput.value,
-        nameSymbol: initialsInput.value,
-        teachingSubject: selectedSubjects.map(s => ({ id: s.id }))
-    };
-
-    console.log("SENDING", teacherData);
-
-    fetch("http://localhost:8080/api/teachers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(teacherData)
-    });
-}
-
-
-// Initialize availability day selection
-function initAvailabilityDays() {
-    const days = document.querySelectorAll("#availability-grid .day");
-
-    days.forEach(day => {
-        day.addEventListener("click", () => {
-            day.classList.toggle("active");
-        });
-    });
-}
-
-// Image Preview Function
-function imagePreview() {
-    const input = document.getElementById("teacher-image-input") as HTMLInputElement;
-    const preview = document.getElementById("avatar-preview") as HTMLImageElement;
-
-    if (!input || !preview) return;
-
-    input.addEventListener("change", () => {
-        const file = input.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-        preview.src = reader.result as string;
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-
-function loadAddTeacherForm() {
-    const noTeachers = document.getElementById("no-teachers");
-    if (noTeachers) noTeachers.style.display = "none";
-    
-    const disableOverlay: HTMLElement | null = document.getElementById("disable-overlay");
-    if (disableOverlay) disableOverlay.style.display = "block";
-
-    const displayTeachers: HTMLElement | null = document.getElementById("display-teachers");
-    if (displayTeachers) displayTeachers.style.overflowY = "hidden";
-    
-
-    const addTeacherScreen: HTMLElement | null = document.getElementById("add-teacher-screen");
-    if (addTeacherScreen) {
-        addTeacherScreen.style.display = "flex";
-        addTeacherScreen.style.flexDirection = "column";
-    }
-    if (!addTeacherScreen) return;
-
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-teacher-header-container";
-    headerContainer.innerHTML = `
-      <h1 id="add-teacher-header">Einen neuen Lehrer hinzufügen</h1>`;
-
-    const closeScreenButton = document.createElement("div");
-    closeScreenButton.id = "close-add-teacher-screen-btn";
-    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-
-    closeScreenButton.onclick = () => {
-        if (displayTeachers) displayTeachers.style.overflowY = "scroll";
-        if (addTeacherScreen) addTeacherScreen.style.display = "none";
-        if (disableOverlay) disableOverlay.style.display = "none";
-        
-    };
-
-    
-    const avaterUploadDiv = document.createElement("div");
-    avaterUploadDiv.className = "avatar-upload";
-    avaterUploadDiv.innerHTML = `
-        <input type="file" id="teacher-image-input" name="teacher-image" accept="image/*"/>
-            <label for="teacher-image-input" class="avatar-label">
-                <img id="avatar-preview" src="../assets/img/userPreview.svg" alt="Upload Photo"/>
-            </label>
-            <p>Profilbild hochladen</p>`;
-
-    
-
-    const formContainer = document.createElement("div");
-    formContainer.id = "form-container";
-    formContainer.innerHTML = `
-      <form id="add-teacher-form">
-        
-        <input type="text" id="first-name-input" name="first-name" required placeholder="Vorname">
-        
-        <input type="text" id="last-name-input" name="last-name" required placeholder="Nachname">
-        
-        <input type="text" id="initials-input" name="initials" required placeholder="Initialen">
-        
-        <input type="email" id="email-input" name="email" required placeholder="Email">
-      </form>
-
-      <div id="add-subjects-container">
-        <div id="subject-input-container">
-            <input type="text" id="subject-input" placeholder="Fach hinzufügen"/>
-            <img id="add-subject-img" src="../assets/img/magnifyingGlass.png" alt="Add Subject"/>
-        </div>
-
-        <div id="subject-dropdown"></div>
-        <div id="selected-subjects"></div>
-      </div>
-    `;
-
-    const availabilityContainer = document.createElement("div");
-    availabilityContainer.id = "availability-container";
-    availabilityContainer.innerHTML = `
-        <div id="availability-header">
-            <p>Verfügbarkeit:</p>
-        </div>
-        <div id="availability-grid">
-            <div class="day active">Mo</div>
-            <div class="day">Di</div>
-            <div class="day">Mi</div>
-            <div class="day">Do</div>
-            <div class="day">Fr</div>
-        </div>
-    `;
-
-    const submitButton = document.createElement("div");
-    submitButton.id = "submit-teacher-btn";
-    submitButton.textContent = "Bestätigen";
-    submitButton.onclick = () => {
-        addTeacher();
-
-        addTeacherScreen.style.display = "none";
-        if (disableOverlay) disableOverlay.style.display = "none";
-        if (displayTeachers) displayTeachers.style.overflowY = "scroll";
-
-        setTimeout(() => {
-            loadTeachers();
-        }, 500);
-    };
-
-
-    headerContainer.appendChild(closeScreenButton);
-
-    addTeacherScreen.replaceChildren(headerContainer, avaterUploadDiv, formContainer, availabilityContainer, submitButton);
-
-    initAvailabilityDays();
-    imagePreview();
-    loadSubjects();
-    initSubjectSearch();
-}
-
-
-
-
-function loadTeachers() {
-    fetch("http://localhost:8080/api/teachers")
-        .then(res => res.json())
-        .then(data => {
-            if (!data || data.length === 0) {
-                console.log("No teachers found");
-                const noTeachersElement = document.getElementById("no-teachers");
-                if (noTeachersElement) noTeachersElement.style.display = "block";
-                return;
-            }
-            else {
-                const noTeachersElement = document.getElementById("no-teachers");
-                if (noTeachersElement) noTeachersElement.style.display = "none";
-
-                const container = document.getElementById("display-teachers") as HTMLElement;
-                if (!container) return;
-                
-                container.innerHTML = "";
-
-                const tableInfo = document.createElement("div");
-                tableInfo.id = "table-info";
-                tableInfo.innerHTML = `
-                    <p id="teacher-left-section">Name</p>
-                    <p id="teacher-initials-section">K&uuml;rzel</p>
-                    <p id="teacher-subjects-section">F&auml;cher</p>
-                    <p id="teacher-workload-section">Arbeitslast</p>
-                    <p id="teacher-edit-section">Bearbeiten</p>
-                `;
-                container.appendChild(tableInfo);
-                
-                
-
-                data.forEach((teacher: any) => {
-                    const card = document.createElement("div");
-                    card.className = "teacher-row";
-
-                    // Subjects anzeigen (max 2 + rest als +X)
-                    const subjects = teacher.teachingSubject || [];
-                    const visibleSubjects = subjects.slice(0, 2);
-                    const remaining = subjects.length - visibleSubjects.length;
-
-                    const subjectsHTML = `
-                        ${visibleSubjects.map((s: any) =>
-                            `<span class="subject-chip">${s.subjectName}</span>`
-                        ).join("")}
-                        ${remaining > 0 ? `<span class="subject-chip extra">+${remaining}</span>` : ""}
-                    `;
-
-                    card.innerHTML = `
-                        <div class="teacher-left">
-                            <div class="avatar-placeholder">👤</div>
-                            <div class="teacher-info">
-                                <div class="teacher-name">${teacher.teacherName}</div>
-                            </div>
-                        </div>
-
-                        <div class="teacher-initials">${teacher.nameSymbol}</div>
-
-                        <div class="teacher-subjects">
-                            ${subjectsHTML}
-                        </div>
-
-                        <div class="teacher-workload">
-                            ${teacher.workload || "—"}
-                        </div>
-
-                        <div class="teacher-edit"><i class="fa-solid fa-pencil"></i></div>
-                    `;
-
-                    container.appendChild(card);
-                });
-
-                const breakDiv = document.createElement("div");
-                breakDiv.style.height = "6vh";
-                breakDiv.innerHTML = "&nbsp;";
-
-                container.appendChild(breakDiv);
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            
-        });
-}
-
-// Search functionality for teachers
-function searchTeacher() {
-    const inputField = document.getElementById("input-field") as HTMLInputElement;
-    if (!inputField) return;
-    
-    let query = inputField.value.toLowerCase();
-    let rows = document.querySelectorAll(".teacher-row");
-
-    rows.forEach(function (row) {
-        const nameElement = row.querySelector(".teacher-name");
-        const initialsElement = row.querySelector(".teacher-initials");
-        const subjectsElement = row.querySelector(".teacher-subjects");
-        
-        if (!nameElement || !initialsElement || !subjectsElement) return;
-        
-        let name = nameElement.textContent?.toLowerCase() || "";
-        let initials = initialsElement.textContent?.toLowerCase() || "";
-        let subjects = subjectsElement.textContent?.toLowerCase() || "";
-
-        const rowElement = row as HTMLElement;
-        if (query === "" || name.includes(query) || initials.includes(query) || subjects.includes(query)) {
-            rowElement.style.display = "";
-        }
-        else {
-            rowElement.style.display = "none";
-        }
-    });
-}
-
-
-function initializeApp() {
-    loadTeachers();
-    initNavbar();
-
-    const addBtn = document.getElementById("add-btn");
-    addBtn?.addEventListener("click", loadAddTeacherForm);
-}
-
-document.addEventListener("DOMContentLoaded", initializeApp);
-
-const inputField = document.getElementById("input-field");
-if (inputField) {
-    inputField.addEventListener("input", searchTeacher);
-}
-*/
 import initNavbar from "./navbar.js";
-import { fetchTeachers } from "../api/teacherApi.js";
+import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { getElement } from "../utils/elementHelpers.js";
+import { closePopup, openPopup } from "../components/popup.js";
+import { imagePreview } from "../features/imagePreview.js";
+import { fetchSubjects } from "../api/subjectApi.js";
+import { initSubjectSelector } from "../features/subjectSelector.js";
 function createTeacherSubjectChips(subjects) {
     const visibleSubjects = subjects.slice(0, 2);
     const remaining = subjects.length - visibleSubjects.length;
@@ -429,7 +59,7 @@ function createTeacherRow(teacher) {
     teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
     const teacherWorkload = document.createElement("div");
     teacherWorkload.className = "teacher-workload";
-    teacherWorkload.textContent = "—"; // Placeholder, da Arbeitslast nicht im Teacher-Objekt vorhanden ist
+    teacherWorkload.textContent = "—";
     const teacherEdit = document.createElement("div");
     teacherEdit.className = "teacher-edit";
     teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
@@ -462,8 +92,169 @@ async function loadAndRenderTeachers() {
         console.error("Fehler beim Laden der Lehrer: " + error);
     }
 }
+function formatedNameInput(firstNameId, lastNameId) {
+    const firstNameInput = getElement(firstNameId);
+    const lastNameInput = getElement(lastNameId);
+    if (!firstNameInput || !lastNameInput)
+        throw new Error("Name input fields not found");
+    return firstNameInput.value + " " + lastNameInput.value;
+}
+function collectSubjectData(selectedSubjects) {
+    const nameInput = formatedNameInput("first-name-input", "last-name-input");
+    const initialsInput = getElement("initials-input");
+    if (!initialsInput)
+        throw new Error("Initials input not found");
+    return {
+        teacherName: nameInput,
+        nameSymbol: initialsInput.value,
+        teachingSubject: selectedSubjects.map((subject) => subject.id)
+    };
+}
+function buildAddTeacherForm() {
+    const formContainer = document.createElement("div");
+    formContainer.id = "form-container";
+    const addTeacherForm = document.createElement("form");
+    addTeacherForm.id = "add-teacher-form";
+    const firstNameInput = document.createElement("input");
+    firstNameInput.type = "text";
+    firstNameInput.id = "first-name-input";
+    firstNameInput.name = "first-name";
+    firstNameInput.required = true;
+    firstNameInput.placeholder = "Vorname";
+    const lastNameInput = document.createElement("input");
+    lastNameInput.type = "text";
+    lastNameInput.id = "last-name-input";
+    lastNameInput.name = "last-name";
+    lastNameInput.required = true;
+    lastNameInput.placeholder = "Nachname";
+    const initialsInput = document.createElement("input");
+    initialsInput.type = "text";
+    initialsInput.id = "initials-input";
+    initialsInput.name = "initials";
+    initialsInput.required = true;
+    initialsInput.placeholder = "Initialen";
+    const emailInput = document.createElement("input");
+    emailInput.type = "email";
+    emailInput.id = "email-input";
+    emailInput.name = "email";
+    emailInput.required = false;
+    emailInput.placeholder = "Email";
+    addTeacherForm.append(firstNameInput, lastNameInput, initialsInput, emailInput);
+    const addSubjectsContainer = document.createElement("div");
+    addSubjectsContainer.id = "add-subjects-container";
+    const subjectInputContainer = document.createElement("div");
+    subjectInputContainer.id = "subject-input-container";
+    const subjectInput = document.createElement("input");
+    subjectInput.type = "text";
+    subjectInput.id = "subject-input";
+    subjectInput.placeholder = "Fach hinzufügen";
+    const addSubjectImg = document.createElement("img");
+    addSubjectImg.id = "add-subject-img";
+    addSubjectImg.src = "../assets/img/magnifyingGlass.png";
+    addSubjectImg.alt = "Add Subject";
+    subjectInputContainer.append(addSubjectImg, subjectInput);
+    const subjectDropdown = document.createElement("div");
+    subjectDropdown.id = "subject-dropdown";
+    const selectedSubjectsContainer = document.createElement("div");
+    selectedSubjectsContainer.id = "selected-subjects";
+    addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
+    formContainer.append(addTeacherForm, addSubjectsContainer);
+    return formContainer;
+}
+function buildFormHeader(modal, overlay, scrollContainer) {
+    const headerContainer = document.createElement("div");
+    headerContainer.id = "add-teacher-header-container";
+    const title = document.createElement("h1");
+    title.id = "add-teacher-header";
+    title.textContent = "Einen neuen Lehrer hinzufügen";
+    const closeScreenButton = document.createElement("div");
+    closeScreenButton.id = "close-add-teacher-screen-btn";
+    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
+    closeScreenButton.addEventListener("click", () => {
+        closePopup({
+            modal: modal,
+            overlay: overlay,
+            scrollContainer: scrollContainer
+        });
+    });
+    headerContainer.append(title, closeScreenButton);
+    return headerContainer;
+}
+async function openAddTeacherForm() {
+    const noTeachersElement = getElement("no-teachers");
+    const disableOverlay = getElement("disable-overlay");
+    const displayTeachers = getElement("display-teachers");
+    const addTeacherScreen = getElement("add-teacher-screen");
+    if (!addTeacherScreen || !disableOverlay || !displayTeachers)
+        return;
+    if (noTeachersElement)
+        noTeachersElement.style.display = "none";
+    openPopup({
+        modal: addTeacherScreen,
+        overlay: disableOverlay,
+        scrollContainer: displayTeachers
+    });
+    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    const avaterUploadDiv = document.createElement("div");
+    avaterUploadDiv.className = "avatar-upload";
+    const teacherImageInput = document.createElement("input");
+    teacherImageInput.type = "file";
+    teacherImageInput.id = "teacher-image-input";
+    teacherImageInput.name = "teacher-image";
+    teacherImageInput.accept = "image/*";
+    const avatarLabel = document.createElement("label");
+    avatarLabel.htmlFor = "teacher-image-input";
+    avatarLabel.className = "avatar-label";
+    const avatarPreview = document.createElement("img");
+    avatarPreview.id = "avatar-preview";
+    avatarPreview.src = "../assets/img/userPreview.svg";
+    avatarPreview.alt = "Upload Photo";
+    const avatarText = document.createElement("p");
+    avatarText.textContent = "Profilbild hochladen";
+    avatarLabel.appendChild(avatarPreview);
+    avaterUploadDiv.append(teacherImageInput, avatarLabel, avatarText);
+    const form = buildAddTeacherForm();
+    const submitButton = document.createElement("div");
+    submitButton.id = "submit-teacher-btn";
+    submitButton.textContent = "Bestätigen";
+    addTeacherScreen.replaceChildren(header, avaterUploadDiv, form, submitButton);
+    imagePreview();
+    const subjectInput = getElement("subject-input");
+    const subjectDropdown = getElement("subject-dropdown");
+    const selectedContainer = getElement("selected-subjects");
+    const inputContainer = getElement("subject-input-container");
+    if (!subjectInput || !subjectDropdown || !selectedContainer || !inputContainer)
+        return;
+    const allSubjects = await fetchSubjects();
+    const subjectSelector = initSubjectSelector({
+        input: subjectInput,
+        dropdown: subjectDropdown,
+        selectedContainer: selectedContainer,
+        inputContainer: inputContainer,
+        allSubjects: allSubjects
+    });
+    submitButton.addEventListener("click", async () => {
+        try {
+            const teacherData = collectSubjectData(subjectSelector.getSelectedSubjects());
+            if (!teacherData)
+                return;
+            await createTeacher(teacherData);
+            closePopup({
+                modal: addTeacherScreen,
+                overlay: disableOverlay,
+                scrollContainer: displayTeachers,
+            });
+            await loadAndRenderTeachers();
+        }
+        catch (error) {
+            console.error("Error occurred while confirming teacher data:", error);
+        }
+    });
+}
 function initializeApp() {
     initNavbar();
     void loadAndRenderTeachers();
+    const addBtn = getElement("add-btn");
+    addBtn?.addEventListener("click", openAddTeacherForm);
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

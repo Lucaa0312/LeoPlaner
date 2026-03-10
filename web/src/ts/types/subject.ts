@@ -7,6 +7,7 @@ export type SubjectColor = {
 };
 
 export type Subject = {
+    id: number;
     subjectName: string;
     subjectColor: SubjectColor;
     requiredRoomTypes: RoomType[];
