@@ -209,13 +209,22 @@ let finishTimer = null;
 const INACTIVITY_MS = 500;
 let lastMaxIteration = 0;
 let totalIterations = 0;
+let lastIterationFromServer = 0;
+let chartRun = false;
 
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log(data)
+    chartRun = true;
 
   //temperatureChartData.push([data.iteration, data.temperature]);
   const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
+  
+  if(currentIteration < lastIterationFromServer) {
+    totalIterations += lastIterationFromServer;
+  }
+  lastIterationFromServer = currentIteration;
+
   const newIteration = currentIteration + totalIterations;
   costChartData.push([newIteration, data.currentCost]);
 
@@ -267,8 +276,6 @@ function finalizeChart() {
         ]
       });*/
 
-      totalIterations += lastMaxIteration; 
-
     costChart.setOption({
         series: [
           {
@@ -277,6 +284,7 @@ function finalizeChart() {
                 {type: 'min', name: 'Min', itemStyle: {color: '#0728a2'}, label: {formatter: 'Min: {c}', position: 'bottom'}}
               ]
             }
+          }
         ]
       });
 }
@@ -342,7 +350,20 @@ slider.addEventListener('input', (event) => {
     socket.send('temperature:' + val);
 });
 
+let paused = false;
+let optimizeButton = document.getElementById('optimizeButton');
+
 // Pause algorithm
-export function toggleAlgorithm() {
-    socket.send('toggle');
-}
+optimizeButton.addEventListener('click', () => {
+  if(chartRun) {
+    if(paused) {
+    paused = false;
+    optimizeButton.innerHTML = "Pausiere die Optimierung";
+  }
+  else {
+    paused = true;
+    optimizeButton.innerHTML = "Setze die Optimierung fort";
+  }
+  socket.send('toggle');
+  }
+})

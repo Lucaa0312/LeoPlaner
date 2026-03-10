@@ -77,7 +77,7 @@ function load() {
             console.error('Error loading Timetable:', error)
         })
         .finally(() => {
-            hideLoader();
+            //hideLoader();
         });
 }
 
@@ -99,7 +99,7 @@ algorithmButton.addEventListener('click', () => {
 })
 function getOptimizedTimetable() {
     clearCharts();
-    showLoader();
+    //showLoader();
     clearLayout();
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
         .then(res => {

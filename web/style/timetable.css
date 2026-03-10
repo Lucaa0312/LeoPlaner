@@ -569,3 +569,35 @@
     font-size: 0.8em;
     font-weight: lighter;
 }
+#button {
+    width: 100%;
+    margin-top: 2vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#optimizeButton {
+    font-family: 'alte-haas-grotesk', sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.5vw 1vw;
+    border-radius: 36px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    color: var(--leo-text-color);
+    box-shadow: #0000004d 0px 5px 5px;
+    transition: all 200ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    outline: none;
+}
+
+#optimizeButton:hover {
+    background-color: var(--leo-primary-color1);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: #00000066 0px 8px 15px;
+}
