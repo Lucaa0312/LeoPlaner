@@ -187,6 +187,8 @@
     max-height: 85vh;
     padding: 2% 5% 0 5%;
     box-sizing: border-box;
+    
+    overflow-y: scroll;
 
     font-size: large;
     /*font-weight: bold;*/
@@ -227,12 +229,11 @@
     justify-content: left;
 
     width: 100%;
-    overflow-y: scroll;
 }
 
 #timetable-background {
     position: absolute;
-    width: 100%;
+    width: 115%;
     z-index: 1;
 }
 
@@ -440,12 +441,12 @@
     position: absolute;
     z-index: 10001;
     bottom: 5vh;
-    right: 2%;
+    right: 20%;
     font-size: 1.75rem;
     text-align: center;
     font-weight: bold;
     background-color: white;
-    width: 20vw;
+    width: 15vw;
     height: 5vh;
     border-radius: 0.8em 0.8em 0.8em 0.8em;
     box-shadow: #0000004d 0px 5px 5px;
@@ -455,12 +456,13 @@
     border-color: rgb(220, 220, 220);
     border-width: 0.1px;
     border-style: solid;
+    display: none;
 }
 
 .graph-box {
     background-color: white;
-    width: 21vw;
-    height: 40vh;
+    width: 20vw;
+    height: 50vh;
     border-radius: 0.8em 0.8em 0.8em 0.8em;
     padding: 0;
 }
@@ -478,18 +480,17 @@
     width: 30vw;
 }
 #slider-container {
-    display: flex;
-    justify-content: center;
+    margin-top: 3vh;
+    width: 20vw;
+    position: relative;
+    display: block;
     align-items: center;
     height: 4vh;
-    margin-top: -4.5vh;
-    margin-bottom: -4.5vh;
-    margin-right: 2vw;
 }
 #temperatureSlider {
     appearance: none;
     -webkit-appearance: none;
-    width: 15vw;
+    width: 20vw;
     height: 3vh;
     background-color: white;
     border: 2px solid white;
@@ -502,11 +503,10 @@
 #temperatureSlider::-webkit-slider-thumb {
     appearance: none;
     -webkit-appearance: none;
-    width: 1vw;
-    height: 1vw;
+    width: 23px;
+    height: 23px;
     border-radius: 50%;
     background-color: var(--thumb-color, (--leo-primary-color1));
-    /*--thumb-color: var(--leo-secondary-color);*/
     cursor: pointer;
     border: 3px solid white;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
@@ -514,13 +514,92 @@
 }
 
 #temperatureSlider::-moz-range-thumb {
-    width: 1vw;
-    height: 1vw;
+    width: 23px;
+    height: 23px;
     border-radius: 50%;
     background-color: var(--thumb-color, (--leo-primary-color1));
-    /*--thumb-color: var(--leo-secondary-color);*/
     cursor: pointer;
     border: 3px solid white;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
     transition: background 0.1s ease;
+}
+
+.slider-tooltip {
+    left: 4%;
+    position: absolute;
+    top: -45px;
+    background-color: white;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.slider-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid white;
+}
+
+#slider-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 20vw;
+    opacity: 0.8;
+}
+
+.slider-value {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.slider-line {
+    font-size: 0.8em;
+    font-weight: lighter;
+}
+#button {
+    width: 100%;
+    margin-top: 2vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#optimizeButton {
+    font-family: 'alte-haas-grotesk', sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.5vw 1vw;
+    border-radius: 36px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    color: var(--leo-text-color);
+    box-shadow: #0000004d 0px 5px 5px;
+    transition: all 200ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    outline: none;
+    opacity: 0.5;
+}
+
+.optimizeButtonHover:hover {
+    background-color: var(--leo-primary-color1);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: #00000066 0px 8px 15px;
 }

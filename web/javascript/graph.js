@@ -1,10 +1,12 @@
 import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js';
+import { load } from './timetable.js';
 
 // Create the echarts instance
-var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
+//var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
 var costChart = echarts.init(document.getElementById('costChart'));
 
 const slider = document.getElementById('temperatureSlider');
+const tooltip = document.getElementById('tooltip');
 let isUserTouchingSlider = false;
 
 slider.onmousedown = () => { isUserTouchingSlider = true; };
@@ -13,7 +15,7 @@ slider.onmouseup = () => { isUserTouchingSlider = false; };
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
 
 // Draw the charts
-temperatureChart.setOption({
+/*temperatureChart.setOption({
   title: {
     text: 'Temperatur/Iteration Diagramm'
   },
@@ -77,35 +79,61 @@ temperatureChart.setOption({
       }
     }
   ]
-});
+});*/
 
 // Draw the charts
 costChart.setOption({
+  animation: false,
   title: {
-    text: 'Kosten/Iteration Diagramm'
+    text: 'Kosten/Iteration Diagramm',
+    left: 'center',
+    textStyle: { fontSize: 16, color: '#374151' }
   },
-  tooltip: {},
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    formatter: params => {
+      let val = params[0].value;
+      return `Iteration: <b>${Math.round(val[0])}</b><br/>Kosten: <b>${val[1].toLocaleString()}</b>`;
+    }
+  },
   grid: {
     containLabel: true,
-    left: '7%',
-    bottom: '10%',
-    top: '25%',
-    right: '15%'
+    left: '8%',
+    bottom: '20%',
+    top: '20%',
+    right: '10%'
   },
   xAxis: {
-    type: 'value',
-    min: 0,
-    max: 10000,
+    type: 'log',
     name: 'Iterationen',
     nameLocation: 'middle',
+    min: 1,
+    max: 'dataMax',
     nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
+    axisLabel: {
+      hideOverlap: true,
+      formatter: (value) => {
+        if (value >= 1000) return (value / 1000) + 'k';
+        return value;
+      }
+    },
+    splitLine: { lineStyle: { color: '#f3f4f6' } }
   },
   yAxis: {
     type: 'log',
     name: 'Kosten',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
+    nameGap: 20,
+    min: 'dataMin',
+    max: 'dataMax',
+    axisLabel: {
+      hideOverlap: true,
+      formatter: (value) => {
+        if (value >= 1000000) return (value / 1000000) + 'M';
+        if (value >= 1000) return (value / 1000) + 'k';
+        return value;
+      }
+    }
   },
   visualMap: {
     show: false,
@@ -118,8 +146,9 @@ costChart.setOption({
   },
   series: [
     {
+      name: 'Kosten',
       type: 'line',
-      smooth: true,
+      smooth: false,
       sampling: 'lttb',
       symbol: 'none',
       data: [],
@@ -133,29 +162,82 @@ costChart.setOption({
             distance: 15
           }
       },
-      lineStyle: { //Strich dicker und leuchter leicht (optional)
-        width: 4,
-        shadowBlur: 15,
-        shadowColor: 'rgb(255, 192, 192)',
-        shadowOffsetY: 0,
-        opacity: 1
+      lineStyle: {
+        width: 3
+      },
+      areaStyle: {
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: 'rgba(79, 70, 229, 0.2)' },
+        { offset: 1, color: 'rgba(79, 70, 229, 0)' }
+      ])
+      }
+    }
+  ],
+  dataZoom: [
+    {
+      type: 'inside',
+      start: 0,
+      end: 100
+    },
+    {
+      type: 'slider',
+      show: true,
+      bottom: '15px',
+      height: 18,
+      borderColor: 'transparent',
+      backgroundColor: '#f9fafb',
+      fillerColor: 'rgba(79, 70, 229, 0.1)',
+      showDataShadow: false,
+      showDetail: false,
+      handleIcon: 'roundRect',
+      handleSize: '160%',
+      handleStyle: {
+        color: '#4F46E5',
+        borderColor: '#4F46E5',
+        borderWidth: 1,
+        shadowBlur: 3,
+        shadowColor: 'rgba(0, 0, 0, 0.1)',
+        borderRadius: 2
+      },
+      moveHandleStyle: {
+        color: '#d1d5db',
+        opacity: 0.3
       }
     }
   ]
 });
 
 // Get data
-var temperatureChartData = [];
+//var temperatureChartData = [];
 var costChartData = [];
+let finishTimer = null;
+const INACTIVITY_MS = 500;
+let lastMaxIteration = 0;
+let totalIterations = 0;
+let lastIterationFromServer = 0;
+let chartRun = false;
+let lastCost = 0;
 
-socket.onmessage = function(event) {
-  const data = JSON.parse(event.data);
-  console.log(data)
+socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log(data)
+    chartRun = true;
 
-  temperatureChartData.push([data.iteration, data.temperature]);
-  costChartData.push([data.iteration, data.currentCost]);
+  //temperatureChartData.push([data.iteration, data.temperature]);
+  const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
+  
+  if(currentIteration < lastIterationFromServer) {
+    totalIterations += lastIterationFromServer;
+  }
+  lastIterationFromServer = currentIteration;
 
-  temperatureChart.setOption({
+  const newIteration = currentIteration + totalIterations;
+  costChartData.push([newIteration, data.currentCost]);
+
+  lastMaxIteration = newIteration;
+  lastCost = data.currentCost;
+
+  /*temperatureChart.setOption({
   series: [
     {
       data: temperatureChartData,
@@ -164,7 +246,7 @@ socket.onmessage = function(event) {
       }
     }
   ]
-  });
+  });*/
 
   costChart.setOption({
   series: [
@@ -179,42 +261,45 @@ socket.onmessage = function(event) {
 
   if (!isUserTouchingSlider) {
     slider.value = data.temperature;
+    updateSlider(data.temperature);
   }
-  
-  if(data.status == 'finished' || data.iteration >= 10000) {
-      temperatureChart.setOption({
-        series: [
-          {
-            markPoint: {
-              data: [
-                {name: 'Anfang', coord: temperatureChartData[0], value: temperatureChartData[0][1], itemStyle: {color: '#F59E0B'}, label: {formatter: 'Start: {c}', distance: 40}},
-                {name: 'Ende', coord: [data.iteration, data.temperature], value: data.temperature, itemStyle: {color: '#4F46E5'}, label: {formatter: 'Ende: {c}'}}
-              ]
-            }
-          }
-        ]
-      });
 
-      costChart.setOption({
+  clearTimeout(finishTimer);
+
+  finishTimer = setTimeout(() => {
+    finalizeChart();
+  }, INACTIVITY_MS);
+};
+
+function finalizeChart() {
+  /*temperatureChart.setOption({
+        series: [
+            {
+                data: temperatureChartData,
+                markPoint: {
+                    data: []
+                }
+            }
+        ]
+      });*/
+
+    costChart.setOption({
         series: [
           {
             markPoint: {
               data: [
-                {name: 'Anfang', coord: costChartData[0], value: costChartData[0][1], itemStyle: {color: '#F59E0B'}, label: {formatter: 'Start: {c}'}},
-                {name: 'Ende', coord: [data.iteration, data.currentCost], value: data.currentCost, itemStyle: {color: '#4F46E5'}, label: {formatter: 'Ende: {c}'}},
                 {type: 'min', name: 'Min', itemStyle: {color: '#0728a2'}, label: {formatter: 'Min: {c}', position: 'bottom'}}
               ]
             }
           }
         ]
       });
-  }
-};
+}
 
 // Clear charts
 export function clearCharts() {
-  temperatureChartData = [];
-  costChartData = [];
+  //temperatureChartData = [];
+  //costChartData = [];
 }
 
 // Slider
@@ -224,31 +309,73 @@ window.addEventListener('load', () => {
 });
 
 function interpolateColor(color1, color2, factor) {
-  const r1 = parseInt(color1.substring(1, 3), 16);
-  const g1 = parseInt(color1.substring(3, 5), 16);
-  const b1 = parseInt(color1.substring(5, 7), 16);
+    const r1 = parseInt(color1.substring(1, 3), 16);
+    const g1 = parseInt(color1.substring(3, 5), 16);
+    const b1 = parseInt(color1.substring(5, 7), 16);
 
-  const r2 = parseInt(color2.substring(1, 3), 16);
-  const g2 = parseInt(color2.substring(3, 5), 16);
-  const b2 = parseInt(color2.substring(5, 7), 16);
+    const r2 = parseInt(color2.substring(1, 3), 16);
+    const g2 = parseInt(color2.substring(3, 5), 16);
+    const b2 = parseInt(color2.substring(5, 7), 16);
 
-  const rNew = Math.round(r1 + factor * (r2 - r1));
-  const gNew = Math.round(g1 + factor * (g2 -g1));
-  const bNew = Math.round(b1 + factor * (b2 - b1));
+    const rNew = Math.round(r1 + factor * (r2 - r1));
+    const gNew = Math.round(g1 + factor * (g2 - g1));
+    const bNew = Math.round(b1 + factor * (b2 - b1));
 
-  return `rgb(${rNew}, ${gNew}, ${bNew})`
+    return `rgb(${rNew}, ${gNew}, ${bNew})`
 }
 
 slider.addEventListener('input', () => {
+  updateSlider();
   const percent = slider.value / 1000;
 
-  const newColor = interpolateColor('#4F46E5', '#F59E0B', percent);
-  console.log(newColor);
-  slider.style.setProperty('--thumb-color', newColor);
+    const newColor = interpolateColor('#4F46E5', '#F59E0B', percent);
+    console.log(newColor);
+    slider.style.setProperty('--thumb-color', newColor);
 })
+
+function updateSlider(temperature) {
+  let value = parseFloat(slider.value);
+  const min = parseFloat(slider.min) || 0;
+  const max = parseFloat(slider.max) || 1000;
+
+  if(temperature) {
+      value = temperature;
+  }    
+
+  tooltip.innerHTML = value;
+
+  const thumbWidth = 23;
+
+  const percent = 1 - (value - min) / (max - min);
+  const offset = (0.5 - percent) * thumbWidth;
+  tooltip.style.left = `calc(${percent * 100}% + (${offset}px))`
+}
 
 // Send data
 slider.addEventListener('input', (event) => {
     const val = event.target.value;
-    socket.send(val);  
+    socket.send('temperature:' + val);
 });
+
+let paused = false;
+let optimizeButton = document.getElementById('optimizeButton');
+let costDisplay = document.getElementById('cost-container');
+
+// Pause algorithm
+optimizeButton.addEventListener('click', () => {
+  if(chartRun) {
+    if(paused) {
+    paused = false;
+    optimizeButton.innerHTML = "Pausiere die Optimierung";
+    costDisplay.style.display = "none";
+  }
+  else {
+    load();
+    paused = true;
+    optimizeButton.innerHTML = "Setze die Optimierung fort";
+    costDisplay.style.display = "block";
+    costDisplay.innerHTML = "Kosten: " + lastCost;
+  }
+  socket.send('toggle');
+  }
+})

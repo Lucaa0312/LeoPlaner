@@ -6,6 +6,7 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.OnClose;
@@ -13,10 +14,12 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import java.util.Locale;
 
-
 @ServerEndpoint("/api/algorithm/progress")
 @ApplicationScoped
 public class Socket {
+    @Inject
+    SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+
     private final Set<Session> sessions = new HashSet<Session>();
 
     @OnOpen
@@ -31,25 +34,28 @@ public class Socket {
 
     public void onProgressUpdate(@Observes AlgorithmProgressDTO progress) {
         String json = String.format(Locale.US, "{\"iteration\": %d,"
-                            + "\"temperature\": %f,"
-                            + "\"currentCost\": %d,"
-                            + "\"finished\": %s}", 
-                            progress.iteration(), 
-                            progress.temperature(), 
-                            progress.currentCost(), 
-                            progress.finished());
+                + "\"temperature\": %f,"
+                + "\"currentCost\": %d,"
+                + "\"finished\": %s}",
+                progress.iteration(),
+                progress.temperature(),
+                progress.currentCost(),
+                progress.finished());
 
-        System.out.println(json);
-        
         sessions.forEach(s -> s.getAsyncRemote().sendText(json));
     }
 
     @OnMessage
-    public void onSliderUpdate(String update) {
+    public void OnMessageHandler(String update) {
         try {
-            double newTemperature = Double.parseDouble(update);
-            SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
-            
+            if (update.startsWith("temperature:")) {
+                double newTemperature = Double.parseDouble(update.substring("temperature:".length()));
+                SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
+            } else if (update.startsWith("toggle")) {
+                simulatedAnnealingAlgorithm.toggleIsRunning();
+            } else {
+                System.out.println("Unknown message: " + update);
+            }
         } catch (NumberFormatException e) {
             System.out.println("Encountered error: " + e.getMessage());
         }
