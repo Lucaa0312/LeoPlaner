@@ -123,7 +123,7 @@ function getTimetableByClass(classId) {
         .then(response => {
             return response.json()
         }).then(data => {
-            console.log(data)
+            /*console.log(data)*/
 
             createLayout(data.classSubjectInstances)
         }).catch(error => {
@@ -136,7 +136,7 @@ function getTimetableByRoom(roomId) {
         .then(response => {
             return response.json()
         }).then(data => {
-            console.log(data)
+            /*console.log(data)*/
 
             createLayout(data.classSubjectInstances)
             hideTimetableCost();
@@ -152,7 +152,7 @@ function clearChoice() {
 }
 
 function createRedArea(teacher) {
-    console.log("Teacher data:", teacher);
+    /*console.log("Teacher data:", teacher);*/
     const noWorkingHours = [];
 
     for (let i = 0; i < teacher.teacherNonWorkingHours.length; i++) {
@@ -176,7 +176,7 @@ function createRedArea(teacher) {
         });
     }
 
-    console.log("No working hours:", noWorkingHours);
+    /*console.log("No working hours:", noWorkingHours);*/
     createLayout(noWorkingHours);
 }
 
@@ -235,6 +235,8 @@ function createLayout(data) {
 
         let alreadyAddedBreak = false;
 
+        let lessonAfterBreakCounter = 0;
+
         // Create HTML 
         classSubjectInstances.forEach(item => {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
@@ -253,7 +255,7 @@ function createLayout(data) {
 
             // Fill empty periods
             while (currentPeriod < period) {
-                content += `<div class="period-styling" style=" background-color: black; margin-top: ${currentPeriod == 3 ? "calc(var(--break-height) + 3px)" : "0"};"></div>`
+                content += `<div class="period-styling" style=" margin-top: ${currentPeriod == 3 ? "calc(var(--break-height) + 3px)" : "0"};"></div>`
                 currentPeriod++
             }
 
@@ -267,11 +269,11 @@ function createLayout(data) {
                 /**/
                 let height;
                 let marginTop = "0";
-                if (duration >= 3 && period == 1 || duration >= 3 && period == 2 || duration >= 2 && period == 2) {
+                if (!alreadyAddedBreak && duration >= 3 && period == 1 || duration >= 3 && period == 2 || duration >= 2 && period == 2) {
                     height = duration === 1? "var(--period-height)" : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
                     alreadyAddedBreak = true;
                 } else {
-                    if (period == 3 && !alreadyAddedBreak) {
+                    if (period == 3 && !alreadyAddedBreak) { /*(lessonAfterBreakCounter == 2 && (period == 1 || period == 2 || period == 3 || period == 4)) */
                         marginTop = "calc(var(--break-height) + 3px)";
                     }
                     height = duration === 1? "var(--period-height)" : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
@@ -302,6 +304,8 @@ function createLayout(data) {
                 `;
             }
             currentPeriod += duration;
+            //lessonAfterBreakCounter+=duration;
+            //console.log('lessonAfterBreakCounter:', lessonAfterBreakCounter, 'period:', period, 'day:', day);
         });
         gridBox.innerHTML = content;
     });
@@ -324,7 +328,7 @@ function loadClasses() {
         .then(response => {
             return response.json()
         }).then(data => {
-            console.log(data)
+            /*console.log(data)*/
             const dorpdown = document.getElementById('classes').querySelector('.select-menu');
             dorpdown.innerHTML = "";
 
@@ -342,7 +346,7 @@ function loadTeachers() {
         .then(response => {
             return response.json()
         }).then(data => {
-            console.log(data)
+            /*console.log(data)*/
             const dorpdown = document.getElementById('teachers').querySelector('.select-menu');
             dorpdown.innerHTML = "";
 
