@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 
 public class TimetableManager {
+
     public static ArrayList<Period> returnAllFreePeriodsOnCertainDay(final Timetable timetable,
             final SchoolDays schoolDay,
             final int duration) {
