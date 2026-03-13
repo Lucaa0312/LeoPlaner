@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Period;
+import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
@@ -36,8 +37,8 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.LOW, 5);
         costOfEachDegree.put(CostDegree.MID, 20);
         costOfEachDegree.put(CostDegree.HIGH, 50);
-        costOfEachDegree.put(CostDegree.SEVERE, 100);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 9999999);
+        costOfEachDegree.put(CostDegree.SEVERE, 200);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 35000);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -132,13 +133,21 @@ public class SimulatedAnnealingAlgorithm {
             iterationCounter++;
         }
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
-
     }
 
-    public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) { // maybe
-                                                                                                                // make
-                                                                                                                // Generic
-        // for dynamic
+    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
+        final int deltaCost = costNextTimeTable - costCurrTimeTable;
+
+        if (deltaCost < 0) { // next solution is better, always accept
+            return true;
+        }
+
+        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * getTemperature()));
+
+        return Math.random() < probability;
+    }
+
+    public void setAttributesOfTimetable(final Timetable timetable, final int cost, final double temperature) {
         timetable.setCostOfTimetable(cost);
         timetable.setTempAtTimetable(temperature);
     }
@@ -150,15 +159,21 @@ public class SimulatedAnnealingAlgorithm {
         // maybe different rooms
         int cost = 0;
         final List<Teacher> allTeachers = getAllTeachersInSchoolSchedule(schoolSchedule);
+        final List<Room> allRooms = getAllRoomsInSchoolSchedule(schoolSchedule);
+
+        for (final Room room : allRooms) {
+            // final int costOfRoomAttributes = determineCostOfRoomAttribute(room);
+            final int costOfRoomAttributes = 0;
+
+            if (costOfRoomAttributes >= IMPOSSIBLE_COST) {
+                return cost + costOfRoomAttributes;
+            } else {
+                cost += costOfRoomAttributes;
+            }
+        }
 
         for (final Teacher teacher : allTeachers) {
-            final int costTeacherWorkload = determineTeacherWorkloadCost(teacher, schoolSchedule);
-
-            if (costTeacherWorkload >= IMPOSSIBLE_COST) {
-                // return cost + costTeacherWorkload;
-            } else {
-                cost += costTeacherWorkload;
-            }
+            cost += determineTeacherWorkloadCost(teacher, schoolSchedule);
         }
 
         for (final Timetable timetable : schoolSchedule) {
@@ -183,7 +198,7 @@ public class SimulatedAnnealingAlgorithm {
                     Integer currCount = countOfClassesPerDay.get(period.getSchoolDays());
                     countOfClassesPerDay.put(period.getSchoolDays(), currCount + 1);
                 } else {
-                    countOfClassesPerDay.put(period.getSchoolDays(), 0);
+                    countOfClassesPerDay.put(period.getSchoolDays(), 1);
                 }
             }
 
@@ -191,6 +206,20 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         return cost;
+    }
+
+    private int determineCostOfRoomAttribute(Room room) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'determineCostOfRoomAttribute'");
+    }
+
+    private List<Room> getAllRoomsInSchoolSchedule(List<Timetable> schoolSchedule) {
+        return schoolSchedule.stream()
+                .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
+                .map(csi -> csi.getRoom())
+                .filter(room -> room != null)
+                .distinct()
+                .toList();
     }
 
     // TODO maybe advance with just being able to get new Changes instead of entire
@@ -300,8 +329,8 @@ public class SimulatedAnnealingAlgorithm {
                 .filter(csi -> csi.getClassSubject().getTeacher().getId().equals(teacher.getId()))
                 .toList();
 
-        if (checkIfTeacherTimetableIsValid(new Timetable(csiList))) {
-            // return IMPOSSIBLE_COST;
+        if (!checkIfTeacherTimetableIsValid(new Timetable(csiList))) {
+            cost += IMPOSSIBLE_COST;
         }
 
         final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
@@ -314,7 +343,7 @@ public class SimulatedAnnealingAlgorithm {
 
             final Integer teacherHoursCost = determineCostForTeacherHours(teacher, period);
             if (teacherHoursCost >= IMPOSSIBLE_COST) {
-                // return cost + IMPOSSIBLE_COST;
+                cost += IMPOSSIBLE_COST;
             }
 
             cost += teacherHoursCost;
@@ -394,7 +423,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public boolean checkIfTeacherTimetableIsValid(final Timetable teacherTimetable) {
-        return TimetableManager.timetableHasOverlap(teacherTimetable);
+        return !TimetableManager.timetableHasOverlap(teacherTimetable);
     }
 
     public Timetable chooseRandomNeighborFunction(final int index1, final int index2, final Timetable currTimetable) {
@@ -409,20 +438,6 @@ public class SimulatedAnnealingAlgorithm {
                 return changePeriod(currTimetable, index1, currTimetable);
         }
         return null;
-    }
-
-    public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
-        final int deltaCost = costNextTimeTable - costCurrTimeTable;
-        if (deltaCost >= IMPOSSIBLE_COST)
-            return false;
-
-        if (deltaCost < 0) { // next solution is better, always accept
-            return true;
-        }
-
-        final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * getTemperature()));
-
-        return Math.random() < probability;
     }
 
     public void pushTemperature(final double pushAmount) {
