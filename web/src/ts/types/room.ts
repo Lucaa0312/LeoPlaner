@@ -12,7 +12,6 @@ export type Room = {
 export type CreateRoomRequest = {
     roomName: string;
     roomNumber: number;
-    roomPrefix: string;
-    roomSuffix: string;
+    nameShort: string;
     roomTypes: RoomType[];
 };

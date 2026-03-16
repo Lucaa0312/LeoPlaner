@@ -8,6 +8,8 @@ import type { CreateRoomRequest, Room, RoomType } from "../types/room.js";
 import { initSearchElement } from "../features/searchElement.js";
 
 function formatRoomName(room: Room): string {
+    console.log(room);
+    
     return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
 }
 
@@ -70,18 +72,16 @@ async function loadAndRenderRooms(): Promise<void> {
 function collectRoomFormData(selectedTypes: RoomType[]): CreateRoomRequest | null {
     const nameInput = getElement<HTMLInputElement>("name-input");
     const numberInput = getElement<HTMLInputElement>("number-input");
-    const prefixInput = getElement<HTMLInputElement>("prefix-input");
-    const suffixInput = getElement<HTMLInputElement>("suffix-input");
+    const roomShortInput = getElement<HTMLInputElement>("initials-input");
 
-    if (!nameInput || !numberInput || !prefixInput || !suffixInput) {
+    if (!nameInput || !numberInput || !roomShortInput) {
         return null;
     }
 
     return {
         roomName: nameInput.value.trim(),
         roomNumber: Number(numberInput.value || 0),
-        roomPrefix: prefixInput.value.trim(),
-        roomSuffix: suffixInput.value.trim(),
+        nameShort: roomShortInput.value.trim(),
         roomTypes: selectedTypes,
     };
 }
@@ -89,30 +89,76 @@ function collectRoomFormData(selectedTypes: RoomType[]): CreateRoomRequest | nul
 function buildAddRoomModalContent(): HTMLElement {
     const content = document.createElement("div");
     content.id = "room-modal-content";
-    content.innerHTML = `
-        <div class="room-form-grid">
-            <div class="form-name-initials-inputs">
-                <input type="text" id="name-input" class="room-input" placeholder="Name">
-                <input type="text" id="initials-input" class="room-input" placeholder="Abkürzung">
-            </div>
 
-            <div class="form-number-prefix-suffix-inputs">
-                <input type="text" id="number-input" class="room-input" placeholder="Nummer">
-                <input type="text" id="prefix-input" class="room-input" placeholder="Prefix">
-                <input type="text" id="suffix-input" class="room-input" placeholder="Suffix">
-            </div>
+    const roomFormGrid = document.createElement("div");
+    roomFormGrid.className = "room-form-grid";
 
-            <div id="roomtype-block">
-                <div id="roomtype-input-container">
-                    <img id="add-room-img" src="../assets/img/magnifyingGlass.png" alt="Add Room"/>
-                    <input type="text" id="roomtype-input" placeholder="Raum Typen auswählen">
-                </div>
+    const nameInitialsDiv = document.createElement("div");
+    nameInitialsDiv.className = "form-name-initials-inputs";
 
-                <div id="roomtype-dropdown"></div>
-                <div id="selected-roomtypes"></div>
-            </div>
-        </div>
-    `;
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "name-input";
+    nameInput.className = "room-input";
+    nameInput.placeholder = "Name";
+    
+    const initialsInput = document.createElement("input");
+    initialsInput.type = "text";
+    initialsInput.id = "initials-input";
+    initialsInput.className = "room-input";
+    initialsInput.placeholder = "Abkürzung";
+    
+    nameInitialsDiv.append(nameInput, initialsInput);
+
+    const numberPrefixSuffixDiv = document.createElement("div");
+    numberPrefixSuffixDiv.className = "form-number-prefix-suffix-inputs";
+    
+    const numberInput = document.createElement("input");
+    numberInput.type = "text";
+    numberInput.id = "number-input";
+    numberInput.className = "room-input";
+    numberInput.placeholder = "Nummer";
+    
+    const prefixInput = document.createElement("input");
+    prefixInput.type = "text";
+    prefixInput.id = "prefix-input";
+    prefixInput.className = "room-input";
+    prefixInput.placeholder = "Prefix";
+    
+    const suffixInput = document.createElement("input");
+    suffixInput.type = "text";
+    suffixInput.id = "suffix-input";
+    suffixInput.className = "room-input";
+    suffixInput.placeholder = "Suffix";
+    
+    numberPrefixSuffixDiv.append(numberInput, prefixInput, suffixInput);
+
+    const roomtypeBlock = document.createElement("div");
+    roomtypeBlock.id = "roomtype-block";
+    
+    const roomtypeInputContainer = document.createElement("div");
+    roomtypeInputContainer.id = "roomtype-input-container";
+    
+    const img = document.createElement("img");
+    img.id = "add-room-img";
+    img.src = "../assets/img/magnifyingGlass.png";
+    img.alt = "Add Room";
+    
+    const roomtypeInput = document.createElement("input");
+    roomtypeInput.type = "text";
+    roomtypeInput.id = "roomtype-input";
+    roomtypeInput.placeholder = "Raum Typen auswählen";
+    roomtypeInputContainer.append(img, roomtypeInput);
+
+    const roomtypeDropdown = document.createElement("div");
+    roomtypeDropdown.id = "roomtype-dropdown";
+    
+    const selectedRoomtypes = document.createElement("div");
+    selectedRoomtypes.id = "selected-roomtypes";
+
+    roomtypeBlock.append(roomtypeInputContainer, roomtypeDropdown, selectedRoomtypes);
+    roomFormGrid.append(nameInitialsDiv, numberPrefixSuffixDiv, roomtypeBlock);
+    content.appendChild(roomFormGrid);
 
     return content;
 }

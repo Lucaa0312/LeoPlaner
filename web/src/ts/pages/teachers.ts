@@ -287,11 +287,16 @@ async function openAddTeacherForm(): Promise<void> {
     
     const form = buildAddTeacherForm();
     
-    const submitButton = document.createElement("div");
+    /*const submitButton = document.createElement("div");
     submitButton.id = "submit-teacher-btn";
-    submitButton.textContent = "Bestätigen";
+    submitButton.textContent = "Bestätigen";*/
     
-    addTeacherScreen.replaceChildren(header, avaterUploadDiv, form, submitButton);
+    const confirmButton = document.createElement("div");
+    confirmButton.id = "submit-teacher-btn";
+    confirmButton.textContent = "Bestätigen";
+
+
+    addTeacherScreen.replaceChildren(header, avaterUploadDiv, form, confirmButton);
     imagePreview();
 
     const subjectInput = getElement<HTMLInputElement>("subject-input");
@@ -313,7 +318,7 @@ async function openAddTeacherForm(): Promise<void> {
     });
 
 
-    submitButton.addEventListener("click", async () => {
+    confirmButton.addEventListener("click", async () => {
         try {
             const teacherData = collectSubjectData(subjectSelector.getSelectedSubjects());
             if (!teacherData) return;

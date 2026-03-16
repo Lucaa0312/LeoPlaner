@@ -1,12 +1,10 @@
 export function getElement(id) {
     return document.getElementById(id);
 }
-export function clearElement(element) {
-    element.replaceChildren();
-}
-export function show(element) {
-    element.style.display = "block";
-}
-export function hide(element) {
-    element.style.display = "none";
+export function requireElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        throw new Error(`Element with id "${id}" not found.`);
+    }
+    return element;
 }

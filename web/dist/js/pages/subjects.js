@@ -64,9 +64,8 @@ async function loadAndRenderSubjects() {
 }
 function collectSubjectData(selectetRoomTypes, selectedSubjectColor) {
     const nameInput = getElement("name-input");
-    const colorPicker = getElement("color-picker");
-    if (!nameInput || !colorPicker) {
-        throw new Error("Fehlende Formularelemente");
+    if (!nameInput) {
+        throw new Error("Fehlendes Formularelement");
     }
     return {
         subjectName: nameInput.value.trim(),

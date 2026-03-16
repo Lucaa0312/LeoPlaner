@@ -90,10 +90,9 @@ async function loadAndRenderSubjects(): Promise<void> {
 
 function collectSubjectData(selectetRoomTypes: RoomType[], selectedSubjectColor: SubjectColor): CreateSubjectRequest {
     const nameInput = getElement<HTMLInputElement>("name-input");
-    const colorPicker = getElement<HTMLElement>("color-picker");
 
-    if (!nameInput || !colorPicker) {
-        throw new Error("Fehlende Formularelemente");
+    if (!nameInput) {
+        throw new Error("Fehlendes Formularelement");
     }
 
     return {
