@@ -1,21 +1,21 @@
 teacherName;initials;subjects;nonWorking;nonPreferred
-Phillip Anderson;PA;English;MONDAY-1,2,6,7,9,10:FRIDAY-3,5,7,8,9,10;FRIDAY-1,3,4,6,7,8,9,10
-Charles Jacobs;CJ;MEDT3D,MEDTSM;MONDAY-1,3,4,6,8,9;WEDNESDAY-1,3,4,6,7,8,9,10
-Frank Phillips;FP;MEDTMC,Physics,English;TUESDAY-1,6;WEDNESDAY-1,3,4,5,6,7,8:MONDAY-1,2,3,4,5,8,10
-Steven Massey;SM;Biology,MEDTFI,Insy;THURSDAY-1,2,4,5,6,9,10;TUESDAY-1,3,4,5,9,10:WEDNESDAY-1,4,5,6,7,8
-Linda Fitzgerald;LF;German,Math,Biology;MONDAY-5,7:FRIDAY-5,7;FRIDAY-1,2,3,4,5,6,7
-James Stafford;JS;SEW,Physics;FRIDAY-4,5,8,9,10:MONDAY-2,3,5,6,9;FRIDAY-5
-Amy Bullock;AB;MEDTFI,Religion,MEDTPD;MONDAY-1,2,3,5,6,8,9,10;THURSDAY-3,5:MONDAY-1,3
-Ryan Hunter;RH;Chemistry,Math,MEDT3D;WEDNESDAY-5,6,7,8,9:THURSDAY-2,3,4,6,7;TUESDAY-4,10
-Karen Meyers;KM;German;FRIDAY-1,2,3,6,9,10:TUESDAY-1,2,3,4,6,9;THURSDAY-1,2,3,4,6,7,8,9:FRIDAY-1,2,3,4,5,7,8,9
-Holly Ball;HB;MEDT3D,Chemistry;MONDAY-2,3,5,8,10:FRIDAY-3,5,6,8,10;THURSDAY-7
-Kenneth Medina;KM;Economy,Biology;TUESDAY-1,2,5,7:THURSDAY-1,2,4,5;MONDAY-2,4,5,8
-Michelle Brewer;MB;MEDTSM,MEDT3D;WEDNESDAY-1,3,4,5,6,8,9,10;WEDNESDAY-5,6,8,9
-Nicole Greer;NG;German,Biology,law;FRIDAY-1,3,5,6,9,10;TUESDAY-2,3,4,7,8,9,10
-Brittany Lewis;BL;German,MEDTSM,ITP;THURSDAY-2,5;TUESDAY-2,4,7,8,10
-Michael Conley;MC;History,MEDTFI;WEDNESDAY-1,2,3,4,5,7,10:FRIDAY-1,5,6,7,8,9,10;FRIDAY-1,2,3,4,6,7,8,10:THURSDAY-2,3,4,5,6,7,9,10
-Scott Stevens;SS;German;MONDAY-2,3,4,5,6,7,9,10;WEDNESDAY-1,2,3,4,5,8,9,10:MONDAY-1,2,3,4,5,6,8,10
-Kayla Burton;KB;law,History;TUESDAY-1,4,5,6,8,9,10;MONDAY-2,6,8,9,10
-Bobby Lee;BL;MEDTPD;FRIDAY-1,4:TUESDAY-4,9;FRIDAY-2,3,4,5,6:TUESDAY-3,4,7,8,9
-Lori Johnson;LJ;English,Economy;TUESDAY-1,4,7,8,10;THURSDAY-6:MONDAY-10
-Alex Harmon;AH;Biology;WEDNESDAY-2,6,8,10;TUESDAY-1,2,4,6,7,8,10:THURSDAY-3,4,5,6,7,8,9
+Jill Patterson;JP;Deutsch;TUESDAY-2,4:MONDAY-5,10;TUESDAY-1,2,4,5,6,7,10
+Christopher Cochran;CC;Medientechnik Mobile Computing,Medientechnik Virtuelle Welten und Spieleentwicklung,Englisch;MONDAY-1,2,3,5,6,8,9,10:THURSDAY-2,3,4,5,6,8,9,10;WEDNESDAY-2,3,5,7,8,9
+Shane Allen;SA;Informationstechnische Projekte;MONDAY-2,4,5,6,7,8,10:FRIDAY-1,2,3,5,6,7,8;MONDAY-1,2,4,5
+Austin Burton;AB;Medientechnik Virtuelle Welten und Spieleentwicklung,Religion,Geographie;THURSDAY-3,5,6,8:WEDNESDAY-1,4,5,10;TUESDAY-7,8,9:WEDNESDAY-5,6,10
+Sean Burnett;SB;Deutsch;MONDAY-1,3,4,5,6,9,10;FRIDAY-2,3,5,6,7,10:WEDNESDAY-3,5,6,8,9,10
+Abigail Sullivan;AS;Englisch,Physik;FRIDAY-1,3,8,10;WEDNESDAY-3,4
+Teresa Baker;TB;Physik,Medientechnik Film und Audio;WEDNESDAY-2,4,7,10:MONDAY-2,4,9,10;FRIDAY-2,5,6,7,10
+James Wood;JW;Medientechnik Virtuelle Welten und Spieleentwicklung;MONDAY-2,4,5,7,8;FRIDAY-1,5,6,10
+Monique Ware;MW;Medientechnik Virtuelle Welten und Spieleentwicklung,Medientechnik Print und Design,Wirtschaft;MONDAY-1,3,4,6,8,10;WEDNESDAY-1,2,4,5,7,8,9,10
+Sarah Rivera;SR;Physik,Informationstechnische Projekte,Religion;FRIDAY-1,2,3,4,6,7,9:WEDNESDAY-1,3,4,5,7,8,9;MONDAY-1,2,5,7,10:THURSDAY-2,3,5,7,10
+Samantha Larson;SL;Software Entwicklung;FRIDAY-2,4,6,7;TUESDAY-1,2,7,8:MONDAY-6,8,9,10
+Scott Duffy;SD;Medientechnik Print und Design;FRIDAY-1,5,9;MONDAY-4,6
+Andrew Jackson;AJ;Deutsch;FRIDAY-2,3,4,5:TUESDAY-4,5,7,8;FRIDAY-1,3,5,7,8,9:WEDNESDAY-2,3,5,6,7,9
+Michael Mckinney;MM;Medientechnik Virtuelle Welten und Spieleentwicklung,Biologie,Chemie;MONDAY-3,6,8,9,10;MONDAY-1,2,3,6,8
+Brian Wood;BW;Biologie;WEDNESDAY-4;WEDNESDAY-1,2,3,4,6,9
+Steven Martinez;SM;Chemie,Mathematik;MONDAY-1,3,4,5,7,8,10;TUESDAY-5
+Jordan Fletcher;JF;Religion,Medientechnik Print und Design,Geographie;TUESDAY-1,2,4,6,8,9:THURSDAY-2,5,6,8,9,10;TUESDAY-3,4,5,6,7,8,9
+Riley Gutierrez;RG;Biologie,Englisch,Geschichte;MONDAY-2,3,4,5,6,7,8,9:FRIDAY-1,2,3,5,6,7,8,9;WEDNESDAY-2,3,5,6,7,8,9,10
+Nathan King;NK;Chemie,Medientechnik Film und Audio;FRIDAY-1,2,3,4,5,6,8;TUESDAY-1,2,3,5,8,9
+Jake Kelley;JK;Informationstechnische Projekte,Geschichte,Medientechnik Film und Audio;TUESDAY-3,4,5,6,7,8,9:MONDAY-1,3,5,6,7,8,10;TUESDAY-1,2,7,9,10:WEDNESDAY-1,4,5,7,10

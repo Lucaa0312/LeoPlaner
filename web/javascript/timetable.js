@@ -1,3 +1,5 @@
+import { clearCharts } from './graph.js';
+
 // Dopdown button trigger
 
 document.querySelectorAll('.top-bar-select').forEach(wrapper => {
@@ -64,7 +66,7 @@ const times = [
 ]
 
 
-function load() {
+export function load() {
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then(response => {
@@ -75,7 +77,7 @@ function load() {
             console.error('Error loading Timetable:', error)
         })
         .finally(() => {
-            hideLoader();
+            //hideLoader();
         });
 }
 
@@ -91,9 +93,16 @@ function getRandomizedTimeTable() {
         })
 }
 
-
+const algorithmButton = document.getElementById('algorithmButton');
+let algorithmToggleButton = document.getElementById('optimizeButton');
+algorithmButton.addEventListener('click', () => {
+    algorithmToggleButton.style.opacity = 1;
+    algorithmToggleButton.classList.add('optimizeButtonHover');
+    getOptimizedTimetable();
+})
 function getOptimizedTimetable() {
-    showLoader();
+    clearCharts();
+    //showLoader();
     clearLayout();
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
         .then(res => {

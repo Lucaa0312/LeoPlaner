@@ -3,12 +3,15 @@ package at.htlleonding.leoplaner.data;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class TimetableManager {
+
     public static ArrayList<Period> returnAllFreePeriodsOnCertainDay(final Timetable timetable,
             final SchoolDays schoolDay,
             final int duration) {
@@ -80,11 +83,11 @@ public class TimetableManager {
                 .filter(e -> e.getPeriod().getSchoolDays() == schoolday).mapToInt(e -> e.getPeriod().getSchoolHour())
                 .min().getAsInt(); // get lowest Schoolhour
 
-        Random random = new Random();
+        final Random random = new Random();
 
-        int randBob = random.nextInt(LOWEST_SCHOOLHOUR + 2, HIGHEST_SCHOOLHOUR + 1);
+        final int randBob = random.nextInt(LOWEST_SCHOOLHOUR + 2, HIGHEST_SCHOOLHOUR + 1);
 
-        boolean LUNCHBREAK = true;
+        final boolean LUNCHBREAK = true;
 
         timetable.getClassSubjectInstances().stream().filter(
                 e -> e.getPeriod().getSchoolDays() == schoolday && e.getPeriod().getSchoolHour() >= randBob)
@@ -92,7 +95,7 @@ public class TimetableManager {
                                                                                                // lunch break one hour
                                                                                                // later
 
-        Period lunchBreakPeriod = new Period(schoolday, randBob, LUNCHBREAK);
+        final Period lunchBreakPeriod = new Period(schoolday, randBob, LUNCHBREAK);
         while (!checkIfPeriodIsFreeOnDay(timetable, randBob, 1, schoolday)) {
             lunchBreakPeriod.setSchoolHour(lunchBreakPeriod.getSchoolHour() + 1);
         }
@@ -108,9 +111,9 @@ public class TimetableManager {
     public static boolean checkIfPeriodIsFreeOnDay(final Timetable timetable, final int schoolHour,
             final int duration, final SchoolDays schoolDay) {
 
-        List<Integer> allOccupiedHoursOnDay = new ArrayList<>();
+        final List<Integer> allOccupiedHoursOnDay = new ArrayList<>();
 
-        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances().stream()
+        for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances().stream()
                 .filter(e -> e.getPeriod().getSchoolDays() == schoolDay).toList()) {
             for (int i = 0; i < csi.getDuration(); i++) {
                 allOccupiedHoursOnDay.add(csi.getPeriod().getSchoolHour());
@@ -127,6 +130,28 @@ public class TimetableManager {
             }
         }
         return true;
+    }
+
+    public static boolean checkIfPeriodIsDoubleDay(final Timetable timetable, final SchoolDays schoolDay) {
+
+        Set<Integer> occupied = new HashSet<>();
+
+        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+
+            if (csi.getPeriod().getSchoolDays() != schoolDay)
+                continue;
+
+            for (int i = 0; i < csi.getDuration(); i++) {
+
+                int hour = csi.getPeriod().getSchoolHour() + i;
+
+                if (!occupied.add(hour)) {
+                    return true; // overlap
+                }
+            }
+        }
+
+        return false;
     }
 
     public static ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList(final Timetable timetable) { // deep
@@ -164,15 +189,33 @@ public class TimetableManager {
         return new Timetable(cloneClassSubjectInstanceList(timetable));
     }
 
+    public static boolean timetableHasOverlap(final Timetable timetable) {
+        for (SchoolDays day : SchoolDays.values()) {
+            if (checkIfPeriodIsDoubleDay(timetable, day)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Timetable switchTwoClassSubjectInstancesAndReturn(final Timetable timetable, final int index1,
             final int index2) {
         final Timetable clonedTimetable = cloneCurrentTimeTable(timetable);
         final ClassSubjectInstance csi1 = clonedTimetable.getClassSubjectInstances().get(index1);
         final ClassSubjectInstance csi2 = clonedTimetable.getClassSubjectInstances().get(index2);
 
+        if (csi1.getPeriod().isLunchBreak() || csi2.getPeriod().isLunchBreak()) {
+            return clonedTimetable;
+        }
+
         final Period tempPeriod = csi2.getPeriod();
+
         csi2.setPeriod(csi1.getPeriod());
         csi1.setPeriod(tempPeriod);
+
+        if (timetableHasOverlap(timetable)) {
+            return timetable;
+        }
 
         return clonedTimetable;
     }

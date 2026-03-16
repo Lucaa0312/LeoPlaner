@@ -280,6 +280,7 @@ public class DataRepository {
         Subject subjectToUpdate = Subject.getById(id);
 
         subjectToUpdate.setSubjectName(subject.getSubjectName());
+        subjectToUpdate.setSubjectSymbol(subject.getSubjectSymbol());
         subjectToUpdate.setSubjectColor(subject.getSubjectColor());
         subjectToUpdate.setRequiredRoomTypes(subject.getRequiredRoomTypes());
 

@@ -1,91 +1,85 @@
 classSubjectName;teacherName;weeklyHours;requiresDoublePeriod;betterDoublePeriod;className;classRoom
-law;Bobby Lee;3;False;False;3IHF;451MILLER
-MEDTFI;Ryan Hunter;2;True;True;3IHF;451MILLER
-MEDTMC;Charles Jacobs;3;False;True;3IHF;451MILLER
-Religion;Scott Stevens;2;True;True;3IHF;451MILLER
-SEW;Michelle Brewer;1;False;False;3IHF;451MILLER
-Economy;Michelle Brewer;1;False;True;3IHF;451MILLER
-Biology;Linda Fitzgerald;1;False;False;3IHF;451MILLER
-Geography;Brittany Lewis;3;True;True;3IHF;451MILLER
-Geography;Karen Meyers;3;True;False;3IHF;451MILLER
-English;Linda Fitzgerald;3;True;False;3IHF;451MILLER
-MEDTFI;Kenneth Medina;3;True;True;3IHF;451MILLER
-SEW;Linda Fitzgerald;2;True;False;3IHF;451MILLER
-MEDTFI;Brittany Lewis;1;True;False;3IHF;451MILLER
-Chemistry;Michael Conley;2;False;True;3IHF;451MILLER
-MEDTSM;Holly Ball;2;False;True;3IHF;451MILLER
-law;Charles Jacobs;3;False;True;1CHITM;38WILLIAMS
-Economy;Ryan Hunter;1;True;False;1CHITM;38WILLIAMS
-MEDTFI;Holly Ball;1;False;True;1CHITM;38WILLIAMS
-Chemistry;Charles Jacobs;1;True;False;1CHITM;38WILLIAMS
-MEDTSM;Steven Massey;2;False;False;1CHITM;38WILLIAMS
-English;Michael Conley;2;False;False;1CHITM;38WILLIAMS
-Math;Karen Meyers;2;False;True;1CHITM;38WILLIAMS
-German;Holly Ball;3;False;False;1CHITM;38WILLIAMS
-MEDTPD;Karen Meyers;1;True;True;1CHITM;38WILLIAMS
-MEDTFI;Holly Ball;3;True;False;1CHITM;38WILLIAMS
-MEDTSM;Linda Fitzgerald;1;False;False;1CHITM;38WILLIAMS
-Biology;Brittany Lewis;1;True;True;1CHITM;38WILLIAMS
-Math;Phillip Anderson;3;False;True;1CHITM;38WILLIAMS
-MEDTPD;Linda Fitzgerald;1;False;True;1CHITM;38WILLIAMS
-Biology;Kenneth Medina;1;False;True;1CHITM;38WILLIAMS
-English;Nicole Greer;1;False;False;1CHIF;469STEVENS
-Chemistry;Lori Johnson;1;True;True;1CHIF;469STEVENS
-MEDT3D;Brittany Lewis;2;True;False;1CHIF;469STEVENS
-Religion;Amy Bullock;1;True;False;1CHIF;469STEVENS
-Economy;Alex Harmon;3;True;False;1CHIF;469STEVENS
-Biology;Karen Meyers;1;True;False;1CHIF;469STEVENS
-MEDTSM;Frank Phillips;1;True;False;1CHIF;469STEVENS
-Geography;Bobby Lee;2;False;True;1CHIF;469STEVENS
-Insy;Linda Fitzgerald;1;True;True;1CHIF;469STEVENS
-German;Kenneth Medina;1;False;False;1CHIF;469STEVENS
-Insy;Lori Johnson;3;True;True;1CHIF;469STEVENS
-MEDT3D;Alex Harmon;1;True;True;1CHIF;469STEVENS
-Biology;Ryan Hunter;3;True;True;1CHIF;469STEVENS
-Religion;Kayla Burton;1;True;True;1CHIF;469STEVENS
-English;Ryan Hunter;1;True;True;1CHIF;469STEVENS
-MEDTSM;Phillip Anderson;3;True;False;3CHITM;378CAMPBELL
-ITP;Kayla Burton;3;False;True;3CHITM;378CAMPBELL
-MEDT3D;Nicole Greer;2;False;False;3CHITM;378CAMPBELL
-History;Nicole Greer;3;False;True;3CHITM;378CAMPBELL
-SEW;Steven Massey;1;True;True;3CHITM;378CAMPBELL
-Insy;Kenneth Medina;3;True;True;3CHITM;378CAMPBELL
-law;Steven Massey;1;True;True;3CHITM;378CAMPBELL
-SEW;Amy Bullock;1;True;True;3CHITM;378CAMPBELL
-German;James Stafford;3;True;True;3CHITM;378CAMPBELL
-History;Phillip Anderson;2;False;True;3CHITM;378CAMPBELL
-Math;Nicole Greer;1;False;True;3CHITM;378CAMPBELL
-Geography;Holly Ball;2;True;False;3CHITM;378CAMPBELL
-History;Steven Massey;3;True;False;3CHITM;378CAMPBELL
-English;Brittany Lewis;3;False;False;3CHITM;378CAMPBELL
-MEDT3D;Brittany Lewis;1;True;False;3CHITM;378CAMPBELL
-Insy;Michelle Brewer;1;False;False;4AHITM;200HENSLEY
-History;Holly Ball;3;False;False;4AHITM;200HENSLEY
-SEW;Ryan Hunter;1;True;False;4AHITM;200HENSLEY
-Religion;Kenneth Medina;3;True;False;4AHITM;200HENSLEY
-Economy;Phillip Anderson;1;True;True;4AHITM;200HENSLEY
-MEDT3D;Charles Jacobs;3;False;True;4AHITM;200HENSLEY
-Geography;Karen Meyers;2;True;False;4AHITM;200HENSLEY
-MEDTPD;Frank Phillips;2;True;True;4AHITM;200HENSLEY
-Economy;Ryan Hunter;1;False;False;4AHITM;200HENSLEY
-law;Bobby Lee;1;True;True;4AHITM;200HENSLEY
-History;Kenneth Medina;1;True;True;4AHITM;200HENSLEY
-Physics;Amy Bullock;3;False;True;4AHITM;200HENSLEY
-ITP;Steven Massey;2;False;True;4AHITM;200HENSLEY
-MEDTPD;Linda Fitzgerald;3;False;True;4AHITM;200HENSLEY
-MEDTMC;Scott Stevens;3;True;True;4AHITM;200HENSLEY
-Chemistry;Kenneth Medina;3;False;False;4CHITM;311PALMER
-law;Phillip Anderson;1;False;True;4CHITM;311PALMER
-MEDTPD;Kenneth Medina;1;False;True;4CHITM;311PALMER
-German;Michael Conley;1;False;False;4CHITM;311PALMER
-ITP;Steven Massey;1;False;True;4CHITM;311PALMER
-ITP;Brittany Lewis;2;False;True;4CHITM;311PALMER
-Math;James Stafford;1;False;False;4CHITM;311PALMER
-ITP;Kenneth Medina;1;False;True;4CHITM;311PALMER
-Math;Linda Fitzgerald;3;False;True;4CHITM;311PALMER
-Chemistry;Linda Fitzgerald;1;True;True;4CHITM;311PALMER
-Insy;Michael Conley;2;False;False;4CHITM;311PALMER
-German;Amy Bullock;2;False;True;4CHITM;311PALMER
-MEDTMC;Nicole Greer;2;False;True;4CHITM;311PALMER
-Physics;Linda Fitzgerald;3;False;False;4CHITM;311PALMER
-Religion;Michael Conley;1;False;True;4CHITM;311PALMER
+Englisch;Samantha Larson;2;True;True;4CHITM;66POTTS
+Informationssysteme;Shane Allen;2;True;False;4CHITM;66POTTS
+Mathematik;Abigail Sullivan;3;True;False;4CHITM;66POTTS
+Recht;Sean Burnett;1;False;False;4CHITM;66POTTS
+Medientechnik Film und Audio;James Wood;1;True;False;4CHITM;66POTTS
+Geographie;Sean Burnett;2;False;True;4CHITM;66POTTS
+Geographie;Steven Martinez;1;True;True;4CHITM;66POTTS
+Englisch;Christopher Cochran;3;True;True;4CHITM;66POTTS
+Englisch;Jordan Fletcher;2;True;True;4CHITM;66POTTS
+Recht;Monique Ware;2;False;True;4CHITM;66POTTS
+Medientechnik Virtuelle Welten und Spieleentwicklung;Nathan King;2;False;False;4CHITM;66POTTS
+Software Entwicklung;Brian Wood;3;False;True;4CHITM;66POTTS
+Chemie;Scott Duffy;1;True;False;4CHITM;66POTTS
+Geschichte;Jordan Fletcher;3;False;False;4CHITM;66POTTS
+Medientechnik Mobile Computing;Nathan King;1;True;False;1CHITM;398MERCADO
+Geschichte;Nathan King;3;False;True;1CHITM;398MERCADO
+Medientechnik Mobile Computing;Shane Allen;3;True;False;1CHITM;398MERCADO
+Medientechnik Mobile Computing;James Wood;3;False;True;1CHITM;398MERCADO
+Medientechnik Print und Design;Nathan King;3;True;True;1CHITM;398MERCADO
+Geschichte;Steven Martinez;3;False;False;1CHITM;398MERCADO
+Recht;Sean Burnett;1;True;True;1CHITM;398MERCADO
+Wirtschaft;Jordan Fletcher;3;True;False;1CHITM;398MERCADO
+Informationssysteme;Monique Ware;2;True;True;1CHITM;398MERCADO
+Mathematik;Steven Martinez;2;True;False;1CHITM;398MERCADO
+Medientechnik Film und Audio;Michael Mckinney;3;False;False;1CHITM;398MERCADO
+Software Entwicklung;Teresa Baker;2;False;False;1CHITM;398MERCADO
+Recht;Jill Patterson;2;False;True;1CHITM;398MERCADO
+Medientechnik Print und Design;Nathan King;2;False;True;1CHITM;398MERCADO
+Deutsch;Abigail Sullivan;3;True;False;4AHITM;447WILLIAMS
+Medientechnik Social Media;Samantha Larson;3;False;False;4AHITM;447WILLIAMS
+Medientechnik Virtuelle Welten und Spieleentwicklung;Austin Burton;3;False;False;4AHITM;447WILLIAMS
+Recht;Jordan Fletcher;3;True;False;4AHITM;447WILLIAMS
+Informationssysteme;Jake Kelley;3;False;True;4AHITM;447WILLIAMS
+Medientechnik Film und Audio;Jill Patterson;1;True;True;4AHITM;447WILLIAMS
+Physik;Jake Kelley;2;False;False;4AHITM;447WILLIAMS
+Biologie;Samantha Larson;1;False;False;4AHITM;447WILLIAMS
+Informationstechnische Projekte;James Wood;1;True;True;4AHITM;447WILLIAMS
+Biologie;Sean Burnett;3;False;True;4AHITM;447WILLIAMS
+Informationssysteme;Christopher Cochran;2;True;True;4AHITM;447WILLIAMS
+Geographie;Sarah Rivera;2;True;True;4AHITM;447WILLIAMS
+Geschichte;Teresa Baker;3;False;False;4AHITM;447WILLIAMS
+Deutsch;Sean Burnett;1;False;True;4AHITM;447WILLIAMS
+Chemie;Steven Martinez;3;True;True;1CHIF;323CERVANTES
+Medientechnik Film und Audio;Andrew Jackson;1;True;True;1CHIF;323CERVANTES
+Geschichte;Steven Martinez;2;True;True;1CHIF;323CERVANTES
+Medientechnik Virtuelle Welten und Spieleentwicklung;Sarah Rivera;3;False;False;1CHIF;323CERVANTES
+Informationstechnische Projekte;Nathan King;3;True;True;1CHIF;323CERVANTES
+Wirtschaft;Michael Mckinney;2;True;True;1CHIF;323CERVANTES
+Englisch;Sean Burnett;2;True;True;1CHIF;323CERVANTES
+Software Entwicklung;Sean Burnett;3;True;True;1CHIF;323CERVANTES
+Mathematik;James Wood;2;True;True;1CHIF;323CERVANTES
+Medientechnik Mobile Computing;Jill Patterson;2;False;False;1CHIF;323CERVANTES
+Medientechnik Virtuelle Welten und Spieleentwicklung;Sean Burnett;1;False;False;1CHIF;323CERVANTES
+Chemie;Teresa Baker;1;False;False;1CHIF;323CERVANTES
+Mathematik;Shane Allen;3;False;False;1CHIF;323CERVANTES
+Software Entwicklung;Nathan King;1;False;False;1CHIF;323CERVANTES
+Physik;Jordan Fletcher;1;True;False;3IHF;125RUSSELL
+Informationstechnische Projekte;Steven Martinez;2;True;True;3IHF;125RUSSELL
+Biologie;Jill Patterson;3;False;True;3IHF;125RUSSELL
+Biologie;Andrew Jackson;3;True;False;3IHF;125RUSSELL
+Englisch;Samantha Larson;2;False;False;3IHF;125RUSSELL
+Software Entwicklung;Steven Martinez;1;True;False;3IHF;125RUSSELL
+Wirtschaft;Sean Burnett;3;True;True;3IHF;125RUSSELL
+Medientechnik Social Media;Jake Kelley;1;True;False;3IHF;125RUSSELL
+Informationstechnische Projekte;Nathan King;3;False;True;3IHF;125RUSSELL
+Chemie;Michael Mckinney;2;True;False;3IHF;125RUSSELL
+Medientechnik Print und Design;Sean Burnett;3;True;False;3IHF;125RUSSELL
+Mathematik;Sean Burnett;3;False;False;3IHF;125RUSSELL
+Informationssysteme;Jake Kelley;2;False;True;3IHF;125RUSSELL
+Medientechnik Film und Audio;Scott Duffy;2;True;True;3IHF;125RUSSELL
+Biologie;Sarah Rivera;2;True;True;3CHITM;480VINCENT
+Medientechnik Social Media;James Wood;2;True;False;3CHITM;480VINCENT
+Medientechnik Print und Design;Jill Patterson;2;False;True;3CHITM;480VINCENT
+Wirtschaft;Christopher Cochran;2;False;True;3CHITM;480VINCENT
+Medientechnik Mobile Computing;Shane Allen;1;True;False;3CHITM;480VINCENT
+Wirtschaft;Sarah Rivera;3;True;True;3CHITM;480VINCENT
+Deutsch;Jill Patterson;1;False;True;3CHITM;480VINCENT
+Physik;Sean Burnett;1;False;False;3CHITM;480VINCENT
+Informationstechnische Projekte;Monique Ware;3;False;True;3CHITM;480VINCENT
+Medientechnik Print und Design;Christopher Cochran;3;False;True;3CHITM;480VINCENT
+Geographie;Shane Allen;1;True;True;3CHITM;480VINCENT
+Physik;Teresa Baker;1;True;False;3CHITM;480VINCENT
+Religion;Riley Gutierrez;2;False;False;3CHITM;480VINCENT
+Geographie;Michael Mckinney;3;True;False;3CHITM;480VINCENT
