@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.algorithm;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,8 +38,8 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.LOW, 5);
         costOfEachDegree.put(CostDegree.MID, 20);
         costOfEachDegree.put(CostDegree.HIGH, 50);
-        costOfEachDegree.put(CostDegree.SEVERE, 200);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 35000);
+        costOfEachDegree.put(CostDegree.SEVERE, 150);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 1000);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -162,18 +163,17 @@ public class SimulatedAnnealingAlgorithm {
         final List<Room> allRooms = getAllRoomsInSchoolSchedule(schoolSchedule);
 
         for (final Room room : allRooms) {
-            // final int costOfRoomAttributes = determineCostOfRoomAttribute(room);
-            final int costOfRoomAttributes = 0;
-
-            if (costOfRoomAttributes >= IMPOSSIBLE_COST) {
-                return cost + costOfRoomAttributes;
-            } else {
-                cost += costOfRoomAttributes;
+            int costRoom = determineCostOfRoomAttribute(room, schoolSchedule);
+            if (costRoom >= IMPOSSIBLE_COST) {
             }
+            cost += costRoom;
         }
 
         for (final Teacher teacher : allTeachers) {
-            cost += determineTeacherWorkloadCost(teacher, schoolSchedule);
+            int costTeacher = determineTeacherWorkloadCost(teacher, schoolSchedule);
+            if (costTeacher >= IMPOSSIBLE_COST) {
+            }
+            // cost += costTeacher;
         }
 
         for (final Timetable timetable : schoolSchedule) {
@@ -206,20 +206,6 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         return cost;
-    }
-
-    private int determineCostOfRoomAttribute(Room room) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'determineCostOfRoomAttribute'");
-    }
-
-    private List<Room> getAllRoomsInSchoolSchedule(List<Timetable> schoolSchedule) {
-        return schoolSchedule.stream()
-                .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
-                .map(csi -> csi.getRoom())
-                .filter(room -> room != null)
-                .distinct()
-                .toList();
     }
 
     // TODO maybe advance with just being able to get new Changes instead of entire
@@ -316,8 +302,33 @@ public class SimulatedAnnealingAlgorithm {
 
     }
 
+    private List<Room> getAllRoomsInSchoolSchedule(List<Timetable> schoolSchedule) {
+        return schoolSchedule.stream()
+                .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
+                .map(csi -> csi.getRoom())
+                .filter(room -> room != null)
+                .distinct()
+                .toList();
+    }
+
     public int determineCostOfCertainDay(SchoolDays day) {
         return costOfEachDay.get(day);
+    }
+
+    private int determineCostOfRoomAttribute(Room room, List<Timetable> schoolSchedule) {
+        int cost = 0;
+
+        List<ClassSubjectInstance> timetablOfRoom = schoolSchedule.stream()
+                .flatMap(t -> t.getClassSubjectInstances().stream())
+                .filter(c -> c.getRoom() != null)
+                .filter(csi -> csi.getRoom().getId().equals(room.getId()))
+                .toList();
+
+        if (!checkIfTimetableIsValid(new Timetable(timetablOfRoom))) {
+            cost += IMPOSSIBLE_COST;
+        }
+
+        return cost;
     }
 
     public int determineTeacherWorkloadCost(final Teacher teacher, List<Timetable> schoolSchedule) {
@@ -329,7 +340,7 @@ public class SimulatedAnnealingAlgorithm {
                 .filter(csi -> csi.getClassSubject().getTeacher().getId().equals(teacher.getId()))
                 .toList();
 
-        if (!checkIfTeacherTimetableIsValid(new Timetable(csiList))) {
+        if (!checkIfTimetableIsValid(new Timetable(csiList))) {
             cost += IMPOSSIBLE_COST;
         }
 
@@ -422,8 +433,8 @@ public class SimulatedAnnealingAlgorithm {
         return false;
     }
 
-    public boolean checkIfTeacherTimetableIsValid(final Timetable teacherTimetable) {
-        return !TimetableManager.timetableHasOverlap(teacherTimetable);
+    public boolean checkIfTimetableIsValid(final Timetable timetable) {
+        return !TimetableManager.timetableHasOverlap(timetable);
     }
 
     public Timetable chooseRandomNeighborFunction(final int index1, final int index2, final Timetable currTimetable) {
