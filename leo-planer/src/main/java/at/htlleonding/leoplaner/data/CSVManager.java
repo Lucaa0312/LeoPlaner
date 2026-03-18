@@ -14,7 +14,7 @@ import at.htlleonding.leoplaner.dto.ParsedDayHour;
 public class CSVManager {
     final static String teacherType = "teacherName";
     final static String roomType = "roomNumber";
-    final static String subjectType = "subjectName"; 
+    final static String subjectType = "subjectName";
     final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
@@ -175,8 +175,9 @@ public class CSVManager {
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
             final String subjectSymbol = line[1].trim();
-            if (subjectSymbol.length() > 6){
-                throw new IllegalArgumentException("Subject symbol " + subjectSymbol + " is too long. Max length is 6 characters.");
+            if (subjectSymbol.length() > 6) {
+                throw new IllegalArgumentException(
+                        "Subject symbol " + subjectSymbol + " is too long. Max length is 6 characters.");
             }
             final String subjectColor = line[3].trim();
             final Subject subject = new Subject();
@@ -240,12 +241,11 @@ public class CSVManager {
             if (schoolClass == null) {
                 schoolClass = new SchoolClass();
                 schoolClass.setClassName(className);
+                Room classRoom = dataRepository.getRoomByNumberName(numberName);
+                // TODO add null check
+                schoolClass.setClassRoom(classRoom);
                 dataRepository.addSchoolClass(schoolClass);
             }
-
-            Room classRoom = dataRepository.getRoomByNumberName(numberName);
-            // TODO add null check
-            schoolClass.setClassRoom(classRoom);
 
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);

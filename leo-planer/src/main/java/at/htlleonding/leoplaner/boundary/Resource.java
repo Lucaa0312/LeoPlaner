@@ -13,6 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api")
@@ -64,6 +65,13 @@ public class Resource {
     @GET
     public void runAlgorithm() {
         simulatedAnnealingAlgorithm.algorithmLoop();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("randomize")
+    public void randomizeTimeTable() {
+        this.dataRepository.randomizeSchoolSchedule();
     }
 
     @Path("get/algorithmHistory")

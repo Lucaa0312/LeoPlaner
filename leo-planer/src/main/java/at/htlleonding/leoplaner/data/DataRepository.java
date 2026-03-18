@@ -168,43 +168,32 @@ public class DataRepository {
     }
 
     @Transactional
-    public ClassSubject addClassSubject(final ClassSubject classSubject) { // TODO correct return type???
-        if (this.entityManager.contains(classSubject)) {
-            throw new IllegalArgumentException();
+    public void addClassSubject(final ClassSubject classSubject) { // TODO correct return type???
+        if (!this.entityManager.contains(classSubject)) {
+            this.entityManager.persist(classSubject);
         }
 
-        this.entityManager.persist(classSubject);
-        return classSubject;
     }
 
     @Transactional
-    public ClassSubjectInstance addClassSubjectInstance(final ClassSubjectInstance classSubjectInstance) {
-        if (this.entityManager.contains(classSubjectInstance)) {
-            throw new IllegalArgumentException();
+    public void addClassSubjectInstance(final ClassSubjectInstance classSubjectInstance) {
+        if (!this.entityManager.contains(classSubjectInstance)) {
+            this.entityManager.persist(classSubjectInstance);
         }
-
-        this.entityManager.persist(classSubjectInstance);
-        return classSubjectInstance;
     }
 
     @Transactional
-    public Timetable addTimetable(final Timetable timetable) {
-        if (this.entityManager.contains(timetable)) {
-            throw new IllegalArgumentException();
+    public void addTimetable(final Timetable timetable) {
+        if (!this.entityManager.contains(timetable)) {
+            this.entityManager.persist(timetable);
         }
-
-        this.entityManager.persist(timetable);
-        return timetable;
     }
 
     @Transactional
-    public SchoolClass addSchoolClass(final SchoolClass schoolClass) {
-        if (this.entityManager.contains(schoolClass)) {
-            throw new IllegalArgumentException();
+    public void addSchoolClass(final SchoolClass schoolClass) {
+        if (!this.entityManager.contains(schoolClass)) {
+            this.entityManager.persist(schoolClass);
         }
-
-        this.entityManager.persist(schoolClass);
-        return schoolClass;
     }
 
     @Transactional
@@ -384,16 +373,17 @@ public class DataRepository {
     }
 
     public void createTimetableForClassNew(final Long id, final String className, final Room classRoom) {
+        System.out.println(classRoom.getRoomNumber());
         final SchoolClass schoolClass = SchoolClass.getById(id);
 
         final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
-        final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
+        final List<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
                 classRoom);
 
         final Timetable timetable = new Timetable(classSubjectInstances, schoolClass);
         this.currentTimetableList.put(className, timetable); // TODO maybe change with id, or
                                                              // make name id
-        addTimetable(timetable);
+        // addTimetable(timetable);
     }
 
     public void createTimetableForClass(final String className, final Room classRoom) {
@@ -401,5 +391,10 @@ public class DataRepository {
         final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
                 classRoom);
         this.currentTimetable = new Timetable(classSubjectInstances);
+    }
+
+    public void randomizeSchoolSchedule() {
+        currentTimetableList = new HashMap<>();
+        initRandomTimetableForAllClasses();
     }
 }

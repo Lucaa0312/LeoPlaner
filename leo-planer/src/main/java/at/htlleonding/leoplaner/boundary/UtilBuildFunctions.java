@@ -77,7 +77,8 @@ public class UtilBuildFunctions {
     }
 
     public static SchoolClassDTO createSchoolClassDTO(SchoolClass schoolClass) {
-        return new SchoolClassDTO(schoolClass.getId(), schoolClass.getClassName());
+        return new SchoolClassDTO(schoolClass.getId(), schoolClass.getClassName(),
+                createRoomDTO(schoolClass.getClassRoom()));
     }
 
     public static List<SchoolClassDTO> createListOfSchoolclassDTOs(List<SchoolClass> schoolClasses) {

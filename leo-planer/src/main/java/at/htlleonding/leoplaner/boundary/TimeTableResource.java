@@ -64,16 +64,6 @@ public class TimeTableResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/randomize")
-    public Response randomizeTimeTable() {
-        Room room = this.dataRepository.getRandomRoom();
-        this.dataRepository.createTimetableForClass("4chitm", room);
-        return Response.status(Response.Status.OK)
-                .build();
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByDay/{day}")
     public Response getClassSubjectInstancesByDay(@PathParam("day") String day) {
         List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable()
