@@ -26,18 +26,18 @@ public class UtilBuildFunctions {
     public static TeacherDTO createTeacherDTO(Teacher teacher) {
         return new TeacherDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(),
                 teacher.getTeachingSubject().stream()
-                        .map(ts -> new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectColor(),
+                        .map(ts -> new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectSymbol(), ts.getSubjectColor(),
                                 ts.getRequiredRoomTypes()))
                         .toList());
     }
 
     public static SubjectDTO createSubjectDTO(Subject subject) {
-        return new SubjectDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectColor(),
+        return new SubjectDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(), subject.getSubjectColor(),
                 subject.getRequiredRoomTypes());
     }
 
     public static SubjectClassLinkDTO createSubjectClassLinkDTO(Subject subject) {
-        return new SubjectClassLinkDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectColor());
+        return new SubjectClassLinkDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(), subject.getSubjectColor());
     }
 
     public static TeacherSubjectLinkDTO createTeacherSubjectLinkDTO(Teacher teacher) {
