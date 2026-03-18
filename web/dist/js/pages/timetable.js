@@ -228,6 +228,8 @@ function createLayout(data) {
             return;
         gridBox.innerHTML = "";
         let currentPeriod = 0;
+        let alreadyAddedBreak = false;
+        let lessonAfterBreakCounter = 0;
         // Create HTML
         classSubjectInstances.forEach((item) => {
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
@@ -243,45 +245,62 @@ function createLayout(data) {
             const lunchBreak = item.period.lunchBreak;
             // Fill empty periods
             while (currentPeriod < period) {
-                content += `<div class="period-styling"></div>`;
+                content += `<div class="period-styling" style=" margin-top: ${currentPeriod == 3 ? "calc(var(--break-height) + 3px)" : "0"};"></div>`;
                 currentPeriod++;
             }
-            for (let d = 0; d < duration; d++) {
-                if (!lunchBreak && subjectName !== "No lesson" && subjectName !== "RedArea") {
-                    /*Wird geändert nachdem Alessandro  die Kürzel einbaut*/
-                    let subjectShort = "";
-                    subjectShort = subjectShort + subjectName;
-                    if (subjectShort.length > 6) {
-                        subjectShort = subjectShort.substring(0, 3);
+            if (!lunchBreak && subjectName !== "No lesson" && subjectName !== "RedArea") {
+                /*Wird geändert nachdem Alessandro die Kürzel einbaut*/
+                let subjectShort = "";
+                subjectShort = subjectShort + subjectName;
+                if (subjectShort.length > 6) {
+                    subjectShort = subjectShort.substring(0, 3);
+                }
+                /**/
+                let height;
+                let marginTop = "0";
+                if (!alreadyAddedBreak && duration >= 3 && period == 1 || duration >= 3 && period == 2 || duration >= 2 && period == 2) {
+                    height = duration === 1
+                        ? "var(--period-height)"
+                        : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
+                    alreadyAddedBreak = true;
+                }
+                else {
+                    if (period == 3 && !alreadyAddedBreak) {
+                        marginTop = "calc(var(--break-height) + 3px)";
                     }
-                    /**/
-                    content += `
-                    <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4);">
-                    <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
-                        <div class="subject-infos">
-                            <p class="subject-styling">${subjectShort}</p>
-                            <p></p>
+                    height = duration === 1
+                        ? "var(--period-height)"
+                        : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
+                }
+                content += `
+                <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4); height: ${height}; margin-top: ${marginTop};">
+                <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
+                    <div class="subject-infos">
+                        <p class="subject-styling">${subjectShort}</p>
+                        <div class="room-teacher-container">
                             <p class="room-styling">E${roomNumber ?? ""}</p>
                             <p class="teacher-styling">${teacherSymbol}</p>
                         </div>
                     </div>
-                    `;
-                }
-                else if (subjectName === "RedArea") {
-                    content += `
-                    <div class="period-styling non-working-stripes">
+                </div>
+                `;
+            }
+            else if (subjectName === "RedArea") {
+                content += `
+                    <div class="period-styling non-working-stripes" style="margin-top: ${period == 3 ? "calc(var(--break-height) + 3px)" : "0"};">
                     <p>Nicht Verfügbar</p>
                     </div>
                 `;
-                }
-                else {
-                    content += `
-                    <div class="period-styling">
+            }
+            else {
+                content += `
+                    <div class="period-styling" style=" margin-top: ${period == 3 ? "calc(var(--break-height) + 3px)" : "0"};">
                     </div>
                     `;
-                }
             }
             currentPeriod += duration;
+            //lessonAfterBreakCounter+=duration;
+            //console.log('lessonAfterBreakCounter:', lessonAfterBreakCounter, 'period:', period, 'day:', day);
         });
         gridBox.innerHTML = content;
     });
