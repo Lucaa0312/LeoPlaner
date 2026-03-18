@@ -169,7 +169,8 @@ function createRedArea(teacher) {
             classSubject: {
                 subject: {
                     id: 2,
-                    subjectName: "RedArea"
+                    subjectName: "RedArea",
+                    subjectSymbol: "NA",
                 },
                 teacher: {
                     id: teacher.id,
@@ -248,6 +249,7 @@ function createLayout(data) {
 
         // Create HTML 
         classSubjectInstances.forEach(item => {
+            const subjectSymbol = item.classSubject?.subject?.subjectSymbol || "";
             const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
             const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
             const duration = item.duration || 1;
@@ -269,20 +271,13 @@ function createLayout(data) {
             }
 
             if (!lunchBreak && subjectName !== "No lesson" && subjectName !== "RedArea") {
-                /*Wird geändert nachdem Alessandro die Kürzel einbaut*/
-                let subjectShort = "";
-                subjectShort = subjectShort + subjectName;
-                if (subjectShort.length > 6) {   
-                    subjectShort = subjectShort.substring(0, 3);
-                }
-                /**/
                 let height;
                 let marginTop = "0";
                 if (!alreadyAddedBreak && duration >= 3 && period == 1 || duration >= 3 && period == 2 || duration >= 2 && period == 2) {
                     height = duration === 1? "var(--period-height)" : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
                     alreadyAddedBreak = true;
                 } else {
-                    if (period == 3 && !alreadyAddedBreak) { /*(lessonAfterBreakCounter == 2 && (period == 1 || period == 2 || period == 3 || period == 4)) */
+                    if (period == 3 && !alreadyAddedBreak) {
                         marginTop = "calc(var(--break-height) + 3px)";
                     }
                     height = duration === 1? "var(--period-height)" : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
@@ -292,7 +287,7 @@ function createLayout(data) {
                 <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4); height: ${height}; margin-top: ${marginTop};">
                 <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
                     <div class="subject-infos">
-                        <p class="subject-styling">${subjectShort}</p>
+                        <p class="subject-styling">${subjectSymbol}</p>
                         <div class="room-teacher-container">
                             <p class="room-styling">E${roomNumber}</p>
                             <p class="teacher-styling">${teacherSymbol}</p>
