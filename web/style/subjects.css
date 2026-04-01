@@ -35,6 +35,12 @@
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--leo-text-color);
+
+    width: 10vw;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .room-types{
     margin-top: 1vh;

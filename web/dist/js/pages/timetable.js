@@ -75,6 +75,7 @@ export function load() {
         //hideLoader();
     });
 }
+//getElement("randomizeButton")?.addEventListener("click", getRandomizedTimeTable);
 function getRandomizedTimeTable() {
     clearLayout();
     fetch("http://localhost:8080/api/timetable/randomize")

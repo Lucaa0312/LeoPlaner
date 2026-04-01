@@ -281,9 +281,8 @@
 }
 
 .subject-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
+    text-align: center;
 
     background: #5b4bff;
     color: white;
@@ -294,6 +293,9 @@
     cursor: pointer;
 
     width: 6vw;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .remove-chip {
