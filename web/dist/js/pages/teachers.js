@@ -10,7 +10,7 @@ function createTeacherSubjectChips(subjects) {
     const visibleSubjects = subjects.slice(0, 2);
     const remaining = subjects.length - visibleSubjects.length;
     let chips = visibleSubjects
-        .map((subject) => `<span class="subject-chip">${subject.subjectName}</span>`)
+        .map((subject) => `<span class="subject-chip" title="${subject.subjectName}">${subject.subjectName}</span>`)
         .join("");
     if (remaining > 0) {
         chips += `<span class="subject-chip extra">+${remaining}</span>`;

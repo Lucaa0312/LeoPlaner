@@ -25,6 +25,7 @@ function createSubjectCard(subject) {
     subjectInfo.className = "subject-info";
     const subjectName = document.createElement("h2");
     subjectName.className = "subject-name";
+    subjectName.title = subject.subjectName;
     subjectName.textContent = formatSubjectName(subject.subjectName);
     const requiredRoomTypes = createRoomTypesElement(subject.requiredRoomTypes);
     const editDiv = document.createElement("div");
