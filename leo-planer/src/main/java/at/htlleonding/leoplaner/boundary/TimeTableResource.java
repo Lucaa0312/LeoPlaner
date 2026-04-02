@@ -37,33 +37,6 @@ public class TimeTableResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public TimetableDTO getCurrentTimeTable() {
-        Timetable timetable = this.dataRepository.getCurrentSortedBySchoolhourTimetable();
-        List<ClassSubjectInstanceDTO> classSubjectInstanceDTOs = new ArrayList<>();
-
-        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
-            if (csi.getPeriod().isLunchBreak()) {
-                classSubjectInstanceDTOs.add(new ClassSubjectInstanceDTO(1, null,
-                        new PeriodDTO(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(),
-                                csi.getPeriod().isLunchBreak()),
-                        null));
-                continue;
-            }
-
-            if (csi.getRoom() == null || csi.getClassSubject() == null || csi.getPeriod() == null)
-                continue;
-
-            classSubjectInstanceDTOs.add(UtilBuildFunctions.createClassSubjectInstanceDTO(csi));
-        }
-
-        return new TimetableDTO(timetable.getTotalWeeklyHours(), classSubjectInstanceDTOs,
-                timetable.getCostOfTimetable(), timetable.getTempAtTimetable());
-        // return
-        // Response.status(Response.Status.OK).entity(this.dataRepository.getCurrentSortedBySchoolhourTimetable()).build();
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByDay/{day}")
     public Response getClassSubjectInstancesByDay(@PathParam("day") String day) {
         List<ClassSubjectInstanceDTO> timetableByDay = this.dataRepository.getCurrentTimetable()
@@ -82,15 +55,15 @@ public class TimeTableResource {
     public TimetableDTO getTimetableByClass(@PathParam("id") final Long id) {
         final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(id);
         return UtilBuildFunctions
-                .createTimetableDTO(this.dataRepository.getCurrentTimetableList().get(schoolClass.getClassName()));
+                .createTimetableDTO(this.dataRepository.getAllTimetables().get(schoolClass.getClassName()));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByTeacher/{id}")
     public TeacherTimetableDTO getTeacherTimetable(@PathParam("id") Long id) {
-        final Timetable timetableTeacher = this.dataRepository.getCurrentTeacherTimetable(id);
-        final Teacher teacher = this.dataRepository.getTeacherByID(id);
+        final Timetable timetableTeacher = this.dataRepository.getTeacherTimetable(id);
+        final Teacher teacher = this.dataRepository.getTeacherById(id);
 
         return new TeacherTimetableDTO(
                 new TeacherNoSubjectDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(),

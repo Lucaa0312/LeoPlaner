@@ -73,7 +73,7 @@ public class SimulatedAnnealingAlgorithm {
         long iterationCounter = 0;
         long costFinal = 0;
 
-        final Map<String, Timetable> schoolScheduleMap = dataRepository.getCurrentTimetableList();
+        final Map<String, Timetable> schoolScheduleMap = dataRepository.getAllTimetables();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
 
         Timetable currTimetable;
@@ -124,13 +124,13 @@ public class SimulatedAnnealingAlgorithm {
                 } catch (final Exception e) {
                     // TODO: handle exception
                 }
-                this.dataRepository.getHistoryList()
+                this.dataRepository.getHistory()
                         .add(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
                 progressEvent.fire(
                         new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
             }
             decreaseTemperature();
-            this.dataRepository.getCurrentTimetableList().put(className, currTimetable);
+            this.dataRepository.getAllTimetables().put(className, currTimetable);
             iterationCounter++;
         }
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
@@ -212,7 +212,7 @@ public class SimulatedAnnealingAlgorithm {
     // timetable
     public void setTeacherTakenPeriod(final Teacher teacher, final Timetable timetable) {
         final List<ClassSubjectInstance> classSubjectInstancesList = dataRepository
-                .getCurrentTeacherTimetable(teacher.getId()).getClassSubjectInstances();
+                .getTeacherTimetable(teacher.getId()).getClassSubjectInstances();
         // final List<ClassSubjectInstance> classSubjectInstancesList =
         // timetable.getClassSubjectInstances().stream()
         // .filter(e -> e.getClassSubject() != null)

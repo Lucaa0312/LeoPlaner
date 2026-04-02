@@ -65,7 +65,7 @@ public class CSVManager {
             final String[] subjects = line[2].split(",");
             for (final String subjectName : subjects) {
                 final Subject subject = dataRepository
-                        .getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
+                        .getSubjectByName(subjectName.trim().toLowerCase());
 
                 if (subject == null) {
                     throw new IllegalArgumentException(
@@ -219,8 +219,8 @@ public class CSVManager {
                         + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
-            final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
-            final Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim().toLowerCase());
+            final Subject subject = dataRepository.getSubjectByName(line[0].trim().toLowerCase());
+            final Teacher teacher = dataRepository.getTeacherByName(line[1].trim().toLowerCase());
             final int weeklyHours = Integer.parseInt(line[2].trim());
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
@@ -237,11 +237,11 @@ public class CSVManager {
 
             final ClassSubject classSubject = new ClassSubject();
 
-            SchoolClass schoolClass = dataRepository.checkIfSchoolClassExists(className);
+            SchoolClass schoolClass = dataRepository.getSchoolClassByName(className);
             if (schoolClass == null) {
                 schoolClass = new SchoolClass();
                 schoolClass.setClassName(className);
-                Room classRoom = dataRepository.getRoomByNumberName(numberName);
+                Room classRoom = dataRepository.getRoomByNumberAndName(numberName);
                 // TODO add null check
                 schoolClass.setClassRoom(classRoom);
                 dataRepository.addSchoolClass(schoolClass);

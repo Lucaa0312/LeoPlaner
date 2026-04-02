@@ -1,400 +1,199 @@
 package at.htlleonding.leoplaner.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
+
+import at.htlleonding.leoplaner.repository.*;
 
 @ApplicationScoped
 public class DataRepository {
-    private Timetable currentTimetable; // volatile, algorithms keep updating this value at the moment
-    private Map<String, Timetable> currentTimetableList = new HashMap<>(); // key = className, value = timetable
-    private List<History> historyList = new ArrayList<>();
+    @Inject
+    TimetableService timetableService;
 
     @Inject
-    EntityManager entityManager;
+    TeacherRepository teacherRepository;
 
-    public List<History> getHistoryList() {
-        return historyList;
-    }
+    @Inject
+    RoomRepository roomRepository;
 
-    public void setHistoryList(final List<History> historyList) {
-        this.historyList = historyList;
-    }
+    @Inject
+    SubjectRepository subjectRepository;
 
-    public void clearTimetableData() {
-        this.currentTimetableList = new HashMap<>();
-        this.currentTimetable = null;
+    @Inject
+    SchoolClassRepository schoolClassRepository;
+
+    @Inject
+    ClassSubjectRepository classSubjectRepository;
+
+    public void randomizeSchoolSchedule() {
+        timetableService.generateForAllClasses();
     }
 
     public Timetable getCurrentTimetable() {
-        return this.currentTimetable;
+        return timetableService.getCurrentTimetable();
     }
 
-    public Timetable getCurrentSortedBySchoolhourTimetable() {
-        this.currentTimetable.sortTimetableBySchoolhour();
-        return this.currentTimetable;
+    public Map<String, Timetable> getAllTimetables() {
+        return timetableService.getCurrentTimetableList();
     }
 
-    public void setCurrentTimetable(final Timetable currentTimetable) {
-        this.currentTimetable = currentTimetable;
+    public Timetable getTeacherTimetable(Long teacherId) {
+        return timetableService.getTeacherTimetable(teacherId);
     }
 
-    public Map<String, Timetable> getCurrentTimetableList() {
-        return currentTimetableList;
+    public void generateTimetableForClass(String className, Room room) {
+        timetableService.generateForSingleClass(className, room);
     }
 
-    public void setCurrentTimetableList(final Map<String, Timetable> currentTimetableList) {
-        this.currentTimetableList = currentTimetableList;
+    public List<History> getHistory() {
+        return timetableService.getHistoryList();
     }
 
-    public Timetable getCurrentTeacherTimetableSingleClass(final Long id) {
-        this.currentTimetable.sortTimetableBySchoolhour();
-        final Teacher teacher = getTeacherByID(id);
-        return new Timetable(this.currentTimetable.getClassSubjectInstances().stream()
-                .filter(e -> e.getClassSubject() != null
-                        && e.getClassSubject().getTeacher().getId().equals(teacher.getId()))
-                .toList());
-    }
-
-    public Timetable getCurrentTeacherTimetable(final Long id) {
-        final Teacher teacher = getTeacherByID(id);
-        final List<ClassSubjectInstance> teacherTakenClasses = new ArrayList<>();
-
-        for (final Timetable timetable : this.currentTimetableList.values()) {
-            for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
-                if (csi.getClassSubject() == null || csi.getPeriod().isLunchBreak()) {
-                    continue;
-                }
-                if (csi.getClassSubject().getTeacher().getId().equals(teacher.getId())) {
-                    teacherTakenClasses.add(csi);
-                }
-            }
-        }
-        return new Timetable(teacherTakenClasses);
-    }
-
-    public List<ClassSubject> getAllClassSubjects() {
-        return ClassSubject.getAllClassSubjects();
-    }
-
-    public List<ClassSubject> getAllClassSubjectsWithClass(final String className) {
-        return ClassSubject.getAllByClassName(className);
+    public void setHistory(List<History> history) {
+        timetableService.setHistoryList(history);
     }
 
     public List<Teacher> getAllTeachers() {
-        return Teacher.getAllTeachers();
+        return teacherRepository.getAllTeachers();
     }
 
-    public Teacher getTeacherByID(final Long id) {
-        return Teacher.getById(id);
+    public Teacher getTeacherById(Long id) {
+        return teacherRepository.getById(id);
+    }
+
+    public Teacher getTeacherByName(String name) {
+        return teacherRepository.getByName(name);
     }
 
     public Long getTeacherCount() {
-        return Teacher.getCountOfAllTeachers();
+        return teacherRepository.getCount();
     }
 
-    public Teacher getTeacherByNameAndCheckIfExists(final String teacherName) {
-        return Teacher.getFirstByName(teacherName);
+    public Teacher addTeacher(Teacher teacher) {
+        return teacherRepository.add(teacher);
+    }
+
+    public Teacher updateTeacher(Long id, Teacher teacher) {
+        return teacherRepository.update(id, teacher);
+    }
+
+    public Teacher deleteTeacher(Long id) {
+        return teacherRepository.delete(id);
     }
 
     public List<Room> getAllRooms() {
-        return Room.getAllRooms();
+        return roomRepository.getAll();
     }
 
-    public Room getRoomByID(final Long id) {
-        return Room.getById(id);
+    public Room getRoomById(Long id) {
+        return roomRepository.getById(id);
+    }
+
+    public Room getRoomByName(String name) {
+        return roomRepository.getByName(name);
+    }
+
+    public Room getRoomByNumber(int number) {
+        return roomRepository.getByNumber(number);
+    }
+
+    public Room getRoomByNumberAndName(String numberName) {
+        return roomRepository.getByNumberAndName(numberName);
     }
 
     public Room getRandomRoom() {
-        return Room.getRandomRoom();
-    }
-
-    public Room getRoomByNumberName(final String numberName) {
-        return Room.getByNumberAndName(numberName);
-    }
-
-    public Room getRoomByNumber(final int number) {
-        return Room.getByNumber(number);
-    }
-
-    public Room getRoomByName(final String name) {
-        return Room.getByName(name);
+        return roomRepository.getRandom();
     }
 
     public Long getRoomCount() {
-        return Room.getCountOfAllRooms();
+        return roomRepository.getCount();
     }
 
-    public SchoolClass checkIfSchoolClassExists(final String className) {
-        return SchoolClass.getFirstByName(className);
+    public Room addRoom(Room room) {
+        return roomRepository.add(room);
     }
 
-    public SchoolClass getSchoolClassById(final Long id) {
-        return SchoolClass.getById(id);
+    public Room updateRoom(Long id, Room room) {
+        return roomRepository.update(id, room);
     }
 
-    public List<SchoolClass> getAllSchoolClasses() {
-        return SchoolClass.getAllSchoolClasss();
+    public Room deleteRoom(Long id) {
+        return roomRepository.delete(id);
     }
 
     public List<Subject> getAllSubjects() {
-        return Subject.getAllSubjects();
+        return subjectRepository.getAll();
     }
 
-    public Subject getSubjectByName(final String name) {
-        return Subject.getFirstByName(name);
+    public Subject getSubjectById(Long id) {
+        return subjectRepository.getById(id);
+    }
+
+    public Subject getSubjectByName(String name) {
+        return subjectRepository.getByName(name);
     }
 
     public Long getSubjectCount() {
-        return Subject.getCountOfAllSubjects();
+        return subjectRepository.getCount();
     }
 
-    public Subject getSubjectByNameAndCheckIfExists(final String subjectName) {
-        Subject subject;
-        try {
-            subject = getSubjectByName(subjectName);
-        } catch (final Exception e) {
-            return null;
-        }
-        return subject;
+    public Subject addSubject(Subject subject) {
+        return subjectRepository.add(subject);
     }
 
-    @Transactional
-    public void addClassSubject(final ClassSubject classSubject) { // TODO correct return type???
-        if (!this.entityManager.contains(classSubject)) {
-            this.entityManager.persist(classSubject);
-        }
-
-    }
-
-    @Transactional
-    public void addClassSubjectInstance(final ClassSubjectInstance classSubjectInstance) {
-        if (!this.entityManager.contains(classSubjectInstance)) {
-            this.entityManager.persist(classSubjectInstance);
-        }
-    }
-
-    @Transactional
-    public void addTimetable(final Timetable timetable) {
-        if (!this.entityManager.contains(timetable)) {
-            this.entityManager.persist(timetable);
-        }
-    }
-
-    @Transactional
-    public void addSchoolClass(final SchoolClass schoolClass) {
-        if (!this.entityManager.contains(schoolClass)) {
-            this.entityManager.persist(schoolClass);
-        }
-    }
-
-    @Transactional
-    public Teacher addTeacher(final Teacher teacher) {
-        if (this.entityManager.contains(teacher)) {
-            throw new IllegalArgumentException();
-        }
-
-        this.entityManager.persist(teacher);
-        return teacher;
-    }
-
-    @Transactional
-    public Teacher updateTeacher(Long id, Teacher teacher) {
-        Teacher teacherToUpdate = Teacher.getById(id);
-
-        teacherToUpdate.setNameSymbol(teacher.getNameSymbol());
-        teacherToUpdate.setTeacherName(teacher.getTeacherName());
-        teacherToUpdate.setTakenUpPeriods(teacher.getTakenUpPeriods());
-        teacherToUpdate.setTeacher_non_preferred_hours(teacher.getTeacher_non_preferred_hours());
-        teacherToUpdate.setTeacher_non_working_hours(teacher.getTeacher_non_working_hours());
-        teacherToUpdate.setTeachingSubject(teacher.getTeachingSubject());
-
-        return teacherToUpdate;
-    }
-
-    @Transactional
-    public Teacher deleteTeacher(Long id) {
-        Teacher teacherToDelete = Teacher.getById(id);
-
-        if (teacherToDelete != null) {
-            this.entityManager.remove(teacherToDelete);
-        }
-
-        return teacherToDelete;
-    }
-
-    @Transactional
-    public Room updateRoom(Long id, Room room) {
-        Room roomToUpdate = Room.getById(id);
-
-        roomToUpdate.setNameShort(room.getNameShort());
-        roomToUpdate.setRoomNumber(room.getRoomNumber());
-        roomToUpdate.setRoomName(room.getRoomName());
-        roomToUpdate.setRoomTypes(room.getRoomTypes());
-
-        return roomToUpdate;
-    }
-
-    @Transactional
-    public Room deleteRoom(Long id) {
-        Room roomToDelete = Room.getById(id);
-
-        if (roomToDelete != null) {
-            this.entityManager.remove(roomToDelete);
-        }
-
-        return roomToDelete;
-    }
-
-    @Transactional
-    public Room addRoom(final Room room) {
-        if (this.entityManager.contains(room)) {
-            throw new IllegalArgumentException();
-        }
-
-        this.entityManager.persist(room);
-        return room;
-    }
-
-    @Transactional
     public Subject updateSubject(Long id, Subject subject) {
-        Subject subjectToUpdate = Subject.getById(id);
-
-        subjectToUpdate.setSubjectName(subject.getSubjectName());
-        subjectToUpdate.setSubjectSymbol(subject.getSubjectSymbol());
-        subjectToUpdate.setSubjectColor(subject.getSubjectColor());
-        subjectToUpdate.setRequiredRoomTypes(subject.getRequiredRoomTypes());
-
-        return subjectToUpdate;
+        return subjectRepository.update(id, subject);
     }
 
-    @Transactional
     public Subject deleteSubject(Long id) {
-        Subject subjectToDelete = Subject.getById(id);
-
-        if (subjectToDelete != null) {
-            this.entityManager.remove(subjectToDelete);
-        }
-
-        return subjectToDelete;
+        return subjectRepository.delete(id);
     }
 
-    @Transactional
-    public Subject addSubject(final Subject subject) {
-        if (this.entityManager.contains(subject)) {
-            throw new IllegalArgumentException();
-        }
-
-        this.entityManager.persist(subject);
-        return subject;
+    public List<SchoolClass> getAllSchoolClasses() {
+        return schoolClassRepository.getAll();
     }
 
-    public ArrayList<ClassSubjectInstance> createRandomClassSubjectInstances(final List<ClassSubject> classSubjects,
-            final Room classRoom) {
-        // List<Room> getAllRooms = getAllRooms(); //TODO add special rooms
-        final SchoolDays[] schoolDays = SchoolDays.values();
-        final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours = new HashMap<>();
-        final ArrayList<ClassSubjectInstance> result = new ArrayList<>();
-        final Random random = new Random();
-        final int MAX_HOUR = 9;
-        final int MIN_HOUR = 1;
-
-        for (final ClassSubject classSubject : classSubjects) {
-            SchoolDays randomSchoolDay;
-            int schoolHour;
-            int randomDuration;
-            final int WEEKLY_HOURS = classSubject.getWeeklyHours();
-            int hoursCounter = WEEKLY_HOURS;
-
-            while (hoursCounter != 0) {
-                randomSchoolDay = schoolDays[random.nextInt(schoolDays.length)];
-                schoolHour = random.nextInt(MIN_HOUR, MAX_HOUR);
-
-                randomDuration = random.nextInt(1, WEEKLY_HOURS + 1); // weeklyHoursBounds == 1 ? 1 :
-
-                if (checkIfPeriodIsFree(occupiedHours, schoolHour, randomDuration, randomSchoolDay)
-                        && (hoursCounter - randomDuration) >= 0) {
-                    final Period period = new Period(randomSchoolDay, schoolHour);
-                    final ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance(classSubject, period,
-                            classRoom, randomDuration);
-                    result.add(classSubjectInstance);
-                    addClassSubjectInstance(classSubjectInstance);
-
-                    // for each duration, add a placeholder in the hasmap to reserve space
-                    reserveHoursInOccupiesHours(occupiedHours, schoolHour, randomDuration, randomSchoolDay);
-
-                    hoursCounter -= randomDuration;
-                }
-            }
-        }
-
-        return result;
+    public SchoolClass getSchoolClassById(Long id) {
+        return schoolClassRepository.getById(id);
     }
 
-    public boolean checkIfPeriodIsFree(final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours,
-            final int schoolHour,
-            final int duration, final SchoolDays schoolDay) {
-        final ArrayList<Integer> allOccupiedHoursOnDay = occupiedHours.get(schoolDay);
-
-        if (allOccupiedHoursOnDay == null) { // entire day is free
-            return true;
-        }
-
-        for (int i = 0; i < duration; i++) {
-            if (allOccupiedHoursOnDay.contains(schoolHour + i)) {
-                return false;
-            }
-        }
-        return true;
+    public SchoolClass getSchoolClassByName(String name) {
+        return schoolClassRepository.getByName(name);
     }
 
-    public void reserveHoursInOccupiesHours(final HashMap<SchoolDays, ArrayList<Integer>> occupiedHours,
-            final int schoolHour,
-            final int duration, final SchoolDays schoolDay) {
-        final ArrayList<Integer> updatedListOnDay = occupiedHours.getOrDefault(schoolDay, new ArrayList<>());
-
-        for (int i = 0; i < duration; i++) {
-            updatedListOnDay.add(schoolHour + i);
-        }
-        occupiedHours.put(schoolDay, updatedListOnDay);
+    public SchoolClass addSchoolClass(SchoolClass schoolClass) {
+        return schoolClassRepository.add(schoolClass);
     }
 
-    public void initRandomTimetableForAllClasses() {
-        SchoolClass.getAllSchoolClasss().stream()
-                .forEach(e -> createTimetableForClassNew(e.getId(), e.getClassName(), e.getClassRoom()));
+    public SchoolClass updateSchoolClass(Long id, SchoolClass schoolClass) {
+        return schoolClassRepository.update(id, schoolClass);
     }
 
-    public void createTimetableForClassNew(final Long id, final String className, final Room classRoom) {
-        System.out.println(classRoom.getRoomNumber());
-        final SchoolClass schoolClass = SchoolClass.getById(id);
-
-        final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
-        final List<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
-                classRoom);
-
-        final Timetable timetable = new Timetable(classSubjectInstances, schoolClass);
-        this.currentTimetableList.put(className, timetable); // TODO maybe change with id, or
-                                                             // make name id
-        // addTimetable(timetable);
+    public SchoolClass deleteSchoolClass(Long id) {
+        return schoolClassRepository.delete(id);
     }
 
-    public void createTimetableForClass(final String className, final Room classRoom) {
-        final List<ClassSubject> classSubjects = getAllClassSubjectsWithClass(className);
-        final ArrayList<ClassSubjectInstance> classSubjectInstances = createRandomClassSubjectInstances(classSubjects,
-                classRoom);
-        this.currentTimetable = new Timetable(classSubjectInstances);
+    public List<ClassSubject> getAllClassSubjects() {
+        return classSubjectRepository.getAll();
     }
 
-    public void randomizeSchoolSchedule() {
-        currentTimetableList = new HashMap<>();
-        initRandomTimetableForAllClasses();
+    public List<ClassSubject> getClassSubjectsByClass(String className) {
+        return classSubjectRepository.getByClassName(className);
+    }
+
+    public ClassSubject getClassSubjectById(Long id) {
+        return classSubjectRepository.getById(id);
+    }
+
+    public ClassSubject addClassSubject(ClassSubject classSubject) {
+        return classSubjectRepository.add(classSubject);
+    }
+
+    public ClassSubject deleteClassSubject(Long id) {
+        return classSubjectRepository.delete(id);
     }
 }

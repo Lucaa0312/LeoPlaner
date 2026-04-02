@@ -39,7 +39,7 @@ public class Resource {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         Room room = this.dataRepository.getRoomByNumber(24);
 
-        this.dataRepository.createTimetableForClass("4chitm", room);
+        this.dataRepository.generateTimetableForClass("4chitm", room);
     }
 
     @Path("run/testCsvNew")
@@ -58,7 +58,7 @@ public class Resource {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
-        this.dataRepository.initRandomTimetableForAllClasses();
+        this.dataRepository.randomizeSchoolSchedule();
     }
 
     @Path("run/algorithmAllClasses")
@@ -78,6 +78,6 @@ public class Resource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<History> getHistoryList() {
-        return this.dataRepository.getHistoryList();
+        return this.dataRepository.getHistory();
     }
 }
