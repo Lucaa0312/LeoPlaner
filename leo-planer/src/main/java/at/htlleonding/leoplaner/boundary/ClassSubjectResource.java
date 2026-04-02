@@ -48,7 +48,7 @@ public class ClassSubjectResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ClassSubjectDTO> getAllClassSubjects(@PathParam("className") String className) {
-        return dataRepository.getAllClassSubjectsWithClass(className).stream()
+        return dataRepository.getClassSubjectsByClass(className).stream()
                 .map(e -> UtilBuildFunctions.createClassSubjectDTO(e))
                 .toList();
     }

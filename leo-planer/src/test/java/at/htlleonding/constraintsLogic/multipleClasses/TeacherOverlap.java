@@ -38,14 +38,13 @@ public class TeacherOverlap {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
-        this.dataRepository.clearTimetableData();
-        this.dataRepository.initRandomTimetableForAllClasses();
+        this.dataRepository.randomizeSchoolSchedule();
     }
 
     @Test
     void testTeachersNotOverlappingInMultipleClasses() {
         Map<Teacher, List<Period>> teacherTakenPeriods = new HashMap<>();
-        var timetablesAllClasses = this.dataRepository.getCurrentTimetableList()
+        var timetablesAllClasses = this.dataRepository.getAllTimetables()
                 .values();
 
         for (Timetable timetable : timetablesAllClasses) {

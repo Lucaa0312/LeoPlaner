@@ -13,6 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api")
@@ -38,7 +39,7 @@ public class Resource {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         Room room = this.dataRepository.getRoomByNumber(24);
 
-        this.dataRepository.createTimetableForClass("4chitm", room);
+        this.dataRepository.generateTimetableForClass("4chitm", room);
     }
 
     @Path("run/testCsvNew")
@@ -57,7 +58,7 @@ public class Resource {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
-        this.dataRepository.initRandomTimetableForAllClasses();
+        this.dataRepository.randomizeSchoolSchedule();
     }
 
     @Path("run/algorithmAllClasses")
@@ -66,10 +67,17 @@ public class Resource {
         simulatedAnnealingAlgorithm.algorithmLoop();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("randomize")
+    public void randomizeTimeTable() {
+        this.dataRepository.randomizeSchoolSchedule();
+    }
+
     @Path("get/algorithmHistory")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<History> getHistoryList() {
-        return this.dataRepository.getHistoryList();
+        return this.dataRepository.getHistory();
     }
 }

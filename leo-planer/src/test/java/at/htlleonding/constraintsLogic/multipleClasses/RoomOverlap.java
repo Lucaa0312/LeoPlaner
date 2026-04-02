@@ -35,8 +35,7 @@ public class RoomOverlap {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
-        this.dataRepository.clearTimetableData();
-        this.dataRepository.initRandomTimetableForAllClasses();
+        this.dataRepository.randomizeSchoolSchedule();
     }
 
     @Inject
@@ -45,7 +44,7 @@ public class RoomOverlap {
     @Test
     void testRoomNotOverlappingInMultipleClasses() {
         Map<Room, List<Period>> roomTakenPeriods = new HashMap<>();
-        var timetablesAllClasses = this.dataRepository.getCurrentTimetableList()
+        var timetablesAllClasses = this.dataRepository.getAllTimetables()
                 .values();
 
         for (Timetable timetable : timetablesAllClasses) {
