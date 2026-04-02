@@ -36,6 +36,10 @@ public class ClassSubject extends PanacheEntity {
         return find("teacher", teacher).list();
     }
 
+    public static ClassSubject getById(final Long id) {
+        return findById(id);
+    }
+
     public Teacher getTeacher() {
         return teacher;
     }

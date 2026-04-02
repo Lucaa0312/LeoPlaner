@@ -34,15 +34,14 @@ public class TestSpreadOutClasses {
         CSVManager.processCSV(roomCSVPath, dataRepository);
         CSVManager.processCSV(classSubjectCSVPath, dataRepository);
 
-        this.dataRepository.clearTimetableData();
-        this.dataRepository.initRandomTimetableForAllClasses();
+        this.dataRepository.randomizeSchoolSchedule();
 
         simulatedAnnealingAlgorithm.algorithmLoop();
     }
 
     @Test
     void testIfDayHasUnder3Hours() {
-        for (Timetable timetable : dataRepository.getCurrentTimetableList().values()) {
+        for (Timetable timetable : dataRepository.getAllTimetables().values()) {
             for (SchoolDays schoolDay : SchoolDays.values()) {
                 if (timetable.getClassSubjectInstances().stream()
                         .filter(e -> e.getPeriod().getSchoolDays() == schoolDay)

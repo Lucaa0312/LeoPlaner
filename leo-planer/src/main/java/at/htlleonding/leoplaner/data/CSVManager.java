@@ -14,7 +14,7 @@ import at.htlleonding.leoplaner.dto.ParsedDayHour;
 public class CSVManager {
     final static String teacherType = "teacherName";
     final static String roomType = "roomNumber";
-    final static String subjectType = "subjectName"; 
+    final static String subjectType = "subjectName";
     final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
@@ -65,7 +65,7 @@ public class CSVManager {
             final String[] subjects = line[2].split(",");
             for (final String subjectName : subjects) {
                 final Subject subject = dataRepository
-                        .getSubjectByNameAndCheckIfExists(subjectName.trim().toLowerCase());
+                        .getSubjectByName(subjectName.trim().toLowerCase());
 
                 if (subject == null) {
                     throw new IllegalArgumentException(
@@ -175,8 +175,9 @@ public class CSVManager {
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
             final String subjectSymbol = line[1].trim();
-            if (subjectSymbol.length() > 6){
-                throw new IllegalArgumentException("Subject symbol " + subjectSymbol + " is too long. Max length is 6 characters.");
+            if (subjectSymbol.length() > 6) {
+                throw new IllegalArgumentException(
+                        "Subject symbol " + subjectSymbol + " is too long. Max length is 6 characters.");
             }
             final String subjectColor = line[3].trim();
             final Subject subject = new Subject();
@@ -218,8 +219,8 @@ public class CSVManager {
                         + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
-            final Subject subject = dataRepository.getSubjectByNameAndCheckIfExists(line[0].trim().toLowerCase());
-            final Teacher teacher = dataRepository.getTeacherByNameAndCheckIfExists(line[1].trim().toLowerCase());
+            final Subject subject = dataRepository.getSubjectByName(line[0].trim().toLowerCase());
+            final Teacher teacher = dataRepository.getTeacherByName(line[1].trim().toLowerCase());
             final int weeklyHours = Integer.parseInt(line[2].trim());
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
@@ -236,16 +237,15 @@ public class CSVManager {
 
             final ClassSubject classSubject = new ClassSubject();
 
-            SchoolClass schoolClass = dataRepository.checkIfSchoolClassExists(className);
+            SchoolClass schoolClass = dataRepository.getSchoolClassByName(className);
             if (schoolClass == null) {
                 schoolClass = new SchoolClass();
                 schoolClass.setClassName(className);
+                Room classRoom = dataRepository.getRoomByNumberAndName(numberName);
+                // TODO add null check
+                schoolClass.setClassRoom(classRoom);
                 dataRepository.addSchoolClass(schoolClass);
             }
-
-            Room classRoom = dataRepository.getRoomByNumberName(numberName);
-            // TODO add null check
-            schoolClass.setClassRoom(classRoom);
 
             classSubject.setTeacher(teacher);
             classSubject.setSubject(subject);
