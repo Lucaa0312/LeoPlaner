@@ -2,7 +2,7 @@ import initNavbar from "./navbar.js";
 import type { CreateTeacherRequest, Teacher } from "../types/teacher.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { getElement, requireElement } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import type { Subject } from "../types/subject.js";
@@ -11,6 +11,7 @@ import { initSubjectSelector } from "../features/subjectSelector.js";
 
 function createTeacherSubjectChips(subjects: Teacher["teachingSubject"]): string {
     const visibleSubjects = subjects.slice(0, 2);
+    const hiddenSubjects = subjects.slice(2);
     const remaining = subjects.length - visibleSubjects.length;
 
     let chips = visibleSubjects
@@ -21,8 +22,45 @@ function createTeacherSubjectChips(subjects: Teacher["teachingSubject"]): string
         chips += `<span class="subject-chip extra">+${remaining}</span>`;
     }
 
+    chips += hiddenSubjects
+    .map(subject => `<span class="subject-chip hidden-subject" style="display: none;" title="${subject.subjectName}">${subject.subjectName}</span>`)
+    .join("");
+
     return chips;
 }
+
+
+function showRemainingSubjects(teacherID: number): void {
+    const container = document.querySelector(`.teacher-subjects[data-index="${teacherID}"]`) as HTMLElement | null;
+    if (!container) return;
+
+    const hiddenChips = container.querySelectorAll(".hidden-subject") as NodeListOf<HTMLElement>;
+    hiddenChips.forEach(chip => {
+        chip.style.display = "inline-block";
+    });
+
+    const extraChip = container.querySelector(".subject-chip.extra") as HTMLElement | null;
+    if (extraChip) {
+        extraChip.style.display = "none";
+    }
+}
+
+function closeAllTeachers(): void {
+    const allTeacherContainers = document.querySelectorAll(".teacher-subjects") as NodeListOf<HTMLElement>;
+
+    allTeacherContainers.forEach(container => {
+        const hiddenChips = container.querySelectorAll(".hidden-subject") as NodeListOf<HTMLElement>;
+        hiddenChips.forEach(chip => {
+            chip.style.display = "none";
+        });
+
+        const extraChip = container.querySelector(".subject-chip.extra") as HTMLElement | null;
+        if (extraChip) {
+            extraChip.style.display = "inline-block";
+        }
+    });
+}
+
 
 function createTableInfoRow(): HTMLElement {
     const tableInfo = document.createElement("div");
@@ -52,6 +90,7 @@ function createTableInfoRow(): HTMLElement {
     return tableInfo;
 }
 
+let subjectChipTeacherID = 0;
 function createTeacherRow(teacher: Teacher): HTMLElement {
     const card = document.createElement("div");
     card.className = "teacher-row";
@@ -76,7 +115,19 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
 
     const teacherSubjects = document.createElement("div");
     teacherSubjects.className = "teacher-subjects";
+    const currentTeacherID = subjectChipTeacherID;
+    teacherSubjects.dataset.index = currentTeacherID.toString();
     teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
+    teacherSubjects.addEventListener("click", (event) => {
+        const target = event.target as HTMLElement;
+        
+        // Only trigger if the extra chip is clicked, not the individual subject chips
+        if (target.classList.contains("extra")) {
+            closeAllTeachers();
+            showRemainingSubjects(currentTeacherID);
+        }
+    })
+    subjectChipTeacherID++;
 
 
     const teacherWorkload = document.createElement("div");

@@ -1,13 +1,14 @@
 import initNavbar from "./navbar.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { getElement, requireElement } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import { fetchSubjects } from "../api/subjectApi.js";
 import { initSubjectSelector } from "../features/subjectSelector.js";
 function createTeacherSubjectChips(subjects) {
     const visibleSubjects = subjects.slice(0, 2);
+    const hiddenSubjects = subjects.slice(2);
     const remaining = subjects.length - visibleSubjects.length;
     let chips = visibleSubjects
         .map((subject) => `<span class="subject-chip" title="${subject.subjectName}">${subject.subjectName}</span>`)
@@ -15,7 +16,36 @@ function createTeacherSubjectChips(subjects) {
     if (remaining > 0) {
         chips += `<span class="subject-chip extra">+${remaining}</span>`;
     }
+    chips += hiddenSubjects
+        .map(subject => `<span class="subject-chip hidden-subject" style="display: none;" title="${subject.subjectName}">${subject.subjectName}</span>`)
+        .join("");
     return chips;
+}
+function showRemainingSubjects(teacherID) {
+    const container = document.querySelector(`.teacher-subjects[data-index="${teacherID}"]`);
+    if (!container)
+        return;
+    const hiddenChips = container.querySelectorAll(".hidden-subject");
+    hiddenChips.forEach(chip => {
+        chip.style.display = "inline-block";
+    });
+    const extraChip = container.querySelector(".subject-chip.extra");
+    if (extraChip) {
+        extraChip.style.display = "none";
+    }
+}
+function closeAllTeachers() {
+    const allTeacherContainers = document.querySelectorAll(".teacher-subjects");
+    allTeacherContainers.forEach(container => {
+        const hiddenChips = container.querySelectorAll(".hidden-subject");
+        hiddenChips.forEach(chip => {
+            chip.style.display = "none";
+        });
+        const extraChip = container.querySelector(".subject-chip.extra");
+        if (extraChip) {
+            extraChip.style.display = "inline-block";
+        }
+    });
 }
 function createTableInfoRow() {
     const tableInfo = document.createElement("div");
@@ -38,6 +68,7 @@ function createTableInfoRow() {
     tableInfo.append(nameHeader, initialsHeader, subjectsHeader, workloadHeader, editHeader);
     return tableInfo;
 }
+let subjectChipTeacherID = 0;
 function createTeacherRow(teacher) {
     const card = document.createElement("div");
     card.className = "teacher-row";
@@ -56,7 +87,18 @@ function createTeacherRow(teacher) {
     teacherInitials.textContent = teacher.nameSymbol;
     const teacherSubjects = document.createElement("div");
     teacherSubjects.className = "teacher-subjects";
+    const currentTeacherID = subjectChipTeacherID;
+    teacherSubjects.dataset.index = currentTeacherID.toString();
     teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
+    teacherSubjects.addEventListener("click", (event) => {
+        const target = event.target;
+        // Only trigger if the extra chip is clicked, not the individual subject chips
+        if (target.classList.contains("extra")) {
+            closeAllTeachers();
+            showRemainingSubjects(currentTeacherID);
+        }
+    });
+    subjectChipTeacherID++;
     const teacherWorkload = document.createElement("div");
     teacherWorkload.className = "teacher-workload";
     teacherWorkload.textContent = "—";
