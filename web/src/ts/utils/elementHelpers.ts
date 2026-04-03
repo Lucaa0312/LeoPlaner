@@ -3,7 +3,7 @@ export function getElement<T extends HTMLElement>(id: string): T | null {
 }
 
 export function requireElement<T extends HTMLElement>(id: string): T {
-    const element = document.getElementById(id) as T | null;
+    const element = getElement<T>(id);
 
     if (!element) {
         throw new Error(`Element with id "${id}" not found.`);
