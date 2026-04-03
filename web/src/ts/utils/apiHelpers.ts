@@ -23,3 +23,10 @@ export async function postJson<TBody>(path: string, body: TBody): Promise<void> 
         throw new Error(`POST ${path} failed with status ${response.status}`);
     }
 }
+
+export async function getFetchResponse(path: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}${path}`, { method: "GET" });
+    if (!res.ok) {
+        throw new Error("Request failed: " + res.status);
+    }
+}

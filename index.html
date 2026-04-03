@@ -4,16 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeoPlaner</title>
+    <script type="module" src="./web/dist/js/pages/index.js"></script>
 </head>
 <body>
-    <script>
-        fetch("http://localhost:8080/api/run/testCsvNew", { method: "GET" })
-        .then(res => {
-            if (!res.ok) throw new Error("Request failed: " + res.status);
-            
-        })
-        .catch(console.error);
-    </script>
     <h1>Welcome to LeoPlaner</h1>
     <a href="./web/pages/dashboard.html">Go to Dashboard</a>
     <a href="./web/pages/teacher.html">Go to Settings</a>

@@ -1,6 +1,7 @@
 import { clearCharts } from "./graph.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { getElement, requireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
+import { getFetchResponse } from "../utils/apiHelpers.js";
 // Dropdown button trigger
 document.querySelectorAll(".top-bar-select").forEach((wrapper) => {
     const trigger = wrapper.querySelector(".select-trigger");
@@ -75,19 +76,11 @@ export function load() {
         //hideLoader();
     });
 }
-//getElement("randomizeButton")?.addEventListener("click", getRandomizedTimeTable);
-function getRandomizedTimeTable() {
+requireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
+async function getRandomizedTimeTable() {
     clearLayout();
-    fetch("http://localhost:8080/api/timetable/randomize")
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        createLayout(data.classSubjectInstances);
-    })
-        .catch((error) => {
-        console.error("Error randomizing Timetable:", error);
-    });
+    await getFetchResponse("/randomize");
+    load();
 }
 const algorithmButton = getElement("algorithmButton");
 const algorithmToggleButton = getElement("optimizeButton");
@@ -98,17 +91,12 @@ algorithmButton?.addEventListener("click", () => {
     algorithmToggleButton.classList.add("optimizeButtonHover");
     getOptimizedTimetable();
 });
-function getOptimizedTimetable() {
+async function getOptimizedTimetable() {
     clearCharts();
     //showLoader();
     clearLayout();
-    fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
-        .then((res) => {
-        if (!res.ok)
-            throw new Error("Request failed: " + res.status);
-        load();
-    })
-        .catch(console.error);
+    await getFetchResponse("/run/algorithmAllClasses");
+    load();
 }
 function getTimetableByTeacher(teacherId) {
     clearLayout();

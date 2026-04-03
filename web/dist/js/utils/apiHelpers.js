@@ -18,3 +18,9 @@ export async function postJson(path, body) {
         throw new Error(`POST ${path} failed with status ${response.status}`);
     }
 }
+export async function getFetchResponse(path) {
+    const res = await fetch(`${API_BASE_URL}${path}`, { method: "GET" });
+    if (!res.ok) {
+        throw new Error("Request failed: " + res.status);
+    }
+}
