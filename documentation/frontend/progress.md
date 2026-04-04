@@ -36,3 +36,4 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 ### 04.04.2026
 - New navbar design
 - Improvised Logo
+- Reworked design slightly
