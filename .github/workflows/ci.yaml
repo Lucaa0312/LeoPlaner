@@ -20,4 +20,10 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: Set up database
+        run: docker compose -f database/docker-compose.yaml up -d
+
+      - name: Wait for database
+        run: sleep 15
+
       - run: mvn -f leo-planer/ clean verify
