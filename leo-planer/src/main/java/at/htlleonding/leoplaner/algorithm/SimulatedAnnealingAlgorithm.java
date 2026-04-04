@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.algorithm;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;

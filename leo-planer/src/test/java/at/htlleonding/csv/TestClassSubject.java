@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import at.htlleonding.leoplaner.data.ClassSubject;
+import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.SchoolClass;
 import at.htlleonding.leoplaner.data.Subject;
 import at.htlleonding.leoplaner.data.Teacher;
@@ -20,10 +21,13 @@ public class TestClassSubject {
     @Inject
     EntityManager entityManager;
 
+    @Inject
+    DataRepository dataRepository;
+
     @Test
     // Use this instead
     @TestTransaction
-    public void t01_testGetterSetter(){
+    public void t01_testGetterSetter() {
         ClassSubject classSubject = new ClassSubject();
 
         Teacher teacher = new Teacher();
@@ -65,10 +69,7 @@ public class TestClassSubject {
         entityManager.persist(classSubject);
         entityManager.persist(classSubject2);
 
-        List<ClassSubject> classSubjects = entityManager
-                .createNamedQuery(ClassSubject.QUERY_FIND_ALL, ClassSubject.class)
-                .getResultList();
-
+        List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
         assertEquals(2, classSubjects.size());
         entityManager.flush();
         entityManager.clear();
@@ -97,10 +98,7 @@ public class TestClassSubject {
         entityManager.persist(classSubject2);
         entityManager.persist(classSubject3);
 
-        List<ClassSubject> classSubjects = entityManager
-                .createNamedQuery(ClassSubject.QUERY_FIND_ALL_BY_CLASSNAME, ClassSubject.class)
-                .setParameter("filter", "4CHITM")
-                .getResultList();
+        List<ClassSubject> classSubjects = dataRepository.getAllClassSubjects();
 
         assertEquals(2, classSubjects.size());
         assertEquals("4CHITM", classSubjects.getFirst().getSchoolClass().getClassName());

@@ -1,5 +1,6 @@
 package at.htlleonding.csv;
 
+import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Subject;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -17,6 +18,9 @@ public class TestSubject {
     @Inject
     EntityManager entityManager;
 
+    @Inject
+    DataRepository dataRepository;
+
     @Test
     public void findAll() {
         Subject subject = new Subject();
@@ -25,9 +29,7 @@ public class TestSubject {
         entityManager.persist(subject);
         entityManager.persist(subject2);
 
-        List<Subject> subjects = entityManager.createNamedQuery(Subject.QUERY_FIND_ALL, Subject.class)
-                .getResultList();
-
+        List<Subject> subjects = dataRepository.getAllSubjects();
         assertEquals(2, subjects.size());
     }
 
@@ -38,9 +40,7 @@ public class TestSubject {
 
         entityManager.persist(subject);
 
-        List<Subject> subjects = entityManager.createNamedQuery(Subject.QUERY_FIND_BY_NAME, Subject.class)
-                .setParameter("filter", "Math")
-                .getResultList();
+        List<Subject> subjects = dataRepository.getAllSubjects();
 
         assertEquals(1, subjects.size());
         assertEquals("Math", subjects.getFirst().getSubjectName());
