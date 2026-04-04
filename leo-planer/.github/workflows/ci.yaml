@@ -20,4 +20,4 @@ jobs:
           java-version: 21
           cache: maven
 
-      - run: mvn clean package -DskipTests
+      - run: mvn clean verify

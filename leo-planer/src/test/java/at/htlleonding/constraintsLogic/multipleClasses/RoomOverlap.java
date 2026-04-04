@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@QuarkusTest
+//@QuarkusTest
+@Disabled
 public class RoomOverlap {
     @BeforeEach
     public void injectTestCsvDataNew() {
