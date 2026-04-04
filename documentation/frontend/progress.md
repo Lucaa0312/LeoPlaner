@@ -29,3 +29,6 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 28.02.2026
 - Started creating the chart designs
+
+### 02.04.2026
+- research for design improvement
