@@ -1,5 +1,5 @@
 import { clearCharts } from "./graph.js";
-import { getElement, requireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 // Dropdown button trigger
@@ -76,7 +76,7 @@ export function load() {
         //hideLoader();
     });
 }
-requireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
+aquireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
 async function getRandomizedTimeTable() {
     clearLayout();
     await getFetchResponse("/randomize");

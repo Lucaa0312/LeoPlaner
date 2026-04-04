@@ -386,6 +386,115 @@
     scale: 1.02;
 }
 
+/* ------------------ Wizard Navigation --------------------- */
+
+#wizard-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2vw;
+
+    margin-top: 5vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#back-teacher-btn {
+    margin-top: 5vh;
+
+    margin-left: auto;
+    margin-right: auto;
+    
+    text-align: center;
+    width: 10vw;
+
+    padding-left: 2.5vw;
+    padding-right: 2.5vw;
+    padding-top: 1.5vh;
+    padding-bottom: 1.5vh;
+
+    font-size: 2.5rem;
+    font-weight: bold;
+
+    border-radius: 2vw;
+
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+    cursor: pointer;
+
+    transition: all 200ms ease-in;
+}
+
+#submit-teacher-btn:hover {
+    background-color: var(--leo-primary-color2);
+    scale: 1.02;
+}
+
+
+/* ------------------ Step Indicator --------------------- */
+
+#step-indicator {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-dot {
+    width: 0.8vw;
+    height: 0.8vw;
+    border-radius: 50%;
+
+    background-color: #F3F4F6;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    transition: all 200ms ease-in-out;
+}
+
+.step-dot.active {
+    background-color: var(--leo-primary-color1);
+    scale: 1.3;
+}
+
+.step-dot.completed {
+    background-color: #5b4bff;
+    opacity: 0.4;
+}
+
+
+/* ------------------ Step Containers --------------------- */
+
+#step-1-container,
+#step-2-container,
+#step-3-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-top: 2vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#availability-placeholder {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--leo-text-color);
+    opacity: 0.4;
+
+    margin-top: 10vh;
+
+    text-align: center;
+}
+
 
 
 /* ------------------ Teacher Display --------------------- */

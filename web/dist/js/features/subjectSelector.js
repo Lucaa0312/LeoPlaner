@@ -28,6 +28,9 @@ export function initSubjectSelector({ input, dropdown, selectedContainer, inputC
         });
         selectedContainer.appendChild(chip);
     }
+    function restore(subject) {
+        addSubject(subject);
+    }
     function showMatchingSubjects() {
         const query = input.value.toLowerCase().trim();
         clearDropdown();
@@ -67,6 +70,7 @@ export function initSubjectSelector({ input, dropdown, selectedContainer, inputC
     });
     return {
         getSelectedSubjects,
+        restore,
         reset,
     };
 }

@@ -2,7 +2,7 @@ export function getElement<T extends HTMLElement>(id: string): T | null {
     return document.getElementById(id) as T | null;
 }
 
-export function requireElement<T extends HTMLElement>(id: string): T {
+export function aquireElement<T extends HTMLElement>(id: string): T {
     const element = getElement<T>(id);
 
     if (!element) {

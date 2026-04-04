@@ -1,8 +1,8 @@
 import initNavbar from "./navbar.js";
-import type { CreateTeacherRequest, Teacher } from "../types/teacher.js";
+import type { CreateTeacherRequest, Teacher, TeacherFormState, TeacherFormStep} from "../types/teacher.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement, requireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import type { Subject } from "../types/subject.js";
@@ -187,7 +187,7 @@ function formatedNameInput(firstNameId: string, lastNameId: string): string {
 }
 
 
-function collectSubjectData(selectedSubjects: Subject[]): CreateTeacherRequest {
+function collectTeacherData(selectedSubjects: Subject[]): CreateTeacherRequest {
     const nameInput = formatedNameInput("first-name-input", "last-name-input");
     const initialsInput = getElement<HTMLInputElement>("initials-input");
     
@@ -200,7 +200,7 @@ function collectSubjectData(selectedSubjects: Subject[]): CreateTeacherRequest {
     };
 }
 
-
+/*
 function buildAddTeacherForm(): HTMLElement {
     const formContainer = document.createElement("div");
     formContainer.id = "form-container";
@@ -268,7 +268,7 @@ function buildAddTeacherForm(): HTMLElement {
 
     return formContainer;
 }
-
+*/
 function buildFormHeader(modal: HTMLElement, overlay: HTMLElement, scrollContainer: HTMLElement): HTMLElement {
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-teacher-header-container";
@@ -294,23 +294,7 @@ function buildFormHeader(modal: HTMLElement, overlay: HTMLElement, scrollContain
 }
 
 
-async function openAddTeacherForm(): Promise<void> {
-    const noTeachersElement = getElement<HTMLElement>("no-teachers");
-    const disableOverlay = getElement<HTMLElement>("disable-overlay");
-    const displayTeachers = getElement<HTMLElement>("display-teachers");
-    const addTeacherScreen = getElement<HTMLElement>("add-teacher-screen");
-
-    if (!addTeacherScreen || !disableOverlay || !displayTeachers) return;
-    if (noTeachersElement) noTeachersElement.style.display = "none";
-
-    openPopup({
-        modal: addTeacherScreen,
-        overlay: disableOverlay,
-        scrollContainer: displayTeachers
-    });
-
-    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
-
+function buildAvatarUploadSection(): HTMLElement {
     const avaterUploadDiv = document.createElement("div");
     avaterUploadDiv.className = "avatar-upload";
 
@@ -335,12 +319,30 @@ async function openAddTeacherForm(): Promise<void> {
     
     avatarLabel.appendChild(avatarPreview);
     avaterUploadDiv.append(teacherImageInput, avatarLabel, avatarText);
-    
+    return avaterUploadDiv;
+}
+
+/*
+async function openAddTeacherForm(): Promise<void> {
+    const noTeachersElement = getElement<HTMLElement>("no-teachers");
+    const disableOverlay = getElement<HTMLElement>("disable-overlay");
+    const displayTeachers = getElement<HTMLElement>("display-teachers");
+    const addTeacherScreen = getElement<HTMLElement>("add-teacher-screen");
+
+    if (!addTeacherScreen || !disableOverlay || !displayTeachers) return;
+    if (noTeachersElement) noTeachersElement.style.display = "none";
+
+    openPopup({
+        modal: addTeacherScreen,
+        overlay: disableOverlay,
+        scrollContainer: displayTeachers
+    });
+
+    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    const avaterUploadDiv = buildAvatarUploadSection();
+
     const form = buildAddTeacherForm();
     
-    /*const submitButton = document.createElement("div");
-    submitButton.id = "submit-teacher-btn";
-    submitButton.textContent = "Bestätigen";*/
     
     const confirmButton = document.createElement("div");
     confirmButton.id = "submit-teacher-btn";
@@ -371,7 +373,7 @@ async function openAddTeacherForm(): Promise<void> {
 
     confirmButton.addEventListener("click", async () => {
         try {
-            const teacherData = collectSubjectData(subjectSelector.getSelectedSubjects());
+            const teacherData = collectTeacherData(subjectSelector.getSelectedSubjects());
             if (!teacherData) return;
 
             await createTeacher(teacherData);
@@ -390,6 +392,310 @@ async function openAddTeacherForm(): Promise<void> {
         }
     });
 
+}*/
+
+// ─── buildStepIndicator ───────────────────────────────────────────────────────
+// Ersetzt: nichts (neu)
+// Zeigt die 3 Punkte oben im Modal (active / completed)
+ 
+function buildStepIndicator(currentStep: TeacherFormStep): HTMLElement {
+    const container = document.createElement("div");
+    container.id = "step-indicator";
+ 
+    const steps = [1, 2, 3] as const;
+ 
+    steps.forEach((step) => {
+        const dot = document.createElement("div");
+        dot.className = "step-dot";
+ 
+        if (step === currentStep) {
+            dot.classList.add("active");
+        }
+ 
+        if (step < currentStep) {
+            dot.classList.add("completed");
+        }
+ 
+        container.appendChild(dot);
+    });
+ 
+    return container;
+}
+
+ 
+type NavigationButtonsConfig = {
+    showBack: boolean;
+    nextLabel: string;
+    onBack?: () => void;
+    onNext: () => void;
+};
+ 
+function buildNavigationButtons(config: NavigationButtonsConfig): HTMLElement {
+    const navContainer = document.createElement("div");
+    navContainer.id = "wizard-nav";
+ 
+    if (config.showBack && config.onBack) {
+        const backButton = document.createElement("div");
+        backButton.id = "back-teacher-btn";
+        backButton.textContent = "Zurück";
+ 
+        backButton.addEventListener("click", () => {
+            config.onBack!();
+        });
+ 
+        navContainer.appendChild(backButton);
+    }
+ 
+    const nextButton = document.createElement("div");
+    nextButton.id = "submit-teacher-btn";
+    nextButton.textContent = config.nextLabel;
+ 
+    nextButton.addEventListener("click", () => {
+        config.onNext();
+    });
+ 
+    navContainer.appendChild(nextButton);
+ 
+    return navContainer;
+}
+ 
+ 
+function buildStep1(state: TeacherFormState): HTMLElement {
+    const container = document.createElement("div");
+    container.id = "step-1-container";
+ 
+    const addTeacherForm = document.createElement("form");
+    addTeacherForm.id = "add-teacher-form";
+ 
+    const firstNameInput = document.createElement("input");
+    firstNameInput.type = "text";
+    firstNameInput.id = "first-name-input";
+    firstNameInput.name = "first-name";
+    firstNameInput.required = true;
+    firstNameInput.placeholder = "Vorname";
+    firstNameInput.value = state.firstName;
+ 
+    const lastNameInput = document.createElement("input");
+    lastNameInput.type = "text";
+    lastNameInput.id = "last-name-input";
+    lastNameInput.name = "last-name";
+    lastNameInput.required = true;
+    lastNameInput.placeholder = "Nachname";
+    lastNameInput.value = state.lastName;
+ 
+    const initialsInput = document.createElement("input");
+    initialsInput.type = "text";
+    initialsInput.id = "initials-input";
+    initialsInput.name = "initials";
+    initialsInput.required = true;
+    initialsInput.placeholder = "Initialen";
+    initialsInput.value = state.nameSymbol;
+ 
+    const emailInput = document.createElement("input");
+    emailInput.type = "email";
+    emailInput.id = "email-input";
+    emailInput.name = "email";
+    emailInput.required = false;
+    emailInput.placeholder = "Email";
+    emailInput.value = state.email;
+ 
+    addTeacherForm.append(firstNameInput, lastNameInput, initialsInput, emailInput);
+    container.appendChild(addTeacherForm);
+ 
+    return container;
+}
+ 
+
+ 
+async function buildStep2(state: TeacherFormState): Promise<HTMLElement> {
+    const container = document.createElement("div");
+    container.id = "step-2-container";
+ 
+    const addSubjectsContainer = document.createElement("div");
+    addSubjectsContainer.id = "add-subjects-container";
+ 
+    const subjectInputContainer = document.createElement("div");
+    subjectInputContainer.id = "subject-input-container";
+ 
+    const addSubjectImg = document.createElement("img");
+    addSubjectImg.id = "add-subject-img";
+    addSubjectImg.src = "../assets/img/magnifyingGlass.png";
+    addSubjectImg.alt = "Add Subject";
+ 
+    const subjectInput = document.createElement("input");
+    subjectInput.type = "text";
+    subjectInput.id = "subject-input";
+    subjectInput.placeholder = "Fach hinzufügen";
+ 
+    subjectInputContainer.append(addSubjectImg, subjectInput);
+ 
+    const subjectDropdown = document.createElement("div");
+    subjectDropdown.id = "subject-dropdown";
+ 
+    const selectedSubjectsContainer = document.createElement("div");
+    selectedSubjectsContainer.id = "selected-subjects";
+ 
+    addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
+    container.appendChild(addSubjectsContainer);
+ 
+    const allSubjects = await fetchSubjects();
+ 
+    const subjectSelector = initSubjectSelector({
+        input: subjectInput,
+        dropdown: subjectDropdown,
+        selectedContainer: selectedSubjectsContainer,
+        inputContainer: subjectInputContainer,
+        allSubjects: allSubjects
+    });
+ 
+    // Vorherige Auswahl wiederherstellen wenn man zurücknavigiert
+    state.selectedSubjects.forEach((subject) => {
+        subjectSelector.restore?.(subject);
+    });
+ 
+    // Selector am Container speichern damit saveStep2() ihn lesen kann
+    (container as any)._subjectSelector = subjectSelector;
+ 
+    return container;
+}
+ 
+ 
+ 
+function buildStep3(): HTMLElement {
+    const container = document.createElement("div");
+    container.id = "step-3-container";
+ 
+    // TODO: ersetzen mit initAvailabilitySelector(...) sobald implementiert
+    const placeholder = document.createElement("p");
+    placeholder.id = "availability-placeholder";
+    placeholder.textContent = "Verfügbarkeit — kommt bald";
+ 
+    container.appendChild(placeholder);
+ 
+    return container;
+}
+ 
+ 
+ 
+async function openAddTeacherForm(): Promise<void> {
+    const noTeachersElement = aquireElement<HTMLElement>("no-teachers");
+    const disableOverlay = aquireElement<HTMLElement>("disable-overlay");
+    const displayTeachers = aquireElement<HTMLElement>("display-teachers");
+    const addTeacherScreen = aquireElement<HTMLElement>("add-teacher-screen");
+ 
+    if (!addTeacherScreen || !disableOverlay || !displayTeachers) return;
+    if (noTeachersElement) noTeachersElement.style.display = "none";
+ 
+    openPopup({
+        modal: addTeacherScreen,
+        overlay: disableOverlay,
+        scrollContainer: displayTeachers
+    });
+ 
+    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+ 
+    const state: TeacherFormState = {
+        firstName: "",
+        lastName: "",
+        nameSymbol: "",
+        email: "",
+        selectedSubjects: [],
+    };
+ 
+    let currentStep: TeacherFormStep = 1;
+ 
+    function saveStep1(): void {
+        state.firstName = getElement<HTMLInputElement>("first-name-input")?.value.trim() ?? "";
+        state.lastName = getElement<HTMLInputElement>("last-name-input")?.value.trim() ?? "";
+        state.nameSymbol = getElement<HTMLInputElement>("initials-input")?.value.trim() ?? "";
+        state.email = getElement<HTMLInputElement>("email-input")?.value.trim() ?? "";
+    }
+ 
+    function saveStep2(stepContainer: HTMLElement): void {
+        const selector = (stepContainer as any)._subjectSelector;
+ 
+        if (selector) {
+            state.selectedSubjects = selector.getSelectedSubjects();
+        }
+    }
+ 
+    async function renderStep(): Promise<void> {
+        const stepIndicator = buildStepIndicator(currentStep);
+ 
+        if (currentStep === 1) {
+            const avaterUploadDiv = buildAvatarUploadSection();
+            const stepContent = buildStep1(state);
+ 
+            const nav = buildNavigationButtons({
+                showBack: false,
+                nextLabel: "Weiter",
+                onNext: () => {
+                    saveStep1();
+                    currentStep = 2;
+                    void renderStep();
+                }
+            });
+ 
+            addTeacherScreen.replaceChildren(header, stepIndicator, avaterUploadDiv, stepContent, nav);
+            imagePreview();
+ 
+        } else if (currentStep === 2) {
+            const stepContent = await buildStep2(state);
+ 
+            const nav = buildNavigationButtons({
+                showBack: true,
+                nextLabel: "Weiter",
+                onBack: () => {
+                    saveStep2(stepContent);
+                    currentStep = 1;
+                    void renderStep();
+                },
+                onNext: () => {
+                    saveStep2(stepContent);
+                    currentStep = 3;
+                    void renderStep();
+                }
+            });
+ 
+            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+ 
+        } else if (currentStep === 3) {
+            const stepContent = buildStep3();
+ 
+            const nav = buildNavigationButtons({
+                showBack: true,
+                nextLabel: "Bestätigen",
+                onBack: () => {
+                    currentStep = 2;
+                    void renderStep();
+                },
+                onNext: async () => {
+                    try {
+                        const teacherData = collectTeacherData(state.selectedSubjects);
+                        if (!teacherData) return;
+ 
+                        await createTeacher(teacherData);
+ 
+                        closePopup({
+                            modal: addTeacherScreen,
+                            overlay: disableOverlay,
+                            scrollContainer: displayTeachers
+                        });
+ 
+                        await loadAndRenderTeachers();
+ 
+                    }
+                    catch (error) {
+                        console.error("Error occurred while confirming teacher data:", error);
+                    }
+                }
+            });
+ 
+            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+        }
+    }
+ 
+    await renderStep();
 }
 
 

@@ -1,7 +1,7 @@
 import initNavbar from "./navbar.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement, requireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import { fetchSubjects } from "../api/subjectApi.js";
@@ -141,7 +141,7 @@ function formatedNameInput(firstNameId, lastNameId) {
         throw new Error("Name input fields not found");
     return firstNameInput.value + " " + lastNameInput.value;
 }
-function collectSubjectData(selectedSubjects) {
+function collectTeacherData(selectedSubjects) {
     const nameInput = formatedNameInput("first-name-input", "last-name-input");
     const initialsInput = getElement("initials-input");
     if (!initialsInput)
@@ -152,57 +152,75 @@ function collectSubjectData(selectedSubjects) {
         teachingSubject: selectedSubjects.map((subject) => subject.id)
     };
 }
-function buildAddTeacherForm() {
+/*
+function buildAddTeacherForm(): HTMLElement {
     const formContainer = document.createElement("div");
     formContainer.id = "form-container";
+
     const addTeacherForm = document.createElement("form");
     addTeacherForm.id = "add-teacher-form";
+
     const firstNameInput = document.createElement("input");
     firstNameInput.type = "text";
     firstNameInput.id = "first-name-input";
     firstNameInput.name = "first-name";
     firstNameInput.required = true;
     firstNameInput.placeholder = "Vorname";
+
     const lastNameInput = document.createElement("input");
     lastNameInput.type = "text";
     lastNameInput.id = "last-name-input";
     lastNameInput.name = "last-name";
     lastNameInput.required = true;
     lastNameInput.placeholder = "Nachname";
+
     const initialsInput = document.createElement("input");
     initialsInput.type = "text";
     initialsInput.id = "initials-input";
     initialsInput.name = "initials";
     initialsInput.required = true;
     initialsInput.placeholder = "Initialen";
+    
     const emailInput = document.createElement("input");
     emailInput.type = "email";
     emailInput.id = "email-input";
     emailInput.name = "email";
     emailInput.required = false;
     emailInput.placeholder = "Email";
+
     addTeacherForm.append(firstNameInput, lastNameInput, initialsInput, emailInput);
+    
     const addSubjectsContainer = document.createElement("div");
     addSubjectsContainer.id = "add-subjects-container";
+
     const subjectInputContainer = document.createElement("div");
     subjectInputContainer.id = "subject-input-container";
+
     const subjectInput = document.createElement("input");
     subjectInput.type = "text";
     subjectInput.id = "subject-input";
     subjectInput.placeholder = "Fach hinzufügen";
+
     const addSubjectImg = document.createElement("img");
     addSubjectImg.id = "add-subject-img";
     addSubjectImg.src = "../assets/img/magnifyingGlass.png";
     addSubjectImg.alt = "Add Subject";
+
     subjectInputContainer.append(addSubjectImg, subjectInput);
+
     const subjectDropdown = document.createElement("div");
     subjectDropdown.id = "subject-dropdown";
+    
     const selectedSubjectsContainer = document.createElement("div");
     selectedSubjectsContainer.id = "selected-subjects";
+
     addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
+
     formContainer.append(addTeacherForm, addSubjectsContainer);
+
     return formContainer;
 }
+*/
 function buildFormHeader(modal, overlay, scrollContainer) {
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-teacher-header-container";
@@ -222,21 +240,7 @@ function buildFormHeader(modal, overlay, scrollContainer) {
     headerContainer.append(title, closeScreenButton);
     return headerContainer;
 }
-async function openAddTeacherForm() {
-    const noTeachersElement = getElement("no-teachers");
-    const disableOverlay = getElement("disable-overlay");
-    const displayTeachers = getElement("display-teachers");
-    const addTeacherScreen = getElement("add-teacher-screen");
-    if (!addTeacherScreen || !disableOverlay || !displayTeachers)
-        return;
-    if (noTeachersElement)
-        noTeachersElement.style.display = "none";
-    openPopup({
-        modal: addTeacherScreen,
-        overlay: disableOverlay,
-        scrollContainer: displayTeachers
-    });
-    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+function buildAvatarUploadSection() {
     const avaterUploadDiv = document.createElement("div");
     avaterUploadDiv.className = "avatar-upload";
     const teacherImageInput = document.createElement("input");
@@ -255,22 +259,48 @@ async function openAddTeacherForm() {
     avatarText.textContent = "Profilbild hochladen";
     avatarLabel.appendChild(avatarPreview);
     avaterUploadDiv.append(teacherImageInput, avatarLabel, avatarText);
+    return avaterUploadDiv;
+}
+/*
+async function openAddTeacherForm(): Promise<void> {
+    const noTeachersElement = getElement<HTMLElement>("no-teachers");
+    const disableOverlay = getElement<HTMLElement>("disable-overlay");
+    const displayTeachers = getElement<HTMLElement>("display-teachers");
+    const addTeacherScreen = getElement<HTMLElement>("add-teacher-screen");
+
+    if (!addTeacherScreen || !disableOverlay || !displayTeachers) return;
+    if (noTeachersElement) noTeachersElement.style.display = "none";
+
+    openPopup({
+        modal: addTeacherScreen,
+        overlay: disableOverlay,
+        scrollContainer: displayTeachers
+    });
+
+    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    const avaterUploadDiv = buildAvatarUploadSection();
+
     const form = buildAddTeacherForm();
-    /*const submitButton = document.createElement("div");
-    submitButton.id = "submit-teacher-btn";
-    submitButton.textContent = "Bestätigen";*/
+    
+    
     const confirmButton = document.createElement("div");
     confirmButton.id = "submit-teacher-btn";
     confirmButton.textContent = "Bestätigen";
+
+
     addTeacherScreen.replaceChildren(header, avaterUploadDiv, form, confirmButton);
     imagePreview();
-    const subjectInput = getElement("subject-input");
-    const subjectDropdown = getElement("subject-dropdown");
-    const selectedContainer = getElement("selected-subjects");
-    const inputContainer = getElement("subject-input-container");
-    if (!subjectInput || !subjectDropdown || !selectedContainer || !inputContainer)
-        return;
+
+    const subjectInput = getElement<HTMLInputElement>("subject-input");
+    const subjectDropdown = getElement<HTMLElement>("subject-dropdown");
+    const selectedContainer = getElement<HTMLElement>("selected-subjects");
+    const inputContainer = getElement<HTMLElement>("subject-input-container");
+    
+    if (!subjectInput || !subjectDropdown || !selectedContainer || !inputContainer) return;
+    
     const allSubjects = await fetchSubjects();
+
+
     const subjectSelector = initSubjectSelector({
         input: subjectInput,
         dropdown: subjectDropdown,
@@ -278,23 +308,257 @@ async function openAddTeacherForm() {
         inputContainer: inputContainer,
         allSubjects: allSubjects
     });
+
+
     confirmButton.addEventListener("click", async () => {
         try {
-            const teacherData = collectSubjectData(subjectSelector.getSelectedSubjects());
-            if (!teacherData)
-                return;
+            const teacherData = collectTeacherData(subjectSelector.getSelectedSubjects());
+            if (!teacherData) return;
+
             await createTeacher(teacherData);
+
             closePopup({
                 modal: addTeacherScreen,
                 overlay: disableOverlay,
                 scrollContainer: displayTeachers,
             });
+
             await loadAndRenderTeachers();
-        }
-        catch (error) {
+
+
+        }catch (error) {
             console.error("Error occurred while confirming teacher data:", error);
         }
     });
+
+}*/
+// ─── buildStepIndicator ───────────────────────────────────────────────────────
+// Ersetzt: nichts (neu)
+// Zeigt die 3 Punkte oben im Modal (active / completed)
+function buildStepIndicator(currentStep) {
+    const container = document.createElement("div");
+    container.id = "step-indicator";
+    const steps = [1, 2, 3];
+    steps.forEach((step) => {
+        const dot = document.createElement("div");
+        dot.className = "step-dot";
+        if (step === currentStep) {
+            dot.classList.add("active");
+        }
+        if (step < currentStep) {
+            dot.classList.add("completed");
+        }
+        container.appendChild(dot);
+    });
+    return container;
+}
+function buildNavigationButtons(config) {
+    const navContainer = document.createElement("div");
+    navContainer.id = "wizard-nav";
+    if (config.showBack && config.onBack) {
+        const backButton = document.createElement("div");
+        backButton.id = "back-teacher-btn";
+        backButton.textContent = "Zurück";
+        backButton.addEventListener("click", () => {
+            config.onBack();
+        });
+        navContainer.appendChild(backButton);
+    }
+    const nextButton = document.createElement("div");
+    nextButton.id = "submit-teacher-btn";
+    nextButton.textContent = config.nextLabel;
+    nextButton.addEventListener("click", () => {
+        config.onNext();
+    });
+    navContainer.appendChild(nextButton);
+    return navContainer;
+}
+function buildStep1(state) {
+    const container = document.createElement("div");
+    container.id = "step-1-container";
+    const addTeacherForm = document.createElement("form");
+    addTeacherForm.id = "add-teacher-form";
+    const firstNameInput = document.createElement("input");
+    firstNameInput.type = "text";
+    firstNameInput.id = "first-name-input";
+    firstNameInput.name = "first-name";
+    firstNameInput.required = true;
+    firstNameInput.placeholder = "Vorname";
+    firstNameInput.value = state.firstName;
+    const lastNameInput = document.createElement("input");
+    lastNameInput.type = "text";
+    lastNameInput.id = "last-name-input";
+    lastNameInput.name = "last-name";
+    lastNameInput.required = true;
+    lastNameInput.placeholder = "Nachname";
+    lastNameInput.value = state.lastName;
+    const initialsInput = document.createElement("input");
+    initialsInput.type = "text";
+    initialsInput.id = "initials-input";
+    initialsInput.name = "initials";
+    initialsInput.required = true;
+    initialsInput.placeholder = "Initialen";
+    initialsInput.value = state.nameSymbol;
+    const emailInput = document.createElement("input");
+    emailInput.type = "email";
+    emailInput.id = "email-input";
+    emailInput.name = "email";
+    emailInput.required = false;
+    emailInput.placeholder = "Email";
+    emailInput.value = state.email;
+    addTeacherForm.append(firstNameInput, lastNameInput, initialsInput, emailInput);
+    container.appendChild(addTeacherForm);
+    return container;
+}
+async function buildStep2(state) {
+    const container = document.createElement("div");
+    container.id = "step-2-container";
+    const addSubjectsContainer = document.createElement("div");
+    addSubjectsContainer.id = "add-subjects-container";
+    const subjectInputContainer = document.createElement("div");
+    subjectInputContainer.id = "subject-input-container";
+    const addSubjectImg = document.createElement("img");
+    addSubjectImg.id = "add-subject-img";
+    addSubjectImg.src = "../assets/img/magnifyingGlass.png";
+    addSubjectImg.alt = "Add Subject";
+    const subjectInput = document.createElement("input");
+    subjectInput.type = "text";
+    subjectInput.id = "subject-input";
+    subjectInput.placeholder = "Fach hinzufügen";
+    subjectInputContainer.append(addSubjectImg, subjectInput);
+    const subjectDropdown = document.createElement("div");
+    subjectDropdown.id = "subject-dropdown";
+    const selectedSubjectsContainer = document.createElement("div");
+    selectedSubjectsContainer.id = "selected-subjects";
+    addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
+    container.appendChild(addSubjectsContainer);
+    const allSubjects = await fetchSubjects();
+    const subjectSelector = initSubjectSelector({
+        input: subjectInput,
+        dropdown: subjectDropdown,
+        selectedContainer: selectedSubjectsContainer,
+        inputContainer: subjectInputContainer,
+        allSubjects: allSubjects
+    });
+    // Vorherige Auswahl wiederherstellen wenn man zurücknavigiert
+    state.selectedSubjects.forEach((subject) => {
+        subjectSelector.restore?.(subject);
+    });
+    // Selector am Container speichern damit saveStep2() ihn lesen kann
+    container._subjectSelector = subjectSelector;
+    return container;
+}
+function buildStep3() {
+    const container = document.createElement("div");
+    container.id = "step-3-container";
+    // TODO: ersetzen mit initAvailabilitySelector(...) sobald implementiert
+    const placeholder = document.createElement("p");
+    placeholder.id = "availability-placeholder";
+    placeholder.textContent = "Verfügbarkeit — kommt bald";
+    container.appendChild(placeholder);
+    return container;
+}
+async function openAddTeacherForm() {
+    const noTeachersElement = aquireElement("no-teachers");
+    const disableOverlay = aquireElement("disable-overlay");
+    const displayTeachers = aquireElement("display-teachers");
+    const addTeacherScreen = aquireElement("add-teacher-screen");
+    if (!addTeacherScreen || !disableOverlay || !displayTeachers)
+        return;
+    if (noTeachersElement)
+        noTeachersElement.style.display = "none";
+    openPopup({
+        modal: addTeacherScreen,
+        overlay: disableOverlay,
+        scrollContainer: displayTeachers
+    });
+    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    const state = {
+        firstName: "",
+        lastName: "",
+        nameSymbol: "",
+        email: "",
+        selectedSubjects: [],
+    };
+    let currentStep = 1;
+    function saveStep1() {
+        state.firstName = getElement("first-name-input")?.value.trim() ?? "";
+        state.lastName = getElement("last-name-input")?.value.trim() ?? "";
+        state.nameSymbol = getElement("initials-input")?.value.trim() ?? "";
+        state.email = getElement("email-input")?.value.trim() ?? "";
+    }
+    function saveStep2(stepContainer) {
+        const selector = stepContainer._subjectSelector;
+        if (selector) {
+            state.selectedSubjects = selector.getSelectedSubjects();
+        }
+    }
+    async function renderStep() {
+        const stepIndicator = buildStepIndicator(currentStep);
+        if (currentStep === 1) {
+            const avaterUploadDiv = buildAvatarUploadSection();
+            const stepContent = buildStep1(state);
+            const nav = buildNavigationButtons({
+                showBack: false,
+                nextLabel: "Weiter",
+                onNext: () => {
+                    saveStep1();
+                    currentStep = 2;
+                    void renderStep();
+                }
+            });
+            addTeacherScreen.replaceChildren(header, stepIndicator, avaterUploadDiv, stepContent, nav);
+            imagePreview();
+        }
+        else if (currentStep === 2) {
+            const stepContent = await buildStep2(state);
+            const nav = buildNavigationButtons({
+                showBack: true,
+                nextLabel: "Weiter",
+                onBack: () => {
+                    saveStep2(stepContent);
+                    currentStep = 1;
+                    void renderStep();
+                },
+                onNext: () => {
+                    saveStep2(stepContent);
+                    currentStep = 3;
+                    void renderStep();
+                }
+            });
+            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+        }
+        else if (currentStep === 3) {
+            const stepContent = buildStep3();
+            const nav = buildNavigationButtons({
+                showBack: true,
+                nextLabel: "Bestätigen",
+                onBack: () => {
+                    currentStep = 2;
+                    void renderStep();
+                },
+                onNext: async () => {
+                    try {
+                        const teacherData = collectTeacherData(state.selectedSubjects);
+                        if (!teacherData)
+                            return;
+                        await createTeacher(teacherData);
+                        closePopup({
+                            modal: addTeacherScreen,
+                            overlay: disableOverlay,
+                            scrollContainer: displayTeachers
+                        });
+                        await loadAndRenderTeachers();
+                    }
+                    catch (error) {
+                        console.error("Error occurred while confirming teacher data:", error);
+                    }
+                }
+            });
+            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+        }
+    }
+    await renderStep();
 }
 function initializeApp() {
     initNavbar();

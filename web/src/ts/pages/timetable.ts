@@ -1,5 +1,5 @@
 import { clearCharts } from "./graph.js";
-import { getElement, requireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 
@@ -173,7 +173,7 @@ export function load(): void {
         });
 }
 
-requireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
+aquireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
 async function getRandomizedTimeTable(): Promise<void> {
     clearLayout();
     await getFetchResponse("/randomize");
