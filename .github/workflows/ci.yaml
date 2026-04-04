@@ -20,4 +20,4 @@ jobs:
           java-version: 21
           cache: maven
 
-      - run: mvn clean verify
+      - run: mvn -f leo-planer/ clean verify
