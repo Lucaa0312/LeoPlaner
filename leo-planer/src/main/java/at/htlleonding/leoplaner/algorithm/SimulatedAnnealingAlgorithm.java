@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.algorithm;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,6 +69,10 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
+        algorithmLoop(30000L);
+    }
+
+    public void algorithmLoop(final Long iterationCap) {
         long iterationCounter = 0;
         long costFinal = 0;
 
@@ -80,7 +83,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        while (getIsRunning()) { // main loop
+        while (getIsRunning() && iterationCounter < iterationCap) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()

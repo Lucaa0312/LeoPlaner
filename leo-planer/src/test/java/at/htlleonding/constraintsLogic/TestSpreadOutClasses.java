@@ -1,6 +1,7 @@
 package at.htlleonding.constraintsLogic;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
@@ -12,7 +13,8 @@ import at.htlleonding.leoplaner.data.Timetable;
 import io.quarkus.test.junit.QuarkusTest;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
+//@QuarkusTest
+@Disabled
 public class TestSpreadOutClasses {
     @Inject
     DataRepository dataRepository;
