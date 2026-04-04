@@ -31,4 +31,8 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 - Started creating the chart designs
 
 ### 02.04.2026
-- research for design improvement
+- Research for design improvement
+
+### 04.04.2026
+- New navbar design
+- Improvised Logo
