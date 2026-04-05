@@ -69,7 +69,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
-        algorithmLoop(30000L);
+        algorithmLoop(Long.MAX_VALUE);
     }
 
     public void algorithmLoop(final Long iterationCap) {
@@ -121,19 +121,14 @@ public class SimulatedAnnealingAlgorithm {
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
 
-            if (iterationCounter % 50 == 0) {
-                try {
-                    // Thread.sleep(300);
-                } catch (final Exception e) {
-                    // TODO: handle exception
-                }
-                this.dataRepository.getHistory()
-                        .add(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
-                progressEvent.fire(
-                        new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
-            }
+            this.dataRepository.addHistory(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
+
+            progressEvent.fire(
+                    new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
+
             decreaseTemperature();
             this.dataRepository.getAllTimetables().put(className, currTimetable);
+
             iterationCounter++;
         }
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
