@@ -1,6 +1,7 @@
 package at.htlleonding.leoplaner.repository;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.*;
@@ -11,7 +12,7 @@ import jakarta.inject.Inject;
 public class TimetableService {
     private Timetable currentTimetable;
     private Map<String, Timetable> currentTimetableList = new HashMap<>();
-    private List<History> historyList = new ArrayList<>();
+    private List<History> historyList = new CopyOnWriteArrayList<>();
 
     @Inject
     TeacherRepository teacherRepository;
@@ -21,6 +22,10 @@ public class TimetableService {
 
     public List<History> getHistoryList() {
         return historyList;
+    }
+
+    public void addHistory(History history) {
+        this.historyList.add(history);
     }
 
     public void setHistoryList(List<History> historyList) {

@@ -53,6 +53,10 @@ public class DataRepository {
         return timetableService.getHistoryList();
     }
 
+    public void addHistory(History history) {
+        timetableService.addHistory(history);
+    }
+
     public void setHistory(List<History> history) {
         timetableService.setHistoryList(history);
     }

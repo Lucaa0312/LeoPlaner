@@ -1,0 +1,29 @@
+name: Build (No Tests)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Set up database
+        run: docker compose -f database/docker-compose.yaml up -d
+
+      - name: Wait for database
+        run: sleep 15
+
+      - run: mvn -f leo-planer/ clean verify

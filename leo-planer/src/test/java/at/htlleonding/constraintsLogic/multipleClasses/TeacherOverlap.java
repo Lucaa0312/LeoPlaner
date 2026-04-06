@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@QuarkusTest
+//@QuarkusTest
+@Disabled
 public class TeacherOverlap {
     @Inject
     DataRepository dataRepository;

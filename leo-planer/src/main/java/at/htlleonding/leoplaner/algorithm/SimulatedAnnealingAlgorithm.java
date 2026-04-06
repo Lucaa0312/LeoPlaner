@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.algorithm;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,6 +69,10 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
+        algorithmLoop(Long.MAX_VALUE);
+    }
+
+    public void algorithmLoop(final Long iterationCap) {
         long iterationCounter = 0;
         long costFinal = 0;
 
@@ -80,7 +83,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
-        while (getIsRunning()) { // main loop
+        while (getIsRunning() && iterationCounter < iterationCap) { // main loop
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -118,19 +121,14 @@ public class SimulatedAnnealingAlgorithm {
 
             setAttributesOfTimetable(currTimetable, costCurrSchoolSchedule, getTemperature());
 
-            if (iterationCounter % 50 == 0) {
-                try {
-                    // Thread.sleep(300);
-                } catch (final Exception e) {
-                    // TODO: handle exception
-                }
-                this.dataRepository.getHistory()
-                        .add(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
-                progressEvent.fire(
-                        new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
-            }
+            this.dataRepository.addHistory(new History(iterationCounter, getTemperature(), costCurrSchoolSchedule));
+
+            progressEvent.fire(
+                    new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
+
             decreaseTemperature();
             this.dataRepository.getAllTimetables().put(className, currTimetable);
+
             iterationCounter++;
         }
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));

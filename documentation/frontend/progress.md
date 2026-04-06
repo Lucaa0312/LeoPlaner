@@ -7,10 +7,9 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### In Work
 
-- Small Figma/Design Rework
-- Different Variants/New Approach
-- Maybe Landing Page?
-- Chart design
+- Timetable page rework
+- Landing page
+- Proper Figma Design for the charts
 ---
 
 ## Change log
@@ -29,3 +28,15 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 28.02.2026
 - Started creating the chart designs
+
+### 02.04.2026
+- Research for design improvement
+
+### 04.04.2026
+- New navbar design
+- Improvised Logo
+- Reworked design slightly
+
+### 05.04.2026
+- Implemented design into the other pages
+- Worked on new timetable design

@@ -1,5 +1,6 @@
 package at.htlleonding.csv;
 
+import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Room;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -17,6 +18,9 @@ public class TestRoom {
     @Inject
     EntityManager entityManager;
 
+    @Inject
+    DataRepository dataRepository;
+
     @Test
     public void findAll() {
         Room room = new Room();
@@ -25,8 +29,7 @@ public class TestRoom {
         entityManager.persist(room);
         entityManager.persist(room2);
 
-        List<Room> rooms = entityManager.createNamedQuery(Room.QUERY_FIND_ALL, Room.class)
-                .getResultList();
+        List<Room> rooms = dataRepository.getAllRooms();
 
         assertEquals(2, rooms.size());
     }
@@ -39,14 +42,8 @@ public class TestRoom {
         entityManager.persist(room);
 
         Long id = room.getId();
-        Room roomFound = entityManager.createNamedQuery(Room.QUERY_FIND_BY_ID, Room.class)
-                .setParameter("filter", id)
-                .getSingleResultOrNull();
-
-        Room roomNotExist = entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class)
-                .setParameter("filter", 999)
-                .getSingleResultOrNull();
-
+        Room roomFound = dataRepository.getRoomById(id);
+        Room roomNotExist = dataRepository.getRoomByNumber(999);
         assertEquals("CHEM", roomFound.getRoomName());
         assertEquals(null, roomNotExist);
     }
@@ -59,14 +56,8 @@ public class TestRoom {
 
         entityManager.persist(room);
 
-        Room roomFound = entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class)
-                .setParameter("filter", 101)
-                .getSingleResultOrNull();
-
-        Room roomNotExist = entityManager.createNamedQuery(Room.QUERY_FIND_BY_NUMBER, Room.class)
-                .setParameter("filter", 999)
-                .getSingleResultOrNull();
-
+        Room roomFound = dataRepository.getRoomByNumber(101);
+        Room roomNotExist = dataRepository.getRoomByNumber(999);
         assertEquals("CHEM", roomFound.getRoomName());
         assertEquals(null, roomNotExist);
     }
