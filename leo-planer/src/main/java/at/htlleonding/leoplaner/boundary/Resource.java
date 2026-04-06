@@ -80,4 +80,18 @@ public class Resource {
     public List<History> getHistoryList() {
         return this.dataRepository.getHistory();
     }
+
+    @Path("isAlgorithmRunning")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean isAlgorithmRunning() {
+        return this.dataRepository.getAlgorithmRunning();
+    }
+
+    @Path("isAlgorithmRunningAtLeastOnce")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean isAlgorithmRunningAtLeastOnce() {
+        return this.dataRepository.isAlgorithmRunningAtLeastOnce();
+    }
 }
