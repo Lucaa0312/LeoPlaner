@@ -45,7 +45,7 @@ export function initSubjectSelector({
         selectedSubjects.push(subject);
 
         const chip = createChip({
-            label: subject.subjectName,
+            label: subject.subjectSymbol,
             className: "subject-chip",
             onRemove: () => {
                 selectedSubjects = selectedSubjects.filter(

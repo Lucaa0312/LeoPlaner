@@ -201,7 +201,7 @@
     align-items: center;
     justify-content: flex-end;
 
-    width: 20vw;
+    width: 40vw;
 
     padding-right: 1vw;
     padding-left: 1vw;
@@ -227,11 +227,11 @@
     background: transparent;
     font-size: 1.75rem;
     color: var(--leo-text-color);
-    text-align: right;
+    text-align: left;
 
-    width: 18vw;
+    width: 36vw;
 
-    margin-right: 0.5vw;
+    margin-left: 0.5vw;
 
     border: none;
     outline: none;
@@ -258,7 +258,7 @@
     margin-left: 0.5vw;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-    width: 20vw;
+    width: 41vw;
 }
 
 .dropdown-item {
@@ -273,16 +273,20 @@
 
 #selected-subjects{
     display: grid;
-    grid-template-columns: auto auto;
-    
-    margin-left: 5vh;
+    grid-template-columns: repeat(auto-fill, minmax(5vw, 1fr));
+    column-gap: 3vw;
+    row-gap: 1vh;
 
-    width: 10vw;
+    margin-top: 2vh;
+    margin-left: 0vh;
+    
+    width: 40vw;
 }
 
 .subject-chip {
     display: inline-block;
     text-align: center;
+    text-transform: uppercase;
 
     background: #5b4bff;
     color: white;
@@ -292,7 +296,7 @@
 
     cursor: pointer;
 
-    width: 6vw;
+    width: 5vw;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -363,138 +367,28 @@
     text-align: center;
     width: 10vw;
 
-    padding-left: 2.5vw;
-    padding-right: 2.5vw;
-    padding-top: 1.5vh;
-    padding-bottom: 1.5vh;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
 
-    font-size: 2.5rem;
-    font-weight: bold;
-
-    border-radius: 2vw;
-
-    background-color: var(--leo-primary-color1);
-    color: white;
-
-    cursor: pointer;
-
-    transition: all 200ms ease-in;
-}
-
-#submit-teacher-btn:hover {
-    background-color: var(--leo-primary-color2);
-    scale: 1.02;
-}
-
-/* ------------------ Wizard Navigation --------------------- */
-
-#wizard-nav {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 2vw;
-
-    margin-top: 5vh;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#back-teacher-btn {
-    margin-top: 5vh;
-
-    margin-left: auto;
-    margin-right: auto;
-    
-    text-align: center;
-    width: 10vw;
-
-    padding-left: 2.5vw;
-    padding-right: 2.5vw;
-    padding-top: 1.5vh;
-    padding-bottom: 1.5vh;
-
-    font-size: 2.5rem;
-    font-weight: bold;
-
-    border-radius: 2vw;
-
-    background-color: var(--leo-primary-color1);
-    color: white;
-
-    cursor: pointer;
-
-    transition: all 200ms ease-in;
-}
-
-#submit-teacher-btn:hover {
-    background-color: var(--leo-primary-color2);
-    scale: 1.02;
-}
-
-
-/* ------------------ Step Indicator --------------------- */
-
-#step-indicator {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 1vw;
-
-    margin-top: 1vh;
-    margin-bottom: 1vh;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.step-dot {
-    width: 0.8vw;
-    height: 0.8vw;
-    border-radius: 50%;
-
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
-    transition: all 200ms ease-in-out;
-}
-
-.step-dot.active {
-    background-color: var(--leo-primary-color1);
-    scale: 1.3;
-}
-
-.step-dot.completed {
-    background-color: #5b4bff;
-    opacity: 0.4;
-}
-
-
-/* ------------------ Step Containers --------------------- */
-
-#step-1-container,
-#step-2-container,
-#step-3-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    margin-top: 2vh;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#availability-placeholder {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--leo-text-color);
-    opacity: 0.4;
 
-    margin-top: 10vh;
+    border-radius: 1.5vw;
 
-    text-align: center;
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+    cursor: pointer;
+
+    transition: all 200ms ease-in;
 }
 
+#submit-teacher-btn:hover {
+    background-color: var(--leo-primary-color2);
+    scale: 1.02;
+}
 
 
 /* ------------------ Teacher Display --------------------- */
@@ -677,4 +571,137 @@
     font-size: 2.5rem;
     font-weight: bold;
     opacity: 0.8;
+}
+
+/* ------------------ Wizard Navigation --------------------- */
+
+#wizard-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2vw;
+ 
+    margin-top: auto;
+    padding-top: 2vh;
+    padding-bottom: 3vh;
+ 
+    margin-left: auto;
+    margin-right: auto;
+}
+ 
+#back-teacher-btn {
+    margin-top: 5vh;
+
+    margin-left: auto;
+    margin-right: auto;
+    
+    text-align: center;
+    width: 10vw;
+
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+
+    font-size: 2rem;
+    font-weight: bold;
+
+    border-radius: 1.5vw;
+
+    background-color: var(--leo-primary-color1);
+    color: white;
+
+    cursor: pointer;
+
+    transition: all 200ms ease-in;
+}
+ 
+#back-teacher-btn:hover {
+    background-color: var(--leo-primary-color2);
+    scale: 1.02;
+}
+ 
+ 
+/* ------------------ Step Indicator --------------------- */
+ 
+#step-indicator {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+ 
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+ 
+.step-dot {
+    width: 1vw;
+    height: 1vw;
+    border-radius: 50%;
+ 
+    background-color: #F3F4F6;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+ 
+    flex-shrink: 0;
+ 
+    transition: all 200ms ease-in-out;
+}
+ 
+.step-dot.active {
+    background-color: var(--leo-primary-color1);
+    scale: 1.3;
+}
+ 
+.step-dot.completed {
+    background-color: var(--leo-primary-color1);
+    opacity: 0.4;
+}
+ 
+.step-line {
+    width: 12vw;
+    height: 2px;
+ 
+    background-color: #F3F4F6;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+ 
+    transition: all 200ms ease-in-out;
+}
+ 
+.step-line.completed {
+    background-color: var(--leo-primary-color1);
+    opacity: 0.4;
+}
+ 
+ 
+/* ------------------ Step Containers --------------------- */
+
+#step-1-container{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+}
+
+#step-2-container,
+#step-3-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ 
+    margin-top: 2vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+ 
+#availability-placeholder {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--leo-text-color);
+    opacity: 0.4;
+ 
+    margin-top: 10vh;
+ 
+    text-align: center;
 }

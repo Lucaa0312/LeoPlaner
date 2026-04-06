@@ -20,7 +20,7 @@ export function initSubjectSelector({ input, dropdown, selectedContainer, inputC
         }
         selectedSubjects.push(subject);
         const chip = createChip({
-            label: subject.subjectName,
+            label: subject.subjectSymbol,
             className: "subject-chip",
             onRemove: () => {
                 selectedSubjects = selectedSubjects.filter((selectedSubject) => selectedSubject.id !== subject.id);

@@ -98,6 +98,7 @@ function collectSubjectData(selectetRoomTypes: RoomType[], selectedSubjectColor:
 
     return {
         subjectName: nameInput.value.trim(),
+        subjectSymbol: nameInput.value.trim().substring(0, 3).toUpperCase(),
         requiredRoomTypes: selectetRoomTypes,
         subjectColor: selectedSubjectColor,
     }

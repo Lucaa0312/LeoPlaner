@@ -9,12 +9,14 @@ export type SubjectColor = {
 export type Subject = {
     id: number;
     subjectName: string;
+    subjectSymbol: string;
     subjectColor: SubjectColor;
     requiredRoomTypes: RoomType[];
 };
 
 export type CreateSubjectRequest = {
     subjectName: string;
+    subjectSymbol: string;
     requiredRoomTypes: RoomType[];
     subjectColor: SubjectColor;
 };
