@@ -94,4 +94,10 @@ public class Resource {
     public boolean isAlgorithmRunningAtLeastOnce() {
         return this.dataRepository.isAlgorithmRunningAtLeastOnce();
     }
+
+    @Path("stopAlgorithmAllClasses")
+    @GET
+    public void stopAlgorithmAllClasses() {
+        this.simulatedAnnealingAlgorithm.setIsRunning(false);
+    }
 }

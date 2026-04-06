@@ -69,7 +69,7 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop() {
-        algorithmLoop(2000L);
+        algorithmLoop(Long.MAX_VALUE);
     }
 
     public void algorithmLoop(final Long iterationCap) {
@@ -135,6 +135,7 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         this.dataRepository.setAlgorithmRunning(false);
+        setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
     }
 
