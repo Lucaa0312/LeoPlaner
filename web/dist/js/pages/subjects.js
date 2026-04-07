@@ -1,14 +1,11 @@
 import initNavbar from "./navbar.js";
 import { fetchSubjects, createSubject } from "../api/subjectApi.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { getElement, formatName } from "../utils/elementHelpers.js";
 import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
 import { initColorPicker } from "../features/colorSelector.js";
 import { initSearchElement } from "../features/searchElement.js";
-function formatSubjectName(name) {
-    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-}
 function createRoomTypesElement(roomTypes) {
     if (roomTypes.length === 0) {
         return document.createElement("div");
@@ -26,7 +23,7 @@ function createSubjectCard(subject) {
     const subjectName = document.createElement("h2");
     subjectName.className = "subject-name";
     subjectName.title = subject.subjectName;
-    subjectName.textContent = formatSubjectName(subject.subjectName);
+    subjectName.textContent = formatName(subject.subjectName);
     const requiredRoomTypes = createRoomTypesElement(subject.requiredRoomTypes);
     const editDiv = document.createElement("div");
     editDiv.className = "subject-edit";

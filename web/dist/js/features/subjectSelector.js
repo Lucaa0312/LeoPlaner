@@ -1,4 +1,5 @@
 import { createChip } from "../components/selectedItems.js";
+import { formatName } from "../utils/elementHelpers.js";
 export function initSubjectSelector({ input, dropdown, selectedContainer, inputContainer, allSubjects, }) {
     let selectedSubjects = [];
     function clearDropdown() {
@@ -20,8 +21,8 @@ export function initSubjectSelector({ input, dropdown, selectedContainer, inputC
         }
         selectedSubjects.push(subject);
         const chip = createChip({
-            label: subject.subjectSymbol,
-            className: "subject-chip",
+            label: subject.subjectSymbol.toUpperCase(),
+            className: "subject-chip2",
             onRemove: () => {
                 selectedSubjects = selectedSubjects.filter((selectedSubject) => selectedSubject.id !== subject.id);
             },
@@ -52,7 +53,7 @@ export function initSubjectSelector({ input, dropdown, selectedContainer, inputC
         matches.forEach((subject) => {
             const item = document.createElement("div");
             item.className = "dropdown-item";
-            item.textContent = subject.subjectName;
+            item.textContent = formatName(subject.subjectName);
             item.addEventListener("click", () => {
                 addSubject(subject);
                 input.value = "";

@@ -2,7 +2,7 @@ import initNavbar from "./navbar.js";
 import type { CreateTeacherRequest, Teacher, TeacherFormState, TeacherFormStep} from "../types/teacher.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement, aquireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement, formatName } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import type { Subject } from "../types/subject.js";
@@ -13,9 +13,10 @@ function createTeacherSubjectChips(subjects: Teacher["teachingSubject"]): string
     const visibleSubjects = subjects.slice(0, 2);
     const hiddenSubjects = subjects.slice(2);
     const remaining = subjects.length - visibleSubjects.length;
+    
 
     let chips = visibleSubjects
-        .map((subject) => `<span class="subject-chip" title="${subject.subjectName}">${subject.subjectName}</span>`)
+        .map((subject) => `<span class="subject-chip" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
         .join("");
 
     if (remaining > 0) {
@@ -23,7 +24,7 @@ function createTeacherSubjectChips(subjects: Teacher["teachingSubject"]): string
     }
 
     chips += hiddenSubjects
-    .map(subject => `<span class="subject-chip hidden-subject" style="display: none;" title="${subject.subjectName}">${subject.subjectName}</span>`)
+    .map(subject => `<span class="subject-chip hidden-subject" style="display: none;" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
     .join("");
 
     return chips;
@@ -335,7 +336,14 @@ function buildStep1(state: TeacherFormState): HTMLElement {
  
     const addTeacherForm = document.createElement("form");
     addTeacherForm.id = "add-teacher-form";
- 
+    
+    const inputContainer = document.createElement("div");
+    inputContainer.className = "input-container";
+
+    const firstNameLable = document.createElement("label");
+    firstNameLable.htmlFor = "first-name-input";
+    firstNameLable.textContent = "Vorname: ";
+
     const firstNameInput = document.createElement("input");
     firstNameInput.type = "text";
     firstNameInput.id = "first-name-input";
@@ -344,6 +352,10 @@ function buildStep1(state: TeacherFormState): HTMLElement {
     firstNameInput.placeholder = "Vorname";
     firstNameInput.value = state.firstName;
  
+    const lastNameLabel = document.createElement("label");
+    lastNameLabel.htmlFor = "last-name-input";
+    lastNameLabel.textContent = "Nachname: ";
+
     const lastNameInput = document.createElement("input");
     lastNameInput.type = "text";
     lastNameInput.id = "last-name-input";
@@ -351,7 +363,12 @@ function buildStep1(state: TeacherFormState): HTMLElement {
     lastNameInput.required = true;
     lastNameInput.placeholder = "Nachname";
     lastNameInput.value = state.lastName;
- 
+
+    
+    const initialsLabel = document.createElement("label");
+    initialsLabel.htmlFor = "initials-input";
+    initialsLabel.textContent = "Kürzel: ";
+    
     const initialsInput = document.createElement("input");
     initialsInput.type = "text";
     initialsInput.id = "initials-input";
@@ -359,16 +376,10 @@ function buildStep1(state: TeacherFormState): HTMLElement {
     initialsInput.required = true;
     initialsInput.placeholder = "Initialen";
     initialsInput.value = state.nameSymbol;
+    
+    inputContainer.append(firstNameLable, firstNameInput, lastNameLabel, lastNameInput, initialsLabel, initialsInput);
  
-    const emailInput = document.createElement("input");
-    emailInput.type = "email";
-    emailInput.id = "email-input";
-    emailInput.name = "email";
-    emailInput.required = false;
-    emailInput.placeholder = "Email";
-    emailInput.value = state.email;
- 
-    addTeacherForm.append(firstNameInput, lastNameInput, initialsInput, emailInput);
+    addTeacherForm.append(inputContainer);
     container.appendChild(addTeacherForm);
  
     return container;
@@ -432,11 +443,9 @@ function buildStep3(): HTMLElement {
     const container = document.createElement("div");
     container.id = "step-3-container";
  
-    const placeholder = document.createElement("p");
-    placeholder.id = "availability-placeholder";
-    placeholder.textContent = "Verfügbarkei kommt bald";
+    
  
-    container.appendChild(placeholder);
+    
  
     return container;
 }

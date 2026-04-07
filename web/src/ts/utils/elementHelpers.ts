@@ -11,3 +11,8 @@ export function aquireElement<T extends HTMLElement>(id: string): T {
 
     return element;
 }
+
+
+export function formatName(name: string): string {
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
