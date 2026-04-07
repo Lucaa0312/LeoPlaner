@@ -5,6 +5,7 @@ import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
 
 import java.io.FileOutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -68,6 +69,7 @@ public class ExcelManager {
         createClassSubjectSheet(classSubjects);
         createSubjectSheet(dataRepository.getAllSubjects());
         createRoomSheet(dataRepository.getAllRooms());
+        createTeacherSheet(dataRepository.getAllTeachers());
 
         // Write file
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
@@ -155,6 +157,49 @@ public class ExcelManager {
                 if (rt != null) 
                 dataRow.createCell(cellIndex++).setCellValue(rt.toString());
             }
+        }
+    }
+
+    private void createTeacherSheet(List<Teacher> teachers) {
+        Sheet teacherSheet = workbook.createSheet("Teachers");
+
+        Row header = teacherSheet.createRow(0);
+        header.createCell(0).setCellValue("Id");
+        header.createCell(1).setCellValue("Name");
+        header.createCell(2).setCellValue("Symbol");
+        header.createCell(3).setCellValue("Teaching Subjects Ids");
+        header.createCell(4).setCellValue("Teaching Subjects Symbols");
+
+        int rtindex = 1;
+
+        for (Teacher teacher : teachers){
+            List<Long> ids = teacher.getTeachingSubject()
+                .stream()
+                .map(Subject::getId)
+                .collect(Collectors.toList());
+
+            List<String> symbols = teacher.getTeachingSubject()
+                .stream()
+                .map(Subject::getSubjectSymbol)
+                .collect(Collectors.toList());
+
+
+            Row dataRow = teacherSheet.createRow(rtindex++);
+
+            dataRow.createCell(0).setCellValue(teacher.getId());
+            dataRow.createCell(1).setCellValue(teacher.getTeacherName());
+            dataRow.createCell(2).setCellValue(teacher.getNameSymbol());
+
+            String sId = "";
+            String sSy = "";
+            for (Long id : ids) {
+                sId += id + ", ";
+            }
+            for (String s : symbols){
+                sSy += s + ", ";
+            }
+            dataRow.createCell(3).setCellValue(sId);
+            dataRow.createCell(4).setCellValue(sSy);
         }
     }
 }
