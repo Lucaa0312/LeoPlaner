@@ -8,6 +8,8 @@ import at.htlleonding.leoplaner.data.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+
 
 @ApplicationScoped
 public class TimetableService {
@@ -148,6 +150,7 @@ public class TimetableService {
         }
     }
 
+    @Transactional
     public void addClassSubjectInstance(ClassSubjectInstance csi) {
         this.entityManager.persist(csi);
     }

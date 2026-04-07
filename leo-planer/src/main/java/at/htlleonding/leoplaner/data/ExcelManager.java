@@ -33,7 +33,7 @@ public class ExcelManager {
         Timetable timetable = allTimetables.get(schoolClass.getClassName());
         // TimetableDTO timetable1 = UtilBuildFunctions.createTimetableDTO(allTimetables.get(schoolClass.getClassName()));
        
-        System.out.println(timetable); // returns Timetable<null>
+        // System.out.println(timetable); // returns Timetable<null>
        // System.out.println(timetable1); // returns TimetableDTO with all data
 
         Workbook workbook = new XSSFWorkbook(); 
@@ -51,17 +51,16 @@ public class ExcelManager {
         row.createCell(3).setCellValue(timetable.getTempAtTimetable());
 
 
-        int rowIdx = 1;
+        int rowIdx = 2;
         for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
             if (!false) {
-                System.out.println(csi.toString());
-                
+                System.out.println(csi.getId());
+                Row dataRow = timetableSheet.createRow(rowIdx++);
+                dataRow.createCell(0).setCellValue(csi.getId());
             }
     
         }
-
-
-
+        
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
         }
