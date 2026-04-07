@@ -1,5 +1,6 @@
 package at.htlleonding.leoplaner.data;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,21 +9,24 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 
 @ApplicationScoped
 public class ExcelManager {
     @Inject
     DataRepository dataRepository;
-    Workbook workbook = new XSSFWorkbook();
 
     private final String filePath = "src/files/excelFiles/export/test1.xlsx";
 
     public void exportTimetable() throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+
         final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(1L);
        
         Map<String, Timetable> allTimetables = dataRepository.getAllTimetables();
@@ -63,10 +67,10 @@ public class ExcelManager {
             }
         }
 
-        createClassSubjectSheet(classSubjects);
-        createSubjectSheet(dataRepository.getAllSubjects());
-        createRoomSheet(dataRepository.getAllRooms());
-        createTeacherSheet(dataRepository.getAllTeachers());
+        createClassSubjectSheet(classSubjects, workbook);
+        createSubjectSheet(dataRepository.getAllSubjects(), workbook);
+        createRoomSheet(dataRepository.getAllRooms(), workbook);
+        createTeacherSheet(dataRepository.getAllTeachers(), workbook);
 
         // Write file
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
@@ -75,7 +79,7 @@ public class ExcelManager {
         
     }
 
-    private void createSubjectSheet(List<Subject> subjects) {
+    private void createSubjectSheet(List<Subject> subjects, Workbook workbook) {
         Sheet subjectSheet = workbook.createSheet("Subjects");
 
         Row header = subjectSheet.createRow(0);
@@ -100,7 +104,7 @@ public class ExcelManager {
          }
     }
 
-    private void createClassSubjectSheet(List<ClassSubject> classSubjects) {
+    private void createClassSubjectSheet(List<ClassSubject> classSubjects, Workbook workbook) {
         Sheet classSubjectSheet = workbook.createSheet("ClassSubjects");
 
         Row header = classSubjectSheet.createRow(0);
@@ -129,7 +133,7 @@ public class ExcelManager {
          }
     }
 
-    private void createRoomSheet(List<Room> rooms) {
+    private void createRoomSheet(List<Room> rooms, Workbook workbook) {
         Sheet roomSheet = workbook.createSheet("Rooms");
 
         Row header = roomSheet.createRow(0);
@@ -157,7 +161,7 @@ public class ExcelManager {
         }
     }
 
-    private void createTeacherSheet(List<Teacher> teachers) {
+    private void createTeacherSheet(List<Teacher> teachers, Workbook workbook) {
         Sheet teacherSheet = workbook.createSheet("Teachers");
 
         Row header = teacherSheet.createRow(0);
@@ -197,6 +201,25 @@ public class ExcelManager {
             }
             dataRow.createCell(3).setCellValue(sId);
             dataRow.createCell(4).setCellValue(sSy);
+        }
+    }
+
+
+    @Transactional
+    public void importAll() throws Exception {
+        try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
+            DataFormatter formatter = new DataFormatter();
+
+            // 1. Independent Sheets
+            importSubjects(importWorkbook.getSheet("Subjects"), formatter);
+            importTeachers(importWorkbook.getSheet("Teachers"), formatter);
+            importRooms(importWorkbook.getSheet("Rooms"), formatter);
+
+            // 2. Structural Sheets
+            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
+
+            // 3. The Timetable / Instances
+            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
         }
     }
 
@@ -241,5 +264,82 @@ public class ExcelManager {
         }
     }
 
-    
+    private void importRooms(Sheet sheet, DataFormatter fmt) {
+    if (sheet == null) return;
+
+    for (Row row : sheet) {
+        if (row.getRowNum() == 0) continue; // Skip header
+
+        Room room = new Room();
+        room.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
+        room.setRoomNumber(Short.parseShort(fmt.formatCellValue(row.getCell(1))));
+        room.setRoomName(fmt.formatCellValue(row.getCell(2)));
+        room.setNameShort(fmt.formatCellValue(row.getCell(3)));
+
+        List<RoomTypes> types = new LinkedList<>();
+        // row.getLastCellNum() gives us the index of the last cell + 1
+        for (int i = 4; i < row.getLastCellNum(); i++) {
+            String typeValue = fmt.formatCellValue(row.getCell(i));
+            
+            if (typeValue != null && !typeValue.isBlank()) {
+                try {
+                    types.add(RoomTypes.valueOf(typeValue.trim()));
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Warning: Invalid RoomType found: " + typeValue);
+                }
+            }
+        }
+        room.setRoomTypes(types);
+
+        dataRepository.addRoom(room);
+    }
+}
+
+    private void importClassSubjects(Sheet sheet, DataFormatter fmt) {
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) continue;
+            ClassSubject cs = new ClassSubject();
+            cs.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
+            
+            // Find existing Subject and Teacher
+            cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
+            cs.setTeacher(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
+            
+            cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(5))));
+            cs.setRequiresDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(6))));
+            cs.setBetterDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(7))));
+            dataRepository.addClassSubject(cs);
+        }
+    }
+
+    private void importTimetable(Sheet sheet, DataFormatter fmt) {
+        Row metaRow = sheet.getRow(1);
+        if (metaRow == null) return;
+
+        String className = fmt.formatCellValue(metaRow.getCell(6)); 
+        
+        SchoolClass sc = dataRepository.getSchoolClassByName(className);
+        
+        Timetable timetable = new Timetable();
+        timetable.setSchoolClass(sc);
+        
+        timetable.setTotalWeeklyHours(Integer.parseInt(fmt.formatCellValue(metaRow.getCell(2))));
+        timetable.setCostOfTimetable(Integer.parseInt(fmt.formatCellValue(metaRow.getCell(3))));
+        timetable.setTempAtTimetable(Double.parseDouble(fmt.formatCellValue(metaRow.getCell(4))));
+
+        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null || row.getCell(0) == null) continue; // Skip empty rows
+
+            ClassSubjectInstance csi = new ClassSubjectInstance();
+            csi.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
+            
+            Long csId = Long.parseLong(fmt.formatCellValue(row.getCell(1)));
+            csi.setClassSubject(dataRepository.getClassSubjectById(csId));
+
+            timetable.getClassSubjectInstances().add(csi);
+        }
+        
+       // dataRepository.addTimetable(timetable);
+    }      
 }
