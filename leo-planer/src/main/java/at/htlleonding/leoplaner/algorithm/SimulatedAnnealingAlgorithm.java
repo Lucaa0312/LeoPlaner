@@ -73,6 +73,8 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void algorithmLoop(final Long iterationCap) {
+        this.dataRepository.setAlgorithmRunning(true);
+        this.dataRepository.setAlgorithmRunningAtLeastOnce(true);
         long iterationCounter = 0;
         long costFinal = 0;
 
@@ -131,6 +133,9 @@ public class SimulatedAnnealingAlgorithm {
 
             iterationCounter++;
         }
+
+        this.dataRepository.setAlgorithmRunning(false);
+        setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
     }
 
@@ -490,6 +495,9 @@ public class SimulatedAnnealingAlgorithm {
     public void toggleIsRunning() {
         boolean newValue = !getIsRunning();
         isRunning.set(newValue);
+
+        this.dataRepository.setAlgorithmRunning(newValue);
+
         if (newValue) {
             new Thread(this::algorithmLoop).start();
         }
