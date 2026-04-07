@@ -1,25 +1,66 @@
 package at.htlleonding.leoplaner.data;
 
-import java.io.FileOutputStream;
+import at.htlleonding.leoplaner.dto.TimetableDTO;
+import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
 
-import org.apache.poi.ss.usermodel.Sheet;
+import java.io.FileOutputStream;
+import java.util.*;
+
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import at.htlleonding.leoplaner.boundary.UtilBuildFunctions;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 
 @ApplicationScoped
 public class ExcelManager {
-    private static final String filePath = "src/files/excelFiles/export/test1.xlsx";
+    @Inject
+    DataRepository dataRepository;
 
-    public static void exportTimetable(Timetable timetable) throws Exception {
+    private final String filePath = "src/files/excelFiles/export/test1.xlsx";
+
+    public void exportTimetable() throws Exception {
+        final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(1L);
+        System.out.println(schoolClass.getClassName());
+
+        // Call ONCE, store it
+        Map<String, Timetable> allTimetables = dataRepository.getAllTimetables();
+
+        Timetable timetable = allTimetables.get(schoolClass.getClassName());
+        // TimetableDTO timetable1 = UtilBuildFunctions.createTimetableDTO(allTimetables.get(schoolClass.getClassName()));
+       
+        System.out.println(timetable); // returns Timetable<null>
+       // System.out.println(timetable1); // returns TimetableDTO with all data
+
         Workbook workbook = new XSSFWorkbook(); 
         Sheet timetableSheet = workbook.createSheet();
         
-        Row row = timetableSheet.createRow(0);
-        row.createCell(0).setCellValue("Test910101");
+        Row header = timetableSheet.createRow(0);
+        header.createCell(0).setCellValue("CSI");
+        header.createCell(1).setCellValue("TWH");
+        header.createCell(2).setCellValue("Cost");
+        header.createCell(3).setCellValue("Temp");
+        
+        Row row = timetableSheet.createRow(1);
+        row.createCell(1).setCellValue(timetable.getTotalWeeklyHours());
+        row.createCell(2).setCellValue(timetable.getCostOfTimetable());
+        row.createCell(3).setCellValue(timetable.getTempAtTimetable());
+
+
+        int rowIdx = 1;
+        for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+            if (!false) {
+                System.out.println(csi.toString());
+                
+            }
+    
+        }
+
+
 
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);

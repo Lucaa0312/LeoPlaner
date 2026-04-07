@@ -5,14 +5,9 @@ import java.util.List;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.CSVManager;
-import at.htlleonding.leoplaner.data.ClassSubject;
-import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
-import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.Teacher;
-import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -29,6 +24,8 @@ public class Resource {
     DataRepository dataRepository;
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+    @Inject
+    ExcelManager excelManager;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -109,32 +106,10 @@ public class Resource {
     @GET
     @Path("/test-export")
     public void triggerExport() throws Exception {
-
-        Timetable table = new Timetable();
-        ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance();
-
-        ClassSubject classSubject = new ClassSubject();
-        Teacher teacher = new Teacher();
-        teacher.setTeacherName("Adolf");
-
-        classSubject.setTeacher(teacher);
-
-        Period period = new Period();
-        period.setSchoolHour(5);
-
-        Room room = new Room();
-        room.setNameShort("PE");
-
-        classSubjectInstance.setClassSubject(classSubject);
-        classSubjectInstance.setPeriod(period);
-        classSubjectInstance.setRoom(room);
-        classSubjectInstance.setDuration(10);
-
-        table.setClassSubjectInstances(List.of(classSubjectInstance));
-        table.setTotalWeeklyHours(0);
+       
 
         try {
-            ExcelManager.exportTimetable(table);
+            excelManager.exportTimetable();
         } catch (Exception e) {
            throw new Exception(e);
         }

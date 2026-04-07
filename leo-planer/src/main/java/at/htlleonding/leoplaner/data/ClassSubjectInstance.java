@@ -95,4 +95,16 @@ public class ClassSubjectInstance extends PanacheEntity {
     public void setDuration(int duration) {
         this.duration = duration;
     }
+
+    @Override
+    public String toString() {
+    return "ClassSubjectInstance{" +
+            "id=" + id +
+             ", " +
+            "classSubject=" + classSubject +
+            ", period=" + period +
+            ", room=" + room +
+            ", duration=" + duration +
+            '}';
+}
 }
