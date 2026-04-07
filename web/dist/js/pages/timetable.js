@@ -76,27 +76,31 @@ export function load() {
         //hideLoader();
     });
 }
-requireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
-async function getRandomizedTimeTable() {
+const randomizeButton = requireElement("randomizeButton");
+randomizeButton.addEventListener("click", getRandomizedTimeTable);
+export async function getRandomizedTimeTable() {
     clearLayout();
+    clearCharts();
     await getFetchResponse("/randomize");
     load();
 }
-const algorithmButton = getElement("algorithmButton");
-const algorithmToggleButton = getElement("optimizeButton");
+const algorithmButton = requireElement("optimizeButton");
 algorithmButton?.addEventListener("click", () => {
-    if (!algorithmToggleButton)
-        return;
-    algorithmToggleButton.style.opacity = "1";
-    algorithmToggleButton.classList.add("optimizeButtonHover");
     getOptimizedTimetable();
 });
+let optimizedOnce = false;
 async function getOptimizedTimetable() {
-    clearCharts();
+    //clearCharts();
     //showLoader();
-    clearLayout();
-    await getFetchResponse("/run/algorithmAllClasses");
-    load();
+    if (!optimizedOnce) {
+        randomizeButton.style.opacity = "0.5";
+        randomizeButton.removeEventListener("click", getRandomizedTimeTable);
+        optimizedOnce = true;
+        algorithmButton.innerHTML = "Pausiere die Optimierung";
+        clearLayout();
+        await getFetchResponse("/run/algorithmAllClasses");
+        load();
+    }
 }
 function getTimetableByTeacher(teacherId) {
     clearLayout();
@@ -289,7 +293,7 @@ function createLayout(data) {
         gridBox.innerHTML = content;
     });
 }
-function clearLayout() {
+export function clearLayout() {
     const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach((day) => {
         const dayContainer = getElement(day);

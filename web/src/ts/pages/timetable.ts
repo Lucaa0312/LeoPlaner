@@ -173,31 +173,33 @@ export function load(): void {
         });
 }
 
-requireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
-async function getRandomizedTimeTable(): Promise<void> {
+const randomizeButton = requireElement<HTMLElement>("randomizeButton");
+randomizeButton.addEventListener("click", getRandomizedTimeTable)
+export async function getRandomizedTimeTable(): Promise<void> {
     clearLayout();
+    clearCharts();
     await getFetchResponse("/randomize");
     load();
 }
 
-const algorithmButton = getElement<HTMLElement>("algorithmButton");
-const algorithmToggleButton = getElement<HTMLElement>("optimizeButton");
-
+const algorithmButton = requireElement<HTMLElement>("optimizeButton");
 algorithmButton?.addEventListener("click", () => {
-    if (!algorithmToggleButton) return;
-
-    algorithmToggleButton.style.opacity = "1";
-    algorithmToggleButton.classList.add("optimizeButtonHover");
     getOptimizedTimetable();
 });
-
+let optimizedOnce = false;
 async function getOptimizedTimetable(): Promise<void> {
-    clearCharts();
+    //clearCharts();
     //showLoader();
-    clearLayout();
+    if(!optimizedOnce) {
+        randomizeButton.style.opacity = "0.5";
+        randomizeButton.removeEventListener("click", getRandomizedTimeTable);
+        optimizedOnce = true;
+        algorithmButton.innerHTML = "Pausiere die Optimierung";
+        clearLayout();
     
-    await getFetchResponse("/run/algorithmAllClasses");
-    load();
+        await getFetchResponse("/run/algorithmAllClasses");
+        load();
+    }
 }
 
 function getTimetableByTeacher(teacherId: string): void {
@@ -419,7 +421,7 @@ function createLayout(data: ClassSubjectInstance[]): void {
     });
 }
 
-function clearLayout(): void {
+export function clearLayout(): void {
     const days: string[] = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach((day) => {
         const dayContainer = getElement<HTMLElement>(day);

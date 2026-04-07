@@ -1,9 +1,8 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
-import { load } from "./timetable.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { load, getRandomizedTimeTable, clearLayout } from "./timetable.js";
+import { getElement, requireElement } from "../utils/elementHelpers.js";
 // Create the echarts instance
-// const temperatureChart = echarts.init(document.getElementById('temperatureChart'));
 const costChartElement = getElement("costChart");
 if (!costChartElement) {
     throw new Error("Element with id 'costChart' not found.");
@@ -22,73 +21,7 @@ slider.onmouseup = () => {
     isUserTouchingSlider = false;
 };
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
-// Draw the charts
-/*temperatureChart.setOption({
-  title: {
-    text: 'Temperatur/Iteration Diagramm'
-  },
-  tooltip: {},
-  grid: {
-    containLabel: true,
-    left: '1%',
-    bottom: '10%',
-    top: '25%',
-    right: '15%'
-  },
-  xAxis: {
-    type: 'value',
-    min: 0,
-    max: 10000,
-    name: 'Iterationen',
-    nameLocation: 'middle',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  yAxis: {
-    type: 'value',
-    min: 0,
-    max: 1000,
-    name: 'Temperatur',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  visualMap: {
-    show: false,
-    type: 'continuous',
-    dimension: 1,
-    min: 0,
-    max: 1000,
-    inRange: {
-      color: ['#4F46E5', '#F59E0B']
-    }
-  },
-  series: [
-    {
-      type: 'line',
-      smooth: true,
-      sampling: 'lttb',
-      symbol: 'none',
-      data: [],
-      markPoint: {
-          symbol: 'circle',
-          symbolSize: 10,
-          label: {
-            show: true,
-            fontWeight: 'bold',
-            position: 'top'
-          }
-      },
-      lineStyle: { //Strich dicker und leuchter leicht (optional)
-        width: 4,
-        shadowBlur: 15,
-        shadowColor: 'rgb(255, 192, 192)',
-        shadowOffsetY: 0,
-        opacity: 1
-      }
-    }
-  ]
-});*/
-// Draw the charts
+// Draw the chart
 costChart.setOption({
     animation: false,
     title: {
@@ -217,49 +150,44 @@ costChart.setOption({
     ]
 });
 // Get data
-// let temperatureChartData: [number, number][] = [];
-let costChartData = [];
-let finishTimer = null;
 const INACTIVITY_MS = 500;
-let lastMaxIteration = 0;
+const UPDATE_INTERVAL = 100;
+let finishTimer = null;
+let costChartData = [];
 let totalIterations = 0;
 let lastIterationFromServer = 0;
-let chartRun = false;
 let lastCost = 0;
+let lastUpdateTime = 0;
+let chartRun = false;
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log(data);
     chartRun = true;
-    // temperatureChartData.push([data.iteration, data.temperature]);
     const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
-    if (currentIteration < lastIterationFromServer) {
+    if (currentIteration < lastIterationFromServer * 0.1 && lastIterationFromServer > 0) {
         totalIterations += lastIterationFromServer;
     }
     lastIterationFromServer = currentIteration;
     const newIteration = currentIteration + totalIterations;
-    costChartData.push([newIteration, data.currentCost]);
-    lastMaxIteration = newIteration;
-    lastCost = data.currentCost;
-    /*temperatureChart.setOption({
-      series: [
-        {
-          data: temperatureChartData,
-          markPoint: {
-            data: []
-          }
-        }
-      ]
-    });*/
-    costChart.setOption({
-        series: [
-            {
-                data: costChartData,
-                markPoint: {
-                    data: []
+    const lastPoint = costChartData[costChartData.length - 1];
+    if (costChartData.length === 0 || (lastPoint && newIteration > lastPoint[0])) {
+        costChartData.push([newIteration, data.currentCost]);
+        lastCost = data.currentCost;
+    }
+    const now = Date.now();
+    if (now - lastUpdateTime > UPDATE_INTERVAL) {
+        costChart.setOption({
+            series: [
+                {
+                    data: costChartData,
+                    markPoint: {
+                        data: []
+                    }
                 }
-            }
-        ]
-    });
+            ]
+        });
+        lastUpdateTime = now;
+    }
     if (!isUserTouchingSlider) {
         slider.value = String(data.temperature);
         updateSlider(data.temperature);
@@ -271,17 +199,8 @@ socket.onmessage = function (event) {
         finalizeChart();
     }, INACTIVITY_MS);
 };
+// Pinpoint minimum
 function finalizeChart() {
-    /*temperatureChart.setOption({
-        series: [
-            {
-                data: temperatureChartData,
-                markPoint: {
-                    data: []
-                }
-            }
-        ]
-      });*/
     costChart.setOption({
         series: [
             {
@@ -299,10 +218,47 @@ function finalizeChart() {
         ]
     });
 }
-// Clear charts
+// Initialize Chart
+function initializeChart() {
+    console.log("Fetching data:");
+    fetch("http://localhost:8080/api/isAlgorithmRunning")
+        .then(response => {
+        return response.json();
+    }).then(data => {
+        console.log("data:");
+        console.log(data);
+    }).catch(error => {
+        console.error('Error Fetching Algorithm History:', error);
+    });
+    /*fetch("http://localhost:8080/api/algorithmHistory")
+          .then(response => {
+              return response.json()
+          }).then(data => {
+              console.log("data:");
+              console.log(data);
+          }).catch(error => {
+              console.error('Error Fetching Algorithm History:', error)
+          })*/
+}
+initializeChart();
+// Clear chart
+const costDisplay = requireElement("cost-container");
 export function clearCharts() {
-    // temperatureChartData = [];
-    // costChartData = [];
+    costChartData = [];
+    totalIterations = 0;
+    lastIterationFromServer = 0;
+    lastCost = 0;
+    costChart.setOption({
+        series: [
+            {
+                data: costChartData,
+                markPoint: {
+                    data: []
+                }
+            }
+        ]
+    });
+    costDisplay.style.display = "none";
 }
 // Slider
 window.addEventListener("load", () => {
@@ -351,13 +307,16 @@ slider.addEventListener("input", (event) => {
 });
 let paused = false;
 const optimizeButton = getElement("optimizeButton");
-const costDisplay = getElement("cost-container");
 // Pause algorithm
+const randomizeButton = requireElement("randomizeButton");
 optimizeButton?.addEventListener("click", () => {
     if (chartRun) {
         if (paused) {
             paused = false;
             optimizeButton.innerHTML = "Pausiere die Optimierung";
+            randomizeButton.style.opacity = "0.5";
+            randomizeButton.removeEventListener("click", getRandomizedTimeTable);
+            clearLayout();
             if (costDisplay) {
                 costDisplay.style.display = "none";
             }
@@ -366,6 +325,8 @@ optimizeButton?.addEventListener("click", () => {
             load();
             paused = true;
             optimizeButton.innerHTML = "Setze die Optimierung fort";
+            randomizeButton.style.opacity = "1";
+            randomizeButton.addEventListener("click", getRandomizedTimeTable);
             if (costDisplay) {
                 costDisplay.style.display = "block";
                 costDisplay.innerHTML = "Kosten: " + lastCost;

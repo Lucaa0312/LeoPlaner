@@ -2,7 +2,6 @@ import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.es
 import { load } from './timetable.js';
 
 // Create the echarts instance
-//var temperatureChart = echarts.init(document.getElementById('temperatureChart'));
 var costChart = echarts.init(document.getElementById('costChart'));
 
 const slider = document.getElementById('temperatureSlider');
@@ -14,74 +13,7 @@ slider.onmouseup = () => { isUserTouchingSlider = false; };
 
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
 
-// Draw the charts
-/*temperatureChart.setOption({
-  title: {
-    text: 'Temperatur/Iteration Diagramm'
-  },
-  tooltip: {},
-  grid: {
-    containLabel: true,
-    left: '1%',
-    bottom: '10%',
-    top: '25%',
-    right: '15%'
-  },
-  xAxis: {
-    type: 'value',
-    min: 0,
-    max: 10000,
-    name: 'Iterationen',
-    nameLocation: 'middle',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  yAxis: {
-    type: 'value',
-    min: 0,
-    max: 1000,
-    name: 'Temperatur',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  visualMap: {
-    show: false,
-    type: 'continuous',
-    dimension: 1,
-    min: 0,
-    max: 1000,
-    inRange: {
-      color: ['#4F46E5', '#F59E0B']
-    }
-  },
-  series: [
-    {
-      type: 'line',
-      smooth: true,
-      sampling: 'lttb',
-      symbol: 'none',
-      data: [],
-      markPoint: {
-          symbol: 'circle',
-          symbolSize: 10,
-          label: {
-            show: true,
-            fontWeight: 'bold',
-            position: 'top'
-          }
-      },
-      lineStyle: { //Strich dicker und leuchter leicht (optional)
-        width: 4,
-        shadowBlur: 15,
-        shadowColor: 'rgb(255, 192, 192)',
-        shadowOffsetY: 0,
-        opacity: 1
-      }
-    }
-  ]
-});*/
-
-// Draw the charts
+// Draw the chart
 costChart.setOption({
   animation: false,
   title: {
@@ -208,7 +140,6 @@ costChart.setOption({
 });
 
 // Get data
-//var temperatureChartData = [];
 var costChartData = [];
 let finishTimer = null;
 const INACTIVITY_MS = 500;
@@ -223,7 +154,6 @@ socket.onmessage = function (event) {
     console.log(data)
     chartRun = true;
 
-  //temperatureChartData.push([data.iteration, data.temperature]);
   const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
   
   if(currentIteration < lastIterationFromServer) {
@@ -236,17 +166,6 @@ socket.onmessage = function (event) {
 
   lastMaxIteration = newIteration;
   lastCost = data.currentCost;
-
-  /*temperatureChart.setOption({
-  series: [
-    {
-      data: temperatureChartData,
-      markPoint: {
-        data: []
-      }
-    }
-  ]
-  });*/
 
   costChart.setOption({
   series: [
@@ -271,18 +190,8 @@ socket.onmessage = function (event) {
   }, INACTIVITY_MS);
 };
 
+// Pinpoint minimum
 function finalizeChart() {
-  /*temperatureChart.setOption({
-        series: [
-            {
-                data: temperatureChartData,
-                markPoint: {
-                    data: []
-                }
-            }
-        ]
-      });*/
-
     costChart.setOption({
         series: [
           {
@@ -296,9 +205,8 @@ function finalizeChart() {
       });
 }
 
-// Clear charts
+// Clear chart
 export function clearCharts() {
-  //temperatureChartData = [];
   //costChartData = [];
 }
 
