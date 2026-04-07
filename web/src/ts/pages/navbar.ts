@@ -32,31 +32,41 @@ export default function initNavbar() {
         // Active State Check
         const searchString = item.path.replace("./", ""); 
         if (currentUrl.includes(searchString)) {
-            navItem.style.backgroundColor = "var(--leo-background-color)";
+            navItem.style.backgroundColor = "#EEF2FF";
             navItem.style.color = "var(--leo-primary-color1)";
-            navItem.style.borderRadius = "5vw";
+            navItem.style.borderLeftColor = "var(--leo-primary-color1)";
+            navItem.style.borderLeftWidth = "0.25vw";
+            navItem.style.borderLeftStyle = "solid";
         }
 
         navItem.onclick = () => window.location.href = item.path;
 
         navItem.innerHTML = `
-            <i class="${item.icon}"></i>
             <p class="nav-text">${item.text}</p>
         `;
         
         navItemContainer.appendChild(navItem);
     });
 
+    // 3,5 You need help section
+    const helpSection = document.createElement("div");
+    helpSection.id = "help-section";
+    helpSection.innerHTML = `
+        <p class="nav-text">Brauchen Sie Hilfe?</p>
+    `;
+
     // 3. Create account info section
     const accountInfo = document.createElement("div");
     accountInfo.id = "account-info-box";
     accountInfo.innerHTML = `
-        <img id="account-avatar" src="../assets/img/defaultAvatar.png" alt="Avatar">
+        <div id="account-avatar-container">
+            <img id="account-avatar" src="../assets/img/defaultAvatar.png" alt="Avatar">
+        </div>
         <div id="account-text-container">
             <p id="account-username">Admin</p>
         </div>
     `;
 
     
-    navBar.replaceChildren(logoContainer, navItemContainer, accountInfo);
+    navBar.replaceChildren(logoContainer, navItemContainer, helpSection, accountInfo);
 }

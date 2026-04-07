@@ -6,6 +6,7 @@ import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.Room;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -13,7 +14,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api")
@@ -24,6 +24,8 @@ public class Resource {
     DataRepository dataRepository;
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+    @Inject
+    ExcelManager excelManager;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -80,4 +82,37 @@ public class Resource {
     public List<History> getHistoryList() {
         return this.dataRepository.getHistory();
     }
+
+    @Path("isAlgorithmRunning")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean isAlgorithmRunning() {
+        return this.dataRepository.getAlgorithmRunning();
+    }
+
+    @Path("isAlgorithmRunningAtLeastOnce")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean isAlgorithmRunningAtLeastOnce() {
+        return this.dataRepository.isAlgorithmRunningAtLeastOnce();
+    }
+
+    @Path("stopAlgorithmAllClasses")
+    @GET
+    public void stopAlgorithmAllClasses() {
+        this.simulatedAnnealingAlgorithm.setIsRunning(false);
+    }
+    
+    @GET
+    @Path("/test-export")
+    public void triggerExport() throws Exception {
+       
+
+        try {
+            excelManager.exportTimetable();
+        } catch (Exception e) {
+           throw new Exception(e);
+        }
+    }
 }
+

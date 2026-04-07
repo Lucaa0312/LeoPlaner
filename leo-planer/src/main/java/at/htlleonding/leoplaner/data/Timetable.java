@@ -92,4 +92,14 @@ public class Timetable extends PanacheEntity {
         this.schoolClass = schoolClass;
     }
 
+    @Override
+    public String toString() {
+    return "Timetable{" +
+            "weeklyHours=" + this.totalWeeklyHours +
+            ", classSubjectInstances=" + this.classSubjectInstances +
+            ", cost=" + this.costOfTimetable +
+            ", temperature=" + this.tempAtTimetable +
+            '}';
+}
+
 }

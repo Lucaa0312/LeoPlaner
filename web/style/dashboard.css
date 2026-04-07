@@ -1,10 +1,4 @@
 /* ------------------MAIN CONTENT BOX--------------------- */
-#main-content {
-    background-color: var(--leo-background-color);
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
 #welcome-text{
     font-weight: bold;
     font-size: 3rem;

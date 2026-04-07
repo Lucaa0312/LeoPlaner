@@ -29,6 +29,25 @@ public class DataRepository {
     @Inject
     ClassSubjectRepository classSubjectRepository;
 
+    private boolean algorithmRunning = false;
+    private boolean algorithmRunningAtLeastOnce = false;
+
+    public boolean isAlgorithmRunningAtLeastOnce() {
+        return algorithmRunningAtLeastOnce;
+    }
+
+    public void setAlgorithmRunningAtLeastOnce(boolean algorithmRunningAtLeastOnce) {
+        this.algorithmRunningAtLeastOnce = algorithmRunningAtLeastOnce;
+    }
+
+    public boolean getAlgorithmRunning() {
+        return algorithmRunning;
+    }
+
+    public void setAlgorithmRunning(boolean running) {
+        this.algorithmRunning = running;
+    }
+
     public void randomizeSchoolSchedule() {
         timetableService.generateForAllClasses();
     }
@@ -200,4 +219,5 @@ public class DataRepository {
     public ClassSubject deleteClassSubject(Long id) {
         return classSubjectRepository.delete(id);
     }
+
 }
