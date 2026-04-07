@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 public class ExcelManager {
     @Inject
     DataRepository dataRepository;
+    Workbook workbook = new XSSFWorkbook();
 
     private final String filePath = "src/files/excelFiles/export/test1.xlsx";
 
@@ -33,8 +34,8 @@ public class ExcelManager {
         // System.out.println(timetable); // returns Timetable<null>
        // System.out.println(timetable1); // returns TimetableDTO with all data
 
-        Workbook workbook = new XSSFWorkbook(); 
-        Sheet timetableSheet = workbook.createSheet();
+         
+        Sheet timetableSheet = workbook.createSheet("Timetable");
         
         Row header = timetableSheet.createRow(0);
         header.createCell(0).setCellValue("CSI");
@@ -47,6 +48,7 @@ public class ExcelManager {
         row.createCell(2).setCellValue(timetable.getCostOfTimetable());
         row.createCell(3).setCellValue(timetable.getTempAtTimetable());
 
+        List<Subject> subjects = new LinkedList<>();
 
         int rowIdx = 2;
         for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
@@ -54,9 +56,12 @@ public class ExcelManager {
                 System.out.println(csi.getId());
                 Row dataRow = timetableSheet.createRow(rowIdx++);
                 dataRow.createCell(0).setCellValue(csi.getId());
+                subjects.add(csi.getClassSubject().getSubject());
             }
-    
         }
+
+        createSubjectSheet(subjects);
+
 
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
@@ -66,28 +71,30 @@ public class ExcelManager {
 
 
  
-    private void createSubjectSheet(Workbook workbook, Subject subject) {
-        Sheet sheet = workbook.createSheet("Subjects");
+    private void createSubjectSheet(List<Subject> subjects) {
+        Sheet subjectSheet = workbook.createSheet("Subjects");
 
-        Row header = sheet.createRow(0);
+        Row header = subjectSheet.createRow(0);
         header.createCell(0).setCellValue("ID");
         header.createCell(1).setCellValue("Name");
         header.createCell(2).setCellValue("Color");
         header.createCell(3).setCellValue("Symbol");
         header.createCell(4).setCellValue("Required Room Types");
 
-        Row dataRow = sheet.createRow(1);
-        dataRow.createCell(0).setCellValue(subject.getId());
-        dataRow.createCell(1).setCellValue(subject.getSubjectName());
-        dataRow.createCell(2).setCellValue(subject.getSubjectColor().toString());
-        dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
-        int rowIndex = 3;
-        for (RoomTypes rt : subject.getRequiredRoomTypes()) {
-            Row rtRow = sheet.createRow(rowIndex++);
-            rtRow.createCell(4).setCellValue(rt.toString());
-        }   
-        
-        
+        int rtindex = 1;
+
+        for (Subject subject : subjects){
+            Row dataRow = subjectSheet.createRow(rtindex++);
+
+            dataRow.createCell(0).setCellValue(subject.getId());
+            dataRow.createCell(1).setCellValue(subject.getSubjectName());
+            dataRow.createCell(2).setCellValue(subject.getSubjectColorAsString());
+            dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
+
+            int cellIndex = 4;
+            for (RoomTypes rt : subject.getRequiredRoomTypes()) dataRow.createCell(cellIndex++).setCellValue(rt.toString());
+            
+         }
     }
         
 }

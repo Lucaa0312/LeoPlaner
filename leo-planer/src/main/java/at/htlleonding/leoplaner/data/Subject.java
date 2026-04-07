@@ -9,6 +9,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 
 @Entity
@@ -17,7 +18,7 @@ public class Subject extends PanacheEntity {
     private RgbColor subjectColor;
     private String subjectSymbol;
 
-    @ElementCollection(targetClass = RoomTypes.class)
+    @ElementCollection(targetClass = RoomTypes.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable( // create new join table
             name = "subject_required_roomtypes", joinColumns = @JoinColumn(name = "subject_id"))
@@ -66,6 +67,10 @@ public class Subject extends PanacheEntity {
 
     public void setSubjectColor(final RgbColor subjectColor) {
         this.subjectColor = subjectColor;
+    }
+
+    public String getSubjectColorAsString(){
+        return String.format("%d, %d, %d", this.subjectColor.red(), this.subjectColor.green(), this.subjectColor.blue());
     }
 
     public Long getId() {
