@@ -218,6 +218,28 @@ public class ExcelManager {
         }
     }
 
-    
+    private void importTeachers(Sheet sheet, DataFormatter fmt) {
+        for (Row row : sheet) {
+            
+            Teacher t = new Teacher();
+            t.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
+            t.setTeacherName(fmt.formatCellValue(row.getCell(1)));
+            t.setNameSymbol(fmt.formatCellValue(row.getCell(2)));
 
+            // Handle the comma-separated IDs: "1, 2, 5, "
+            String idString = fmt.formatCellValue(row.getCell(3));
+            if (!idString.isEmpty()) {
+                String[] ids = idString.split(",\\s*");
+                for (String id : ids) {
+                    if (!id.isBlank()) {
+                        Subject s = Subject.findById(Long.parseLong(id));
+                        if (s != null) t.getTeachingSubject().add(s);
+                    }
+                }
+            }
+            dataRepository.addTeacher(t);
+        }
+    }
+
+    
 }
