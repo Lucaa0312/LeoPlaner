@@ -7,12 +7,16 @@ import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @ApplicationScoped
 public class TimetableService {
     private Timetable currentTimetable;
     private Map<String, Timetable> currentTimetableList = new HashMap<>();
     private List<History> historyList = new CopyOnWriteArrayList<>();
+
+    @Inject
+    EntityManager entityManager;
 
     @Inject
     TeacherRepository teacherRepository;
@@ -132,9 +136,20 @@ public class TimetableService {
         for (SchoolClass sc : schoolClassRepository.getAll()) {
             List<ClassSubject> subjects = ClassSubject.getAllByClassName(sc.getClassName());
             List<ClassSubjectInstance> instances = createRandomInstances(subjects, sc.getClassRoom());
+            addClassSubjectInstances(instances);
             Timetable timetable = new Timetable(instances, sc);
             currentTimetableList.put(sc.getClassName(), timetable);
         }
+    }
+
+    public void addClassSubjectInstances(List<ClassSubjectInstance> csis) {
+        for (ClassSubjectInstance csi : csis) {
+            addClassSubjectInstance(csi);
+        }
+    }
+
+    public void addClassSubjectInstance(ClassSubjectInstance csi) {
+        this.entityManager.persist(csi);
     }
 
     public void generateForSingleClass(String className, Room room) {
