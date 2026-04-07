@@ -67,6 +67,7 @@ public class ExcelManager {
 
         createClassSubjectSheet(classSubjects);
         createSubjectSheet(dataRepository.getAllSubjects());
+        createRoomSheet(dataRepository.getAllRooms());
 
         // Write file
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
@@ -129,30 +130,31 @@ public class ExcelManager {
          }
     }
 
-/* 
     private void createRoomSheet(List<Room> rooms) {
-        Sheet subjectSheet = workbook.createSheet("Subjects");
+        Sheet roomSheet = workbook.createSheet("Rooms");
 
-        Row header = subjectSheet.createRow(0);
+        Row header = roomSheet.createRow(0);
         header.createCell(0).setCellValue("ID");
-        header.createCell(1).setCellValue("Name");
-        header.createCell(2).setCellValue("Color");
-        header.createCell(3).setCellValue("Symbol");
-        header.createCell(4).setCellValue("Required Room Types");
+        header.createCell(1).setCellValue("Number");
+        header.createCell(2).setCellValue("Name");
+        header.createCell(3).setCellValue("Short");
+        header.createCell(4).setCellValue("Room Type");
 
         int rtindex = 1;
 
-        for (Subject subject : subjects){
-            Row dataRow = subjectSheet.createRow(rtindex++);
+        for (Room room : rooms){
+            Row dataRow = roomSheet.createRow(rtindex++);
 
-            dataRow.createCell(0).setCellValue(subject.getId());
-            dataRow.createCell(1).setCellValue(subject.getSubjectName());
-            dataRow.createCell(2).setCellValue(subject.getSubjectColorAsString());
-            dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
+            dataRow.createCell(0).setCellValue(room.getId());
+            dataRow.createCell(1).setCellValue(room.getRoomNumber());
+            dataRow.createCell(2).setCellValue(room.getRoomName());
+            dataRow.createCell(3).setCellValue(room.getNameShort());
 
             int cellIndex = 4;
-            for (RoomTypes rt : subject.getRequiredRoomTypes()) dataRow.createCell(cellIndex++).setCellValue(rt.toString());
-         }
+            for (RoomTypes rt : room.getRoomTypes()) {
+                if (rt != null) 
+                dataRow.createCell(cellIndex++).setCellValue(rt.toString());
+            }
+        }
     }
-        */
 }
