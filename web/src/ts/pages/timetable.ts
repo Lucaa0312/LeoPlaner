@@ -182,26 +182,6 @@ export async function getRandomizedTimeTable(): Promise<void> {
     load();
 }
 
-const algorithmButton = requireElement<HTMLElement>("optimizeButton");
-algorithmButton?.addEventListener("click", () => {
-    getOptimizedTimetable();
-});
-let optimizedOnce = false;
-async function getOptimizedTimetable(): Promise<void> {
-    //clearCharts();
-    //showLoader();
-    if(!optimizedOnce) {
-        randomizeButton.style.opacity = "0.5";
-        randomizeButton.removeEventListener("click", getRandomizedTimeTable);
-        optimizedOnce = true;
-        algorithmButton.innerHTML = "Pausiere die Optimierung";
-        clearLayout();
-    
-        await getFetchResponse("/run/algorithmAllClasses");
-        load();
-    }
-}
-
 function getTimetableByTeacher(teacherId: string): void {
     clearLayout();
     fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)

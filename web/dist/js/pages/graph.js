@@ -161,7 +161,7 @@ let lastUpdateTime = 0;
 let chartRun = false;
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log(data);
+    //console.log(data);
     chartRun = true;
     const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
     if (currentIteration < lastIterationFromServer * 0.1 && lastIterationFromServer > 0) {
@@ -219,26 +219,50 @@ function finalizeChart() {
     });
 }
 // Initialize Chart
+let optimizedBefore = false;
 function initializeChart() {
     console.log("Fetching data:");
-    fetch("http://localhost:8080/api/isAlgorithmRunning")
+    fetch("http://localhost:8080/api/isAlgorithmRunningAtLeastOnce")
         .then(response => {
         return response.json();
-    }).then(data => {
+    }).then(didRun => {
         console.log("data:");
-        console.log(data);
+        console.log(didRun);
+        optimizedBefore = didRun;
+        if (didRun) {
+            fetch("http://localhost:8080/api/get/algorithmHistory")
+                .then(response => {
+                return response.json();
+            }).then((data) => {
+                console.log(data);
+                if (data && data.length > 0) {
+                    costChartData = data.map(item => [item.iteration, item.cost]);
+                    const lastEntry = costChartData[costChartData.length - 1];
+                    if (lastEntry) {
+                        totalIterations = lastEntry[0];
+                    }
+                    else {
+                        totalIterations = 0;
+                    }
+                    lastIterationFromServer = 0;
+                    costChart.setOption({
+                        series: [
+                            {
+                                data: costChartData,
+                                markPoint: {
+                                    data: []
+                                }
+                            }
+                        ]
+                    });
+                }
+            }).catch(error => {
+                console.error('Error Fetching Algorithm History:', error);
+            });
+        }
     }).catch(error => {
-        console.error('Error Fetching Algorithm History:', error);
+        console.error('Error Fetching Algorithm Running:', error);
     });
-    /*fetch("http://localhost:8080/api/algorithmHistory")
-          .then(response => {
-              return response.json()
-          }).then(data => {
-              console.log("data:");
-              console.log(data);
-          }).catch(error => {
-              console.error('Error Fetching Algorithm History:', error)
-          })*/
 }
 initializeChart();
 // Clear chart
@@ -305,33 +329,49 @@ slider.addEventListener("input", (event) => {
         return;
     socket.send("temperature:" + val);
 });
-let paused = false;
-const optimizeButton = getElement("optimizeButton");
 // Pause algorithm
+let paused = false;
+let isStarting = false;
 const randomizeButton = requireElement("randomizeButton");
-optimizeButton?.addEventListener("click", () => {
-    if (chartRun) {
-        if (paused) {
+const optimizeButton = requireElement("optimizeButton");
+optimizeButton.addEventListener("click", handleOptimizeButton);
+async function handleOptimizeButton() {
+    if (isStarting)
+        return;
+    if (!optimizedBefore) {
+        isStarting = true;
+        try {
+            fetch("http://localhost:8080/api/run/algorithmAllClasses"); //Backend fix needed here (can't use await)
+            optimizedBefore = true;
             paused = false;
             optimizeButton.innerHTML = "Pausiere die Optimierung";
             randomizeButton.style.opacity = "0.5";
-            randomizeButton.removeEventListener("click", getRandomizedTimeTable);
             clearLayout();
-            if (costDisplay) {
-                costDisplay.style.display = "none";
-            }
         }
-        else {
-            load();
-            paused = true;
-            optimizeButton.innerHTML = "Setze die Optimierung fort";
-            randomizeButton.style.opacity = "1";
-            randomizeButton.addEventListener("click", getRandomizedTimeTable);
-            if (costDisplay) {
-                costDisplay.style.display = "block";
-                costDisplay.innerHTML = "Kosten: " + lastCost;
-            }
+        catch (error) {
+            console.log("Error while starting algorithm: ", error);
         }
-        socket.send("toggle");
+        finally {
+            isStarting = false;
+        }
+        return;
     }
-});
+    if (paused) {
+        console.log("ALGORITHM RESUMED");
+        paused = false;
+        optimizeButton.innerHTML = "Pausiere die Optimierung";
+        randomizeButton.style.opacity = "0.5";
+        costDisplay.style.display = "none";
+        socket.send("resume");
+    }
+    else {
+        console.log("ALGORITHM PAUSED");
+        paused = true;
+        optimizeButton.innerHTML = "Setze die Optimierung fort";
+        randomizeButton.style.opacity = "1";
+        load();
+        costDisplay.style.display = "block";
+        costDisplay.innerHTML = "Kosten: " + lastCost;
+        socket.send("pause");
+    }
+}

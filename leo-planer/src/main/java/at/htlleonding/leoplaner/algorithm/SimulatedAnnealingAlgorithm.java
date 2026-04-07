@@ -492,13 +492,17 @@ public class SimulatedAnnealingAlgorithm {
         isRunning.set(paused);
     }
 
-    public void toggleIsRunning() {
-        boolean newValue = !getIsRunning();
-        isRunning.set(newValue);
+    public void pauseAlgorithm() {
+        if(getIsRunning()) {
+            isRunning.set(false);
+            this.dataRepository.setAlgorithmRunning(false);
+        }
+    }
 
-        this.dataRepository.setAlgorithmRunning(newValue);
-
-        if (newValue) {
+    public void resumeAlgorithm() {
+        if(!getIsRunning()) {
+            isRunning.set(true);
+            this.dataRepository.setAlgorithmRunning(true);
             new Thread(this::algorithmLoop).start();
         }
     }
