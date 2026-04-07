@@ -49,7 +49,7 @@
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {
     background-color: var(--leo-background-color);
-    width: 80vw;
+    width: 85vw;
     height: 100vh;
     position: relative;
 
@@ -175,7 +175,7 @@
 /* ------------------NAVIGATION BAR--------------------- */
 #nav-bar {
     height: 100%;
-    width: 20vw;
+    width: 15vw;
 }
 
 #logo-container{
@@ -203,14 +203,16 @@
     align-items: center;
     gap: 1rem;
     
-    width: 15vw;
-
     margin-top: 2vh;
-    margin-left: 2vw;
-    margin-right: 2vw;
 
-    padding-top: 0.5vw;
-    padding-bottom: 0.5vw;
+    border-top-right-radius: 0.3vw;
+    border-bottom-right-radius: 0.3vw;
+    border-left-color: transparent;
+    border-left-width: 0.25vw;
+    border-left-style: solid;
+
+    padding-top: 0.3vw;
+    padding-bottom: 0.3vw;
     padding-left: 1vw;
     padding-right: 1vw;
 
@@ -223,9 +225,7 @@
 
 .nav-item:hover {
     color: var(--leo-primary-color1);
-    background-color: var(--leo-background-color);
-
-    border-radius: 5vw;
+    background-color: #EEF2FF;
 }
 
 .nav-item i {
@@ -247,18 +247,43 @@
 }
 
 #account-avatar {
-    width: 3vw;
-    height: 3vw;
+    width: 2vw;
+    height: 2vw;
+    object-fit: scale-down;
+}
+
+#account-avatar-container {
+    width: 2.5vw;
+    height: 2.5vw;
     border-radius: 50%;
 
     margin-left: 1vw;
 
     object-fit:scale-down;
     border-style: solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #account-username {
     font-size: 2rem;
     color: var(--leo-text-color);
     font-weight: 0;
+}
+
+#help-section {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.5);
+    width: 10vw;
+
+    position: fixed;
+    bottom: 12vh;
+    left: 0;
+
+    padding-left: 2vw;
+
+    border-bottom: var(--leo-primary-color1);
+    border-bottom-width: 0.2vw;
+    border-bottom-style: solid;
 }
