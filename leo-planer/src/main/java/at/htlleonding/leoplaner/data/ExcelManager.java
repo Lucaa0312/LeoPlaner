@@ -25,14 +25,11 @@ public class ExcelManager {
 
     public void exportTimetable() throws Exception {
         final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(1L);
-        System.out.println(schoolClass.getClassName());
-
-        // Call ONCE, store it
+       
         Map<String, Timetable> allTimetables = dataRepository.getAllTimetables();
 
         Timetable timetable = allTimetables.get(schoolClass.getClassName());
         // TimetableDTO timetable1 = UtilBuildFunctions.createTimetableDTO(allTimetables.get(schoolClass.getClassName()));
-       
         // System.out.println(timetable); // returns Timetable<null>
        // System.out.println(timetable1); // returns TimetableDTO with all data
 
@@ -60,7 +57,7 @@ public class ExcelManager {
             }
     
         }
-        
+
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
         }
@@ -68,21 +65,29 @@ public class ExcelManager {
     }
 
 
-/* 
-    private void createEmployeeSheet(Workbook workbook, List<Employee> employees) {
-        Sheet sheet = workbook.createSheet("Employees");
+ 
+    private void createSubjectSheet(Workbook workbook, Subject subject) {
+        Sheet sheet = workbook.createSheet("Subjects");
+
         Row header = sheet.createRow(0);
         header.createCell(0).setCellValue("ID");
         header.createCell(1).setCellValue("Name");
-        header.createCell(2).setCellValue("Company ID"); // The "Foreign Key"
+        header.createCell(2).setCellValue("Color");
+        header.createCell(3).setCellValue("Symbol");
+        header.createCell(4).setCellValue("Required Room Types");
 
-        int rowIdx = 1;
-        for (Employee e : employees) {
-            Row row = sheet.createRow(rowIdx++);
-            row.createCell(0).setCellValue(e.id);
-            row.createCell(1).setCellValue(e.fullName);
-            row.createCell(2).setCellValue(e.company.id); // Linking back to Sheet 1
-        }
+        Row dataRow = sheet.createRow(1);
+        dataRow.createCell(0).setCellValue(subject.getId());
+        dataRow.createCell(1).setCellValue(subject.getSubjectName());
+        dataRow.createCell(2).setCellValue(subject.getSubjectColor().toString());
+        dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
+        int rowIndex = 3;
+        for (RoomTypes rt : subject.getRequiredRoomTypes()) {
+            Row rtRow = sheet.createRow(rowIndex++);
+            rtRow.createCell(4).setCellValue(rt.toString());
+        }   
+        
+        
     }
-        */
+        
 }
