@@ -1,18 +1,15 @@
 package at.htlleonding.leoplaner.data;
 
-import at.htlleonding.leoplaner.dto.TimetableDTO;
-import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
-
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import at.htlleonding.leoplaner.boundary.UtilBuildFunctions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -202,4 +199,25 @@ public class ExcelManager {
             dataRow.createCell(4).setCellValue(sSy);
         }
     }
+
+    private void importSubjects(Sheet sheet, DataFormatter fmt) {
+        for (Row row : sheet) {
+            Subject s = new Subject();
+
+            s.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
+            s.setSubjectName(fmt.formatCellValue(row.getCell(1)));
+            // TODO color handling
+            
+            List<RoomTypes> rts = new LinkedList<>();
+            for (int i = 4; i < row.getLastCellNum(); i++) {
+                String val = fmt.formatCellValue(row.getCell(i));
+                if (!val.isEmpty()) rts.add(RoomTypes.valueOf(val));
+            }
+            s.setRequiredRoomTypes(rts);
+            dataRepository.addSubject(s);
+        }
+    }
+
+    
+
 }
