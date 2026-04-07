@@ -94,10 +94,38 @@ public class ClassSubject extends PanacheEntity {
 
     public SchoolClass getSchoolClass() {
         return schoolClass;
+
     }
 
     public void setSchoolClass(final SchoolClass schoolClass) {
         this.schoolClass = schoolClass;
     }
+
+ @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder("cs ID: " + this.getId());
+    
+    if (teacher != null) {
+        sb.append(", teacher=").append(teacher.getTeacherName()).append(" (ID: ").append(teacher.getId()).append(")");
+    }
+    
+    if (subject != null) {
+        if (sb.length() > 0) {
+            sb.append(", ");
+        }
+        sb.append("subject=").append(subject.getSubjectName()).append(" (ID: ").append(subject.getId()).append(")");
+    }
+    
+    if (sb.length() > 0) {
+        sb.append(", ");
+    }
+    sb.append("weeklyHours=").append(weeklyHours);
+    sb.append(", requiresDoublePeriod=").append(requiresDoublePeriod);
+    sb.append(", isBetterDoublePeriod=").append(isBetterDoublePeriod);
+    
+    return sb.toString();
+}
+
+
 
 }

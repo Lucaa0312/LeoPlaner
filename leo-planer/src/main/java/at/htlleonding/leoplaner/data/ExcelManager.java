@@ -34,43 +34,47 @@ public class ExcelManager {
         // System.out.println(timetable); // returns Timetable<null>
        // System.out.println(timetable1); // returns TimetableDTO with all data
 
-         
         Sheet timetableSheet = workbook.createSheet("Timetable");
         
         Row header = timetableSheet.createRow(0);
-        header.createCell(0).setCellValue("CSI");
-        header.createCell(1).setCellValue("TWH");
-        header.createCell(2).setCellValue("Cost");
-        header.createCell(3).setCellValue("Temp");
+        header.createCell(0).setCellValue("CSI Id");
+        header.createCell(1).setCellValue("CS Id");
+        header.createCell(2).setCellValue("Total weekly hours");
+        header.createCell(3).setCellValue("Cost");
+        header.createCell(4).setCellValue("Temp");
+        header.createCell(5).setCellValue("SchoolClass Id");
+        header.createCell(6).setCellValue("SchoolClass Name");
         
         Row row = timetableSheet.createRow(1);
-        row.createCell(1).setCellValue(timetable.getTotalWeeklyHours());
-        row.createCell(2).setCellValue(timetable.getCostOfTimetable());
-        row.createCell(3).setCellValue(timetable.getTempAtTimetable());
+        row.createCell(2).setCellValue(timetable.getTotalWeeklyHours());
+        row.createCell(3).setCellValue(timetable.getCostOfTimetable());
+        row.createCell(4).setCellValue(timetable.getTempAtTimetable());
+        row.createCell(5).setCellValue(timetable.getSchoolClass().getId());
+        row.createCell(6).setCellValue(timetable.getSchoolClass().getClassName());
 
-        List<Subject> subjects = new LinkedList<>();
+        List<ClassSubject> classSubjects = new LinkedList<>();        
 
         int rowIdx = 2;
         for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
             if (!false) {
-                System.out.println(csi.getId());
                 Row dataRow = timetableSheet.createRow(rowIdx++);
                 dataRow.createCell(0).setCellValue(csi.getId());
-                subjects.add(csi.getClassSubject().getSubject());
+                dataRow.createCell(1).setCellValue(csi.getClassSubject().getId());
+
+                if (!classSubjects.contains(csi.getClassSubject())) classSubjects.add(csi.getClassSubject());
             }
         }
 
-        createSubjectSheet(subjects);
+        createClassSubjectSheet(classSubjects);
+        createSubjectSheet(dataRepository.getAllSubjects());
 
-
+        // Write file
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
         }
         
     }
 
-
- 
     private void createSubjectSheet(List<Subject> subjects) {
         Sheet subjectSheet = workbook.createSheet("Subjects");
 
@@ -93,8 +97,62 @@ public class ExcelManager {
 
             int cellIndex = 4;
             for (RoomTypes rt : subject.getRequiredRoomTypes()) dataRow.createCell(cellIndex++).setCellValue(rt.toString());
-            
          }
     }
-        
+
+    private void createClassSubjectSheet(List<ClassSubject> classSubjects) {
+        Sheet classSubjectSheet = workbook.createSheet("ClassSubjects");
+
+        Row header = classSubjectSheet.createRow(0);
+        header.createCell(0).setCellValue("ID");
+        header.createCell(1).setCellValue("Subject Id");
+        header.createCell(2).setCellValue("Subject Symbol");
+        header.createCell(3).setCellValue("Teacher Id");
+        header.createCell(4).setCellValue("Teacher Symbol");
+        header.createCell(5).setCellValue("Weekly Hours");
+        header.createCell(6).setCellValue("Requires Double Period");
+        header.createCell(7).setCellValue("Is better as Double Period");
+
+        int rtindex = 1;
+
+        for (ClassSubject subject : classSubjects){
+            Row dataRow = classSubjectSheet.createRow(rtindex++);
+
+            dataRow.createCell(0).setCellValue(subject.getId());
+            dataRow.createCell(1).setCellValue(subject.getSubject().getId());
+            dataRow.createCell(2).setCellValue(subject.getSubject().getSubjectSymbol());
+            dataRow.createCell(3).setCellValue(subject.getTeacher().getId());
+            dataRow.createCell(4).setCellValue(subject.getTeacher().getNameSymbol());
+            dataRow.createCell(5).setCellValue(subject.getWeeklyHours());
+            dataRow.createCell(6).setCellValue(subject.isRequiresDoublePeriod());
+            dataRow.createCell(7).setCellValue(subject.isBetterDoublePeriod());
+         }
+    }
+
+/* 
+    private void createRoomSheet(List<Room> rooms) {
+        Sheet subjectSheet = workbook.createSheet("Subjects");
+
+        Row header = subjectSheet.createRow(0);
+        header.createCell(0).setCellValue("ID");
+        header.createCell(1).setCellValue("Name");
+        header.createCell(2).setCellValue("Color");
+        header.createCell(3).setCellValue("Symbol");
+        header.createCell(4).setCellValue("Required Room Types");
+
+        int rtindex = 1;
+
+        for (Subject subject : subjects){
+            Row dataRow = subjectSheet.createRow(rtindex++);
+
+            dataRow.createCell(0).setCellValue(subject.getId());
+            dataRow.createCell(1).setCellValue(subject.getSubjectName());
+            dataRow.createCell(2).setCellValue(subject.getSubjectColorAsString());
+            dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
+
+            int cellIndex = 4;
+            for (RoomTypes rt : subject.getRequiredRoomTypes()) dataRow.createCell(cellIndex++).setCellValue(rt.toString());
+         }
+    }
+        */
 }
