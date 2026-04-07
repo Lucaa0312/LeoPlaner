@@ -135,7 +135,7 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         this.dataRepository.setAlgorithmRunning(false);
-        setIsRunning(true);
+        // setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
     }
 
@@ -494,7 +494,8 @@ public class SimulatedAnnealingAlgorithm {
 
     public void toggleIsRunning() {
         boolean newValue = !getIsRunning();
-        isRunning.set(newValue);
+        System.out.println(newValue);
+        setIsRunning(newValue);
 
         this.dataRepository.setAlgorithmRunning(newValue);
 
