@@ -1,9 +1,8 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
-import { load } from "./timetable.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { load, getRandomizedTimeTable, clearLayout } from "./timetable.js";
+import { getElement, requireElement } from "../utils/elementHelpers.js";
 // Create the echarts instance
-// const temperatureChart = echarts.init(document.getElementById('temperatureChart'));
 const costChartElement = getElement("costChart");
 if (!costChartElement) {
     throw new Error("Element with id 'costChart' not found.");
@@ -22,73 +21,7 @@ slider.onmouseup = () => {
     isUserTouchingSlider = false;
 };
 const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
-// Draw the charts
-/*temperatureChart.setOption({
-  title: {
-    text: 'Temperatur/Iteration Diagramm'
-  },
-  tooltip: {},
-  grid: {
-    containLabel: true,
-    left: '1%',
-    bottom: '10%',
-    top: '25%',
-    right: '15%'
-  },
-  xAxis: {
-    type: 'value',
-    min: 0,
-    max: 10000,
-    name: 'Iterationen',
-    nameLocation: 'middle',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  yAxis: {
-    type: 'value',
-    min: 0,
-    max: 1000,
-    name: 'Temperatur',
-    nameGap: 30,
-    nameTextStyle: {fontWeight: 'bold'}
-  },
-  visualMap: {
-    show: false,
-    type: 'continuous',
-    dimension: 1,
-    min: 0,
-    max: 1000,
-    inRange: {
-      color: ['#4F46E5', '#F59E0B']
-    }
-  },
-  series: [
-    {
-      type: 'line',
-      smooth: true,
-      sampling: 'lttb',
-      symbol: 'none',
-      data: [],
-      markPoint: {
-          symbol: 'circle',
-          symbolSize: 10,
-          label: {
-            show: true,
-            fontWeight: 'bold',
-            position: 'top'
-          }
-      },
-      lineStyle: { //Strich dicker und leuchter leicht (optional)
-        width: 4,
-        shadowBlur: 15,
-        shadowColor: 'rgb(255, 192, 192)',
-        shadowOffsetY: 0,
-        opacity: 1
-      }
-    }
-  ]
-});*/
-// Draw the charts
+// Draw the chart
 costChart.setOption({
     animation: false,
     title: {
@@ -217,49 +150,44 @@ costChart.setOption({
     ]
 });
 // Get data
-// let temperatureChartData: [number, number][] = [];
-let costChartData = [];
-let finishTimer = null;
 const INACTIVITY_MS = 500;
-let lastMaxIteration = 0;
+const UPDATE_INTERVAL = 100;
+let finishTimer = null;
+let costChartData = [];
 let totalIterations = 0;
 let lastIterationFromServer = 0;
-let chartRun = false;
 let lastCost = 0;
+let lastUpdateTime = 0;
+let chartRun = false;
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log(data);
+    //console.log(data);
     chartRun = true;
-    // temperatureChartData.push([data.iteration, data.temperature]);
     const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
-    if (currentIteration < lastIterationFromServer) {
+    if (currentIteration < lastIterationFromServer * 0.1 && lastIterationFromServer > 0) {
         totalIterations += lastIterationFromServer;
     }
     lastIterationFromServer = currentIteration;
     const newIteration = currentIteration + totalIterations;
-    costChartData.push([newIteration, data.currentCost]);
-    lastMaxIteration = newIteration;
-    lastCost = data.currentCost;
-    /*temperatureChart.setOption({
-      series: [
-        {
-          data: temperatureChartData,
-          markPoint: {
-            data: []
-          }
-        }
-      ]
-    });*/
-    costChart.setOption({
-        series: [
-            {
-                data: costChartData,
-                markPoint: {
-                    data: []
+    const lastPoint = costChartData[costChartData.length - 1];
+    if (costChartData.length === 0 || (lastPoint && newIteration > lastPoint[0])) {
+        costChartData.push([newIteration, data.currentCost]);
+        lastCost = data.currentCost;
+    }
+    const now = Date.now();
+    if (now - lastUpdateTime > UPDATE_INTERVAL) {
+        costChart.setOption({
+            series: [
+                {
+                    data: costChartData,
+                    markPoint: {
+                        data: []
+                    }
                 }
-            }
-        ]
-    });
+            ]
+        });
+        lastUpdateTime = now;
+    }
     if (!isUserTouchingSlider) {
         slider.value = String(data.temperature);
         updateSlider(data.temperature);
@@ -271,17 +199,8 @@ socket.onmessage = function (event) {
         finalizeChart();
     }, INACTIVITY_MS);
 };
+// Pinpoint minimum
 function finalizeChart() {
-    /*temperatureChart.setOption({
-        series: [
-            {
-                data: temperatureChartData,
-                markPoint: {
-                    data: []
-                }
-            }
-        ]
-      });*/
     costChart.setOption({
         series: [
             {
@@ -299,10 +218,71 @@ function finalizeChart() {
         ]
     });
 }
-// Clear charts
+// Initialize Chart
+let optimizedBefore = false;
+function initializeChart() {
+    console.log("Fetching data:");
+    fetch("http://localhost:8080/api/isAlgorithmRunningAtLeastOnce")
+        .then(response => {
+        return response.json();
+    }).then(didRun => {
+        console.log("data:");
+        console.log(didRun);
+        optimizedBefore = didRun;
+        if (didRun) {
+            fetch("http://localhost:8080/api/get/algorithmHistory")
+                .then(response => {
+                return response.json();
+            }).then((data) => {
+                console.log(data);
+                if (data && data.length > 0) {
+                    costChartData = data.map(item => [item.iteration, item.cost]);
+                    const lastEntry = costChartData[costChartData.length - 1];
+                    if (lastEntry) {
+                        totalIterations = lastEntry[0];
+                    }
+                    else {
+                        totalIterations = 0;
+                    }
+                    lastIterationFromServer = 0;
+                    costChart.setOption({
+                        series: [
+                            {
+                                data: costChartData,
+                                markPoint: {
+                                    data: []
+                                }
+                            }
+                        ]
+                    });
+                }
+            }).catch(error => {
+                console.error('Error Fetching Algorithm History:', error);
+            });
+        }
+    }).catch(error => {
+        console.error('Error Fetching Algorithm Running:', error);
+    });
+}
+initializeChart();
+// Clear chart
+const costDisplay = requireElement("cost-container");
 export function clearCharts() {
-    // temperatureChartData = [];
-    // costChartData = [];
+    costChartData = [];
+    totalIterations = 0;
+    lastIterationFromServer = 0;
+    lastCost = 0;
+    costChart.setOption({
+        series: [
+            {
+                data: costChartData,
+                markPoint: {
+                    data: []
+                }
+            }
+        ]
+    });
+    costDisplay.style.display = "none";
 }
 // Slider
 window.addEventListener("load", () => {
@@ -349,28 +329,49 @@ slider.addEventListener("input", (event) => {
         return;
     socket.send("temperature:" + val);
 });
-let paused = false;
-const optimizeButton = getElement("optimizeButton");
-const costDisplay = getElement("cost-container");
 // Pause algorithm
-optimizeButton?.addEventListener("click", () => {
-    if (chartRun) {
-        if (paused) {
+let paused = false;
+let isStarting = false;
+const randomizeButton = requireElement("randomizeButton");
+const optimizeButton = requireElement("optimizeButton");
+optimizeButton.addEventListener("click", handleOptimizeButton);
+async function handleOptimizeButton() {
+    if (isStarting)
+        return;
+    if (!optimizedBefore) {
+        isStarting = true;
+        try {
+            fetch("http://localhost:8080/api/run/algorithmAllClasses"); //Backend fix needed here (can't use await)
+            optimizedBefore = true;
             paused = false;
             optimizeButton.innerHTML = "Pausiere die Optimierung";
-            if (costDisplay) {
-                costDisplay.style.display = "none";
-            }
+            randomizeButton.style.opacity = "0.5";
+            clearLayout();
         }
-        else {
-            load();
-            paused = true;
-            optimizeButton.innerHTML = "Setze die Optimierung fort";
-            if (costDisplay) {
-                costDisplay.style.display = "block";
-                costDisplay.innerHTML = "Kosten: " + lastCost;
-            }
+        catch (error) {
+            console.log("Error while starting algorithm: ", error);
         }
-        socket.send("toggle");
+        finally {
+            isStarting = false;
+        }
+        return;
     }
-});
+    if (paused) {
+        console.log("ALGORITHM RESUMED");
+        paused = false;
+        optimizeButton.innerHTML = "Pausiere die Optimierung";
+        randomizeButton.style.opacity = "0.5";
+        costDisplay.style.display = "none";
+        socket.send("resume");
+    }
+    else {
+        console.log("ALGORITHM PAUSED");
+        paused = true;
+        optimizeButton.innerHTML = "Setze die Optimierung fort";
+        randomizeButton.style.opacity = "1";
+        load();
+        costDisplay.style.display = "block";
+        costDisplay.innerHTML = "Kosten: " + lastCost;
+        socket.send("pause");
+    }
+}

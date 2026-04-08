@@ -93,15 +93,13 @@ function getRandomizedTimeTable() {
         })
 }
 
-const algorithmButton = document.getElementById('algorithmButton');
-let algorithmToggleButton = document.getElementById('optimizeButton');
+const algorithmButton = document.getElementById('optimizeButton');
 algorithmButton.addEventListener('click', () => {
-    algorithmToggleButton.style.opacity = 1;
-    algorithmToggleButton.classList.add('optimizeButtonHover');
     getOptimizedTimetable();
 })
 function getOptimizedTimetable() {
-    clearCharts();
+    console.log("a");
+    //clearCharts();
     //showLoader();
     clearLayout();
     fetch("http://localhost:8080/api/run/algorithmAllClasses", { method: "GET" })
