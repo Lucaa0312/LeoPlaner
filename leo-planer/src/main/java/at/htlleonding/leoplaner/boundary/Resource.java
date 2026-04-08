@@ -73,6 +73,7 @@ public class Resource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("randomize")
     public void randomizeTimeTable() {
+        this.dataRepository.clearHistory();
         this.dataRepository.randomizeSchoolSchedule();
     }
 
@@ -102,17 +103,15 @@ public class Resource {
     public void stopAlgorithmAllClasses() {
         this.simulatedAnnealingAlgorithm.setIsRunning(false);
     }
-    
+
     @GET
     @Path("/test-export")
     public void triggerExport() throws Exception {
-       
 
         try {
             excelManager.exportTimetable();
         } catch (Exception e) {
-           throw new Exception(e);
+            throw new Exception(e);
         }
     }
 }
-
