@@ -261,15 +261,24 @@ function initializeChart() {
                     }).then((data: { iteration: number, cost: number}[]) => {
                         console.log(data);
                         if(data && data.length > 0) {
-                            costChartData = data.map(item => [item.iteration, item.cost]);
-                            const lastEntry = costChartData[costChartData.length - 1];
-                            if(lastEntry) {
-                                totalIterations = lastEntry[0];
+                            let lastIterationFromServerHolder = 0;
+                            let totalIterationsHolder = 0;
+                            let processedHistory: [number, number][] = [];
+
+                            for(const item of data) {
+                                const currentIteration = item.iteration <= 0 ? 1 : item.iteration;
+
+                                if (currentIteration < lastIterationFromServerHolder * 0.1 && lastIterationFromServerHolder > 0) {
+                                    totalIterationsHolder += lastIterationFromServerHolder;
+                                }
+                                lastIterationFromServerHolder = currentIteration;
+
+                                processedHistory.push([currentIteration + totalIterationsHolder, item.cost]);
                             }
-                            else {
-                                totalIterations = 0;
-                            }
-                            lastIterationFromServer = 0;
+                            costChartData = processedHistory;
+                            totalIterations = totalIterationsHolder;
+                            lastIterationFromServer = lastIterationFromServerHolder;
+
                             costChart.setOption({
                                 series: [
                                     {
@@ -372,6 +381,7 @@ slider.addEventListener("input", (event: Event) => {
 // Pause algorithm
 let paused = false;
 let isStarting = false;
+let reloadedPage = true;
 const randomizeButton = requireElement<HTMLElement>("randomizeButton");
 const optimizeButton = requireElement<HTMLElement>("optimizeButton");
 optimizeButton.addEventListener("click", handleOptimizeButton);
@@ -379,11 +389,13 @@ async function handleOptimizeButton() {
     if (isStarting) return;
     
     if (!optimizedBefore) {
+        console.log("why here")
         isStarting = true;
         try {
             fetch("http://localhost:8080/api/run/algorithmAllClasses"); //Backend fix needed here (can't use await)
             optimizedBefore = true;
             paused = false;
+            reloadedPage = false;
             optimizeButton.innerHTML = "Pausiere die Optimierung";
             randomizeButton.style.opacity = "0.5";
             clearLayout();
@@ -395,11 +407,14 @@ async function handleOptimizeButton() {
         return;
     }
 
-    if(paused) {
+    if(paused || reloadedPage) {
+        console.log("yes here")
         console.log("ALGORITHM RESUMED");
         paused = false;
+        reloadedPage = false;
         optimizeButton.innerHTML = "Pausiere die Optimierung";
         randomizeButton.style.opacity = "0.5";
+        randomizeButton.removeEventListener("click", getRandomizedTimeTable);
         costDisplay.style.display = "none";
         socket.send("resume");
     }
@@ -408,6 +423,7 @@ async function handleOptimizeButton() {
         paused = true;
         optimizeButton.innerHTML = "Setze die Optimierung fort";
         randomizeButton.style.opacity = "1";
+        randomizeButton.addEventListener("click", getRandomizedTimeTable);
         load();
         costDisplay.style.display = "block";
         costDisplay.innerHTML = "Kosten: " + lastCost;
