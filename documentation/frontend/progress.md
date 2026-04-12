@@ -40,3 +40,6 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 ### 05.04.2026
 - Implemented design into the other pages
 - Worked on new timetable design
+
+### 11.04.2026
+- Reworked design slightly
