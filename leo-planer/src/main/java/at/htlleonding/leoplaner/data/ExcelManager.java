@@ -16,7 +16,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
-
 @ApplicationScoped
 public class ExcelManager {
     @Inject
@@ -28,16 +27,17 @@ public class ExcelManager {
         Workbook workbook = new XSSFWorkbook();
 
         final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(1L);
-       
+
         Map<String, Timetable> allTimetables = dataRepository.getAllTimetables();
 
         Timetable timetable = allTimetables.get(schoolClass.getClassName());
-        // TimetableDTO timetable1 = UtilBuildFunctions.createTimetableDTO(allTimetables.get(schoolClass.getClassName()));
+        // TimetableDTO timetable1 =
+        // UtilBuildFunctions.createTimetableDTO(allTimetables.get(schoolClass.getClassName()));
         // System.out.println(timetable); // returns Timetable<null>
-       // System.out.println(timetable1); // returns TimetableDTO with all data
+        // System.out.println(timetable1); // returns TimetableDTO with all data
 
         Sheet timetableSheet = workbook.createSheet("Timetable");
-        
+
         Row header = timetableSheet.createRow(0);
         header.createCell(0).setCellValue("CSI Id");
         header.createCell(1).setCellValue("CS Id");
@@ -46,7 +46,7 @@ public class ExcelManager {
         header.createCell(4).setCellValue("Temp");
         header.createCell(5).setCellValue("SchoolClass Id");
         header.createCell(6).setCellValue("SchoolClass Name");
-        
+
         Row row = timetableSheet.createRow(1);
         row.createCell(2).setCellValue(timetable.getTotalWeeklyHours());
         row.createCell(3).setCellValue(timetable.getCostOfTimetable());
@@ -54,7 +54,7 @@ public class ExcelManager {
         row.createCell(5).setCellValue(timetable.getSchoolClass().getId());
         row.createCell(6).setCellValue(timetable.getSchoolClass().getClassName());
 
-        List<ClassSubject> classSubjects = new LinkedList<>();        
+        List<ClassSubject> classSubjects = new LinkedList<>();
 
         int rowIdx = 2;
         for (ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
@@ -63,7 +63,8 @@ public class ExcelManager {
                 dataRow.createCell(0).setCellValue(csi.getId());
                 dataRow.createCell(1).setCellValue(csi.getClassSubject().getId());
 
-                if (!classSubjects.contains(csi.getClassSubject())) classSubjects.add(csi.getClassSubject());
+                if (!classSubjects.contains(csi.getClassSubject()))
+                    classSubjects.add(csi.getClassSubject());
             }
         }
 
@@ -72,11 +73,10 @@ public class ExcelManager {
         createRoomSheet(dataRepository.getAllRooms(), workbook);
         createTeacherSheet(dataRepository.getAllTeachers(), workbook);
 
-        // Write file
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
         }
-        
+
     }
 
     private void createSubjectSheet(List<Subject> subjects, Workbook workbook) {
@@ -85,23 +85,30 @@ public class ExcelManager {
         Row header = subjectSheet.createRow(0);
         header.createCell(0).setCellValue("ID");
         header.createCell(1).setCellValue("Name");
-        header.createCell(2).setCellValue("Color");
-        header.createCell(3).setCellValue("Symbol");
-        header.createCell(4).setCellValue("Required Room Types");
+        header.createCell(2).setCellValue("Symbol");
+        header.createCell(3).setCellValue("Required Room Types");
 
         int rtindex = 1;
 
-        for (Subject subject : subjects){
+        for (Subject subject : subjects) {
             Row dataRow = subjectSheet.createRow(rtindex++);
 
             dataRow.createCell(0).setCellValue(subject.getId());
             dataRow.createCell(1).setCellValue(subject.getSubjectName());
-            dataRow.createCell(2).setCellValue(subject.getSubjectColorAsString());
-            dataRow.createCell(3).setCellValue(subject.getSubjectSymbol());
+            dataRow.createCell(2).setCellValue(subject.getSubjectSymbol());
+            dataRow.createCell(2).setCellValue(subject.getSubjectSymbol());
 
-            int cellIndex = 4;
-            for (RoomTypes rt : subject.getRequiredRoomTypes()) dataRow.createCell(cellIndex++).setCellValue(rt.toString());
-         }
+            String roomTypesCell = "";
+            for (RoomTypes rt : subject.getRequiredRoomTypes()) {
+                roomTypesCell += rt.toString() + ", ";
+            }
+
+            if (roomTypesCell.length() > 2) {
+                roomTypesCell = roomTypesCell.substring(0, roomTypesCell.length() - 2);
+            }
+
+            dataRow.createCell(3).setCellValue(roomTypesCell);
+        }
     }
 
     private void createClassSubjectSheet(List<ClassSubject> classSubjects, Workbook workbook) {
@@ -119,7 +126,7 @@ public class ExcelManager {
 
         int rtindex = 1;
 
-        for (ClassSubject subject : classSubjects){
+        for (ClassSubject subject : classSubjects) {
             Row dataRow = classSubjectSheet.createRow(rtindex++);
 
             dataRow.createCell(0).setCellValue(subject.getId());
@@ -130,7 +137,7 @@ public class ExcelManager {
             dataRow.createCell(5).setCellValue(subject.getWeeklyHours());
             dataRow.createCell(6).setCellValue(subject.isRequiresDoublePeriod());
             dataRow.createCell(7).setCellValue(subject.isBetterDoublePeriod());
-         }
+        }
     }
 
     private void createRoomSheet(List<Room> rooms, Workbook workbook) {
@@ -145,7 +152,7 @@ public class ExcelManager {
 
         int rtindex = 1;
 
-        for (Room room : rooms){
+        for (Room room : rooms) {
             Row dataRow = roomSheet.createRow(rtindex++);
 
             dataRow.createCell(0).setCellValue(room.getId());
@@ -153,11 +160,16 @@ public class ExcelManager {
             dataRow.createCell(2).setCellValue(room.getRoomName());
             dataRow.createCell(3).setCellValue(room.getNameShort());
 
-            int cellIndex = 4;
+            String roomTypesCell = "";
             for (RoomTypes rt : room.getRoomTypes()) {
-                if (rt != null) 
-                dataRow.createCell(cellIndex++).setCellValue(rt.toString());
+                roomTypesCell += rt.toString() + ", ";
             }
+
+            if (roomTypesCell.length() > 2) {
+                roomTypesCell = roomTypesCell.substring(0, roomTypesCell.length() - 2);
+            }
+
+            dataRow.createCell(4).setCellValue(roomTypesCell);
         }
     }
 
@@ -173,17 +185,16 @@ public class ExcelManager {
 
         int rtindex = 1;
 
-        for (Teacher teacher : teachers){
+        for (Teacher teacher : teachers) {
             List<Long> ids = teacher.getTeachingSubject()
-                .stream()
-                .map(Subject::getId)
-                .collect(Collectors.toList());
+                    .stream()
+                    .map(Subject::getId)
+                    .collect(Collectors.toList());
 
             List<String> symbols = teacher.getTeachingSubject()
-                .stream()
-                .map(Subject::getSubjectSymbol)
-                .collect(Collectors.toList());
-
+                    .stream()
+                    .map(Subject::getSubjectSymbol)
+                    .collect(Collectors.toList());
 
             Row dataRow = teacherSheet.createRow(rtindex++);
 
@@ -196,67 +207,87 @@ public class ExcelManager {
             for (Long id : ids) {
                 sId += id + ", ";
             }
-            for (String s : symbols){
+            for (String s : symbols) {
                 sSy += s + ", ";
             }
+
+            if (sId.length() > 2) {
+                sId = sId.substring(0, sId.length() - 2);
+            }
+
+            if (sSy.length() > 2) {
+                sSy = sSy.substring(0, sSy.length() - 2);
+            }
+
             dataRow.createCell(3).setCellValue(sId);
             dataRow.createCell(4).setCellValue(sSy);
         }
     }
-
 
     @Transactional
     public void importAll() throws Exception {
         try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
             DataFormatter formatter = new DataFormatter();
 
-            // 1. Independent Sheets
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);
             importTeachers(importWorkbook.getSheet("Teachers"), formatter);
             importRooms(importWorkbook.getSheet("Rooms"), formatter);
 
-            // 2. Structural Sheets
             importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
 
-            // 3. The Timetable / Instances
-            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
+            // importTimetable(importWorkbook.getSheet("Timetable"), formatter);
         }
     }
 
     private void importSubjects(Sheet sheet, DataFormatter fmt) {
+        boolean isFirstRow = true;
         for (Row row : sheet) {
+            if (isFirstRow) {
+                isFirstRow = false;
+                continue;
+            }
+
             Subject s = new Subject();
 
-            s.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
             s.setSubjectName(fmt.formatCellValue(row.getCell(1)));
-            // TODO color handling
-            
-            List<RoomTypes> rts = new LinkedList<>();
-            for (int i = 4; i < row.getLastCellNum(); i++) {
-                String val = fmt.formatCellValue(row.getCell(i));
-                if (!val.isEmpty()) rts.add(RoomTypes.valueOf(val));
+            s.setSubjectSymbol(fmt.formatCellValue(row.getCell(2)));
+
+            String roomTypeString = fmt.formatCellValue(row.getCell(3));
+            List<RoomTypes> roomTypes = new ArrayList<>();
+            if (!roomTypeString.isEmpty()) {
+                String[] rts = roomTypeString.split(",\\s*");
+                for (String rt : rts) {
+                    if (!rt.isBlank()) {
+                        roomTypes.add(RoomTypes.valueOf(rt.trim()));
+                    }
+                }
             }
-            s.setRequiredRoomTypes(rts);
+            s.setRequiredRoomTypes(roomTypes);
+
             dataRepository.addSubject(s);
         }
     }
 
     private void importTeachers(Sheet sheet, DataFormatter fmt) {
+        boolean isFirstRow = true;
         for (Row row : sheet) {
-            
+            if (isFirstRow) {
+                isFirstRow = false;
+                continue;
+            }
+
             Teacher t = new Teacher();
-            t.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
             t.setTeacherName(fmt.formatCellValue(row.getCell(1)));
             t.setNameSymbol(fmt.formatCellValue(row.getCell(2)));
 
-            // Handle the comma-separated IDs: "1, 2, 5, "
             String idString = fmt.formatCellValue(row.getCell(3));
             if (!idString.isEmpty()) {
                 String[] ids = idString.split(",\\s*");
                 for (String id : ids) {
                     if (!id.isBlank()) {
                         Subject s = Subject.findById(Long.parseLong(id));
-                        if (s != null) t.getTeachingSubject().add(s);
+                        if (s != null)
+                            t.getTeachingSubject().add(s);
                     }
                 }
             }
@@ -265,46 +296,43 @@ public class ExcelManager {
     }
 
     private void importRooms(Sheet sheet, DataFormatter fmt) {
-    if (sheet == null) return;
+        if (sheet == null)
+            return;
 
-    for (Row row : sheet) {
-        if (row.getRowNum() == 0) continue; // Skip header
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0)
+                continue;
 
-        Room room = new Room();
-        room.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
-        room.setRoomNumber(Short.parseShort(fmt.formatCellValue(row.getCell(1))));
-        room.setRoomName(fmt.formatCellValue(row.getCell(2)));
-        room.setNameShort(fmt.formatCellValue(row.getCell(3)));
+            Room room = new Room();
+            room.setRoomNumber(Short.parseShort(fmt.formatCellValue(row.getCell(1))));
+            room.setRoomName(fmt.formatCellValue(row.getCell(2)));
+            room.setNameShort(fmt.formatCellValue(row.getCell(3)));
 
-        List<RoomTypes> types = new LinkedList<>();
-        // row.getLastCellNum() gives us the index of the last cell + 1
-        for (int i = 4; i < row.getLastCellNum(); i++) {
-            String typeValue = fmt.formatCellValue(row.getCell(i));
-            
-            if (typeValue != null && !typeValue.isBlank()) {
-                try {
-                    types.add(RoomTypes.valueOf(typeValue.trim()));
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Warning: Invalid RoomType found: " + typeValue);
+            String roomTypeString = fmt.formatCellValue(row.getCell(4));
+            List<RoomTypes> roomTypes = new ArrayList<>();
+            if (!roomTypeString.isEmpty()) {
+                String[] rts = roomTypeString.split(",\\s*");
+                for (String rt : rts) {
+                    if (!rt.isBlank()) {
+                        roomTypes.add(RoomTypes.valueOf(rt.trim()));
+                    }
                 }
             }
-        }
-        room.setRoomTypes(types);
+            room.setRoomTypes(roomTypes);
 
-        dataRepository.addRoom(room);
+            dataRepository.addRoom(room);
+        }
     }
-}
 
     private void importClassSubjects(Sheet sheet, DataFormatter fmt) {
         for (Row row : sheet) {
-            if (row.getRowNum() == 0) continue;
+            if (row.getRowNum() == 0)
+                continue;
             ClassSubject cs = new ClassSubject();
-            cs.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
-            
-            // Find existing Subject and Teacher
+
             cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
             cs.setTeacher(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
-            
+
             cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(5))));
             cs.setRequiresDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(6))));
             cs.setBetterDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(7))));
@@ -314,32 +342,34 @@ public class ExcelManager {
 
     private void importTimetable(Sheet sheet, DataFormatter fmt) {
         Row metaRow = sheet.getRow(1);
-        if (metaRow == null) return;
+        if (metaRow == null)
+            return;
 
-        String className = fmt.formatCellValue(metaRow.getCell(6)); 
-        
+        String className = fmt.formatCellValue(metaRow.getCell(6));
+
         SchoolClass sc = dataRepository.getSchoolClassByName(className);
-        
+
         Timetable timetable = new Timetable();
         timetable.setSchoolClass(sc);
-        
+
         timetable.setTotalWeeklyHours(Integer.parseInt(fmt.formatCellValue(metaRow.getCell(2))));
         timetable.setCostOfTimetable(Integer.parseInt(fmt.formatCellValue(metaRow.getCell(3))));
         timetable.setTempAtTimetable(Double.parseDouble(fmt.formatCellValue(metaRow.getCell(4))));
 
         for (int i = 2; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
-            if (row == null || row.getCell(0) == null) continue; // Skip empty rows
+            if (row == null || row.getCell(0) == null)
+                continue; // Skip empty rows
 
             ClassSubjectInstance csi = new ClassSubjectInstance();
             csi.setId(Long.parseLong(fmt.formatCellValue(row.getCell(0))));
-            
+
             Long csId = Long.parseLong(fmt.formatCellValue(row.getCell(1)));
             csi.setClassSubject(dataRepository.getClassSubjectById(csId));
 
             timetable.getClassSubjectInstances().add(csi);
         }
-        
-       // dataRepository.addTimetable(timetable);
-    }      
+
+        // dataRepository.addTimetable(timetable);
+    }
 }

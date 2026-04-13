@@ -9,7 +9,9 @@ import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.Room;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
@@ -110,6 +112,17 @@ public class Resource {
 
         try {
             excelManager.exportTimetable();
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+    }
+
+    @POST
+    @Path("/test-import")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void triggerImport() throws Exception {
+        try {
+            excelManager.importAll();
         } catch (Exception e) {
             throw new Exception(e);
         }

@@ -35,7 +35,7 @@ public class SubjectRepository {
         if (entityManager.contains(subject)) {
             throw new IllegalArgumentException();
         }
-        entityManager.persist(subject);
+        entityManager.merge(subject);
         return subject;
     }
 
