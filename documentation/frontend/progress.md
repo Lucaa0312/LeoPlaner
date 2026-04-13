@@ -46,3 +46,6 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 12.04.2026
 - Working on timetable design
+
+### 13.04.2026
+- Reworked timetable design
