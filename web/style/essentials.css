@@ -39,6 +39,7 @@
 .flex-row {
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 .flex-column {
     display: flex;
@@ -84,7 +85,8 @@
     flex-direction: column;
     align-items: flex-end;
 
-    
+    position: absolute;
+    right: 0;
 } 
 
 #search-bar{
@@ -97,22 +99,17 @@
 
     padding-right: 1vw;
     padding-left: 1vw;
-    padding-top: 0.7vh;
-    padding-bottom: 0.7vh;
+    padding-top: 0.5vh;
+    padding-bottom: 0.5vh;
 
     background-color: #D9D9D9;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-    border-radius: 2vw;
+    border-top-left-radius: 0.4vw;
+    border-bottom-left-radius: 0.4vw;
     border-style: none;
     font-size: 1.75rem;
 
     color: var(--leo-text-color);
-}
-
-#search-bar:focus-within{
-    outline: none;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
 }
 
 
@@ -122,7 +119,8 @@
     font-size: 1.5rem;
     /*text-align: right;*/
 
-    width: 15vw;
+    width: 13vw;
+    /*width: 15vw;*/
     /*width: 20vw;*/
     margin-right: 0.5vw;
     border: none;
@@ -137,14 +135,20 @@
     justify-self: center;
 }
 
+#add-btn svg {
+    scale: 0.8;
+    position: relative;
+    bottom: 0.5vh;
+}
 
 #add-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 0.5rem;
     font-size: 1.5rem;
     width: 15vw;
+    height: 3.5vh;
 
     font-weight: semi-bold;
 
@@ -152,14 +156,14 @@
 
     padding-left: 1vw;
     padding-right: 1vw;
-    padding-top: 1vh;
-    padding-bottom: 1vh;
+    padding-top: 0.5vh;
+    padding-bottom: 0.5vh;
 
-    border-radius: 43px;
+    border-top-left-radius: 0.4vw;
+    border-bottom-left-radius: 0.4vw;
 
     background-color: var(--leo-primary-color1);
     color: white;
-
 
     cursor: pointer;
 
