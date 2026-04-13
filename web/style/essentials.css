@@ -138,7 +138,7 @@
 #add-btn svg {
     scale: 0.8;
     position: relative;
-    bottom: 0.5vh;
+    bottom: 0.7vh;
 }
 
 #add-btn {
@@ -215,8 +215,8 @@
     border-left-width: 0.25vw;
     border-left-style: solid;
 
-    padding-top: 0.3vw;
-    padding-bottom: 0.3vw;
+    padding-top: 0.1vw;
+    padding-bottom: 0.1vw;
     padding-left: 1vw;
     padding-right: 1vw;
 
@@ -277,12 +277,15 @@
 }
 
 #help-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
     color: rgba(0, 0, 0, 0.5);
     width: 10vw;
 
     position: fixed;
-    bottom: 12vh;
+    bottom: 11vh;
     left: 0;
 
     padding-left: 2vw;
@@ -290,4 +293,9 @@
     border-bottom: var(--leo-primary-color1);
     border-bottom-width: 0.2vw;
     border-bottom-style: solid;
+}
+
+#help-section svg {
+    scale: 0.8;
+    margin-right: 0.2vw;
 }

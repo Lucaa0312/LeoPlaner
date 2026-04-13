@@ -53,7 +53,7 @@ function createSubjectCard(subject: Subject): HTMLElement {
     }
 
     subjectBox.append(subjectInfo, editDiv);
-    subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.5)`;
+    subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.4)`;
     
     return subjectBox;
 }
