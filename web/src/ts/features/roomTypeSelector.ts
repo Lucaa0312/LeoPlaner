@@ -80,6 +80,9 @@ export function initRoomTypeSelector({ input, dropdown, selectedContainer, input
             dropdown.appendChild(item);
         });
     }
+    function restore(type: RoomType): void {
+        addType(type); 
+    }
 
     input.addEventListener("input", showMatchingTypes);
 
@@ -94,5 +97,6 @@ export function initRoomTypeSelector({ input, dropdown, selectedContainer, input
     return {
         getSelectedTypes,
         reset,
+        restore,
     };
 }

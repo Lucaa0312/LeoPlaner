@@ -44,6 +44,10 @@ function createSubjectCard(subject: Subject): HTMLElement {
     editDiv.className = "subject-edit";
     editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
 
+    editDiv.addEventListener("click", () => {
+        openEditSubjectForm(subject);
+    });
+
     subjectInfo.append(subjectName);
 
     if (subject.requiredRoomTypes.length > 0) {
@@ -56,6 +60,9 @@ function createSubjectCard(subject: Subject): HTMLElement {
     return subjectBox;
 }
 
+function openEditSubjectForm(subject: Subject): void {
+    openSubjectForm(subject);
+}
 
 async function loadAndRenderSubjects(): Promise<void> {
     const noSubjectsElement = getElement<HTMLElement>("no-subjects");
@@ -102,7 +109,7 @@ function collectSubjectData(selectetRoomTypes: RoomType[], selectedSubjectColor:
     }
 }
 
-function buildAddSubjectFormContent(): HTMLElement {
+function buildAddSubjectFormContent(subject?: Subject): HTMLElement {
     const container = document.createElement("div");
     container.id = "subject-modal-content";
 
@@ -124,6 +131,9 @@ function buildAddSubjectFormContent(): HTMLElement {
     initialsInput.id = "initials-input";
     initialsInput.className = "subject-input";
     initialsInput.placeholder = "Abkürzung";
+
+    nameInput.value = subject?.subjectName ?? "";
+    initialsInput.value = subject?.subjectSymbol ?? "";
 
     nameInitials.append(nameInput, initialsInput);
 
@@ -160,7 +170,11 @@ function buildAddSubjectFormContent(): HTMLElement {
     return container;
 }
 
-function openAddSubjectForm(): void {
+/*
+function openSubjectForm(existingSubject?: Subject): void {
+    const isEditMode = !!existingSubject;
+
+
     const noSubjectsElement = getElement<HTMLElement>("no-subjects");
     const disableOverlay = getElement<HTMLElement>("disable-overlay");
     const displaySubjects = getElement<HTMLElement>("display-subjects");
@@ -180,7 +194,9 @@ function openAddSubjectForm(): void {
 
     const title = document.createElement("h1");
     title.id = "add-subject-header";
-    title.textContent = "Ein neues Fach hinzufügen";
+    title.textContent = isEditMode
+    ? "Dieses Fach bearbeiten"
+    : "Ein neues Fach hinzufügen";
 
     const closeScreenButton = document.createElement("div");
     closeScreenButton.id = "close-add-subject-screen-btn";
@@ -247,7 +263,110 @@ function openAddSubjectForm(): void {
         }
     });
 }
+*/
+function openSubjectForm(existingSubject?: Subject): void {
+    const noSubjectsElement = getElement<HTMLElement>("no-subjects");
+    const disableOverlay = getElement<HTMLElement>("disable-overlay");
+    const displaySubjects = getElement<HTMLElement>("display-subjects");
+    const addSubjectScreen = getElement<HTMLElement>("add-subject-screen");
 
+    if (!addSubjectScreen || !disableOverlay || !displaySubjects) return;
+
+    if (noSubjectsElement) noSubjectsElement.style.display = "none";
+
+    openPopup({ modal: addSubjectScreen, overlay: disableOverlay, scrollContainer: displaySubjects });
+
+    const isEditMode = !!existingSubject;
+
+    const headerContainer = document.createElement("div");
+    headerContainer.id = "add-subject-header-container";
+
+    const title = document.createElement("h1");
+    title.id = "add-subject-header";
+    title.textContent = isEditMode
+        ? "Dieses Fach bearbeiten"
+        : "Ein neues Fach hinzufügen";
+
+    const closeScreenButton = document.createElement("div");
+    closeScreenButton.id = "close-add-subject-screen-btn";
+    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
+
+    closeScreenButton.addEventListener("click", () => {
+        closePopup({
+            modal: addSubjectScreen,
+            overlay: disableOverlay,
+            scrollContainer: displaySubjects,
+        });
+    });
+
+    const formContent = buildAddSubjectFormContent(existingSubject);
+
+    const colorPickerContainer = document.createElement("div");
+    colorPickerContainer.id = "color-selection-container";
+
+    const confirmButton = document.createElement("div");
+    confirmButton.id = "confirm-subject-btn";
+    confirmButton.textContent = isEditMode ? "Speichern" : "Bestätigen";
+
+    headerContainer.append(title, closeScreenButton);
+    addSubjectScreen.replaceChildren(headerContainer, formContent, colorPickerContainer, confirmButton);
+
+    const selectorInput = getElement<HTMLInputElement>("roomtype-input");
+    const selectorDropdown = getElement<HTMLElement>("roomtype-dropdown");
+    const selectedContainer = getElement<HTMLElement>("selected-roomtypes");
+    const inputContainer = getElement<HTMLElement>("roomtype-input-container");
+
+    if (!selectorInput || !selectorDropdown || !selectedContainer || !inputContainer) return;
+
+    const roomTypeSelector = initRoomTypeSelector({
+        input: selectorInput,
+        dropdown: selectorDropdown,
+        selectedContainer,
+        inputContainer,
+    });
+
+    if (existingSubject) {
+        existingSubject.requiredRoomTypes.forEach((type) => {
+            roomTypeSelector.restore?.(type);
+        });
+    }
+
+    const colorPicker = initColorPicker(colorPickerContainer);
+
+    if (existingSubject) {
+        colorPicker.setColor?.(existingSubject.subjectColor);
+    }
+
+    confirmButton.addEventListener("click", async () => {
+        try {
+            const subjectData = collectSubjectData(
+                roomTypeSelector.getSelectedTypes(),
+                colorPicker.getSelectedColor()
+            );
+
+            if (!subjectData) return;
+
+            if (isEditMode && existingSubject) {
+                //await updateSubject(existingSubject.id, subjectData);
+                console.log("It works");
+                
+            } else {
+                await createSubject(subjectData);
+            }
+
+            closePopup({
+                modal: addSubjectScreen,
+                overlay: disableOverlay,
+                scrollContainer: displaySubjects,
+            });
+
+            await loadAndRenderSubjects();
+
+        } catch (error) {
+            console.error("Error occurred:", error);
+        }
+    });
+}
 
 
 
@@ -257,7 +376,7 @@ function initializeApp(): void {
 
     
     const addBtn = getElement<HTMLElement>("add-btn");
-    addBtn?.addEventListener("click", openAddSubjectForm);
+    addBtn?.addEventListener("click", () => openSubjectForm());
 
     const inputField = getElement<HTMLInputElement>("input-field");
     inputField?.addEventListener("input", () => {

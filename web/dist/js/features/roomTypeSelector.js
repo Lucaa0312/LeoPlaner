@@ -56,6 +56,9 @@ export function initRoomTypeSelector({ input, dropdown, selectedContainer, input
             dropdown.appendChild(item);
         });
     }
+    function restore(type) {
+        addType(type);
+    }
     input.addEventListener("input", showMatchingTypes);
     document.addEventListener("click", (event) => {
         const target = event.target;
@@ -66,5 +69,6 @@ export function initRoomTypeSelector({ input, dropdown, selectedContainer, input
     return {
         getSelectedTypes,
         reset,
+        restore,
     };
 }

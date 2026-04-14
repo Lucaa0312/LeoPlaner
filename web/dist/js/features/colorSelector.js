@@ -46,6 +46,13 @@ export function initColorPicker(container) {
     let lig = 0.85;
     let dragging = false;
     let selectedColor = { red: 222, green: 209, blue: 214 };
+    function setColor(color) {
+        selectedColor = color;
+        const hex = rgbToHex(color);
+        preview.style.background = hex;
+        hexEl.textContent = hex;
+        rgbEl.textContent = `RGB(${color.red}, ${color.green}, ${color.blue})`;
+    }
     function hslToRgb(h, s, l) {
         h = (h % 360 + 360) % 360;
         const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -157,5 +164,6 @@ export function initColorPicker(container) {
         getSelectedColor() {
             return selectedColor;
         },
+        setColor,
     };
 }

@@ -2,6 +2,7 @@ import type { SubjectColor } from "../types/subject.js";
 
 export interface ColorPickerController {
     getSelectedColor(): SubjectColor;
+    setColor(color: SubjectColor): void;
 }
 
 export function initColorPicker(container: HTMLElement): ColorPickerController {
@@ -60,6 +61,17 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
 
     let selectedColor: SubjectColor = { red: 222, green: 209, blue: 214 };
 
+   
+    function setColor(color: SubjectColor): void {
+        selectedColor = color;
+
+        const hex = rgbToHex(color);
+        preview!.style.background = hex;
+        hexEl!.textContent = hex;
+        rgbEl!.textContent = `RGB(${color.red}, ${color.green}, ${color.blue})`;
+    }
+
+   
     function hslToRgb(h: number, s: number, l: number): SubjectColor {
         h = (h % 360 + 360) % 360;
         const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -191,5 +203,7 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
         getSelectedColor(): SubjectColor {
             return selectedColor;
         },
+        setColor,
+
     };
 }
