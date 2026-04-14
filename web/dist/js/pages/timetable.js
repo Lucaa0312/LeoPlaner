@@ -76,7 +76,7 @@ export function load() {
         //hideLoader();
     });
 }
-const randomizeButton = requireElement("randomizeButton");
+const randomizeButton = aquireElement("randomizeButton");
 randomizeButton.addEventListener("click", getRandomizedTimeTable);
 export async function getRandomizedTimeTable() {
     clearLayout();

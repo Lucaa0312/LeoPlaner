@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
 import { load, getRandomizedTimeTable, clearLayout } from "./timetable.js";
-import { getElement, requireElement } from "../utils/elementHelpers.js";
+import { getElement, aquireElement } from "../utils/elementHelpers.js";
 
 // Create the echarts instance
 const costChartElement = getElement<HTMLElement>("costChart");
@@ -301,7 +301,7 @@ function initializeChart() {
 initializeChart();
 
 // Clear chart
-const costDisplay = requireElement<HTMLElement>("cost-container");
+const costDisplay = aquireElement<HTMLElement>("cost-container");
 export function clearCharts(): void {
     costChartData = [];
     totalIterations = 0;
@@ -382,8 +382,8 @@ slider.addEventListener("input", (event: Event) => {
 let paused = false;
 let isStarting = false;
 let reloadedPage = true;
-const randomizeButton = requireElement<HTMLElement>("randomizeButton");
-const optimizeButton = requireElement<HTMLElement>("optimizeButton");
+const randomizeButton = aquireElement<HTMLElement>("randomizeButton");
+const optimizeButton = aquireElement<HTMLElement>("optimizeButton");
 optimizeButton.addEventListener("click", handleOptimizeButton);
 async function handleOptimizeButton() {
     if (isStarting) return;
