@@ -10,7 +10,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-
 @ApplicationScoped
 public class TimetableService {
     private Timetable currentTimetable;
@@ -41,6 +40,10 @@ public class TimetableService {
     public void clear() {
         currentTimetable = null;
         currentTimetableList.clear();
+    }
+
+    public void clearHistory() {
+        historyList.clear();
     }
 
     public Timetable getCurrentTimetable() {

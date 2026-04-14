@@ -10,8 +10,8 @@
 
 .room-box{
     background-color: white;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-radius: 1vw;
+    box-shadow: 0.2vh 0.25vh rgba(0,0,0,0.20), 0 0.6vh 2vh rgba(0,0,0,0.19);
+    border-radius: 0.5vw;
 
     padding: 1vw;
 

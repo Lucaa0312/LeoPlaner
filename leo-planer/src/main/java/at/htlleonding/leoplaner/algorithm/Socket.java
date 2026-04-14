@@ -51,8 +51,10 @@ public class Socket {
             if (update.startsWith("temperature:")) {
                 double newTemperature = Double.parseDouble(update.substring("temperature:".length()));
                 SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
-            } else if (update.startsWith("toggle")) {
-                simulatedAnnealingAlgorithm.toggleIsRunning();
+            } else if (update.startsWith("pause")) {
+                simulatedAnnealingAlgorithm.pauseAlgorithm();
+            } else if (update.startsWith("resume")) {
+                simulatedAnnealingAlgorithm.resumeAlgorithm();
             } else {
                 System.out.println("Unknown message: " + update);
             }

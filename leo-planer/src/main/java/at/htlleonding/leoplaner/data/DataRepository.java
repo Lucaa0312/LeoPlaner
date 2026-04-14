@@ -220,4 +220,12 @@ public class DataRepository {
         return classSubjectRepository.delete(id);
     }
 
+    public void clearTimetableData() {
+        timetableService.clear();
+    }
+
+    public void clearHistory() {
+        timetableService.clearHistory();
+    }
+
 }

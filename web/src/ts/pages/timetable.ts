@@ -173,30 +173,12 @@ export function load(): void {
         });
 }
 
-aquireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
-async function getRandomizedTimeTable(): Promise<void> {
+const randomizeButton = aquireElement<HTMLElement>("randomizeButton");
+randomizeButton.addEventListener("click", getRandomizedTimeTable)
+export async function getRandomizedTimeTable(): Promise<void> {
     clearLayout();
-    await getFetchResponse("/randomize");
-    load();
-}
-
-const algorithmButton = getElement<HTMLElement>("algorithmButton");
-const algorithmToggleButton = getElement<HTMLElement>("optimizeButton");
-
-algorithmButton?.addEventListener("click", () => {
-    if (!algorithmToggleButton) return;
-
-    algorithmToggleButton.style.opacity = "1";
-    algorithmToggleButton.classList.add("optimizeButtonHover");
-    getOptimizedTimetable();
-});
-
-async function getOptimizedTimetable(): Promise<void> {
     clearCharts();
-    //showLoader();
-    clearLayout();
-    
-    await getFetchResponse("/run/algorithmAllClasses");
+    await getFetchResponse("/randomize");
     load();
 }
 
@@ -419,7 +401,7 @@ function createLayout(data: ClassSubjectInstance[]): void {
     });
 }
 
-function clearLayout(): void {
+export function clearLayout(): void {
     const days: string[] = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach((day) => {
         const dayContainer = getElement<HTMLElement>(day);

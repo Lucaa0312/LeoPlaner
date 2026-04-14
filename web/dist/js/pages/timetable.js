@@ -76,26 +76,12 @@ export function load() {
         //hideLoader();
     });
 }
-aquireElement("randomizeButton").addEventListener("click", getRandomizedTimeTable);
-async function getRandomizedTimeTable() {
+const randomizeButton = requireElement("randomizeButton");
+randomizeButton.addEventListener("click", getRandomizedTimeTable);
+export async function getRandomizedTimeTable() {
     clearLayout();
-    await getFetchResponse("/randomize");
-    load();
-}
-const algorithmButton = getElement("algorithmButton");
-const algorithmToggleButton = getElement("optimizeButton");
-algorithmButton?.addEventListener("click", () => {
-    if (!algorithmToggleButton)
-        return;
-    algorithmToggleButton.style.opacity = "1";
-    algorithmToggleButton.classList.add("optimizeButtonHover");
-    getOptimizedTimetable();
-});
-async function getOptimizedTimetable() {
     clearCharts();
-    //showLoader();
-    clearLayout();
-    await getFetchResponse("/run/algorithmAllClasses");
+    await getFetchResponse("/randomize");
     load();
 }
 function getTimetableByTeacher(teacherId) {
@@ -289,7 +275,7 @@ function createLayout(data) {
         gridBox.innerHTML = content;
     });
 }
-function clearLayout() {
+export function clearLayout() {
     const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
     days.forEach((day) => {
         const dayContainer = getElement(day);
