@@ -14,10 +14,18 @@ export type CreateTeacherRequest = {
 
 export type TeacherFormStep = 1 | 2 | 3;
  
+export type TimeSlot = {
+    day: number; 
+    time: string;
+};
+
 export type TeacherFormState = {
     firstName: string;
     lastName: string;
     nameSymbol: string;
     email: string;
     selectedSubjects: Subject[];
+
+    nonWorkingHours: TimeSlot[];
+    nonPreferredHours: TimeSlot[];
 };

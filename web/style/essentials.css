@@ -45,6 +45,16 @@
     flex-direction: column;
 }
 
+/* ----------------disable overlay ------------------ */
+#disable-overlay {
+    display: none;
+    width: 85vw;
+    position: fixed;
+    top: 0;
+    left: 15vw;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
 
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {

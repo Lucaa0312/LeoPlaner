@@ -63,15 +63,6 @@
 }
 
 /* ------------------ Add Room Screen --------------------- */
-#disable-overlay{
-    display: none;
-    width: 80vw;
-    position: fixed;
-    top: 0;
-    left: 20vw;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-}
 
 #add-room-screen{
     position: fixed;

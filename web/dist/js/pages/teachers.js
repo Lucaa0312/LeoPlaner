@@ -6,6 +6,7 @@ import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import { fetchSubjects } from "../api/subjectApi.js";
 import { initSubjectSelector } from "../features/subjectSelector.js";
+import { initSetAvailability } from "../features/availabilitySelector.js";
 function createTeacherSubjectChips(subjects) {
     const visibleSubjects = subjects.slice(0, 2);
     const hiddenSubjects = subjects.slice(2);
@@ -316,9 +317,27 @@ async function buildStep2(state) {
     container._subjectSelector = subjectSelector;
     return container;
 }
-function buildStep3() {
+const times = [
+    "07:05", "07:55", "08:00", "08:50", "08:55",
+    "09:45", "10:00", "10:50", "10:55", "11:45",
+    "11:50", "12:40", "12:45", "13:35", "13:40",
+    "14:30", "14:35", "15:25", "15:30", "16:20",
+    "16:25", "17:15", "17:20", "18:05", "18:50",
+    "19:00", "19:45", "20:30", "20:40", "21:25",
+    "22:10"
+];
+const DAYS = ["Mo", "Di", "Mi", "Do", "Fr"];
+function buildStep3(state) {
     const container = document.createElement("div");
     container.id = "step-3-container";
+    const gridContainer = document.createElement("div");
+    gridContainer.id = "availability-grid";
+    container.appendChild(gridContainer);
+    const availability = initSetAvailability({
+        container: gridContainer,
+        times
+    });
+    container._availability = availability;
     return container;
 }
 async function openAddTeacherForm() {
@@ -342,6 +361,8 @@ async function openAddTeacherForm() {
         nameSymbol: "",
         email: "",
         selectedSubjects: [],
+        nonWorkingHours: [],
+        nonPreferredHours: []
     };
     let currentStep = 1;
     function saveStep1() {
@@ -354,6 +375,13 @@ async function openAddTeacherForm() {
         const selector = stepContainer._subjectSelector;
         if (selector) {
             state.selectedSubjects = selector.getSelectedSubjects();
+        }
+    }
+    function saveStep3(stepContainer) {
+        const availability = stepContainer._availability;
+        if (availability) {
+            state.nonWorkingHours = availability.getNonWorking();
+            state.nonPreferredHours = availability.getNonPreferred();
         }
     }
     async function renderStep() {
@@ -392,7 +420,7 @@ async function openAddTeacherForm() {
             addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
         }
         else if (currentStep === 3) {
-            const stepContent = buildStep3();
+            const stepContent = buildStep3(state);
             const nav = buildNavigationButtons({
                 showBack: true,
                 nextLabel: "Bestätigen",
@@ -401,11 +429,15 @@ async function openAddTeacherForm() {
                     void renderStep();
                 },
                 onNext: async () => {
+                    saveStep3(stepContent);
                     try {
                         const teacherData = collectTeacherData(state.selectedSubjects);
-                        if (!teacherData)
-                            return;
-                        await createTeacher(teacherData);
+                        const payload = {
+                            ...teacherData,
+                            teacher_non_working_hours: state.nonWorkingHours,
+                            teacher_non_preferred_hours: state.nonPreferredHours
+                        };
+                        await createTeacher(payload);
                         closePopup({
                             modal: addTeacherScreen,
                             overlay: disableOverlay,
@@ -414,7 +446,7 @@ async function openAddTeacherForm() {
                         await loadAndRenderTeachers();
                     }
                     catch (error) {
-                        console.error("Error occurred while confirming teacher data:", error);
+                        console.error(error);
                     }
                 }
             });
