@@ -1,10 +1,11 @@
 import initNavbar from "./navbar.js";
-import { fetchRooms, createRoom } from "../api/roomApi.js";
-import { getElement } from "../utils/elementHelpers.js";
+import { fetchRooms, createRoom, updateRoom } from "../api/roomApi.js";
+import { aquireElement, getElement } from "../utils/elementHelpers.js";
 import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
 import { initSearchElement } from "../features/searchElement.js";
+let editingRoom = null;
 function formatRoomName(room) {
     console.log(room);
     return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
@@ -23,6 +24,9 @@ function createRoomCard(room) {
     const editDiv = document.createElement("div");
     editDiv.className = "room-edit";
     editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+    editDiv.addEventListener("click", () => {
+        openEditRoomForm(room);
+    });
     roomInfo.append(title, types);
     roomBox.append(roomInfo, editDiv);
     return roomBox;
@@ -123,7 +127,15 @@ function buildAddRoomModalContent() {
     content.appendChild(roomFormGrid);
     return content;
 }
+function openEditRoomForm(room) {
+    editingRoom = room;
+    openRoomForm(room);
+}
 function openAddRoomForm() {
+    editingRoom = null;
+    openRoomForm(null);
+}
+function openRoomForm(room) {
     const noRooms = getElement("no-rooms");
     const overlay = getElement("disable-overlay");
     const displayRooms = getElement("display-rooms");
@@ -143,11 +155,24 @@ function openAddRoomForm() {
     headerContainer.id = "add-room-header-container";
     const title = document.createElement("h1");
     title.id = "add-room-header";
-    title.textContent = "Einen neuen Raum hinzufügen";
+    title.textContent = room
+        ? "Diesen Raum bearbeiten"
+        : "Einen neuen Raum hinzufügen";
     const closeButton = document.createElement("div");
     closeButton.id = "close-add-room-screen-btn";
     closeButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
     const content = buildAddRoomModalContent();
+    const nameInput = content.querySelector("#name-input");
+    const numberInput = content.querySelector("#number-input");
+    const initialsInput = content.querySelector("#initials-input");
+    if (room) {
+        if (!nameInput || !numberInput || !initialsInput) {
+            throw new Error("Form inputs missing");
+        }
+        nameInput.value = room.roomName;
+        numberInput.value = String(room.roomNumber);
+        initialsInput.value = room.nameShort;
+    }
     const confirmButton = document.createElement("div");
     confirmButton.id = "confirm-room-btn";
     confirmButton.textContent = "Bestätigen";
@@ -166,6 +191,11 @@ function openAddRoomForm() {
         selectedContainer,
         inputContainer,
     });
+    if (room) {
+        room.roomTypes.forEach(type => {
+            roomTypeSelector.restore?.(type);
+        });
+    }
     closeButton.addEventListener("click", () => {
         closePopup({
             modal: addRoomScreen,
@@ -179,7 +209,13 @@ function openAddRoomForm() {
             if (!roomData) {
                 return;
             }
-            await createRoom(roomData);
+            if (room) {
+                await updateRoom(room.id, roomData);
+                console.log("It works");
+            }
+            else {
+                await createRoom(roomData);
+            }
             closePopup({
                 modal: addRoomScreen,
                 overlay,

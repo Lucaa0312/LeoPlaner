@@ -30,3 +30,17 @@ export async function getFetchResponse(path: string): Promise<void> {
         throw new Error("Request failed: " + res.status);
     }
 }
+
+export async function putJson<T>(url: string, data: T): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    });
+}

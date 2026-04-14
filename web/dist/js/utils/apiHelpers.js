@@ -24,3 +24,16 @@ export async function getFetchResponse(path) {
         throw new Error("Request failed: " + res.status);
     }
 }
+export async function putJson(url, data) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    });
+}

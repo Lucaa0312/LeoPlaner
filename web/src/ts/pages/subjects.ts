@@ -1,5 +1,5 @@
 import initNavbar from "./navbar.js";
-import { fetchSubjects, createSubject } from "../api/subjectApi.js";
+import { fetchSubjects, createSubject, updateSubject } from "../api/subjectApi.js";
 import { getElement, formatName } from "../utils/elementHelpers.js";
 import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
@@ -170,100 +170,6 @@ function buildAddSubjectFormContent(subject?: Subject): HTMLElement {
     return container;
 }
 
-/*
-function openSubjectForm(existingSubject?: Subject): void {
-    const isEditMode = !!existingSubject;
-
-
-    const noSubjectsElement = getElement<HTMLElement>("no-subjects");
-    const disableOverlay = getElement<HTMLElement>("disable-overlay");
-    const displaySubjects = getElement<HTMLElement>("display-subjects");
-    const addSubjectScreen = getElement<HTMLElement>("add-subject-screen");
-    
-    if (!addSubjectScreen || !disableOverlay || !displaySubjects) {
-        return;
-    }
-
-    if(noSubjectsElement) noSubjectsElement.style.display = "none";
-
-    openPopup({ modal: addSubjectScreen, overlay: disableOverlay, scrollContainer: displaySubjects });
-
-    
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-subject-header-container";
-
-    const title = document.createElement("h1");
-    title.id = "add-subject-header";
-    title.textContent = isEditMode
-    ? "Dieses Fach bearbeiten"
-    : "Ein neues Fach hinzufügen";
-
-    const closeScreenButton = document.createElement("div");
-    closeScreenButton.id = "close-add-subject-screen-btn";
-    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-
-    closeScreenButton.addEventListener("click", () => {
-        closePopup({
-            modal: addSubjectScreen,
-            overlay: disableOverlay,
-            scrollContainer: displaySubjects,
-        });
-    });
-
-    const formContent = buildAddSubjectFormContent();
-
-    const colorPickerContainer = document.createElement("div");
-    colorPickerContainer.id = "color-selection-container";
-    
-    const confirmButton = document.createElement("div");
-    confirmButton.id = "confirm-subject-btn";
-    confirmButton.textContent = "Bestätigen";
-
-    
-    headerContainer.append(title, closeScreenButton);
-    addSubjectScreen.replaceChildren(headerContainer, formContent, colorPickerContainer, confirmButton);
-
-    const selectorInput = getElement<HTMLInputElement>("roomtype-input");
-    const selectorDropdown = getElement<HTMLElement>("roomtype-dropdown");
-    const selectedContainer = getElement<HTMLElement>("selected-roomtypes");
-    const inputContainer = getElement<HTMLElement>("roomtype-input-container");
-
-    if (!selectorInput || !selectorDropdown || !selectedContainer || !inputContainer) {
-        return;
-    }
-
-    const roomTypeSelector = initRoomTypeSelector({
-        input: selectorInput,
-        dropdown: selectorDropdown,
-        selectedContainer,
-        inputContainer,
-    });
-
-    const colorPicker = initColorPicker(colorPickerContainer);
-    
-    confirmButton.addEventListener("click", async () => {
-        try {
-            const subjectData = collectSubjectData(roomTypeSelector.getSelectedTypes(), colorPicker.getSelectedColor());
-            if (!subjectData) {
-                return;
-            }
-            
-            await createSubject(subjectData);
-
-            closePopup({
-                modal: addSubjectScreen,
-                overlay: disableOverlay,
-                scrollContainer: displaySubjects,
-            });
-
-            await loadAndRenderSubjects();
-
-        } catch (error) {
-            console.error("Error occurred while confirming subject data:", error);
-        }
-    });
-}
-*/
 function openSubjectForm(existingSubject?: Subject): void {
     const noSubjectsElement = getElement<HTMLElement>("no-subjects");
     const disableOverlay = getElement<HTMLElement>("disable-overlay");
@@ -347,7 +253,7 @@ function openSubjectForm(existingSubject?: Subject): void {
             if (!subjectData) return;
 
             if (isEditMode && existingSubject) {
-                //await updateSubject(existingSubject.id, subjectData);
+                await updateSubject(existingSubject.id, subjectData);
                 console.log("It works");
                 
             } else {

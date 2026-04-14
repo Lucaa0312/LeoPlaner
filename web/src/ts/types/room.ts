@@ -1,6 +1,7 @@
 export type RoomType = "CLASSROOM" | "EDV" | "CHEM" | "PHY" | "SPORT" | "WORKSHOP";
 
 export type Room = {
+    id: number;
     roomName: string;
     nameShort: string;
     roomNumber: number;
