@@ -175,7 +175,7 @@ function openRoomForm(room) {
     }
     const confirmButton = document.createElement("div");
     confirmButton.id = "confirm-room-btn";
-    confirmButton.textContent = "Bestätigen";
+    confirmButton.textContent = room ? "Speichern" : "Bestätigen";
     headerContainer.append(title, closeButton);
     addRoomScreen.replaceChildren(headerContainer, content, confirmButton);
     const selectorInput = getElement("roomtype-input");

@@ -229,7 +229,7 @@ function openRoomForm(room: Room | null): void {
 
     const confirmButton = document.createElement("div");
     confirmButton.id = "confirm-room-btn";
-    confirmButton.textContent = "Bestätigen";
+    confirmButton.textContent = room ? "Speichern" : "Bestätigen";
 
     headerContainer.append(title, closeButton);
     addRoomScreen.replaceChildren(headerContainer, content, confirmButton);
