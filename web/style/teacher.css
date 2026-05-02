@@ -9,7 +9,9 @@
     height: 90vh;
 
     background-color: var(--leo-background-color);
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
     border-radius: 2vw;
 
@@ -55,7 +57,6 @@
     scale: 1.05;
 }
 
-
 /* ------------------ Form --------------------- */
 #form-container {
     display: grid;
@@ -70,7 +71,6 @@
     width: 50vw;
 }
 
-
 #add-teacher-form {
     display: flex;
     flex-direction: column;
@@ -79,9 +79,7 @@
     margin-right: auto;
 
     width: auto;
-
 }
-
 
 .avatar-upload {
     display: flex;
@@ -96,11 +94,10 @@
     display: none;
 }
 
-
 .avatar-label {
     width: 4.5vw;
     height: 4.5vw;
-    background-color: #F3F4F6;
+    background-color: #f3f4f6;
     border-radius: 50%;
     overflow: hidden;
     cursor: pointer;
@@ -119,7 +116,6 @@
 .avatar-label:hover {
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
-
 
 #avatar-preview {
     width: 3.5vw;
@@ -144,7 +140,6 @@
     font-weight: bold;
 }
 
-
 #first-name-input,
 #last-name-input,
 #initials-input {
@@ -155,8 +150,10 @@
     padding-top: 0.7vh;
     padding-bottom: 0.7vh;
 
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: #f3f4f6;
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
     border-radius: 0.75vw;
     border-style: none;
@@ -176,8 +173,7 @@
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
 }
 
-
-.input-container{
+.input-container {
     margin-top: 2vh;
     margin-left: 15vw;
 
@@ -185,7 +181,7 @@
     grid-template-columns: auto auto;
     column-gap: 0.5vw;
     row-gap: 2vh;
-    
+
     justify-content: flex-start;
     align-items: center;
 
@@ -196,13 +192,13 @@
 
 /* ------------------add-subjects-container--------------------- */
 
-#add-subjects-container{
+#add-subjects-container {
     margin-left: auto;
     margin-right: auto;
     width: auto;
 }
 
-#subject-input-container{
+#subject-input-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -215,8 +211,10 @@
     padding-top: 0.7vh;
     padding-bottom: 0.7vh;
 
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: #f3f4f6;
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
     border-radius: 2vw;
     border-style: none;
@@ -225,12 +223,12 @@
     color: var(--leo-text-color);
 }
 
-#subject-input-container:focus-within{
+#subject-input-container:focus-within {
     outline: none;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.089);
 }
 
-#subject-input{
+#subject-input {
     background: transparent;
     font-size: 1.75rem;
     color: var(--leo-text-color);
@@ -244,9 +242,6 @@
     outline: none;
 }
 
-
-
-
 #add-subject-img {
     color: var(--leo-text-color);
     width: 1.5vw;
@@ -255,15 +250,16 @@
     justify-self: center;
 }
 
-
 #subject-dropdown {
     position: fixed;
     display: block;
-    background-color: #F3F4F6;
+    background-color: #f3f4f6;
     border-radius: 0.5vw;
     margin-top: 0.5vh;
     margin-left: 0.5vw;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
     width: 41vw;
 }
@@ -278,7 +274,7 @@
     background: #f0f0f0;
 }
 
-#selected-subjects{
+#selected-subjects {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(10vw, 1fr));
     column-gap: 5vw;
@@ -286,7 +282,7 @@
 
     margin-top: 2vh;
     margin-left: 0vh;
-    
+
     width: 40vw;
 }
 
@@ -313,7 +309,6 @@
     cursor: pointer;
 }
 
-
 .subject-chip2 {
     display: inline-block;
     text-align: center;
@@ -338,13 +333,12 @@
     cursor: pointer;
 }
 
-
 #submit-teacher-btn {
     margin-top: 1vh;
 
     margin-left: auto;
     margin-right: auto;
-    
+
     text-align: center;
     width: 10vw;
 
@@ -371,14 +365,11 @@
     scale: 1.02;
 }
 
-
 /* ------------------ Teacher Display --------------------- */
 
-#display-teachers{
+#display-teachers {
     margin-left: auto;
     margin-right: auto;
-
-
 
     margin-top: 10vh;
 
@@ -388,7 +379,7 @@
     overflow-y: scroll;
 }
 
-#table-info{
+#table-info {
     display: grid;
     grid-template-columns: 2fr 1fr 3fr 1fr auto;
     gap: 0.3vw;
@@ -411,7 +402,6 @@
     padding-left: -2vw;
     padding-right: auto;
     opacity: 0.7;
-
 }
 #teacher-initials-section {
     font-weight: bold;
@@ -464,9 +454,10 @@
     margin-left: auto;
     margin-right: auto;
 
-
     background: white;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 20px;
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
@@ -547,7 +538,7 @@
     top: 30vh;
     left: 18vw;
     text-align: center;
-    
+
     color: var(--leo-text-color);
     font-size: 2.5rem;
     font-weight: bold;
@@ -562,21 +553,21 @@
     justify-content: center;
     align-items: center;
     gap: 2vw;
- 
+
     margin-top: auto;
     padding-top: 2vh;
     padding-bottom: 3vh;
- 
+
     margin-left: auto;
     margin-right: auto;
 }
- 
+
 #back-teacher-btn {
     margin-top: 1vh;
 
     margin-left: auto;
     margin-right: auto;
-    
+
     text-align: center;
     width: 10vw;
 
@@ -597,80 +588,79 @@
 
     transition: all 200ms ease-in;
 }
- 
+
 #back-teacher-btn:hover {
     background-color: var(--leo-primary-color2);
     scale: 1.02;
 }
- 
- 
+
 /* ------------------ Step Indicator --------------------- */
- 
+
 #step-indicator {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
- 
+
     margin-top: 1vh;
     margin-bottom: 1vh;
     margin-left: auto;
     margin-right: auto;
 }
- 
+
 .step-dot {
     width: 1vw;
     height: 1vw;
     border-radius: 50%;
- 
-    background-color: #F3F4F6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
- 
+
+    background-color: #f3f4f6;
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
     flex-shrink: 0;
- 
+
     transition: all 200ms ease-in-out;
 }
- 
+
 .step-dot.active {
     background-color: var(--leo-primary-color1);
     scale: 1.3;
 }
- 
+
 .step-dot.completed {
     background-color: var(--leo-primary-color1);
     opacity: 0.4;
 }
- 
+
 .step-line {
     width: 12vw;
     height: 2px;
- 
-    background-color: #F3F4F6;
+
+    background-color: #f3f4f6;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
- 
+
     transition: all 200ms ease-in-out;
 }
- 
+
 .step-line.completed {
     background-color: var(--leo-primary-color1);
     opacity: 0.4;
 }
- 
- 
+
 /* ------------------ Step Containers --------------------- */
 
-
-#step-2-container{
+#step-2-container {
     display: flex;
     flex-direction: column;
     align-items: center;
- 
+
     margin-top: 2vh;
     margin-left: auto;
     margin-right: auto;
 }
 
-#step-3-container{
+#step-3-container {
     display: block;
     margin-top: 2vh;
     margin-left: auto;
@@ -678,82 +668,104 @@
     width: 100%;
 }
 
-
-
 /* ------------------- Availability Selector ----------------------- */
+
 #availability-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1vw;
-
-    width: 50vw;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 2vh;
-}
-
-.day-column {
     display: flex;
     flex-direction: column;
-    gap: 0.5vh;
-
-    background: white;
-    border-radius: 1vw;
-    padding: 0.5vw;
-
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    gap: 6px;
+    padding: 12px 16px;
+    max-height: 55vh;
+    overflow-y: auto;
 }
 
-.day-column > div:first-child {
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 0.5vh;
-
-    font-size: 1.5rem;
-    color: var(--leo-text-color);
-
-    opacity: 0.7;
+/* Jede Zeile: Zeitlabel + 5 Tages-Zellen */
+.ag-row {
+    display: grid;
+    grid-template-columns: 72px repeat(5, 1fr);
+    gap: 6px;
+    align-items: center;
 }
 
-.time-slot {
-    padding: 0.4vh 0.2vw;
-    font-size: 0.9rem;
-
+/* Spalten-Überschriften (Mo, Di, ...) */
+.ag-day-header {
+    font-weight: 700;
     text-align: center;
+    font-size: 1.1rem;
+    color: var(--leo-text-color, #1f2937);
+    padding-bottom: 4px;
+}
 
-    border-radius: 0.5vw;
+/* Zeitlabel links */
+.ag-time-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 8px;
+    line-height: 1.2;
+}
+
+.ag-period-name {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--leo-text-color, #1f2937);
+}
+
+.ag-time-start,
+.ag-time-end {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+/* Zellen mit Schraffur-Muster */
+.ag-cell {
+    height: 58px;
+    border-radius: 10px;
     cursor: pointer;
-
-    background-color: #F3F4F6;
-
-    transition: all 150ms ease-in-out;
-}
-
-.time-slot:hover {
-    transform: scale(1.05);
     background-color: #e5e7eb;
-}
-
-.time-slot.non-preferred {
-    background-color: #fde68a;
-    color: #92400e;
-    font-weight: bold;
-}
-
-.time-slot.non-working {
-    background-color: #f87171;
-    color: white;
-    font-weight: bold;
-}
-
-.time-slot {
-    transition: 
-        background-color 150ms ease,
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(0, 0, 0, 0.08) 5px,
+        rgba(0, 0, 0, 0.08) 6px
+    );
+    border: 1px solid #d1d5db;
+    transition:
         transform 100ms ease,
-        color 150ms ease;
+        background-color 150ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 4px;
+    color: white;
+    user-select: none;
 }
 
-.time-slot:active {
-    transform: scale(0.95);
+.ag-cell:hover {
+    transform: scale(1.04);
+    background-color: #d1d5db;
 }
- 
+
+.ag-cell:active {
+    transform: scale(0.96);
+}
+
+/* Nicht bevorzugt → gelb */
+.ag-cell.non-preferred {
+    background-image: none;
+    background-color: #f59e0b;
+    border-color: #d97706;
+    color: white;
+}
+
+/* Nicht verfügbar → blau/lila wie im Screenshot */
+.ag-cell.non-working {
+    background-image: none;
+    background-color: #4f46e5;
+    border-color: #4338ca;
+    color: white;
+}
