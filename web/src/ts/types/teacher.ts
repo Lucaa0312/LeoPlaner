@@ -9,14 +9,17 @@ export type Teacher = {
 export type CreateTeacherRequest = {
     teacherName: string;
     nameSymbol: string;
-    teachingSubject: number[];
+    teachingSubject: { id: number }[];  
+     teacher_non_working_hours: TimeSlot[];
+    teacher_non_preferred_hours: TimeSlot[];
+    takenUpPeriods: never[];
 };
 
 export type TeacherFormStep = 1 | 2 | 3;
  
 export type TimeSlot = {
-    day: number; 
-    time: string;
+    day: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
+    schoolHour: number;
 };
 
 export type TeacherFormState = {

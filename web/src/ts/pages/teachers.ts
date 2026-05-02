@@ -179,26 +179,14 @@ async function loadAndRenderTeachers(): Promise<void> {
     }
 }
 
-function formatedNameInput(firstNameId: string, lastNameId: string): string {
-    const firstNameInput = getElement<HTMLInputElement>(firstNameId);
-    const lastNameInput = getElement<HTMLInputElement>(lastNameId);
-
-    if (!firstNameInput || !lastNameInput) throw new Error("Name input fields not found");
-
-    return firstNameInput.value + " " + lastNameInput.value;
-}
-
-
-function collectTeacherData(selectedSubjects: Subject[]): CreateTeacherRequest {
-    const nameInput = formatedNameInput("first-name-input", "last-name-input");
-    const initialsInput = getElement<HTMLInputElement>("initials-input");
-    
-    if (!initialsInput) throw new Error("Initials input not found");
-
+function collectTeacherData(state: TeacherFormState): CreateTeacherRequest {
     return {
-        teacherName: nameInput,
-        nameSymbol: initialsInput.value,
-        teachingSubject: selectedSubjects.map((subject) => subject.id)
+        teacherName: `${state.firstName} ${state.lastName}`,
+        nameSymbol: state.nameSymbol,
+        teachingSubject: state.selectedSubjects.map((subject) => ({ id: subject.id })),
+        teacher_non_working_hours: state.nonWorkingHours,
+        teacher_non_preferred_hours: state.nonPreferredHours,
+        takenUpPeriods: []
     };
 }
 
@@ -437,19 +425,27 @@ async function buildStep2(state: TeacherFormState): Promise<HTMLElement> {
  
     return container;
 }
- 
- 
- const times: string[] = [ 
-    "07:05", "07:55", "08:00", "08:50", "08:55", 
-    "09:45", "10:00", "10:50", "10:55", "11:45", 
-    "11:50", "12:40", "12:45", "13:35", "13:40", 
-    "14:30", "14:35", "15:25", "15:30", "16:20", 
-    "16:25", "17:15", "17:20", "18:05", "18:50", 
-    "19:00", "19:45", "20:30", "20:40", "21:25", 
-    "22:10" ];
-    
-const DAYS = ["Mo", "Di", "Mi", "Do", "Fr"];
 
+const periods = [
+    { start: "07:05", end: "07:55",  label: "0. EH"  },
+    { start: "08:00", end: "08:50",  label: "1. EH"  },
+    { start: "08:55", end: "09:45",  label: "2. EH"  },
+    { start: "10:00", end: "10:50",  label: "3. EH"  },
+    { start: "10:55", end: "11:45",  label: "4. EH"  },
+    { start: "11:50", end: "12:40",  label: "5. EH"  },
+    { start: "12:45", end: "13:35",  label: "6. EH"  },
+    { start: "13:40", end: "14:30",  label: "7. EH"  },
+    { start: "14:35", end: "15:25",  label: "8. EH"  },
+    { start: "15:30", end: "16:20",  label: "9. EH"  },
+    { start: "16:25", end: "17:15",  label: "10. EH" },
+    { start: "17:20", end: "18:05",  label: "11. EH" },
+    { start: "18:05", end: "18:50",  label: "12. EH" },
+    { start: "19:00", end: "19:45",  label: "13. EH" },
+    { start: "19:45", end: "20:30",  label: "14. EH" },
+    { start: "20:40", end: "21:25",  label: "15. EH" },
+    { start: "21:25", end: "22:10",  label: "16. EH" },
+];
+    
 function buildStep3(state: TeacherFormState): HTMLElement {
     const container = document.createElement("div");
     container.id = "step-3-container";
@@ -461,7 +457,7 @@ function buildStep3(state: TeacherFormState): HTMLElement {
 
     const availability = initSetAvailability({
         container: gridContainer,
-        times
+        periods
     });
 
     (container as any)._availability = availability;
@@ -578,12 +574,12 @@ async function openAddTeacherForm(): Promise<void> {
                     saveStep3(stepContent);
 
                     try {
-                        const teacherData = collectTeacherData(state.selectedSubjects);
-
+                        const teacherData = collectTeacherData(state);
                         const payload = {
                             ...teacherData,
                             teacher_non_working_hours: state.nonWorkingHours,
-                            teacher_non_preferred_hours: state.nonPreferredHours
+                            teacher_non_preferred_hours: state.nonPreferredHours,
+                            takenUpPeriods: []
                         };
 
                         await createTeacher(payload);

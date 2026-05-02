@@ -1,78 +1,64 @@
-export function initSetAvailability({ container, times }) {
+export function initSetAvailability({ container, periods }) {
     let nonWorking = [];
     let nonPreferred = [];
     const days = ["Mo", "Di", "Mi", "Do", "Fr"];
-    // Pair consecutive times into periods: [0,1], [2,3], ...
-    const periods = [];
-    for (let i = 0; i + 1 < times.length; i += 2) {
-        const start = times[i];
-        const end = times[i + 1];
-        if (start && end) {
-            periods.push({
-                start,
-                end,
-                label: `${i / 2}. EH`,
-            });
-        }
-    }
-    function getState(dayIndex, time) {
-        if (nonWorking.some((t) => t.day === dayIndex && t.time === time))
-            return "non-working";
-        if (nonPreferred.some((t) => t.day === dayIndex && t.time === time))
-            return "non-preferred";
-        return "none";
-    }
-    function toggleSlot(dayIndex, time, element) {
-        const state = getState(dayIndex, time);
-        // Remove from both arrays first
-        nonWorking = nonWorking.filter((t) => !(t.day === dayIndex && t.time === time));
-        nonPreferred = nonPreferred.filter((t) => !(t.day === dayIndex && t.time === time));
+    const DAY_ENUM = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+    function toggleSlot(dayIndex, periodIndex, element) {
+        const day = DAY_ENUM[dayIndex];
+        const schoolHour = periodIndex + 1;
+        const state = getState(day, schoolHour);
+        nonWorking = nonWorking.filter(t => !(t.day === day && t.schoolHour === schoolHour));
+        nonPreferred = nonPreferred.filter(t => !(t.day === day && t.schoolHour === schoolHour));
         element.classList.remove("non-preferred", "non-working");
         element.textContent = "";
         if (state === "none") {
-            nonPreferred.push({ day: dayIndex, time });
+            nonPreferred.push({ day, schoolHour });
             element.classList.add("non-preferred");
             element.textContent = "Nicht bevorzugt";
         }
         else if (state === "non-preferred") {
-            nonWorking.push({ day: dayIndex, time });
+            nonWorking.push({ day, schoolHour });
             element.classList.add("non-working");
             element.textContent = "Nicht verfügbar";
         }
-        // state === "non-working" → stays empty (reset)
+    }
+    function getState(day, schoolHour) {
+        if (nonWorking.some(t => t.day === day && t.schoolHour === schoolHour))
+            return "non-working";
+        if (nonPreferred.some(t => t.day === day && t.schoolHour === schoolHour))
+            return "non-preferred";
+        return "none";
     }
     function renderGrid() {
         container.innerHTML = "";
-        // ── Header row ──────────────────────────────────────────
         const headerRow = document.createElement("div");
-        headerRow.className = "ag-row ag-header-row";
+        headerRow.className = "grid-row header-row";
         const corner = document.createElement("div");
-        corner.className = "ag-time-label";
+        corner.className = "time-label";
         headerRow.appendChild(corner);
-        days.forEach((day) => {
-            const th = document.createElement("div");
-            th.className = "ag-day-header";
-            th.textContent = day;
-            headerRow.appendChild(th);
+        days.forEach(day => {
+            const dayHeader = document.createElement("div");
+            dayHeader.className = "day-header";
+            dayHeader.textContent = day;
+            headerRow.appendChild(dayHeader);
         });
         container.appendChild(headerRow);
-        // ── Period rows ──────────────────────────────────────────
-        periods.forEach((period) => {
+        periods.forEach((period, periodIndex) => {
             const row = document.createElement("div");
-            row.className = "ag-row ag-period-row";
+            row.className = "grid-row";
             const label = document.createElement("div");
-            label.className = "ag-time-label";
+            label.className = "time-label";
             label.innerHTML = `
-                <span class="ag-time-start">${period.start}</span>
-                <span class="ag-period-name">${period.label}</span>
-                <span class="ag-time-end">${period.end}</span>
+                <span class="time-start">${period.start}</span>
+                <span class="period-name">${period.label}</span>
+                <span class="time-end">${period.end}</span>
             `;
             row.appendChild(label);
             days.forEach((_, dayIndex) => {
-                const cell = document.createElement("div");
-                cell.className = "ag-cell";
-                cell.addEventListener("click", () => toggleSlot(dayIndex, period.start, cell));
-                row.appendChild(cell);
+                const slot = document.createElement("div");
+                slot.className = "time-slot";
+                slot.addEventListener("click", () => toggleSlot(dayIndex, periodIndex, slot));
+                row.appendChild(slot);
             });
             container.appendChild(row);
         });
@@ -80,6 +66,6 @@ export function initSetAvailability({ container, times }) {
     renderGrid();
     return {
         getNonWorking: () => nonWorking,
-        getNonPreferred: () => nonPreferred,
+        getNonPreferred: () => nonPreferred
     };
 }

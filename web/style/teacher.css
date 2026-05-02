@@ -668,6 +668,7 @@
     width: 100%;
 }
 
+
 /* ------------------- Availability Selector ----------------------- */
 
 #availability-grid {
@@ -679,16 +680,14 @@
     overflow-y: auto;
 }
 
-/* Jede Zeile: Zeitlabel + 5 Tages-Zellen */
-.ag-row {
+.grid-row {
     display: grid;
     grid-template-columns: 72px repeat(5, 1fr);
     gap: 6px;
     align-items: center;
 }
 
-/* Spalten-Überschriften (Mo, Di, ...) */
-.ag-day-header {
+.day-header {
     font-weight: 700;
     text-align: center;
     font-size: 1.1rem;
@@ -696,8 +695,7 @@
     padding-bottom: 4px;
 }
 
-/* Zeitlabel links */
-.ag-time-label {
+.time-label {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -705,20 +703,19 @@
     line-height: 1.2;
 }
 
-.ag-period-name {
+.period-name {
     font-weight: 700;
     font-size: 0.8rem;
     color: var(--leo-text-color, #1f2937);
 }
 
-.ag-time-start,
-.ag-time-end {
+.time-start,
+.time-end {
     font-size: 0.7rem;
     color: #6b7280;
 }
 
-/* Zellen mit Schraffur-Muster */
-.ag-cell {
+.time-slot {
     height: 58px;
     border-radius: 10px;
     cursor: pointer;
@@ -731,9 +728,7 @@
         rgba(0, 0, 0, 0.08) 6px
     );
     border: 1px solid #d1d5db;
-    transition:
-        transform 100ms ease,
-        background-color 150ms ease;
+    transition: transform 100ms ease, background-color 150ms ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -745,27 +740,23 @@
     user-select: none;
 }
 
-.ag-cell:hover {
+.time-slot:hover {
     transform: scale(1.04);
     background-color: #d1d5db;
 }
 
-.ag-cell:active {
+.time-slot:active {
     transform: scale(0.96);
 }
 
-/* Nicht bevorzugt → gelb */
-.ag-cell.non-preferred {
+.time-slot.non-preferred {
     background-image: none;
     background-color: #f59e0b;
     border-color: #d97706;
-    color: white;
 }
 
-/* Nicht verfügbar → blau/lila wie im Screenshot */
-.ag-cell.non-working {
+.time-slot.non-working {
     background-image: none;
     background-color: #4f46e5;
     border-color: #4338ca;
-    color: white;
 }
