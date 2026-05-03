@@ -1,6 +1,7 @@
 package at.htlleonding.leoplaner.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,8 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final AtomicBoolean automaticMode = new AtomicBoolean(false);
+
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
     // private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.9994;
@@ -129,6 +132,11 @@ public class SimulatedAnnealingAlgorithm {
                     new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
 
             decreaseTemperature();
+
+            if (automaticMode.get()) {
+                pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
+            }
+
             this.dataRepository.getAllTimetables().put(className, currTimetable);
 
             iterationCounter++;
@@ -137,6 +145,30 @@ public class SimulatedAnnealingAlgorithm {
         this.dataRepository.setAlgorithmRunning(false);
         // setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
+    }
+
+    public double autumaticallyPushTemperatureAmount(double currentCost) {
+        double pushAmount = 0;
+        var reverseHistory = new ArrayList<>(this.dataRepository.getHistory());
+        Collections.reverse(reverseHistory);
+        int counter = 0;
+
+        for (History history : reverseHistory) {
+            if (history.cost() != currentCost) {
+                break;
+            }
+
+            if (counter == 1) {
+                pushAmount += 30;
+            }
+
+            if (counter % 5 == 0) {
+                pushAmount *= 5;
+            }
+            counter++;
+        }
+
+        return pushAmount;
     }
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
@@ -493,14 +525,14 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void pauseAlgorithm() {
-        if(getIsRunning()) {
+        if (getIsRunning()) {
             isRunning.set(false);
             this.dataRepository.setAlgorithmRunning(false);
         }
     }
 
     public void resumeAlgorithm() {
-        if(!getIsRunning()) {
+        if (!getIsRunning()) {
             isRunning.set(true);
             this.dataRepository.setAlgorithmRunning(true);
             new Thread(this::algorithmLoop).start();
@@ -509,6 +541,13 @@ public class SimulatedAnnealingAlgorithm {
 
     public boolean getIsRunning() {
         return isRunning.get();
+    }
+
+    public void toggleAutomaticMode() {
+        boolean toggledMode = !automaticMode.get();
+
+        automaticMode.set(toggledMode);
+        this.dataRepository.setAutomaticMode(toggledMode);
     }
 
 }
