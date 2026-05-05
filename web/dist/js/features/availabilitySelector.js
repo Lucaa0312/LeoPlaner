@@ -1,14 +1,20 @@
-export function initSetAvailability({ container, periods }) {
+export function initSetAvailability({ container, periods, }) {
     let nonWorking = [];
     let nonPreferred = [];
     const days = ["Mo", "Di", "Mi", "Do", "Fr"];
-    const DAY_ENUM = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+    const DAY_ENUM = [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+    ];
     function toggleSlot(dayIndex, periodIndex, element) {
         const day = DAY_ENUM[dayIndex];
         const schoolHour = periodIndex + 1;
         const state = getState(day, schoolHour);
-        nonWorking = nonWorking.filter(t => !(t.day === day && t.schoolHour === schoolHour));
-        nonPreferred = nonPreferred.filter(t => !(t.day === day && t.schoolHour === schoolHour));
+        nonWorking = nonWorking.filter((t) => !(t.day === day && t.schoolHour === schoolHour));
+        nonPreferred = nonPreferred.filter((t) => !(t.day === day && t.schoolHour === schoolHour));
         element.classList.remove("non-preferred", "non-working");
         element.textContent = "";
         if (state === "none") {
@@ -23,9 +29,9 @@ export function initSetAvailability({ container, periods }) {
         }
     }
     function getState(day, schoolHour) {
-        if (nonWorking.some(t => t.day === day && t.schoolHour === schoolHour))
+        if (nonWorking.some((t) => t.day === day && t.schoolHour === schoolHour))
             return "non-working";
-        if (nonPreferred.some(t => t.day === day && t.schoolHour === schoolHour))
+        if (nonPreferred.some((t) => t.day === day && t.schoolHour === schoolHour))
             return "non-preferred";
         return "none";
     }
@@ -36,7 +42,7 @@ export function initSetAvailability({ container, periods }) {
         const corner = document.createElement("div");
         corner.className = "time-label";
         headerRow.appendChild(corner);
-        days.forEach(day => {
+        days.forEach((day) => {
             const dayHeader = document.createElement("div");
             dayHeader.className = "day-header";
             dayHeader.textContent = day;
@@ -66,6 +72,6 @@ export function initSetAvailability({ container, periods }) {
     renderGrid();
     return {
         getNonWorking: () => nonWorking,
-        getNonPreferred: () => nonPreferred
+        getNonPreferred: () => nonPreferred,
     };
 }

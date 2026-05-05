@@ -1,37 +1,41 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.util.List;
-
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Subject;
 import at.htlleonding.leoplaner.dto.SubjectDTO;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.List;
 
 @Path("api/subjects")
 public class SubjectResource {
+
     @Inject
     DataRepository dataRepository;
+
     @Context
     UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<SubjectDTO> getAllSubjects() {
-        return dataRepository.getAllSubjects().stream().map(e -> UtilBuildFunctions.createSubjectDTO(e)).toList();
+        return dataRepository
+            .getAllSubjects()
+            .stream()
+            .map(e -> UtilBuildFunctions.createSubjectDTO(e))
+            .toList();
     }
 
     @POST
@@ -66,7 +70,6 @@ public class SubjectResource {
         }
 
         return Response.ok(updatedSubject).build();
-
     }
 
     @DELETE

@@ -1,6 +1,6 @@
 import initNavbar from "./navbar.js";
-import { fetchSubjects, createSubject, updateSubject } from "../api/subjectApi.js";
-import { getElement, formatName } from "../utils/elementHelpers.js";
+import { fetchSubjects, createSubject, updateSubject, } from "../api/subjectApi.js";
+import { getElement, formatName, aquireElement, } from "../utils/elementHelpers.js";
 import { openPopup, closePopup } from "../components/popup.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
@@ -68,12 +68,13 @@ async function loadAndRenderSubjects() {
 }
 function collectSubjectData(selectetRoomTypes, selectedSubjectColor) {
     const nameInput = getElement("name-input");
+    const symbolInput = aquireElement("initials-input");
     if (!nameInput) {
         throw new Error("Fehlendes Formularelement");
     }
     return {
         subjectName: nameInput.value.trim(),
-        subjectSymbol: nameInput.value.trim().substring(0, 3).toUpperCase(),
+        subjectSymbol: symbolInput.value.trim(),
         requiredRoomTypes: selectetRoomTypes,
         subjectColor: selectedSubjectColor,
     };
@@ -131,7 +132,11 @@ function openSubjectForm(existingSubject) {
         return;
     if (noSubjectsElement)
         noSubjectsElement.style.display = "none";
-    openPopup({ modal: addSubjectScreen, overlay: disableOverlay, scrollContainer: displaySubjects });
+    openPopup({
+        modal: addSubjectScreen,
+        overlay: disableOverlay,
+        scrollContainer: displaySubjects,
+    });
     const isEditMode = !!existingSubject;
     const headerContainer = document.createElement("div");
     headerContainer.id = "add-subject-header-container";
@@ -162,7 +167,10 @@ function openSubjectForm(existingSubject) {
     const selectorDropdown = getElement("roomtype-dropdown");
     const selectedContainer = getElement("selected-roomtypes");
     const inputContainer = getElement("roomtype-input-container");
-    if (!selectorInput || !selectorDropdown || !selectedContainer || !inputContainer)
+    if (!selectorInput ||
+        !selectorDropdown ||
+        !selectedContainer ||
+        !inputContainer)
         return;
     const roomTypeSelector = initRoomTypeSelector({
         input: selectorInput,
@@ -189,6 +197,8 @@ function openSubjectForm(existingSubject) {
                 console.log("It works");
             }
             else {
+                console.log("SUBJECT DATA:", subjectData);
+                console.log("ROOM TYPES:", subjectData.requiredRoomTypes);
                 await createSubject(subjectData);
             }
             closePopup({

@@ -1,7 +1,7 @@
 import initNavbar from "./navbar.js";
 import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement, aquireElement, formatName } from "../utils/elementHelpers.js";
+import { getElement, aquireElement, formatName, } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
 import { imagePreview } from "../features/imagePreview.js";
 import { fetchSubjects } from "../api/subjectApi.js";
@@ -18,7 +18,7 @@ function createTeacherSubjectChips(subjects) {
         chips += `<span class="subject-chip extra">+${remaining}</span>`;
     }
     chips += hiddenSubjects
-        .map(subject => `<span class="subject-chip hidden-subject" style="display: none;" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
+        .map((subject) => `<span class="subject-chip hidden-subject" style="display: none;" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
         .join("");
     return chips;
 }
@@ -27,7 +27,7 @@ function showRemainingSubjects(teacherID) {
     if (!container)
         return;
     const hiddenChips = container.querySelectorAll(".hidden-subject");
-    hiddenChips.forEach(chip => {
+    hiddenChips.forEach((chip) => {
         chip.style.display = "inline-block";
     });
     const extraChip = container.querySelector(".subject-chip.extra");
@@ -37,9 +37,9 @@ function showRemainingSubjects(teacherID) {
 }
 function closeAllTeachers() {
     const allTeacherContainers = document.querySelectorAll(".teacher-subjects");
-    allTeacherContainers.forEach(container => {
+    allTeacherContainers.forEach((container) => {
         const hiddenChips = container.querySelectorAll(".hidden-subject");
-        hiddenChips.forEach(chip => {
+        hiddenChips.forEach((chip) => {
             chip.style.display = "none";
         });
         const extraChip = container.querySelector(".subject-chip.extra");
@@ -139,10 +139,12 @@ function collectTeacherData(state) {
     return {
         teacherName: `${state.firstName} ${state.lastName}`,
         nameSymbol: state.nameSymbol,
-        teachingSubject: state.selectedSubjects.map((subject) => ({ id: subject.id })),
+        teachingSubject: state.selectedSubjects.map((subject) => ({
+            id: subject.id,
+        })),
         teacher_non_working_hours: state.nonWorkingHours,
         teacher_non_preferred_hours: state.nonPreferredHours,
-        takenUpPeriods: []
+        takenUpPeriods: [],
     };
 }
 function buildFormHeader(modal, overlay, scrollContainer) {
@@ -158,7 +160,7 @@ function buildFormHeader(modal, overlay, scrollContainer) {
         closePopup({
             modal: modal,
             overlay: overlay,
-            scrollContainer: scrollContainer
+            scrollContainer: scrollContainer,
         });
     });
     headerContainer.append(title, closeScreenButton);
@@ -301,7 +303,7 @@ async function buildStep2(state) {
         dropdown: subjectDropdown,
         selectedContainer: selectedSubjectsContainer,
         inputContainer: subjectInputContainer,
-        allSubjects: allSubjects
+        allSubjects: allSubjects,
     });
     state.selectedSubjects.forEach((subject) => {
         subjectSelector.restore?.(subject);
@@ -336,7 +338,7 @@ function buildStep3(state) {
     container.appendChild(gridContainer);
     const availability = initSetAvailability({
         container: gridContainer,
-        periods
+        periods,
     });
     container._availability = availability;
     return container;
@@ -353,7 +355,7 @@ async function openAddTeacherForm() {
     openPopup({
         modal: addTeacherScreen,
         overlay: disableOverlay,
-        scrollContainer: displayTeachers
+        scrollContainer: displayTeachers,
     });
     const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
     const state = {
@@ -363,14 +365,18 @@ async function openAddTeacherForm() {
         email: "",
         selectedSubjects: [],
         nonWorkingHours: [],
-        nonPreferredHours: []
+        nonPreferredHours: [],
     };
     let currentStep = 1;
     function saveStep1() {
-        state.firstName = getElement("first-name-input")?.value.trim() ?? "";
-        state.lastName = getElement("last-name-input")?.value.trim() ?? "";
-        state.nameSymbol = getElement("initials-input")?.value.trim() ?? "";
-        state.email = getElement("email-input")?.value.trim() ?? "";
+        state.firstName =
+            getElement("first-name-input")?.value.trim() ?? "";
+        state.lastName =
+            getElement("last-name-input")?.value.trim() ?? "";
+        state.nameSymbol =
+            getElement("initials-input")?.value.trim() ?? "";
+        state.email =
+            getElement("email-input")?.value.trim() ?? "";
     }
     function saveStep2(stepContainer) {
         const selector = stepContainer._subjectSelector;
@@ -397,7 +403,7 @@ async function openAddTeacherForm() {
                     saveStep1();
                     currentStep = 2;
                     void renderStep();
-                }
+                },
             });
             addTeacherScreen.replaceChildren(header, stepIndicator, avaterUploadDiv, stepContent, nav);
             imagePreview();
@@ -416,7 +422,7 @@ async function openAddTeacherForm() {
                     saveStep2(stepContent);
                     currentStep = 3;
                     void renderStep();
-                }
+                },
             });
             addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
         }
@@ -437,20 +443,20 @@ async function openAddTeacherForm() {
                             ...teacherData,
                             teacher_non_working_hours: state.nonWorkingHours,
                             teacher_non_preferred_hours: state.nonPreferredHours,
-                            takenUpPeriods: []
+                            takenUpPeriods: [],
                         };
                         await createTeacher(payload);
                         closePopup({
                             modal: addTeacherScreen,
                             overlay: disableOverlay,
-                            scrollContainer: displayTeachers
+                            scrollContainer: displayTeachers,
                         });
                         await loadAndRenderTeachers();
                     }
                     catch (error) {
                         console.error(error);
                     }
-                }
+                },
             });
             addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
         }

@@ -1,7 +1,5 @@
 package at.htlleonding.leoplaner.data;
 
-import java.util.List;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -11,9 +9,11 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import java.util.List;
 
 @Entity
 public class Subject extends PanacheEntity {
+
     private String subjectName;
     private RgbColor subjectColor;
     private String subjectSymbol;
@@ -21,16 +21,24 @@ public class Subject extends PanacheEntity {
     @ElementCollection(targetClass = RoomTypes.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable( // create new join table
-            name = "subject_required_roomtypes", joinColumns = @JoinColumn(name = "subject_id"))
+        name = "subject_required_roomtypes",
+        joinColumns = @JoinColumn(name = "subject_id")
+    )
     @Column(name = "room_type")
     private List<RoomTypes> requiredRoomTypes;
 
     public static List<Subject> getByName(final String filter) {
-        return find("LOWER(subjectName) like LOWER(?1)", "%" + filter + "%").list();
+        return find(
+            "LOWER(subjectName) like LOWER(?1)",
+            "%" + filter + "%"
+        ).list();
     }
 
     public static Subject getFirstByName(final String filter) {
-        return find("LOWER(subjectName) like LOWER(?1)", "%" + filter + "%").firstResult();
+        return find(
+            "LOWER(subjectName) like LOWER(?1)",
+            "%" + filter + "%"
+        ).firstResult();
     }
 
     public static Subject getById(final Long id) {
@@ -69,15 +77,20 @@ public class Subject extends PanacheEntity {
         this.subjectColor = subjectColor;
     }
 
-    public String getSubjectColorAsString(){
-        return String.format("%d, %d, %d", this.subjectColor.red(), this.subjectColor.green(), this.subjectColor.blue());
+    public String getSubjectColorAsString() {
+        return String.format(
+            "%d, %d, %d",
+            this.subjectColor.red(),
+            this.subjectColor.green(),
+            this.subjectColor.blue()
+        );
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id){
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -88,5 +101,4 @@ public class Subject extends PanacheEntity {
     public void setSubjectSymbol(final String subjectSymbol) {
         this.subjectSymbol = subjectSymbol;
     }
-
 }
