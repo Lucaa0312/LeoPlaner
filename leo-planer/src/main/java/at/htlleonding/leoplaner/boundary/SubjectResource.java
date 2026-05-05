@@ -1,5 +1,7 @@
 package at.htlleonding.leoplaner.boundary;
 
+import java.util.List;
+
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Subject;
 import at.htlleonding.leoplaner.dto.SubjectDTO;
@@ -15,9 +17,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.List;
 
 @Path("api/subjects")
 public class SubjectResource {
@@ -42,12 +42,8 @@ public class SubjectResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response addSubject(Subject subject) {
-        Subject subjectCreated = this.dataRepository.addSubject(subject); // TODO add Error handling
-
-        UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-        uriBuilder.path(Long.toString(subjectCreated.getId()));
-
-        return Response.created(uriBuilder.build()).build();
+        this.dataRepository.addSubject(subject);
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @GET

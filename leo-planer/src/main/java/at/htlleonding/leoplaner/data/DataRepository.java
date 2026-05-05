@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
+import at.htlleonding.leoplaner.repository.ClassSubjectRepository;
+import at.htlleonding.leoplaner.repository.RoomRepository;
+import at.htlleonding.leoplaner.repository.SchoolClassRepository;
+import at.htlleonding.leoplaner.repository.SubjectRepository;
+import at.htlleonding.leoplaner.repository.TeacherRepository;
+import at.htlleonding.leoplaner.repository.TimetableService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import at.htlleonding.leoplaner.repository.*;
 
 @ApplicationScoped
 public class DataRepository {
@@ -164,8 +168,8 @@ public class DataRepository {
         return subjectRepository.getCount();
     }
 
-    public Subject addSubject(Subject subject) {
-        return subjectRepository.add(subject);
+    public void addSubject(Subject subject) {
+        subjectRepository.add(subject);
     }
 
     public Subject updateSubject(Long id, Subject subject) {
