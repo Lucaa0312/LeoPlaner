@@ -7,9 +7,8 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### In Work
 
-- Timetable page rework
 - Landing page
-- Proper Figma Design for the charts
+- New Dashboard
 ---
 
 ## Change log
@@ -49,3 +48,7 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 13.04.2026
 - Reworked timetable design
+
+### 04.05.2026
+- Created class subpage
+- Created Simple/Advanced time table design
