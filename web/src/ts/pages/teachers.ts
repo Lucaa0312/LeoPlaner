@@ -5,7 +5,11 @@ import type {
   TeacherFormState,
   TeacherFormStep,
 } from "../types/teacher.js";
-import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
+import {
+  createTeacher,
+  fetchTeachers,
+  updateTeacher,
+} from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import {
   getElement,
@@ -157,7 +161,6 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
   teacherSubjects.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
 
-    // Only trigger if the extra chip is clicked, not the individual subject chips
     if (target.classList.contains("extra")) {
       closeAllTeachers();
       showRemainingSubjects(currentTeacherID);
@@ -172,6 +175,11 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
   const teacherEdit = document.createElement("div");
   teacherEdit.className = "teacher-edit";
   teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+
+  teacherEdit.addEventListener("click", () => {
+    console.log(teacher);
+    void openAddTeacherForm(teacher);
+  });
 
   teacherInfo.appendChild(teacherName);
   teacherLeft.append(avatarPlaceholder, teacherInfo);
@@ -506,7 +514,7 @@ function buildStep3(state: TeacherFormState): HTMLElement {
   return container;
 }
 
-async function openAddTeacherForm(): Promise<void> {
+async function openAddTeacherForm(existingTeacher?: Teacher): Promise<void> {
   const noTeachersElement = aquireElement<HTMLElement>("no-teachers");
   const disableOverlay = aquireElement<HTMLElement>("disable-overlay");
   const displayTeachers = aquireElement<HTMLElement>("display-teachers");
@@ -527,14 +535,19 @@ async function openAddTeacherForm(): Promise<void> {
     displayTeachers,
   );
 
+  const isEditMode = !!existingTeacher;
+  const [firstName, ...lastParts] = (existingTeacher?.teacherName ?? "").split(
+    " ",
+  );
+
   const state: TeacherFormState = {
-    firstName: "",
-    lastName: "",
-    nameSymbol: "",
+    firstName: firstName ?? "",
+    lastName: lastParts.join(" "),
+    nameSymbol: existingTeacher?.nameSymbol ?? "",
     email: "",
-    selectedSubjects: [],
-    nonWorkingHours: [],
-    nonPreferredHours: [],
+    selectedSubjects: existingTeacher?.teachingSubject ?? [],
+    nonWorkingHours: existingTeacher?.teacher_non_working_hours ?? [],
+    nonPreferredHours: existingTeacher?.teacher_non_preferred_hours ?? [],
   };
 
   let currentStep: TeacherFormStep = 1;
@@ -614,6 +627,11 @@ async function openAddTeacherForm(): Promise<void> {
     } else if (currentStep === 3) {
       const stepContent = buildStep3(state);
 
+      const availability = (stepContent as any)._availability;
+      if (availability && isEditMode) {
+        availability.restore(state.nonWorkingHours, state.nonPreferredHours);
+      }
+
       const nav = buildNavigationButtons({
         showBack: true,
         nextLabel: "Bestätigen",
@@ -626,14 +644,12 @@ async function openAddTeacherForm(): Promise<void> {
 
           try {
             const teacherData = collectTeacherData(state);
-            const payload = {
-              ...teacherData,
-              teacher_non_working_hours: state.nonWorkingHours,
-              teacher_non_preferred_hours: state.nonPreferredHours,
-              takenUpPeriods: [],
-            };
 
-            await createTeacher(payload);
+            if (isEditMode && existingTeacher) {
+              await updateTeacher(existingTeacher.id, teacherData);
+            } else {
+              await createTeacher(teacherData);
+            }
 
             closePopup({
               modal: addTeacherScreen,
@@ -660,7 +676,7 @@ function initializeApp() {
   void loadAndRenderTeachers();
 
   const addBtn = getElement<HTMLElement>("add-btn");
-  addBtn?.addEventListener("click", openAddTeacherForm);
+  addBtn?.addEventListener("click", () => openAddTeacherForm());
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

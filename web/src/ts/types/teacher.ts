@@ -1,9 +1,12 @@
 import type { Subject } from "./subject.js";
 
 export type Teacher = {
+  id: number;
   teacherName: string;
   nameSymbol: string;
   teachingSubject: Subject[];
+  teacher_non_working_hours: TimeSlot[];
+  teacher_non_preferred_hours: TimeSlot[];
 };
 
 export type CreateTeacherRequest = {

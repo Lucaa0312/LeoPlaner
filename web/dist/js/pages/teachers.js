@@ -1,5 +1,5 @@
 import initNavbar from "./navbar.js";
-import { createTeacher, fetchTeachers } from "../api/teacherApi.js";
+import { createTeacher, fetchTeachers, updateTeacher, } from "../api/teacherApi.js";
 import { toggleEmptyState } from "../components/emptyState.js";
 import { getElement, aquireElement, formatName, } from "../utils/elementHelpers.js";
 import { closePopup, openPopup } from "../components/popup.js";
@@ -93,7 +93,6 @@ function createTeacherRow(teacher) {
     teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
     teacherSubjects.addEventListener("click", (event) => {
         const target = event.target;
-        // Only trigger if the extra chip is clicked, not the individual subject chips
         if (target.classList.contains("extra")) {
             closeAllTeachers();
             showRemainingSubjects(currentTeacherID);
@@ -106,6 +105,10 @@ function createTeacherRow(teacher) {
     const teacherEdit = document.createElement("div");
     teacherEdit.className = "teacher-edit";
     teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+    teacherEdit.addEventListener("click", () => {
+        console.log(teacher);
+        void openAddTeacherForm(teacher);
+    });
     teacherInfo.appendChild(teacherName);
     teacherLeft.append(avatarPlaceholder, teacherInfo);
     card.append(teacherLeft, teacherInitials, teacherSubjects, teacherWorkload, teacherEdit);
@@ -343,7 +346,7 @@ function buildStep3(state) {
     container._availability = availability;
     return container;
 }
-async function openAddTeacherForm() {
+async function openAddTeacherForm(existingTeacher) {
     const noTeachersElement = aquireElement("no-teachers");
     const disableOverlay = aquireElement("disable-overlay");
     const displayTeachers = aquireElement("display-teachers");
@@ -358,14 +361,16 @@ async function openAddTeacherForm() {
         scrollContainer: displayTeachers,
     });
     const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    const isEditMode = !!existingTeacher;
+    const [firstName, ...lastParts] = (existingTeacher?.teacherName ?? "").split(" ");
     const state = {
-        firstName: "",
-        lastName: "",
-        nameSymbol: "",
+        firstName: firstName ?? "",
+        lastName: lastParts.join(" "),
+        nameSymbol: existingTeacher?.nameSymbol ?? "",
         email: "",
-        selectedSubjects: [],
-        nonWorkingHours: [],
-        nonPreferredHours: [],
+        selectedSubjects: existingTeacher?.teachingSubject ?? [],
+        nonWorkingHours: existingTeacher?.teacher_non_working_hours ?? [],
+        nonPreferredHours: existingTeacher?.teacher_non_preferred_hours ?? [],
     };
     let currentStep = 1;
     function saveStep1() {
@@ -428,6 +433,10 @@ async function openAddTeacherForm() {
         }
         else if (currentStep === 3) {
             const stepContent = buildStep3(state);
+            const availability = stepContent._availability;
+            if (availability && isEditMode) {
+                availability.restore(state.nonWorkingHours, state.nonPreferredHours);
+            }
             const nav = buildNavigationButtons({
                 showBack: true,
                 nextLabel: "Bestätigen",
@@ -439,13 +448,12 @@ async function openAddTeacherForm() {
                     saveStep3(stepContent);
                     try {
                         const teacherData = collectTeacherData(state);
-                        const payload = {
-                            ...teacherData,
-                            teacher_non_working_hours: state.nonWorkingHours,
-                            teacher_non_preferred_hours: state.nonPreferredHours,
-                            takenUpPeriods: [],
-                        };
-                        await createTeacher(payload);
+                        if (isEditMode && existingTeacher) {
+                            await updateTeacher(existingTeacher.id, teacherData);
+                        }
+                        else {
+                            await createTeacher(teacherData);
+                        }
                         closePopup({
                             modal: addTeacherScreen,
                             overlay: disableOverlay,
@@ -467,6 +475,6 @@ function initializeApp() {
     initNavbar();
     void loadAndRenderTeachers();
     const addBtn = getElement("add-btn");
-    addBtn?.addEventListener("click", openAddTeacherForm);
+    addBtn?.addEventListener("click", () => openAddTeacherForm());
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

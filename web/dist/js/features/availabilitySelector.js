@@ -70,8 +70,32 @@ export function initSetAvailability({ container, periods, }) {
         });
     }
     renderGrid();
+    function restore(initialNonWorking, initialNonPreferred) {
+        nonWorking = [...initialNonWorking];
+        nonPreferred = [...initialNonPreferred];
+        const rows = container.querySelectorAll(".grid-row:not(.header-row)");
+        rows.forEach((row, periodIndex) => {
+            const slots = row.querySelectorAll(".time-slot");
+            slots.forEach((slot, dayIndex) => {
+                const day = DAY_ENUM[dayIndex];
+                const schoolHour = periodIndex + 1;
+                const state = getState(day, schoolHour);
+                slot.classList.remove("non-preferred", "non-working");
+                slot.textContent = "";
+                if (state === "non-preferred") {
+                    slot.classList.add("non-preferred");
+                    slot.textContent = "Nicht bevorzugt";
+                }
+                else if (state === "non-working") {
+                    slot.classList.add("non-working");
+                    slot.textContent = "Nicht verfügbar";
+                }
+            });
+        });
+    }
     return {
         getNonWorking: () => nonWorking,
         getNonPreferred: () => nonPreferred,
+        restore,
     };
 }
