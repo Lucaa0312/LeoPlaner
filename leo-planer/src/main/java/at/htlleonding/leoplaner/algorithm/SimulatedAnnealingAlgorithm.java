@@ -294,7 +294,7 @@ public class SimulatedAnnealingAlgorithm {
                 .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
                 .map(csi -> csi.getClassSubject())
                 .filter(cs -> cs != null)
-                .map(cs -> cs.getTeacher())
+                .map(cs -> cs.getTeachers()).flatMap(List::stream)
                 .filter(teacher -> teacher != null)
                 .distinct()
                 .toList();
@@ -336,7 +336,8 @@ public class SimulatedAnnealingAlgorithm {
         List<ClassSubjectInstance> csiList = schoolSchedule.stream()
                 .flatMap(t -> t.getClassSubjectInstances().stream())
                 .filter(csi -> csi.getClassSubject() != null)
-                .filter(csi -> csi.getClassSubject().getTeacher().getId().equals(teacher.getId()))
+                .filter(csi -> csi.getClassSubject().getTeachers().stream()
+                        .anyMatch(t -> t.getId().equals(teacher.getId())))
                 .toList();
 
         if (!checkIfTimetableIsValid(new Timetable(csiList))) {

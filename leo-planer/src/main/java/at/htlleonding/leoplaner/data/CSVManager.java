@@ -221,6 +221,8 @@ public class CSVManager {
             // FULL CSV LINE FORMAT EXAMPLE: chemistry;john doe;4;true;false;
             final Subject subject = dataRepository.getSubjectByName(line[0].trim().toLowerCase());
             final Teacher teacher = dataRepository.getTeacherByName(line[1].trim().toLowerCase());
+            List<Teacher> teachers = new ArrayList<>();
+            teachers.add(teacher);
             final int weeklyHours = Integer.parseInt(line[2].trim());
             final boolean requiresDoublePeriod = Boolean.parseBoolean(line[3].trim());
             final boolean isBetterDoublePeriod = Boolean.parseBoolean(line[4].trim());
@@ -247,7 +249,7 @@ public class CSVManager {
                 dataRepository.addSchoolClass(schoolClass);
             }
 
-            classSubject.setTeacher(teacher);
+            classSubject.setTeachers(teachers);
             classSubject.setSubject(subject);
             classSubject.setWeeklyHours(weeklyHours);
             classSubject.setRequiresDoublePeriod(requiresDoublePeriod);

@@ -93,8 +93,11 @@ public class UtilBuildFunctions {
 
         return new ClassSubjectDTO(classSubject.getWeeklyHours(), classSubject.isRequiresDoublePeriod(),
                 classSubject.isBetterDoublePeriod(), classSubject.getSchoolClass().getClassName(),
-                UtilBuildFunctions.createTeacherSubjectLinkDTO(classSubject.getTeacher()),
+                classSubject.getTeachers().stream()
+                        .map(t -> UtilBuildFunctions.createTeacherSubjectLinkDTO(t))
+                        .toList(),
                 UtilBuildFunctions.createSubjectClassLinkDTO(classSubject.getSubject()));
+
     }
 
     public static TimetableDTO createTimetableDTO(Timetable timetable) {
