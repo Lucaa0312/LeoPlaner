@@ -55,6 +55,8 @@ public class Socket {
                 simulatedAnnealingAlgorithm.pauseAlgorithm();
             } else if (update.startsWith("resume")) {
                 simulatedAnnealingAlgorithm.resumeAlgorithm();
+            } else if (update.startsWith("toggleAutoMode")) {
+                simulatedAnnealingAlgorithm.toggleAutomaticMode();
             } else {
                 System.out.println("Unknown message: " + update);
             }

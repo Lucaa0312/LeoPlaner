@@ -133,7 +133,7 @@ public class SimulatedAnnealingAlgorithm {
 
             decreaseTemperature();
 
-            if (automaticMode.get()) {
+            if (automaticMode.get() && getTemperature() < 0.0001) {
                 pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
             }
 
@@ -154,16 +154,16 @@ public class SimulatedAnnealingAlgorithm {
         int counter = 0;
 
         for (History history : reverseHistory) {
-            if (history.cost() != currentCost) {
+            if (history.cost() != currentCost || pushAmount >= 100) {
                 break;
             }
 
-            if (counter == 1) {
-                pushAmount += 30;
+            if (counter == 50) {
+                pushAmount += 1;
             }
 
-            if (counter % 5 == 0) {
-                pushAmount *= 5;
+            if (counter % 300 == 0) {
+                pushAmount *= 2;
             }
             counter++;
         }
