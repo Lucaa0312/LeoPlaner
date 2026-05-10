@@ -1,6 +1,7 @@
 package at.htlleonding.leoplaner.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,6 @@ import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
-import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import at.htlleonding.leoplaner.data.TimetableManager;
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
@@ -59,6 +59,8 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final AtomicBoolean automaticMode = new AtomicBoolean(false);
+
     private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
     // private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.9994;
@@ -129,6 +131,11 @@ public class SimulatedAnnealingAlgorithm {
                     new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
 
             decreaseTemperature();
+
+            if (automaticMode.get() && getTemperature() < 0.0001) {
+                pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
+            }
+
             this.dataRepository.getAllTimetables().put(className, currTimetable);
 
             iterationCounter++;
@@ -137,6 +144,30 @@ public class SimulatedAnnealingAlgorithm {
         this.dataRepository.setAlgorithmRunning(false);
         // setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
+    }
+
+    public double autumaticallyPushTemperatureAmount(double currentCost) {
+        double pushAmount = 0;
+        var reverseHistory = new ArrayList<>(this.dataRepository.getHistory());
+        Collections.reverse(reverseHistory);
+        int counter = 0;
+
+        for (History history : reverseHistory) {
+            if (history.cost() != currentCost || pushAmount >= 100) {
+                break;
+            }
+
+            if (counter == 50) {
+                pushAmount += 1;
+            }
+
+            if (counter % 300 == 0) {
+                pushAmount *= 2;
+            }
+            counter++;
+        }
+
+        return pushAmount;
     }
 
     public boolean acceptSolution(final int costCurrTimeTable, final int costNextTimeTable) {
@@ -211,41 +242,6 @@ public class SimulatedAnnealingAlgorithm {
         return cost;
     }
 
-    // TODO maybe advance with just being able to get new Changes instead of entire
-    // timetable
-    public void setTeacherTakenPeriod(final Teacher teacher, final Timetable timetable) {
-        final List<ClassSubjectInstance> classSubjectInstancesList = dataRepository
-                .getTeacherTimetable(teacher.getId()).getClassSubjectInstances();
-        // final List<ClassSubjectInstance> classSubjectInstancesList =
-        // timetable.getClassSubjectInstances().stream()
-        // .filter(e -> e.getClassSubject() != null)
-        // .filter(e ->
-        // e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList();
-        //
-        final List<TeacherTakenPeriod> takenPeriods = new ArrayList<>();
-
-        for (final ClassSubjectInstance csi : classSubjectInstancesList) {
-            final Period period = csi.getPeriod();
-            for (int i = 0; i < csi.getDuration(); i++) {
-                period.setSchoolHour(period.getSchoolHour() + i);
-                takenPeriods.add(new TeacherTakenPeriod(period, timetable.getSchoolClass().getClassName()));
-            }
-        }
-
-        teacher.setTakenUpPeriods(takenPeriods);
-    }
-
-    public void resetAllTeacherTakenPeriodForClass(final List<Teacher> teachers, final String className) {
-        for (final Teacher teacher : teachers) {
-            final List<TeacherTakenPeriod> takenPeriodsList = teacher.getTakenUpPeriods();
-            takenPeriodsList.removeIf(e -> e.className().equals(className));
-        }
-    }
-
-    public void resetTeacherTakenPeriod(final Teacher teacher) {
-        teacher.setTakenUpPeriods(new ArrayList<>());
-    }
-
     public void repairTimetable(final Timetable timetable) {
         timetable.getClassSubjectInstances()
                 .removeIf(csi -> csi.getClassSubject() == null && !csi.getPeriod().isLunchBreak());
@@ -298,7 +294,7 @@ public class SimulatedAnnealingAlgorithm {
                 .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
                 .map(csi -> csi.getClassSubject())
                 .filter(cs -> cs != null)
-                .map(cs -> cs.getTeacher())
+                .map(cs -> cs.getTeachers()).flatMap(List::stream)
                 .filter(teacher -> teacher != null)
                 .distinct()
                 .toList();
@@ -340,7 +336,8 @@ public class SimulatedAnnealingAlgorithm {
         List<ClassSubjectInstance> csiList = schoolSchedule.stream()
                 .flatMap(t -> t.getClassSubjectInstances().stream())
                 .filter(csi -> csi.getClassSubject() != null)
-                .filter(csi -> csi.getClassSubject().getTeacher().getId().equals(teacher.getId()))
+                .filter(csi -> csi.getClassSubject().getTeachers().stream()
+                        .anyMatch(t -> t.getId().equals(teacher.getId())))
                 .toList();
 
         if (!checkIfTimetableIsValid(new Timetable(csiList))) {
@@ -493,14 +490,14 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void pauseAlgorithm() {
-        if(getIsRunning()) {
+        if (getIsRunning()) {
             isRunning.set(false);
             this.dataRepository.setAlgorithmRunning(false);
         }
     }
 
     public void resumeAlgorithm() {
-        if(!getIsRunning()) {
+        if (!getIsRunning()) {
             isRunning.set(true);
             this.dataRepository.setAlgorithmRunning(true);
             new Thread(this::algorithmLoop).start();
@@ -509,6 +506,13 @@ public class SimulatedAnnealingAlgorithm {
 
     public boolean getIsRunning() {
         return isRunning.get();
+    }
+
+    public void toggleAutomaticMode() {
+        boolean toggledMode = !automaticMode.get();
+
+        automaticMode.set(toggledMode);
+        this.dataRepository.setAutomaticMode(toggledMode);
     }
 
 }

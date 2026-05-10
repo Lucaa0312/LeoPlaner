@@ -26,18 +26,45 @@ public class UtilBuildFunctions {
     public static TeacherDTO createTeacherDTO(Teacher teacher) {
         return new TeacherDTO(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(),
                 teacher.getTeachingSubject().stream()
-                        .map(ts -> new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectSymbol(), ts.getSubjectColor(),
+                        .map(ts -> new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectSymbol(),
+                                ts.getSubjectColor(),
                                 ts.getRequiredRoomTypes()))
                         .toList());
     }
 
+    public static TeacherDTOwithWishes createTeacherDTOWithWishes(Teacher teacher) {
+        return new TeacherDTOwithWishes(teacher.getId(), teacher.getTeacherName(), teacher.getNameSymbol(),
+                teacher.getTeachingSubject().stream()
+                        .map(ts -> new SubjectDTO(ts.getId(), ts.getSubjectName(), ts.getSubjectSymbol(),
+                                ts.getSubjectColor(),
+                                ts.getRequiredRoomTypes()))
+                        .toList(),
+                teacher.getTeacher_non_working_hours().stream()
+                        .map(nw -> createTeacherNonWorkingHourDTO(nw)).toList(),
+                teacher.getTeacher_non_preferred_hours().stream()
+                        .map(np -> createTeacherNonPreferredHourDTO(np)).toList());
+    }
+
+    public static TeacherNonWorkingHourDTO createTeacherNonWorkingHourDTO(
+            TeacherNonWorkingHours teacherNonWorkingHour) {
+        return new TeacherNonWorkingHourDTO(teacherNonWorkingHour.getDay(), teacherNonWorkingHour.getSchoolHour());
+    }
+
+    public static TeacherNonPreferredHourDTO createTeacherNonPreferredHourDTO(
+            TeacherNonPreferredHours teacherNonPreferredHour) {
+        return new TeacherNonPreferredHourDTO(teacherNonPreferredHour.getDay(),
+                teacherNonPreferredHour.getSchoolHour());
+    }
+
     public static SubjectDTO createSubjectDTO(Subject subject) {
-        return new SubjectDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(), subject.getSubjectColor(),
+        return new SubjectDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(),
+                subject.getSubjectColor(),
                 subject.getRequiredRoomTypes());
     }
 
     public static SubjectClassLinkDTO createSubjectClassLinkDTO(Subject subject) {
-        return new SubjectClassLinkDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(), subject.getSubjectColor());
+        return new SubjectClassLinkDTO(subject.getId(), subject.getSubjectName(), subject.getSubjectSymbol(),
+                subject.getSubjectColor());
     }
 
     public static TeacherSubjectLinkDTO createTeacherSubjectLinkDTO(Teacher teacher) {
@@ -66,8 +93,11 @@ public class UtilBuildFunctions {
 
         return new ClassSubjectDTO(classSubject.getWeeklyHours(), classSubject.isRequiresDoublePeriod(),
                 classSubject.isBetterDoublePeriod(), classSubject.getSchoolClass().getClassName(),
-                UtilBuildFunctions.createTeacherSubjectLinkDTO(classSubject.getTeacher()),
+                classSubject.getTeachers().stream()
+                        .map(t -> UtilBuildFunctions.createTeacherSubjectLinkDTO(t))
+                        .toList(),
                 UtilBuildFunctions.createSubjectClassLinkDTO(classSubject.getSubject()));
+
     }
 
     public static TimetableDTO createTimetableDTO(Timetable timetable) {

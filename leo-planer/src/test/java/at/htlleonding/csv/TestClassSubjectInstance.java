@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @QuarkusTest
 // Do not annotate Transaction here - em will persist between tests
 public class TestClassSubjectInstance {
@@ -22,14 +25,16 @@ public class TestClassSubjectInstance {
     @Test
     // Use this instead
     @TestTransaction
-    public void t01_testGetterSetter(){
+    public void t01_testGetterSetter() {
         ClassSubjectInstance classSubjectInstance = new ClassSubjectInstance();
 
         ClassSubject classSubject = new ClassSubject();
         Teacher teacher = new Teacher();
+        List<Teacher> teachers = new ArrayList<>();
+        teachers.add(teacher);
         teacher.setTeacherName("Adolf");
         entityManager.persist(teacher);
-        classSubject.setTeacher(teacher);
+        classSubject.setTeachers(teachers);
         entityManager.persist(classSubject);
         Period period = new Period();
         period.setSchoolHour(5);
@@ -45,7 +50,7 @@ public class TestClassSubjectInstance {
         Long id = classSubjectInstance.getId();
 
         ClassSubjectInstance result = entityManager.find(ClassSubjectInstance.class, id);
-        assertEquals("Adolf", result.getClassSubject().getTeacher().getTeacherName());
+        assertEquals("Adolf", result.getClassSubject().getTeachers().getFirst().getTeacherName());
         assertEquals(5, result.getPeriod().getSchoolHour());
         assertEquals("PE", result.getRoom().getNameShort());
         assertEquals(10, result.getDuration());

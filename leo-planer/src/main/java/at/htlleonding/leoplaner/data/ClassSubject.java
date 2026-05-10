@@ -4,14 +4,17 @@ import java.util.List;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 @Entity
 public class ClassSubject extends PanacheEntity {
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "class_subject_teachers", joinColumns = @JoinColumn(name = "class_subject_id"), inverseJoinColumns = @JoinColumn(name = "teacher_id"))
+    private List<Teacher> teachers;
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
@@ -40,10 +43,6 @@ public class ClassSubject extends PanacheEntity {
         return findById(id);
     }
 
-    public Teacher getTeacher() {
-        return teacher;
-    }
-
     public Long getId() {
         return id;
     }
@@ -58,10 +57,6 @@ public class ClassSubject extends PanacheEntity {
 
     public void setId(final long id) {
         this.id = id;
-    }
-
-    public void setTeacher(final Teacher teacher) {
-        this.teacher = teacher;
     }
 
     public void setSubject(final Subject subject) {
@@ -101,31 +96,41 @@ public class ClassSubject extends PanacheEntity {
         this.schoolClass = schoolClass;
     }
 
- @Override
-public String toString() {
-    StringBuilder sb = new StringBuilder("cs ID: " + this.getId());
-    
-    if (teacher != null) {
-        sb.append(", teacher=").append(teacher.getTeacherName()).append(" (ID: ").append(teacher.getId()).append(")");
-    }
-    
-    if (subject != null) {
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("cs ID: " + this.getId());
+
+        if (teachers != null && !teachers.isEmpty()) {
+            sb.append(", teachers=[");
+            teachers.forEach(t -> sb.append(t.getTeacherName())
+                    .append(" (ID: ").append(t.getId()).append("), "));
+            sb.setLength(sb.length() - 2);
+            sb.append("]");
+        }
+
+        if (subject != null) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("subject=").append(subject.getSubjectName()).append(" (ID: ").append(subject.getId()).append(")");
+        }
+
         if (sb.length() > 0) {
             sb.append(", ");
         }
-        sb.append("subject=").append(subject.getSubjectName()).append(" (ID: ").append(subject.getId()).append(")");
-    }
-    
-    if (sb.length() > 0) {
-        sb.append(", ");
-    }
-    sb.append("weeklyHours=").append(weeklyHours);
-    sb.append(", requiresDoublePeriod=").append(requiresDoublePeriod);
-    sb.append(", isBetterDoublePeriod=").append(isBetterDoublePeriod);
-    
-    return sb.toString();
-}
+        sb.append("weeklyHours=").append(weeklyHours);
+        sb.append(", requiresDoublePeriod=").append(requiresDoublePeriod);
+        sb.append(", isBetterDoublePeriod=").append(isBetterDoublePeriod);
 
+        return sb.toString();
+    }
 
+    public List<Teacher> getTeachers() {
+        return teachers;
+    }
+
+    public void setTeachers(List<Teacher> teachers) {
+        this.teachers = teachers;
+    }
 
 }

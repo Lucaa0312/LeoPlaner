@@ -36,6 +36,8 @@ public class DataRepository {
     private boolean algorithmRunning = false;
     private boolean algorithmRunningAtLeastOnce = false;
 
+    private boolean automaticMode = false;
+
     public boolean isAlgorithmRunningAtLeastOnce() {
         return algorithmRunningAtLeastOnce;
     }
@@ -230,6 +232,38 @@ public class DataRepository {
 
     public void clearHistory() {
         timetableService.clearHistory();
+    }
+
+    public TimetableService getTimetableService() {
+        return timetableService;
+    }
+
+    public TeacherRepository getTeacherRepository() {
+        return teacherRepository;
+    }
+
+    public RoomRepository getRoomRepository() {
+        return roomRepository;
+    }
+
+    public SubjectRepository getSubjectRepository() {
+        return subjectRepository;
+    }
+
+    public SchoolClassRepository getSchoolClassRepository() {
+        return schoolClassRepository;
+    }
+
+    public ClassSubjectRepository getClassSubjectRepository() {
+        return classSubjectRepository;
+    }
+
+    public boolean isAutomaticMode() {
+        return automaticMode;
+    }
+
+    public void setAutomaticMode(boolean automaticMode) {
+        this.automaticMode = automaticMode;
     }
 
 }

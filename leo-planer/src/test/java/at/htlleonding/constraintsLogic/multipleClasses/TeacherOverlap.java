@@ -53,7 +53,7 @@ public class TeacherOverlap {
                 if (csi == null || csi.getClassSubject() == null) {
                     continue;
                 }
-                final Teacher teacher = csi.getClassSubject().getTeacher();
+                final Teacher teacher = csi.getClassSubject().getTeachers().getFirst();
                 final Period period = csi.getPeriod();
 
                 List<Period> takenPeriods = teacherTakenPeriods.computeIfAbsent(teacher, k -> new ArrayList<>());

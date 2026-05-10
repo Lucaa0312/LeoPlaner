@@ -132,8 +132,8 @@ public class ExcelManager {
             dataRow.createCell(0).setCellValue(subject.getId());
             dataRow.createCell(1).setCellValue(subject.getSubject().getId());
             dataRow.createCell(2).setCellValue(subject.getSubject().getSubjectSymbol());
-            dataRow.createCell(3).setCellValue(subject.getTeacher().getId());
-            dataRow.createCell(4).setCellValue(subject.getTeacher().getNameSymbol());
+            dataRow.createCell(3).setCellValue(subject.getTeachers().getFirst().getId());
+            dataRow.createCell(4).setCellValue(subject.getTeachers().getFirst().getNameSymbol());
             dataRow.createCell(5).setCellValue(subject.getWeeklyHours());
             dataRow.createCell(6).setCellValue(subject.isRequiresDoublePeriod());
             dataRow.createCell(7).setCellValue(subject.isBetterDoublePeriod());
@@ -331,7 +331,7 @@ public class ExcelManager {
             ClassSubject cs = new ClassSubject();
 
             cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
-            cs.setTeacher(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
+            cs.setTeachers(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
 
             cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(5))));
             cs.setRequiresDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(6))));
