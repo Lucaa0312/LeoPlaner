@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class TimetableService {
+    private Map<String, Timetable> bestSchoolSchedule = new HashMap<>();
+
     private Timetable currentTimetable;
     private Map<String, Timetable> currentTimetableList = new HashMap<>();
     private List<History> historyList = new CopyOnWriteArrayList<>();
@@ -40,6 +42,46 @@ public class TimetableService {
     public void clear() {
         currentTimetable = null;
         currentTimetableList.clear();
+    }
+
+    public Map<String, Timetable> getBestSchoolSchedule() {
+        return bestSchoolSchedule;
+    }
+
+    public void setBestSchoolSchedule(Map<String, Timetable> bestSchoolSchedule) {
+        this.bestSchoolSchedule = bestSchoolSchedule;
+    }
+
+    public void setCurrentTimetable(Timetable currentTimetable) {
+        this.currentTimetable = currentTimetable;
+    }
+
+    public void setCurrentTimetableList(Map<String, Timetable> currentTimetableList) {
+        this.currentTimetableList = currentTimetableList;
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public TeacherRepository getTeacherRepository() {
+        return teacherRepository;
+    }
+
+    public void setTeacherRepository(TeacherRepository teacherRepository) {
+        this.teacherRepository = teacherRepository;
+    }
+
+    public SchoolClassRepository getSchoolClassRepository() {
+        return schoolClassRepository;
+    }
+
+    public void setSchoolClassRepository(SchoolClassRepository schoolClassRepository) {
+        this.schoolClassRepository = schoolClassRepository;
     }
 
     public void clearHistory() {

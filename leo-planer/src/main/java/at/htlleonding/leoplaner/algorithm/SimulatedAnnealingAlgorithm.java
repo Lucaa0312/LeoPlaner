@@ -79,6 +79,7 @@ public class SimulatedAnnealingAlgorithm {
         this.dataRepository.setAlgorithmRunningAtLeastOnce(true);
         long iterationCounter = 0;
         long costFinal = 0;
+        long bestCosts = Long.MAX_VALUE;
 
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getAllTimetables();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
@@ -138,12 +139,25 @@ public class SimulatedAnnealingAlgorithm {
 
             this.dataRepository.getAllTimetables().put(className, currTimetable);
 
+            if (costCurrSchoolSchedule < bestCosts) {
+                this.dataRepository.setBestSchoolSchedule(deepCopy(this.dataRepository.getAllTimetables()));
+                bestCosts = costCurrSchoolSchedule;
+            }
+
             iterationCounter++;
         }
 
         this.dataRepository.setAlgorithmRunning(false);
         // setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
+    }
+
+    private Map<String, Timetable> deepCopy(Map<String, Timetable> original) {
+        Map<String, Timetable> copy = new HashMap<>();
+        for (Map.Entry<String, Timetable> entry : original.entrySet()) {
+            copy.put(entry.getKey(), new Timetable(entry.getValue()));
+        }
+        return copy;
     }
 
     public double autumaticallyPushTemperatureAmount(double currentCost) {

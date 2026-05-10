@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.boundary;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
@@ -8,6 +10,7 @@ import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.Room;
+import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -116,6 +119,20 @@ public class Resource {
     @GET
     public void getAutomaticMode() {
         this.dataRepository.isAutomaticMode();
+    }
+
+    @Path("loadBestSchedule")
+    @GET
+    public void loadBestSchedule() {
+        this.dataRepository.setAllTimetables(deepCopy(this.dataRepository.getBestSchoolSchedule()));
+    }
+
+    private Map<String, Timetable> deepCopy(Map<String, Timetable> original) {
+        Map<String, Timetable> copy = new HashMap<>();
+        for (Map.Entry<String, Timetable> entry : original.entrySet()) {
+            copy.put(entry.getKey(), new Timetable(entry.getValue()));
+        }
+        return copy;
     }
 
     @GET

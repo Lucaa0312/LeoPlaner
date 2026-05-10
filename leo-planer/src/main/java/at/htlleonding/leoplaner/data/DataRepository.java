@@ -66,8 +66,20 @@ public class DataRepository {
         return timetableService.getCurrentTimetableList();
     }
 
+    public void setAllTimetables(Map<String, Timetable> timetableList) {
+        timetableService.setCurrentTimetableList(timetableList);
+    }
+
     public Timetable getTeacherTimetable(Long teacherId) {
         return timetableService.getTeacherTimetable(teacherId);
+    }
+
+    public Map<String, Timetable> getBestSchoolSchedule() {
+        return timetableService.getBestSchoolSchedule();
+    }
+
+    public void setBestSchoolSchedule(Map<String, Timetable> schoolSchedule) {
+        timetableService.setBestSchoolSchedule(schoolSchedule);
     }
 
     public void generateTimetableForClass(String className, Room room) {

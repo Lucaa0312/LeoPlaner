@@ -1,17 +1,13 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import at.htlleonding.leoplaner.data.ClassSubjectInstance;
-import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.SchoolClass;
 import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Timetable;
 import at.htlleonding.leoplaner.dto.ClassSubjectInstanceDTO;
-import at.htlleonding.leoplaner.dto.PeriodDTO;
 import at.htlleonding.leoplaner.dto.TeacherNoSubjectDTO;
 import at.htlleonding.leoplaner.dto.TeacherNonPreferredHourDTO;
 import at.htlleonding.leoplaner.dto.TeacherNonWorkingHourDTO;

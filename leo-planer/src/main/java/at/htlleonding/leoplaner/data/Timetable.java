@@ -9,6 +9,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 @Entity
@@ -21,6 +22,13 @@ public class Timetable extends PanacheEntity {
     private double tempAtTimetable = 0;
 
     public Timetable() {
+    }
+
+    public Timetable(Timetable timetable) {
+        this.classSubjectInstances = new ArrayList<>(timetable.getClassSubjectInstances());
+        this.totalWeeklyHours = timetable.getTotalWeeklyHours();
+        this.costOfTimetable = timetable.getCostOfTimetable();
+        this.tempAtTimetable = timetable.getTempAtTimetable();
     }
 
     @OneToOne
@@ -94,12 +102,12 @@ public class Timetable extends PanacheEntity {
 
     @Override
     public String toString() {
-    return "Timetable{" +
-            "weeklyHours=" + this.totalWeeklyHours +
-            ", classSubjectInstances=" + this.classSubjectInstances +
-            ", cost=" + this.costOfTimetable +
-            ", temperature=" + this.tempAtTimetable +
-            '}';
-}
+        return "Timetable{" +
+                "weeklyHours=" + this.totalWeeklyHours +
+                ", classSubjectInstances=" + this.classSubjectInstances +
+                ", cost=" + this.costOfTimetable +
+                ", temperature=" + this.tempAtTimetable +
+                '}';
+    }
 
 }
