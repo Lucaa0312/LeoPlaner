@@ -31,10 +31,6 @@ public class Teacher extends PanacheEntity {
     @CollectionTable(name = "teacher_non_preferred_hours", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherNonPreferredHours> teacher_non_preferred_hours = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "teacher_periods", joinColumns = @JoinColumn(name = "teacher_id"))
-    private List<TeacherTakenPeriod> takenUpPeriods = new ArrayList<>();
-
     public static List<Teacher> getByName(final String filter) {
         return find("LOWER(teacherName) like LOWER(?1)", "%" + filter + "%").list();
     }
@@ -117,14 +113,6 @@ public class Teacher extends PanacheEntity {
 
     public void setTeachingSubject(final List<Subject> teachingSubject) {
         this.teachingSubject = teachingSubject;
-    }
-
-    public List<TeacherTakenPeriod> getTakenUpPeriods() {
-        return takenUpPeriods;
-    }
-
-    public void setTakenUpPeriods(final List<TeacherTakenPeriod> takenUpPeriods) {
-        this.takenUpPeriods = takenUpPeriods;
     }
 
 }

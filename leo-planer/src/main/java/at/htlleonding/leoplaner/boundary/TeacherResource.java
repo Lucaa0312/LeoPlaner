@@ -5,6 +5,7 @@ import java.util.List;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.dto.TeacherDTO;
+import at.htlleonding.leoplaner.dto.TeacherDTOwithWishes;
 import jakarta.inject.Inject;
 import jakarta.websocket.server.PathParam;
 import jakarta.ws.rs.Consumes;
@@ -44,6 +45,14 @@ public class TeacherResource {
         uriBuilder.path(Long.toString(teacherCreated.getId()));
 
         return Response.created(uriBuilder.build()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/withWishes")
+    public List<TeacherDTOwithWishes> getTeacherWithWishes() {
+        return this.dataRepository.getAllTeachers().stream().map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
+                .toList();
     }
 
     @GET

@@ -45,7 +45,6 @@ public class TeacherRepository {
 
         teacher.setNameSymbol(updated.getNameSymbol());
         teacher.setTeacherName(updated.getTeacherName());
-        teacher.setTakenUpPeriods(updated.getTakenUpPeriods());
         teacher.setTeacher_non_preferred_hours(updated.getTeacher_non_preferred_hours());
         teacher.setTeacher_non_working_hours(updated.getTeacher_non_working_hours());
         teacher.setTeachingSubject(updated.getTeachingSubject());

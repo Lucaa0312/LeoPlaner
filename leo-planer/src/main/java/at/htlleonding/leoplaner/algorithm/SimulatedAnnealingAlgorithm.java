@@ -18,7 +18,6 @@ import at.htlleonding.leoplaner.data.SchoolDays;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
 import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
-import at.htlleonding.leoplaner.data.TeacherTakenPeriod;
 import at.htlleonding.leoplaner.data.Timetable;
 import at.htlleonding.leoplaner.data.TimetableManager;
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
@@ -241,41 +240,6 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         return cost;
-    }
-
-    // TODO maybe advance with just being able to get new Changes instead of entire
-    // timetable
-    public void setTeacherTakenPeriod(final Teacher teacher, final Timetable timetable) {
-        final List<ClassSubjectInstance> classSubjectInstancesList = dataRepository
-                .getTeacherTimetable(teacher.getId()).getClassSubjectInstances();
-        // final List<ClassSubjectInstance> classSubjectInstancesList =
-        // timetable.getClassSubjectInstances().stream()
-        // .filter(e -> e.getClassSubject() != null)
-        // .filter(e ->
-        // e.getClassSubject().getTeacher().getId().equals(teacher.getId())).toList();
-        //
-        final List<TeacherTakenPeriod> takenPeriods = new ArrayList<>();
-
-        for (final ClassSubjectInstance csi : classSubjectInstancesList) {
-            final Period period = csi.getPeriod();
-            for (int i = 0; i < csi.getDuration(); i++) {
-                period.setSchoolHour(period.getSchoolHour() + i);
-                takenPeriods.add(new TeacherTakenPeriod(period, timetable.getSchoolClass().getClassName()));
-            }
-        }
-
-        teacher.setTakenUpPeriods(takenPeriods);
-    }
-
-    public void resetAllTeacherTakenPeriodForClass(final List<Teacher> teachers, final String className) {
-        for (final Teacher teacher : teachers) {
-            final List<TeacherTakenPeriod> takenPeriodsList = teacher.getTakenUpPeriods();
-            takenPeriodsList.removeIf(e -> e.className().equals(className));
-        }
-    }
-
-    public void resetTeacherTakenPeriod(final Teacher teacher) {
-        teacher.setTakenUpPeriods(new ArrayList<>());
     }
 
     public void repairTimetable(final Timetable timetable) {
