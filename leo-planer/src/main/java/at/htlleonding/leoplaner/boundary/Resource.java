@@ -106,6 +106,18 @@ public class Resource {
         this.simulatedAnnealingAlgorithm.setIsRunning(false);
     }
 
+    @Path("toggleAutomaticMode")
+    @GET
+    public void toggleAutomaticMode() {
+        this.simulatedAnnealingAlgorithm.toggleAutomaticMode();
+    }
+
+    @Path("isAutomaticMode")
+    @GET
+    public void getAutomaticMode() {
+        this.dataRepository.isAutomaticMode();
+    }
+
     @GET
     @Path("/test-export")
     public void triggerExport() throws Exception {
