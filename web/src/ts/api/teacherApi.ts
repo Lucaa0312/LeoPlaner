@@ -2,7 +2,7 @@ import { getJson, postJson, putJson } from "../utils/apiHelpers.js";
 import type { CreateTeacherRequest, Teacher } from "../types/teacher.js";
 
 export function fetchTeachers(): Promise<Teacher[]> {
-  return getJson<Teacher[]>("/teachers");
+  return getJson<Teacher[]>("/teachers/withWishes");
 }
 
 export function createTeacher(teacher: CreateTeacherRequest): Promise<void> {

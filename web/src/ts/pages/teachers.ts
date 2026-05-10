@@ -177,7 +177,6 @@ function createTeacherRow(teacher: Teacher): HTMLElement {
   teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
 
   teacherEdit.addEventListener("click", () => {
-    console.log(teacher);
     void openAddTeacherForm(teacher);
   });
 
@@ -230,7 +229,6 @@ function collectTeacherData(state: TeacherFormState): CreateTeacherRequest {
     })),
     teacher_non_working_hours: state.nonWorkingHours,
     teacher_non_preferred_hours: state.nonPreferredHours,
-    takenUpPeriods: [],
   };
 }
 
@@ -546,8 +544,8 @@ async function openAddTeacherForm(existingTeacher?: Teacher): Promise<void> {
     nameSymbol: existingTeacher?.nameSymbol ?? "",
     email: "",
     selectedSubjects: existingTeacher?.teachingSubject ?? [],
-    nonWorkingHours: existingTeacher?.teacher_non_working_hours ?? [],
-    nonPreferredHours: existingTeacher?.teacher_non_preferred_hours ?? [],
+    nonWorkingHours: existingTeacher?.teacherNonWorkingHours ?? [],
+    nonPreferredHours: existingTeacher?.teacherNonPreferredHours ?? [],
   };
 
   let currentStep: TeacherFormStep = 1;

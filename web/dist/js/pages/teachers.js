@@ -106,7 +106,6 @@ function createTeacherRow(teacher) {
     teacherEdit.className = "teacher-edit";
     teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
     teacherEdit.addEventListener("click", () => {
-        console.log(teacher);
         void openAddTeacherForm(teacher);
     });
     teacherInfo.appendChild(teacherName);
@@ -147,7 +146,6 @@ function collectTeacherData(state) {
         })),
         teacher_non_working_hours: state.nonWorkingHours,
         teacher_non_preferred_hours: state.nonPreferredHours,
-        takenUpPeriods: [],
     };
 }
 function buildFormHeader(modal, overlay, scrollContainer) {
@@ -369,8 +367,8 @@ async function openAddTeacherForm(existingTeacher) {
         nameSymbol: existingTeacher?.nameSymbol ?? "",
         email: "",
         selectedSubjects: existingTeacher?.teachingSubject ?? [],
-        nonWorkingHours: existingTeacher?.teacher_non_working_hours ?? [],
-        nonPreferredHours: existingTeacher?.teacher_non_preferred_hours ?? [],
+        nonWorkingHours: existingTeacher?.teacherNonWorkingHours ?? [],
+        nonPreferredHours: existingTeacher?.teacherNonPreferredHours ?? [],
     };
     let currentStep = 1;
     function saveStep1() {

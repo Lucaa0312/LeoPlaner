@@ -5,8 +5,8 @@ export type Teacher = {
   teacherName: string;
   nameSymbol: string;
   teachingSubject: Subject[];
-  teacher_non_working_hours: TimeSlot[];
-  teacher_non_preferred_hours: TimeSlot[];
+  teacherNonWorkingHours: TimeSlot[];
+  teacherNonPreferredHours: TimeSlot[];
 };
 
 export type CreateTeacherRequest = {
@@ -15,7 +15,6 @@ export type CreateTeacherRequest = {
   teachingSubject: { id: number }[];
   teacher_non_working_hours: TimeSlot[];
   teacher_non_preferred_hours: TimeSlot[];
-  takenUpPeriods: never[];
 };
 
 export type TeacherFormStep = 1 | 2 | 3;

@@ -1,38 +1,43 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.util.List;
-
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.Teacher;
 import at.htlleonding.leoplaner.dto.TeacherDTO;
 import at.htlleonding.leoplaner.dto.TeacherDTOwithWishes;
 import jakarta.inject.Inject;
-import jakarta.websocket.server.PathParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.core.Response.Status;
+import java.util.List;
 
 @Path("api/teachers")
 public class TeacherResource {
+
     @Inject
     DataRepository dataRepository;
+
     @Context
     UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<TeacherDTO> getAllTeachers() {
-        return dataRepository.getAllTeachers().stream().map(e -> UtilBuildFunctions.createTeacherDTO(e)).toList();
+        return dataRepository
+            .getAllTeachers()
+            .stream()
+            .map(e -> UtilBuildFunctions.createTeacherDTO(e))
+            .toList();
     }
 
     @POST
@@ -51,8 +56,10 @@ public class TeacherResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/withWishes")
     public List<TeacherDTOwithWishes> getTeacherWithWishes() {
-        return this.dataRepository.getAllTeachers().stream().map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
-                .toList();
+        return this.dataRepository.getAllTeachers()
+            .stream()
+            .map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
+            .toList();
     }
 
     @GET
@@ -74,8 +81,7 @@ public class TeacherResource {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return Response.ok(updatedTeacher).build();
-
+        return Response.ok().build();
     }
 
     @DELETE
