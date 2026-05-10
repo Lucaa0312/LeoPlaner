@@ -50,7 +50,7 @@ public class TestClassSubjectInstance {
         Long id = classSubjectInstance.getId();
 
         ClassSubjectInstance result = entityManager.find(ClassSubjectInstance.class, id);
-        assertEquals("Adolf", result.getClassSubject().getTeacher().getTeacherName());
+        assertEquals("Adolf", result.getClassSubject().getTeachers().getFirst().getTeacherName());
         assertEquals(5, result.getPeriod().getSchoolHour());
         assertEquals("PE", result.getRoom().getNameShort());
         assertEquals(10, result.getDuration());

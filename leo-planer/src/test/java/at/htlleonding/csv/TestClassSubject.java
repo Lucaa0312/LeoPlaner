@@ -1,5 +1,6 @@
 package at.htlleonding.csv;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +36,8 @@ public class TestClassSubject {
 
         Teacher teacher = new Teacher();
         teacher.setTeacherName("Adolf");
+        List<Teacher> teachers = new ArrayList<>();
+        teachers.add(teacher);
         entityManager.persist(teacher);
         Subject subject = new Subject();
         subject.setSubjectName("Fliegen");
@@ -43,7 +46,7 @@ public class TestClassSubject {
         schoolClass.setClassName("4CHITM");
         entityManager.persist(schoolClass);
 
-        classSubject.setTeacher(teacher);
+        classSubject.setTeachers(teachers);
         classSubject.setSubject(subject);
         classSubject.setSchoolClass(schoolClass);
         classSubject.setWeeklyHours(2);
@@ -53,7 +56,7 @@ public class TestClassSubject {
         Long id = classSubject.getId();
 
         ClassSubject result = entityManager.find(ClassSubject.class, id);
-        assertEquals("Adolf", result.getTeacher().getTeacherName());
+        assertEquals("Adolf", result.getTeachers().getFirst().getTeacherName());
         assertEquals("Fliegen", result.getSubject().getSubjectName());
         assertEquals("4CHITM", result.getSchoolClass().getClassName());
         assertEquals(2, result.getWeeklyHours());

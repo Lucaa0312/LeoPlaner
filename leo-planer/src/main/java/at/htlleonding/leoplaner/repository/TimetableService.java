@@ -65,7 +65,8 @@ public class TimetableService {
                     continue;
                 }
 
-                if (csi.getClassSubject().getTeacher().getId().equals(teacher.getId())) {
+                if (csi.getClassSubject().getTeachers().stream()
+                        .anyMatch(t -> t.getId().equals(teacher.getId()))) {
                     result.add(csi);
                 }
             }
