@@ -16,7 +16,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
@@ -32,68 +31,135 @@ public class TeacherResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<TeacherDTO> getAllTeachers() {
-        return dataRepository
-            .getAllTeachers()
-            .stream()
-            .map(e -> UtilBuildFunctions.createTeacherDTO(e))
-            .toList();
+    public Response getAllTeachers() {
+        try {
+            List<TeacherDTO> teachers = dataRepository
+                    .getAllTeachers()
+                    .stream()
+                    .map(UtilBuildFunctions::createTeacherDTO)
+                    .toList();
+
+            return Response.ok(teachers).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to fetch teachers")
+                    .build();
+        }
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response addTeacher(Teacher teacher) {
-        Teacher teacherCreated = this.dataRepository.addTeacher(teacher); // TODO add Error handling
+        try {
+            Teacher teacherCreated = this.dataRepository.addTeacher(teacher);
 
-        UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-        uriBuilder.path(Long.toString(teacherCreated.getId()));
+            if (teacherCreated == null || teacherCreated.getId() == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to create teacher")
+                        .build();
+            }
 
-        return Response.created(uriBuilder.build()).build();
+            UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
+            uriBuilder.path(Long.toString(teacherCreated.getId()));
+
+            return Response.created(uriBuilder.build())
+                    .entity(teacherCreated)
+                    .build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+        }
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/withWishes")
-    public List<TeacherDTOwithWishes> getTeacherWithWishes() {
-        return this.dataRepository.getAllTeachers()
-            .stream()
-            .map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
-            .toList();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTeacherWithWishes() {
+        try {
+            List<TeacherDTOwithWishes> teachersWithWishes =
+                    this.dataRepository.getAllTeachers()
+                            .stream()
+                            .map(UtilBuildFunctions::createTeacherDTOWithWishes)
+                            .toList();
+
+            return Response.ok(teachersWithWishes).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to fetch teachers with wishes")
+                    .build();
+        }
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/getTeacherCount")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getTeacherCount() {
-        Long teacherCount = this.dataRepository.getTeacherCount();
-        return Response.status(Response.Status.OK).entity(teacherCount).build();
+        try {
+            Long teacherCount = this.dataRepository.getTeacherCount();
+
+            return Response.ok(teacherCount).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to fetch teacher count")
+                    .build();
+        }
     }
+
+    // TODO maybe refactor route to just /id
 
     @PUT
     @Path("update/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response updateTeacher(@PathParam("id") Long id, Teacher teacher) {
-        Teacher updatedTeacher = dataRepository.updateTeacher(id, teacher);
+        try {
+            Teacher updatedTeacher = dataRepository.updateTeacher(id, teacher);
 
-        if (updatedTeacher == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            if (updatedTeacher == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Teacher not found")
+                        .build();
+            }
+
+            return Response.ok(updatedTeacher).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to update teacher")
+                    .build();
         }
-
-        return Response.ok().build();
     }
 
     @DELETE
     @Path("delete/{id}")
-    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response deleteTeacher(@PathParam("id") Long id) {
-        Teacher teacherToDelete = dataRepository.deleteTeacher(id);
+        try {
+            Teacher teacherToDelete = dataRepository.deleteTeacher(id);
 
-        if (teacherToDelete == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            if (teacherToDelete == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Teacher not found")
+                        .build();
+            }
+
+            return Response.ok(teacherToDelete).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to delete teacher")
+                    .build();
         }
-
-        return Response.ok(teacherToDelete).build();
     }
 }

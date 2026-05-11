@@ -202,7 +202,6 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public int determineCost(final List<Timetable> schoolSchedule) {
-        // TODO if classsubject instance on friday, high cost
         // the later the period the more cost
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
@@ -212,7 +211,9 @@ public class SimulatedAnnealingAlgorithm {
 
         for (final Room room : allRooms) {
             int costRoom = determineCostOfRoomAttribute(room, schoolSchedule);
+            // Maybe add return so it becomes more efficient
             if (costRoom >= IMPOSSIBLE_COST) {
+
             }
             cost += costRoom;
         }
