@@ -16,7 +16,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
@@ -34,10 +33,10 @@ public class TeacherResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<TeacherDTO> getAllTeachers() {
         return dataRepository
-            .getAllTeachers()
-            .stream()
-            .map(e -> UtilBuildFunctions.createTeacherDTO(e))
-            .toList();
+                .getAllTeachers()
+                .stream()
+                .map(e -> UtilBuildFunctions.createTeacherDTO(e))
+                .toList();
     }
 
     @POST
@@ -57,9 +56,9 @@ public class TeacherResource {
     @Path("/withWishes")
     public List<TeacherDTOwithWishes> getTeacherWithWishes() {
         return this.dataRepository.getAllTeachers()
-            .stream()
-            .map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
-            .toList();
+                .stream()
+                .map(e -> UtilBuildFunctions.createTeacherDTOWithWishes(e))
+                .toList();
     }
 
     @GET
