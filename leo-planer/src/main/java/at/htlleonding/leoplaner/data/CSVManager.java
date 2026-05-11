@@ -12,10 +12,10 @@ import java.util.function.Consumer;
 import at.htlleonding.leoplaner.dto.ParsedDayHour;
 
 public class CSVManager {
-    final static String teacherType = "teacherName";
-    final static String roomType = "roomNumber";
-    final static String subjectType = "subjectName";
-    final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
+    final static String TEACHER_TYPE = "teacherName";
+    final static String ROOM_TYPE = "roomNumber";
+    final static String SUBJECT_TYPE = "subjectName";
+    final static String CLASS_SUBJECT_TYPE = "classSubjectName";
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
         final String[] lines = getLinesFromCSV(filePath);
@@ -27,16 +27,16 @@ public class CSVManager {
         final String type = lines[0].split(";")[0];
 
         switch (type) {
-            case teacherType:
+            case TEACHER_TYPE:
                 createTeacherFromCSV(lines, dataRepository);
                 break;
-            case roomType:
+            case ROOM_TYPE:
                 createRoomFromCSV(lines, dataRepository);
                 break;
-            case subjectType:
+            case SUBJECT_TYPE:
                 createSubjectFromCSV(lines, dataRepository);
                 break;
-            case classSubjectType:
+            case CLASS_SUBJECT_TYPE:
                 createClassSubjectFromCSV(lines, dataRepository);
                 break;
             default:
@@ -61,7 +61,6 @@ public class CSVManager {
 
             final ArrayList<Subject> takenSubjects = new ArrayList<>(); // CSV FORMAT: ;math,physics(maybe roomtypes
                                                                         // with ..);
-            // TODO maybe use subjectSymbols from now on
             final String[] subjects = line[2].split(",");
             for (final String subjectName : subjects) {
                 final Subject subject = dataRepository
@@ -125,52 +124,50 @@ public class CSVManager {
     }
 
     public static void createRoomFromCSV(final String[] lines, final DataRepository dataRepository) {
-        for (int i = 1; i < lines.length; i++) {
-            final String[] line = lines[i].toLowerCase().split(";");
-            if (line.length != 4) {
-                throw new IllegalArgumentException(
-                        "Room CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i);
-            }
-            // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
-
-            final short roomNumber = Short.parseShort(line[0]);
-            final String roomName = line[1].trim();
-            final String nameShort = line[2].trim();
-
-            final String[] roomTypesStrings = line[3].split(","); // TODO handle empty prefix/suffix
-            final RoomTypes[] roomTypesArray = new RoomTypes[roomTypesStrings.length];
-
-            int index = 0;
-            for (final String roomTypeString : roomTypesStrings) {
-                RoomTypes roomType = null;
-                try {
-                    roomType = RoomTypes.valueOf(roomTypeString.trim().toUpperCase());
-                    roomTypesArray[index] = roomType;
-                    index++;
-                } catch (final IllegalArgumentException e) {
-                    System.out.println("Roomtype: " + roomType + " does not exist");
-                }
-            }
-
-            final Room room = new Room();
-            room.setRoomNumber(roomNumber);
-            room.setRoomName(roomName);
-            room.setNameShort(nameShort);
-            room.setRoomTypes(Arrays.stream(roomTypesArray).toList());
-            dataRepository.addRoom(room);
+    for (int i = 1; i < lines.length; i++) {
+        final String[] line = lines[i].toLowerCase().split(";");
+        if (line.length != 4) {
+            throw new IllegalArgumentException(
+                    "Room CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i);
         }
+        // FULL CSV FORMAT EXAMPLE: 101;EDUARD;;;CHEM,PHY;
+
+        final short roomNumber = Short.parseShort(line[0]);
+        final String roomName = line[1].trim();
+        final String nameShort = line[2].trim();
+
+        final String[] roomTypesStrings = line[3].trim().split(",");
+        final List<RoomTypes> roomTypesList = new ArrayList<>();
+
+        for (final String roomTypeString : roomTypesStrings) {
+            final String trimmed = roomTypeString.trim();
+            if (trimmed.isEmpty()) {
+                continue; // Skip empty strings
+            }
+            try {
+                RoomTypes roomType = RoomTypes.valueOf(trimmed.toUpperCase());
+                roomTypesList.add(roomType);
+            } catch (final IllegalArgumentException e) {
+                System.out.println("Roomtype: " + trimmed + " does not exist");
+            }
+        }
+
+        final Room room = new Room();
+        room.setRoomNumber(roomNumber);
+        room.setRoomName(roomName);
+        room.setNameShort(nameShort);
+        room.setRoomTypes(roomTypesList);
+        dataRepository.addRoom(room);
     }
+}
+
 
     public static void createSubjectFromCSV(final String[] lines, final DataRepository dataRepository) {
         for (int i = 1; i < lines.length; i++) {
             final String[] line = lines[i].toLowerCase().split(";");
             if (line.length != 4) {
                 throw new IllegalArgumentException(
-                        "Subject CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i); // TODO
-                                                                                                                         // Has
-                                                                                                                         // to
-                                                                                                                         // be
-                                                                                                                         // changed
+                        "Subject CSV is only allowed to have 4 columns! Found " + line.length + " columns in row " + i);
             }
             // FULL CSV LINE FORMAT EXAMPLE: Chemisty;CHEM,PHY;
             final String subjectName = line[0].trim();
@@ -243,11 +240,17 @@ public class CSVManager {
             if (schoolClass == null) {
                 schoolClass = new SchoolClass();
                 schoolClass.setClassName(className);
+                
                 Room classRoom = dataRepository.getRoomByNumberAndName(numberName);
-                // TODO add null check
+                if (classRoom == null) {
+                    throw new IllegalArgumentException(
+                            "Room with number and name '" + numberName + "' does not exist for class '" + className + "'");
+                }
+                
                 schoolClass.setClassRoom(classRoom);
                 dataRepository.addSchoolClass(schoolClass);
             }
+
 
             classSubject.setTeachers(teachers);
             classSubject.setSubject(subject);

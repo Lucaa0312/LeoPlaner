@@ -31,10 +31,7 @@ public class ClassSubjectInstance extends PanacheEntity {
 
     private int duration; // amount of hours (classes) specific instance takes
 
-    public ClassSubjectInstance(final ClassSubject classSubject, final Period period, final Room room, // TODO maybe
-                                                                                                       // delete now
-                                                                                                       // that entity
-            final int duration) {
+    public ClassSubjectInstance(final ClassSubject classSubject, final Period period, final Room room, final int duration) {
         this.classSubject = classSubject;
         this.period = period;
         this.room = room;
