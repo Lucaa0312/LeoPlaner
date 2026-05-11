@@ -202,7 +202,6 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public int determineCost(final List<Timetable> schoolSchedule) {
-        // TODO if classsubject instance on friday, high cost
         // the later the period the more cost
         // if against classSubject.isBetterDoublePeriod higher cost
         // maybe different rooms
