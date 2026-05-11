@@ -62,3 +62,4 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 ### 11.05.2026
 - Started implementing feedback
 - Reworking class subpage
+- Trying out class subpage designs
