@@ -58,3 +58,6 @@ Link: https://www.figma.com/design/683xuXzLKWuxzxvmS1lVgG/Untitled?node-id=0-1&t
 
 ### 10.05.2026
 - Created new variants
+
+### 11.05.2026
+- Started implementing feedback
