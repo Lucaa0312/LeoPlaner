@@ -30,108 +30,55 @@ public class RoomResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllRooms() {
-        try {
-            List<RoomDTO> rooms = dataRepository.getAllRooms()
-                    .stream()
-                    .map(UtilBuildFunctions::createRoomDTO)
-                    .toList();
-
-            return Response.ok(rooms).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to fetch rooms")
-                    .build();
-        }
+    public List<RoomDTO> getAllRooms() {
+        return dataRepository.getAllRooms().stream().map(e -> UtilBuildFunctions.createRoomDTO(e)).toList();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response addRoom(Room room) {
-        try {
-            Room roomCreated = this.dataRepository.addRoom(room);
+        Room roomCreated = this.dataRepository.addRoom(room); // TODO add Error handling
 
-            if (roomCreated == null || roomCreated.getId() == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity("Failed to create room")
-                        .build();
-            }
+        UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Long.toString(roomCreated.getId()));
 
-            UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-            uriBuilder.path(Long.toString(roomCreated.getId()));
-
-            return Response.created(uriBuilder.build())
-                    .entity(roomCreated)
-                    .build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.created(uriBuilder.build()).build();
     }
 
     @GET
-    @Path("/getRoomCount")
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getRoomCount")
     public Response getRoomCount() {
-        try {
-            Long roomCount = this.dataRepository.getRoomCount();
-
-            return Response.ok(roomCount).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to fetch room count")
-                    .build();
-        }
+        Long roomCount = this.dataRepository.getRoomCount();
+        return Response.status(Response.Status.OK).entity(roomCount).build();
     }
 
-    // TODO maybe refactor route to just /id
     @PUT
     @Path("update/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response updateRoom(@PathParam("id") Long id, Room room) {
-        try {
-            Room updatedRoom = dataRepository.updateRoom(id, room);
+        Room updatedRoom = dataRepository.updateRoom(id, room);
 
-            if (updatedRoom == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Room not found")
-                        .build();
-            }
-
-            return Response.ok(updatedRoom).build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
+        if (updatedRoom == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+
+        return Response.ok(updatedRoom).build();
+
     }
 
     @DELETE
     @Path("delete/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response deleteRoom(@PathParam("id") Long id) {
-        try {
-            Room roomToDelete = dataRepository.deleteRoom(id);
+        Room roomToDelete = dataRepository.deleteRoom(id);
 
-            if (roomToDelete == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Room not found")
-                        .build();
-            }
-
-            return Response.ok(roomToDelete).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to delete room")
-                    .build();
+        if (roomToDelete == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+
+        return Response.ok(roomToDelete).build();
     }
 }

@@ -12,10 +12,10 @@ import java.util.function.Consumer;
 import at.htlleonding.leoplaner.dto.ParsedDayHour;
 
 public class CSVManager {
-    private final static String TEACHER_TYPE = "teacherName";
-    private final static String ROOM_TYPE = "roomNumber";
-    private final static String SUBJECT_TYPE = "subjectName";
-    private final static String CLASS_SUBJECT_TYPE = "classSubjectName";
+    final static String teacherType = "teacherName";
+    final static String roomType = "roomNumber";
+    final static String subjectType = "subjectName";
+    final static String classSubjectType = "classSubjectName"; // TODO make finals name UPPERCASE
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
         final String[] lines = getLinesFromCSV(filePath);
@@ -27,16 +27,16 @@ public class CSVManager {
         final String type = lines[0].split(";")[0];
 
         switch (type) {
-            case TEACHER_TYPE:
+            case teacherType:
                 createTeacherFromCSV(lines, dataRepository);
                 break;
-            case ROOM_TYPE:
+            case roomType:
                 createRoomFromCSV(lines, dataRepository);
                 break;
-            case SUBJECT_TYPE:
+            case subjectType:
                 createSubjectFromCSV(lines, dataRepository);
                 break;
-            case CLASS_SUBJECT_TYPE:
+            case classSubjectType:
                 createClassSubjectFromCSV(lines, dataRepository);
                 break;
             default:

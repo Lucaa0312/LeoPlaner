@@ -22,7 +22,6 @@ public class ExcelManager {
     DataRepository dataRepository;
 
     private final String filePath = "src/files/excelFiles/export/test1.xlsx";
-    private final String directoryPath = "src/files/excelFiles/export/";
 
     public void exportTimetable() throws Exception {
         Workbook workbook = new XSSFWorkbook();
@@ -80,14 +79,6 @@ public class ExcelManager {
 
     }
 
-    public void createBaseDataWorkbook() {
-        Workbook workbook = new XSSFWorkbook();
-
-        createSubjectSheet(dataRepository.getAllSubjects(), workbook);
-        createRoomSheet(dataRepository.getAllRooms(), workbook);
-        createTeacherSheet(dataRepository.getAllTeachers(), workbook);
-    }
-
     private void createSubjectSheet(List<Subject> subjects, Workbook workbook) {
         Sheet subjectSheet = workbook.createSheet("Subjects");
 
@@ -126,10 +117,12 @@ public class ExcelManager {
         Row header = classSubjectSheet.createRow(0);
         header.createCell(0).setCellValue("ID");
         header.createCell(1).setCellValue("Subject Id");
-        header.createCell(2).setCellValue("Teacher Ids");
-        header.createCell(3).setCellValue("Weekly Hours");
-        header.createCell(4).setCellValue("Requires Double Period");
-        header.createCell(5).setCellValue("Is better as Double Period");
+        header.createCell(2).setCellValue("Subject Symbol");
+        header.createCell(3).setCellValue("Teacher Id");
+        header.createCell(4).setCellValue("Teacher Symbol");
+        header.createCell(5).setCellValue("Weekly Hours");
+        header.createCell(6).setCellValue("Requires Double Period");
+        header.createCell(7).setCellValue("Is better as Double Period");
 
         int rtindex = 1;
 
@@ -138,20 +131,12 @@ public class ExcelManager {
 
             dataRow.createCell(0).setCellValue(subject.getId());
             dataRow.createCell(1).setCellValue(subject.getSubject().getId());
-            dataRow.createCell(3).setCellValue(subject.getWeeklyHours());
-            dataRow.createCell(4).setCellValue(subject.isRequiresDoublePeriod());
-            dataRow.createCell(5).setCellValue(subject.isBetterDoublePeriod());
-
-            String teachersCell = "";
-            for (Teacher teacher : subject.getTeachers()) {
-                teachersCell += teacher.getId().toString() + ", ";
-
-                if (teachersCell.length() > 2) {
-                    teachersCell = teachersCell.substring(0, teachersCell.length() - 2);
-                }
-            }
-
-            dataRow.createCell(2).setCellValue(teachersCell);
+            dataRow.createCell(2).setCellValue(subject.getSubject().getSubjectSymbol());
+            dataRow.createCell(3).setCellValue(subject.getTeachers().getFirst().getId());
+            dataRow.createCell(4).setCellValue(subject.getTeachers().getFirst().getNameSymbol());
+            dataRow.createCell(5).setCellValue(subject.getWeeklyHours());
+            dataRow.createCell(6).setCellValue(subject.isRequiresDoublePeriod());
+            dataRow.createCell(7).setCellValue(subject.isBetterDoublePeriod());
         }
     }
 
@@ -196,6 +181,7 @@ public class ExcelManager {
         header.createCell(1).setCellValue("Name");
         header.createCell(2).setCellValue("Symbol");
         header.createCell(3).setCellValue("Teaching Subjects Ids");
+        header.createCell(4).setCellValue("Teaching Subjects Symbols");
 
         int rtindex = 1;
 
@@ -234,27 +220,13 @@ public class ExcelManager {
             }
 
             dataRow.createCell(3).setCellValue(sId);
+            dataRow.createCell(4).setCellValue(sSy);
         }
     }
 
     @Transactional
     public void importAll() throws Exception {
         try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
-            DataFormatter formatter = new DataFormatter();
-
-            importSubjects(importWorkbook.getSheet("Subjects"), formatter);
-            importTeachers(importWorkbook.getSheet("Teachers"), formatter);
-            importRooms(importWorkbook.getSheet("Rooms"), formatter);
-
-            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
-
-            // importTimetable(importWorkbook.getSheet("Timetable"), formatter);
-        }
-    }
-
-    @Transactional
-    public void importFile(String fileName) throws Exception {
-        try (Workbook importWorkbook = WorkbookFactory.create(new File(directoryPath + fileName))) {
             DataFormatter formatter = new DataFormatter();
 
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);

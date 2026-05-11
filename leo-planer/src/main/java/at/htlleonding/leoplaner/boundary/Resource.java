@@ -16,7 +16,6 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -141,7 +140,7 @@ public class Resource {
     public void triggerExport() throws Exception {
 
         try {
-            excelManager.createBaseDataWorkbook();
+            excelManager.exportTimetable();
         } catch (Exception e) {
             throw new Exception(e);
         }
@@ -153,17 +152,6 @@ public class Resource {
     public void triggerImport() throws Exception {
         try {
             excelManager.importAll();
-        } catch (Exception e) {
-            throw new Exception(e);
-        }
-    }
-
-    @POST
-    @Path("importExcel/{fileName}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    public void importFile(@PathParam("fileName") String fileName) throws Exception {
-        try {
-            excelManager.importFile(fileName);
         } catch (Exception e) {
             throw new Exception(e);
         }

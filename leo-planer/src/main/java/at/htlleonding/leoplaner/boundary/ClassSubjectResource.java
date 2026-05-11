@@ -28,37 +28,20 @@ public class ClassSubjectResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ClassSubjectDTO> getAllClassSubjects() {
-        return dataRepository.getAllClassSubjects().stream().map(UtilBuildFunctions::createClassSubjectDTO)
+        return dataRepository.getAllClassSubjects().stream().map(e -> UtilBuildFunctions.createClassSubjectDTO(e))
                 .toList();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MEDIA_TYPE_WILDCARD)
     public Response addClassSubject(ClassSubject classSubject) {
-        try {
-            ClassSubject createdClassSubject =
-                    this.dataRepository.addClassSubject(classSubject);
+        ClassSubject createdClassSubject = this.dataRepository.addClassSubject(classSubject); // TODO add Error handling
 
-            if (createdClassSubject == null || createdClassSubject.getId() == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity("Failed to create ClassSubject")
-                        .build();
-            }
+        UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Long.toString(createdClassSubject.getId()));
 
-            UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-            uriBuilder.path(Long.toString(createdClassSubject.getId()));
-
-            return Response.created(uriBuilder.build())
-                    .entity(createdClassSubject)
-                    .build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-
-        }
+        return Response.created(uriBuilder.build()).build();
     }
 
     @Path("/getByClass/{className}")
@@ -66,7 +49,7 @@ public class ClassSubjectResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<ClassSubjectDTO> getAllClassSubjects(@PathParam("className") String className) {
         return dataRepository.getClassSubjectsByClass(className).stream()
-                .map(UtilBuildFunctions::createClassSubjectDTO)
+                .map(e -> UtilBuildFunctions.createClassSubjectDTO(e))
                 .toList();
     }
 }
