@@ -1,0 +1,344 @@
+/* ------------------ No Teachers Message --------------------- */
+#no-classSubjects {
+    display: block;
+    position: absolute;
+    top: 30vh;
+    left: 18vw;
+    text-align: center;
+
+    color: var(--leo-text-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+/* 
+/* ===== Subject Cards — Stundenplan UI ===== 
+
+/* --- Container & Scroll --- 
+.subject-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 560px;
+  overflow-y: auto;
+  padding: 4px 4px 4px 2px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #1D9E75 transparent;
+}
+
+.subject-cards-container::-webkit-scrollbar {
+  width: 5px;
+}
+.subject-cards-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.subject-cards-container::-webkit-scrollbar-thumb {
+  background: #1D9E75;
+  border-radius: 99px;
+}
+
+/* --- Card --- 
+.subject-box {
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 4px 1fr;
+  gap: 0 14px;
+  align-items: stretch;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+  cursor: default;
+  will-change: transform;
+}
+
+.subject-box::before {
+  content: "";
+  display: block;
+  width: 4px;
+  background: #1D9E75;
+  border-radius: 99px;
+  grid-row: 1 / -1;
+}
+
+.subject-box:hover {
+  border-color: rgba(29, 158, 117, 0.45);
+  transform: translateX(2px);
+}
+
+/* --- Content --- 
+.subject-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subject-name {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0F6E56;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.subject-info p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #444441;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subject-info p::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #9FE1CB;
+  flex-shrink: 0;
+}
+
+.class-name {
+  font-weight: 500;
+  color: #2C2C2A !important;
+}
+
+.teachers {
+  color: #5F5E5A !important;
+}
+
+.weekly-hours {
+  color: #5F5E5A !important;
+}
+
+.double-period,
+.better-double-period {
+  color: #888780 !important;
+}
+
+/* Ja/Nein badge — wrap value in <span class="badge-ja"> or <span class="badge-nein"> in JS 
+.badge-ja {
+  display: inline-block;
+  background: #E1F5EE;
+  color: #0F6E56;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.02em;
+  margin-left: 2px;
+}
+.badge-nein {
+  display: inline-block;
+  background: #F1EFE8;
+  color: #5F5E5A;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 99px;
+  margin-left: 2px;
+}
+
+/* Weekly hours pill 
+.weekly-hours-pill {
+  display: inline-block;
+  background: #E1F5EE;
+  color: #085041;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 99px;
+  margin-left: 2px;
+}
+
+/* --- Scroll fade top/bottom hint --- 
+.subject-cards-wrapper {
+  position: relative;
+}
+.subject-cards-wrapper::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.85));
+  pointer-events: none;
+  border-radius: 0 0 12px 12px;
+}
+
+/* --- Dark mode --- 
+@media (prefers-color-scheme: dark) {
+  .subject-box {
+    background: #1a1a18;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .subject-box:hover {
+    border-color: rgba(29, 158, 117, 0.5);
+  }
+  .subject-box::before {
+    background: #1D9E75;
+  }
+  .subject-name {
+    color: #5DCAA5;
+  }
+  .subject-info p {
+    color: #B4B2A9;
+  }
+  .subject-info p::before {
+    background: #085041;
+  }
+  .class-name {
+    color: #D3D1C7 !important;
+  }
+  .teachers,
+  .weekly-hours {
+    color: #888780 !important;
+  }
+  .double-period,
+  .better-double-period {
+    color: #5F5E5A !important;
+  }
+  .badge-ja {
+    background: #085041;
+    color: #9FE1CB;
+  }
+  .badge-nein {
+    background: #2C2C2A;
+    color: #888780;
+  }
+  .weekly-hours-pill {
+    background: #085041;
+    color: #9FE1CB;
+  }
+  .subject-cards-wrapper::after {
+    background: linear-gradient(to bottom, transparent, rgba(15, 15, 14, 0.85));
+  }
+} */
+
+#display-classSubjects{
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
+    width: 80vw;
+    height: 80vh;
+    
+    overflow-y: scroll;
+}
+
+.grid-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+/* Ganze Zeile */
+.class-row {
+    display: grid;
+    grid-template-columns: 1fr 0.3fr 0.3fr;
+    gap: 18px;
+    align-items: center;
+}
+
+/* Hauptbox links */
+.class-main {
+    background: #f7f7f7;
+    border-radius: 12px;
+    padding: 18px 22px;
+
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+    gap: 24px;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Klassenname */
+.class-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #222;
+    /* min-width: 90px; */
+}
+
+/* Actions */
+.class-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
+    width: 100%;
+}
+
+/* Buttons */
+.action-btn {
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #2b2b2b;
+
+    transition: 0.2s;
+}
+
+.action-btn:hover {
+    color: #5a54ff;
+}
+
+/* Rechte Boxen */
+.info-box {
+    background: #f7f7f7;
+    border-radius: 12px;
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.4rem;
+    font-weight: 700;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+
+.class-header-row {
+    display: grid;
+    grid-template-columns: 1fr 0.3fr 0.3fr;
+    gap: 18px;
+    margin-bottom: 8px;
+    padding: 0 6px;
+}
+
+/* Linker Header */
+.header-main {
+    display: flex;
+    justify-content: center;
+
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2f2f2f;
+}
+
+/* Rechte Header */
+.header-box {
+    text-align: center;
+
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2f2f2f;
+}

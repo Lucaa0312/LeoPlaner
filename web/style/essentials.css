@@ -55,19 +55,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
 }
-/* ------------------ No Teachers Message --------------------- */
-#no-teachers {
-    display: block;
-    position: absolute;
-    top: 30vh;
-    left: 18vw;
-    text-align: center;
 
-    color: var(--leo-text-color);
-    font-size: 2.5rem;
-    font-weight: bold;
-    opacity: 0.8;
-}
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {
     background-color: var(--leo-background-color);
