@@ -1,25 +1,10 @@
 package at.htlleonding.leoplaner.algorithm;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import at.htlleonding.leoplaner.data.ClassSubjectInstance;
-import at.htlleonding.leoplaner.data.DataRepository;
-import at.htlleonding.leoplaner.data.Period;
-import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.SchoolDays;
-import at.htlleonding.leoplaner.data.Teacher;
-import at.htlleonding.leoplaner.data.TeacherNonPreferredHours;
-import at.htlleonding.leoplaner.data.TeacherNonWorkingHours;
-import at.htlleonding.leoplaner.data.Timetable;
-import at.htlleonding.leoplaner.data.TimetableManager;
+import at.htlleonding.leoplaner.data.*;
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -101,12 +86,12 @@ public class SimulatedAnnealingAlgorithm {
             do {
                 ranIndex2 = random.nextInt(0, indexesAmount);
             } while (ranIndex2 == ranIndex1);
-            // create 2 random non equal indexes
+            // create 2 random non-equal indexes
 
             if (currTimetable.getClassSubjectInstances().get(ranIndex1).getPeriod().isLunchBreak()
                     || currTimetable.getClassSubjectInstances().get(ranIndex2).getPeriod().isLunchBreak()) {
                 continue; // no reason to play around with lunch breaks only causes problems
-            } // if more checks are needed then itll be moved to a helper method
+            } // if more checks are needed then it'll be moved to a helper method
 
             nextTimeTable = chooseRandomNeighborFunction(ranIndex1, ranIndex2, currTimetable);
             repairTimetable(nextTimeTable);
@@ -134,7 +119,7 @@ public class SimulatedAnnealingAlgorithm {
             decreaseTemperature();
 
             if (automaticMode.get() && getTemperature() < 0.0001) {
-                pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
+                pushTemperature(automaticallyPushTemperatureAmount(costCurrSchoolSchedule));
             }
 
             this.dataRepository.getAllTimetables().put(className, currTimetable);
@@ -160,7 +145,7 @@ public class SimulatedAnnealingAlgorithm {
         return copy;
     }
 
-    public double autumaticallyPushTemperatureAmount(double currentCost) {
+    public double automaticallyPushTemperatureAmount(double currentCost) {
         double pushAmount = 0;
         var reverseHistory = new ArrayList<>(this.dataRepository.getHistory());
         Collections.reverse(reverseHistory);
@@ -211,15 +196,16 @@ public class SimulatedAnnealingAlgorithm {
 
         for (final Room room : allRooms) {
             int costRoom = determineCostOfRoomAttribute(room, schoolSchedule);
-            if (costRoom >= IMPOSSIBLE_COST) {
+            /* if (costRoom >= IMPOSSIBLE_COST) {
             }
+            */
             cost += costRoom;
         }
 
         for (final Teacher teacher : allTeachers) {
             int costTeacher = determineTeacherWorkloadCost(teacher, schoolSchedule);
-            if (costTeacher >= IMPOSSIBLE_COST) {
-            }
+            //if (costTeacher >= IMPOSSIBLE_COST) {
+            // }
             // cost += costTeacher;
         }
 
@@ -305,10 +291,10 @@ public class SimulatedAnnealingAlgorithm {
     public List<Teacher> getAllTeachersInSchoolSchedule(final List<Timetable> schoolSchedule) {
         return schoolSchedule.stream()
                 .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
-                .map(csi -> csi.getClassSubject())
-                .filter(cs -> cs != null)
-                .map(cs -> cs.getTeachers()).flatMap(List::stream)
-                .filter(teacher -> teacher != null)
+                .map(ClassSubjectInstance::getClassSubject)
+                .filter(Objects::nonNull)
+                .map(ClassSubject::getTeachers).flatMap(List::stream)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 
@@ -317,8 +303,8 @@ public class SimulatedAnnealingAlgorithm {
     private List<Room> getAllRoomsInSchoolSchedule(List<Timetable> schoolSchedule) {
         return schoolSchedule.stream()
                 .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
-                .map(csi -> csi.getRoom())
-                .filter(room -> room != null)
+                .map(ClassSubjectInstance::getRoom)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
     }
@@ -330,13 +316,13 @@ public class SimulatedAnnealingAlgorithm {
     private int determineCostOfRoomAttribute(Room room, List<Timetable> schoolSchedule) {
         int cost = 0;
 
-        List<ClassSubjectInstance> timetablOfRoom = schoolSchedule.stream()
+        List<ClassSubjectInstance> timetableOfRoom = schoolSchedule.stream()
                 .flatMap(t -> t.getClassSubjectInstances().stream())
                 .filter(c -> c.getRoom() != null)
                 .filter(csi -> csi.getRoom().getId().equals(room.getId()))
                 .toList();
 
-        if (!checkIfTimetableIsValid(new Timetable(timetablOfRoom))) {
+        if (!checkIfTimetableIsValid(new Timetable(timetableOfRoom))) {
             cost += IMPOSSIBLE_COST;
         }
 
@@ -380,7 +366,7 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         for (final int hours : hoursPerDay.values()) {
-            if (hours > 0 && hours < 2) {
+            if (hours == 1) {
                 cost += SEVERE_COST;
             } else if (hours > 0 && hours < 3) {
                 cost += HIGH_COST;
@@ -454,14 +440,12 @@ public class SimulatedAnnealingAlgorithm {
         final Random random = new Random();
         final int ranNumber = random.nextInt(1, 2);
 
-        switch (ranNumber) {
-            case 1:
-                return changePeriod(currTimetable, index1, currTimetable);
+        return switch (ranNumber) {
+            case 1 -> changePeriod(currTimetable, index1, currTimetable);
             // return swapPeriods(currTimetable, index1, index2);
-            case 2:
-                return changePeriod(currTimetable, index1, currTimetable);
-        }
-        return null;
+            case 2 -> changePeriod(currTimetable, index1, currTimetable);
+            default -> null;
+        };
     }
 
     public void pushTemperature(final double pushAmount) {

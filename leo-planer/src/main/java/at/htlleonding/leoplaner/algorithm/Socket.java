@@ -20,7 +20,7 @@ public class Socket {
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
 
-    private final Set<Session> sessions = new HashSet<Session>();
+    private final Set<Session> sessions = new HashSet<>();
 
     @OnOpen
     public void onOpen(Session session) {
