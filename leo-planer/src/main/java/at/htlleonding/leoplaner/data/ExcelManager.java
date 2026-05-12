@@ -107,10 +107,11 @@ public class ExcelManager {
             dataRow.createCell(2).setCellValue(subject.getSubjectSymbol());
             dataRow.createCell(2).setCellValue(subject.getSubjectSymbol());
 
-            String roomTypesCell = "";
+            StringBuilder roomTypesCellBuilder = new StringBuilder();
             for (RoomTypes rt : subject.getRequiredRoomTypes()) {
-                roomTypesCell += rt.toString() + ", ";
+                roomTypesCellBuilder.append(rt.toString()).append(", ");
             }
+            String roomTypesCell = roomTypesCellBuilder.toString();
 
             if (roomTypesCell.length() > 2) {
                 roomTypesCell = roomTypesCell.substring(0, roomTypesCell.length() - 2);
@@ -142,16 +143,16 @@ public class ExcelManager {
             dataRow.createCell(4).setCellValue(subject.isRequiresDoublePeriod());
             dataRow.createCell(5).setCellValue(subject.isBetterDoublePeriod());
 
-            String teachersCell = "";
+            StringBuilder teachersCell = new StringBuilder();
             for (Teacher teacher : subject.getTeachers()) {
-                teachersCell += teacher.getId().toString() + ", ";
+                teachersCell.append(teacher.getId().toString()).append(", ");
 
                 if (teachersCell.length() > 2) {
-                    teachersCell = teachersCell.substring(0, teachersCell.length() - 2);
+                    teachersCell = new StringBuilder(teachersCell.substring(0, teachersCell.length() - 2));
                 }
             }
 
-            dataRow.createCell(2).setCellValue(teachersCell);
+            dataRow.createCell(2).setCellValue(teachersCell.toString());
         }
     }
 
@@ -175,16 +176,16 @@ public class ExcelManager {
             dataRow.createCell(2).setCellValue(room.getRoomName());
             dataRow.createCell(3).setCellValue(room.getNameShort());
 
-            String roomTypesCell = "";
+            StringBuilder roomTypesCell = new StringBuilder();
             for (RoomTypes rt : room.getRoomTypes()) {
-                roomTypesCell += rt.toString() + ", ";
+                roomTypesCell.append(rt.toString()).append(", ");
             }
 
             if (roomTypesCell.length() > 2) {
-                roomTypesCell = roomTypesCell.substring(0, roomTypesCell.length() - 2);
+                roomTypesCell = new StringBuilder(roomTypesCell.substring(0, roomTypesCell.length() - 2));
             }
 
-            dataRow.createCell(4).setCellValue(roomTypesCell);
+            dataRow.createCell(4).setCellValue(roomTypesCell.toString());
         }
     }
 
@@ -216,13 +217,15 @@ public class ExcelManager {
             dataRow.createCell(1).setCellValue(teacher.getTeacherName());
             dataRow.createCell(2).setCellValue(teacher.getNameSymbol());
 
-            String sId = "";
-            String sSy = "";
+            String sId;
+            StringBuilder sSy = new StringBuilder();
+            StringBuilder sIdBuilder = new StringBuilder();
             for (Long id : ids) {
-                sId += id + ", ";
+                sIdBuilder.append(id).append(", ");
             }
+            sId = sIdBuilder.toString();
             for (String s : symbols) {
-                sSy += s + ", ";
+                sSy.append(s).append(", ");
             }
 
             if (sId.length() > 2) {
@@ -230,7 +233,7 @@ public class ExcelManager {
             }
 
             if (sSy.length() > 2) {
-                sSy = sSy.substring(0, sSy.length() - 2);
+                sSy = new StringBuilder(sSy.substring(0, sSy.length() - 2));
             }
 
             dataRow.createCell(3).setCellValue(sId);

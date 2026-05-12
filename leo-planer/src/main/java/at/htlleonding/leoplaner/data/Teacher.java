@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.CollectionTable;
@@ -59,7 +60,7 @@ public class Teacher extends PanacheEntity {
     }
 
     public <T extends HoursPeriod> boolean listContainsHour(final List<T> list, final T hour) {
-        return list.stream().anyMatch(e -> e.getDay() == hour.getDay() && e.getSchoolHour() == hour.getSchoolHour());
+        return list.stream().anyMatch(e -> e.getDay() == hour.getDay() && Objects.equals(e.getSchoolHour(), hour.getSchoolHour()));
     }
 
     public String getTeacherName() {
