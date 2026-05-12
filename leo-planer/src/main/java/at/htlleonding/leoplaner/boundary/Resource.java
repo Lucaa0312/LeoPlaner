@@ -1,5 +1,11 @@
 package at.htlleonding.leoplaner.boundary;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +26,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("api")
@@ -156,6 +163,34 @@ public class Resource {
         } catch (Exception e) {
             throw new Exception(e);
         }
+    }
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyhhmmss");
+    private static final String archivePath = "src/files/excelFiles/export/";
+
+    @Path("/uploadExcel")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response upload(InputStream is) {
+        String outFileName = archivePath + sdf.format(new Date());
+        try (OutputStream outputStream = new FileOutputStream(outFileName)) {
+            byte[] buffer = new byte[1000000];
+            int bytesRead;
+
+            while ((bytesRead = is.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            String msg = "Failed to save file to " + outFileName;
+            return Response.status(500, msg).build();
+        }
+
+        try {
+            excelManager.importFile(outFileName);
+        } catch (Exception e) {
+        }
+        return Response.ok(outFileName).build();
     }
 
     @POST
