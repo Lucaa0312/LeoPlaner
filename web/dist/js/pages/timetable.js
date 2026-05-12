@@ -284,69 +284,6 @@ export function clearLayout() {
             gridBox.innerHTML = "";
         }
     });
-    loadClasses();
-    loadTeachers();
-    loadRooms();
-}
-function loadClasses() {
-    fetch(`http://localhost:8080/api/getAllClasses`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data);
-        const dropdownWrapper = getElement("classes");
-        const dropdown = dropdownWrapper?.querySelector(".select-menu");
-        if (!dropdown)
-            return;
-        dropdown.innerHTML = "";
-        data.forEach((clazz) => {
-            dropdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
-        });
-    })
-        .catch((error) => {
-        console.error("Error loading all classes into dropdown: ", error);
-    });
-}
-function loadTeachers() {
-    fetch(`http://localhost:8080/api/teachers`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data);
-        const dropdownWrapper = getElement("teachers");
-        const dropdown = dropdownWrapper?.querySelector(".select-menu");
-        if (!dropdown)
-            return;
-        dropdown.innerHTML = "";
-        data.forEach((teach) => {
-            dropdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
-        });
-    })
-        .catch((error) => {
-        console.error("Error loading all teachers into dropdown: ", error);
-    });
-}
-function loadRooms() {
-    fetch(`http://localhost:8080/api/rooms`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data);
-        const dropdownWrapper = getElement("rooms");
-        const dropdown = dropdownWrapper?.querySelector(".select-menu");
-        if (!dropdown)
-            return;
-        dropdown.innerHTML = "";
-        data.forEach((room) => {
-            dropdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;
-        });
-    })
-        .catch((error) => {
-        console.error("Error loading all rooms into dropdown: ", error);
-    });
 }
 function showLoader() {
     const loader = document.querySelector(".loader");
