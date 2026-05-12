@@ -34,11 +34,11 @@ public class SimulatedAnnealingAlgorithm {
 
     private static final Map<CostDegree, Integer> costOfEachDegree = new HashMap<>();
     static {
-        costOfEachDegree.put(CostDegree.LOW, 5);
-        costOfEachDegree.put(CostDegree.MID, 20);
-        costOfEachDegree.put(CostDegree.HIGH, 50);
-        costOfEachDegree.put(CostDegree.SEVERE, 150);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 1000);
+        costOfEachDegree.put(CostDegree.LOW, 3);
+        costOfEachDegree.put(CostDegree.MID, 10);
+        costOfEachDegree.put(CostDegree.HIGH, 20);
+        costOfEachDegree.put(CostDegree.SEVERE, 50);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 100000000);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -80,6 +80,8 @@ public class SimulatedAnnealingAlgorithm {
         long iterationCounter = 0;
         long costFinal = 0;
         long bestCosts = Long.MAX_VALUE;
+        long lastBestCost = bestCosts;
+        int hitBestCostCounter = 0;
 
         final Map<String, Timetable> schoolScheduleMap = dataRepository.getAllTimetables();
         List<Timetable> schoolSchedule = new ArrayList<>(schoolScheduleMap.values());
@@ -133,16 +135,27 @@ public class SimulatedAnnealingAlgorithm {
 
             decreaseTemperature();
 
-            if (automaticMode.get() && getTemperature() < 0.0001) {
-                pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
-            }
-
-            this.dataRepository.getAllTimetables().put(className, currTimetable);
-
             if (costCurrSchoolSchedule < bestCosts) {
                 this.dataRepository.setBestSchoolSchedule(deepCopy(this.dataRepository.getAllTimetables()));
                 bestCosts = costCurrSchoolSchedule;
             }
+
+            if (automaticMode.get() && getTemperature() < 0.1) {
+                // if (costCurrSchoolSchedule == bestCosts) {
+                if (bestCosts != lastBestCost) {
+                    // hitBestCostCounter--;
+                }
+                lastBestCost = bestCosts;
+                hitBestCostCounter++;
+
+                if (hitBestCostCounter >= 2) {
+                    pauseAlgorithm();
+                }
+                // }
+                pushTemperature(autumaticallyPushTemperatureAmount(costCurrSchoolSchedule));
+            }
+
+            this.dataRepository.getAllTimetables().put(className, currTimetable);
 
             iterationCounter++;
         }
@@ -192,6 +205,9 @@ public class SimulatedAnnealingAlgorithm {
         }
 
         final double probability = Math.exp(-deltaCost / (BOLTZMANN_CONSTANT * getTemperature()));
+
+        System.out.println(costCurrTimeTable + " " + costNextTimeTable + " " +
+                getTemperature() + " " + probability);
 
         return Math.random() < probability;
     }
@@ -393,7 +409,7 @@ public class SimulatedAnnealingAlgorithm {
 
     private int determineCostForClassPosition(int schoolHour, int duration) {
         if (schoolHour + duration > 6) {
-            return (schoolHour + duration - 5) * MID_COST;
+            return (schoolHour + duration - 5) * LOW_COST;
         }
         return 0;
     }
@@ -515,6 +531,10 @@ public class SimulatedAnnealingAlgorithm {
             this.dataRepository.setAlgorithmRunning(true);
             new Thread(this::algorithmLoop).start();
         }
+    }
+
+    public boolean getAutomaticMode() {
+        return automaticMode.get();
     }
 
     public boolean getIsRunning() {
