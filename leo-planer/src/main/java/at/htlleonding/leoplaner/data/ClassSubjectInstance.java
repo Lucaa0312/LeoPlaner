@@ -43,7 +43,7 @@ public class ClassSubjectInstance extends PanacheEntity {
     }
 
     public ClassSubjectInstance() {
-    };
+    }
 
     public static List<ClassSubjectInstance> getAlClassSubjectInstances() {
         return ClassSubjectInstance.listAll();

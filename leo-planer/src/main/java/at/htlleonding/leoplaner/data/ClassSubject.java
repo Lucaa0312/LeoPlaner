@@ -109,13 +109,13 @@ public class ClassSubject extends PanacheEntity {
         }
 
         if (subject != null) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
             sb.append("subject=").append(subject.getSubjectName()).append(" (ID: ").append(subject.getId()).append(")");
         }
 
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             sb.append(", ");
         }
         sb.append("weeklyHours=").append(weeklyHours);
