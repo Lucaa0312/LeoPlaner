@@ -26,45 +26,11 @@
 
             <div id="top-bar">
                 <h1 id="title">Stundenplan</h1>
-
                 <div id="middle-console">
-                    <div class="top-bar-select" id="classes">
-                        <button class="select-trigger">Klassen</button>
-                        <ul class="select-menu">
-                        </ul>
-                    </div>
-
-                    <div class="top-bar-select" id="teachers">
-                        <button class="select-trigger">Lehrer</button>
-                        <ul class="select-menu" id="select-teachers">
-                        </ul>
-                    </div>
-
-                    <div class="top-bar-select" id="rooms">
-                        <button class="select-trigger">R&auml;ume</button>
-                        <ul class="select-menu">
-                        </ul>
-                    </div>
-
-                    <div class="top-bar-select" id="back">
-                        <button class="select-trigger" onclick="clearChoice()">Zurücksetzen</button>
-                    </div>
-
-                    <div class="top-bar-btn" id="filter">
-                        <div><i class="fa-solid fa-filter"></i></div>
-                    </div>
-                    <div class="top-bar-btn" id="share">
-                        <div><i class="fa-solid fa-share-nodes"></i></div>
-                    </div>
-                    <div class="top-bar-btn" id="print">
-                        <div><i class="fa-solid fa-print"></i></div>
-                    </div>
                     <div class="top-bar-btn" id="randomizeButton">
                         <div><i class="fa-solid fa-dice"></i></div>
                     </div>
-                </div>
-
-                
+                </div>   
             </div>
 
             <!--New Timetable-->
@@ -132,7 +98,7 @@
                 <div class="button">
                     <button id="optionButton" class="buttonStyle">Auswahl</button>
                 </div>
-                <div class="button buttonStyle" id="advancedButton">
+                <div class="button" id="advancedButton">
                     <div id="advancedTextContainer">
                     <svg id="buttonImage" width="26" height="20" viewBox="0 0 26 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M25.7067 13.7071L19.7069 19.707C19.5193 19.8946 19.2648 20 18.9994 20C18.7341 20 18.4796 19.8946 18.2919 19.707C18.1043 19.5193 17.9989 19.2648 17.9989 18.9995C17.9989 18.7341 18.1043 18.4796 18.2919 18.292L22.5856 13.9996H12.9996C9.55301 13.996 6.24863 12.6252 3.81152 10.1881C1.37441 7.75097 0.00363966 4.44657 0 0.999972C0 0.734763 0.105354 0.480416 0.292884 0.292885C0.480415 0.105354 0.734761 0 0.99997 0C1.26518 0 1.51952 0.105354 1.70705 0.292885C1.89459 0.480416 1.99994 0.734763 1.99994 0.999972C2.00325 3.91626 3.1632 6.71215 5.22532 8.77428C7.28744 10.8364 10.0833 11.9964 12.9996 11.9997H22.5856L18.2919 7.70729C18.1043 7.51965 17.9989 7.26516 17.9989 6.9998C17.9989 6.73445 18.1043 6.47996 18.2919 6.29232C18.4796 6.10469 18.7341 5.99928 18.9994 5.99928C19.2648 5.99928 19.5193 6.10469 19.7069 6.29232L25.7067 12.2922C25.7997 12.385 25.8735 12.4953 25.9238 12.6167C25.9741 12.7381 26 12.8682 26 12.9996C26 13.1311 25.9741 13.2612 25.9238 13.3826C25.8735 13.504 25.7997 13.6142 25.7067 13.7071Z" fill="#1F2937"/>
@@ -140,8 +106,8 @@
                     <p id="advancedButtonText">Stundenplan für Fortgeschrittene</p>
                     </div>
                 </div>
-                <!--<div class="graph-box" style="padding: 0.3vw;">
-                    <div id="costChart" style="width: 21vw;height:50vh;"></div>
+                <!--<div class="graph-box">
+                    <div id="costChart"></div>
                 </div>
                 <div id="slider-container">
                     <div id="tooltip" class="slider-tooltip">1000</div>
