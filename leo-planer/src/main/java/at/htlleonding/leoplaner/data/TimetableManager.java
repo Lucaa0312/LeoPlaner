@@ -26,7 +26,7 @@ public class TimetableManager {
         for (int startHour = FIRST_HOUR; startHour <= LAST_HOUR - duration + 1; startHour++) {
             boolean isFree = true;
 
-            // check agaainst ALL existing CSIs
+            // check against ALL existing CSIs
             for (final ClassSubjectInstance csi : csisOnDay) {
                 final int occupiedStart = csi.getPeriod().getSchoolHour();
                 final int occupiedEnd = occupiedStart + csi.getDuration() - 1;
@@ -60,7 +60,7 @@ public class TimetableManager {
         }
 
         if (allFreePeriods.isEmpty()) {
-            throw new RuntimeException("no Free Period avaible"); // TODO add a check for that in algorrithm class
+            throw new RuntimeException("no Free Period available"); // TODO add a check for that in algorithm class
         }
 
         return switchClassSubjectInstancePeriodAndReturn(timetable, index,
@@ -154,9 +154,9 @@ public class TimetableManager {
         return false;
     }
 
-    public static ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList(final Timetable timetable) { // deep
-                                                                                                             // deep
-                                                                                                             // copy
+    public static ArrayList<ClassSubjectInstance> cloneClassSubjectInstanceList(final Timetable timetable) {
+        // deep
+        // copy
         // since
         // all lives on the
         // heap
