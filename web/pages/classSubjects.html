@@ -3,17 +3,20 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Lehrer</title>
+        <title>Class Subjects</title>
         <link rel="stylesheet" href="../style/essentials.css" />
-        <link rel="stylesheet" href="../style/teacher.css" />
-        <script type="module" defer src="../dist/js/pages/teachers.js"></script>
+        <link rel="stylesheet" href="../style/classSubjects.css" />
+        <script
+            type="module"
+            defer
+            src="../dist/js/pages/classSubjects.js"
+        ></script>
         <script type="module" defer src="../dist/js/pages/navbar.js"></script>
         <script
             src="https://kit.fontawesome.com/7dd0aadbc3.js"
             crossorigin="anonymous"
         ></script>
     </head>
-
     <body>
         <div class="flex-container">
             <div id="nav-bar"></div>
@@ -21,17 +24,15 @@
             <div id="main-content">
                 <div class="flex-row" id="teacher-header">
                     <div id="header-section">
-                        <h1 id="header-text">Lehrer</h1>
-                        <p id="header-subtext">
-                            Verwalten Sie Ihre Lehrkr&auml;fte
-                        </p>
+                        <h1 id="header-text">Klassen</h1>
+                        <p id="header-subtext">Verwalten Sie Ihre Klassen</p>
                     </div>
                     <div id="controls">
                         <div id="search-bar">
                             <input
                                 type="text"
                                 id="input-field"
-                                placeholder="Nach Lehrern suchen"
+                                placeholder="Nach Klassen suchen"
                             />
                             <img
                                 id="search-icon"
@@ -41,7 +42,7 @@
                         </div>
                         <div id="add-btn">
                             <i class="fa-solid fa-plus"></i>
-                            <p>Lehrer hinzufügen</p>
+                            <p>Klasse erstellen</p>
                             <svg
                                 width="38"
                                 height="52"
@@ -82,7 +83,7 @@
                 </div>
 
                 <div id="no-teachers" style="display: block">
-                    <p>Es sind noch keine Lehrer hinzugefügt worden.</p>
+                    <p>Es sind noch keine Klassen hinzugefügt worden.</p>
                     <p>...</p>
                 </div>
             </div>

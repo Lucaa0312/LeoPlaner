@@ -4,11 +4,11 @@
     --transparent: rgba(0, 0, 0, 0);
 
     /*Leo colors*/
-    --leo-primary-color1: #4F46E5;
-    --leo-primary-color2: #3B82F6;
-    --leo-secondary-color: #F59E0B;
-    --leo-background-color: #EBEBEB;
-    --leo-text-color: #1F2937;
+    --leo-primary-color1: #4f46e5;
+    --leo-primary-color2: #3b82f6;
+    --leo-secondary-color: #f59e0b;
+    --leo-background-color: #ebebeb;
+    --leo-text-color: #1f2937;
 
     /*constant values*/
 }
@@ -25,7 +25,6 @@
     padding: 0;
     font-family: "Roboto", sans-serif;
 }
-
 
 /* ------------------FLEX CONTAINER--------------------- */
 
@@ -56,7 +55,19 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
 }
+/* ------------------ No Teachers Message --------------------- */
+#no-teachers {
+    display: block;
+    position: absolute;
+    top: 30vh;
+    left: 18vw;
+    text-align: center;
 
+    color: var(--leo-text-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0.8;
+}
 /* ------------------MAIN CONTENT BOX--------------------- */
 #main-content {
     background-color: var(--leo-background-color);
@@ -65,7 +76,6 @@
     position: relative;
 
     overflow-y: hidden;
-
 }
 
 #header-text {
@@ -87,7 +97,6 @@
     margin-left: 5vw;
 }
 
-
 /* ------------------ CONTROLS CSS SUCH AS SEARCH AND ADD BUTTON---------------------*/
 #controls {
     margin-top: 2vh;
@@ -97,9 +106,9 @@
 
     position: absolute;
     right: 0;
-} 
+}
 
-#search-bar{
+#search-bar {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -112,7 +121,7 @@
     padding-top: 0.5vh;
     padding-bottom: 0.5vh;
 
-    background-color: #D9D9D9;
+    background-color: #d9d9d9;
 
     border-top-left-radius: 0.4vw;
     border-bottom-left-radius: 0.4vw;
@@ -121,7 +130,6 @@
 
     color: var(--leo-text-color);
 }
-
 
 #input-field {
     background: transparent;
@@ -137,7 +145,7 @@
     outline: none;
 }
 
-#search-icon{
+#search-icon {
     color: var(--leo-text-color);
     width: 1.5vw;
     height: 1.5vw;
@@ -185,14 +193,13 @@
     scale: 1.02;
 }
 
-
 /* ------------------NAVIGATION BAR--------------------- */
 #nav-bar {
     height: 100%;
     width: 15vw;
 }
 
-#logo-container{
+#logo-container {
     background-color: var(--leo-background-color);
     border-radius: 50%;
 
@@ -216,7 +223,7 @@
     grid-template-columns: 3rem auto;
     align-items: center;
     gap: 1rem;
-    
+
     margin-top: 2vh;
 
     border-top-right-radius: 0.3vw;
@@ -239,7 +246,7 @@
 
 .nav-item:hover {
     color: var(--leo-primary-color1);
-    background-color: #EEF2FF;
+    background-color: #eef2ff;
 }
 
 .nav-item i {
@@ -273,7 +280,7 @@
 
     margin-left: 1vw;
 
-    object-fit:scale-down;
+    object-fit: scale-down;
     border-style: solid;
     display: flex;
     justify-content: center;

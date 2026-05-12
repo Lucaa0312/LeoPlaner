@@ -1,10 +1,41 @@
 // Nav items configuration
 const navItems = [
-    { id: "nav-item-dashboard", icon: "fa-regular fa-chart-bar", text: "Startseite", path: "./dashboard.html" },
-    { id: "nav-item-teacher", icon: "fa-regular fa-address-card", text: "Lehrer", path: "./teacher.html" },
-    { id: "nav-item-subjects", icon: "fa-regular fa-newspaper", text: "Fächer", path: "./subjects.html" },
-    { id: "nav-item-rooms", icon: "fa-regular fa-compass", text: "Räume", path: "./rooms.html" },
-    { id: "nav-item-timetable", icon: "fa-regular fa-calendar-days", text: "Stundenplan", path: "./timetable.html" },
+    {
+        id: "nav-item-dashboard",
+        icon: "fa-regular fa-chart-bar",
+        text: "Startseite",
+        path: "./dashboard.html",
+    },
+    {
+        id: "nav-item-teacher",
+        icon: "fa-regular fa-address-card",
+        text: "Lehrer",
+        path: "./teacher.html",
+    },
+    {
+        id: "nav-item-subjects",
+        icon: "fa-regular fa-newspaper",
+        text: "Fächer",
+        path: "./subjects.html",
+    },
+    {
+        id: "nav-item-rooms",
+        icon: "fa-regular fa-compass",
+        text: "Räume",
+        path: "./rooms.html",
+    },
+    {
+        id: "nav-item-classes",
+        icon: "fa-regular fa-school",
+        text: "Klassen",
+        path: "./classSubjects.html",
+    },
+    {
+        id: "nav-item-timetable",
+        icon: "fa-regular fa-calendar-days",
+        text: "Stundenplan",
+        path: "./timetable.html",
+    },
 ];
 // Initializes the navigation bar
 export default function initNavbar() {
@@ -32,7 +63,7 @@ export default function initNavbar() {
             navItem.style.borderLeftWidth = "0.25vw";
             navItem.style.borderLeftStyle = "solid";
         }
-        navItem.onclick = () => window.location.href = item.path;
+        navItem.onclick = () => (window.location.href = item.path);
         navItem.innerHTML = `
             <p class="nav-text">${item.text}</p>
         `;
