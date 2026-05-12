@@ -19,6 +19,7 @@ import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Timetable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -146,7 +147,6 @@ public class Resource {
     @GET
     @Path("/test-export")
     public void triggerExport() throws Exception {
-
         try {
             excelManager.createBaseDataWorkbook();
         } catch (Exception e) {
@@ -165,31 +165,34 @@ public class Resource {
         }
     }
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyhhmmss");
     private static final String archivePath = "src/files/excelFiles/export/";
 
-    @Path("/uploadExcel")
     @POST
+    @Path("/uploadExcel")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response upload(InputStream is) {
-        String outFileName = archivePath + sdf.format(new Date());
-        try (OutputStream outputStream = new FileOutputStream(outFileName)) {
-            byte[] buffer = new byte[1000000];
-            int bytesRead;
-
-            while ((bytesRead = is.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+        String outFileName = archivePath + "upload_" + System.currentTimeMillis() + ".xlsx";
+        try (OutputStream os = new FileOutputStream(outFileName)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
             }
         } catch (IOException e) {
-            String msg = "Failed to save file to " + outFileName;
-            return Response.status(500, msg).build();
+            return Response.status(500)
+                    .entity("Failed to save file: " + outFileName)
+                    .build();
         }
 
         try {
             excelManager.importFile(outFileName);
         } catch (Exception e) {
+            return Response.status(500)
+                    .entity("Excel processing failed")
+                    .build();
         }
+
         return Response.ok(outFileName).build();
     }
 
