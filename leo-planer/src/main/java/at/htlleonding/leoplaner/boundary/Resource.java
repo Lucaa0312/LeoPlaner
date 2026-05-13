@@ -77,6 +77,12 @@ public class Resource {
         this.dataRepository.randomizeSchoolSchedule();
     }
 
+    @Path("run/generateRandomSchedule")
+    @GET
+    public void generateSchoolSchedule() {
+        this.dataRepository.randomizeSchoolSchedule();
+    }
+
     @Path("run/algorithmAllClasses")
     @GET
     public void runAlgorithm() {
@@ -148,7 +154,7 @@ public class Resource {
     @Path("/test-export")
     public void triggerExport() throws Exception {
         try {
-            excelManager.exportTimetable();
+            excelManager.createBaseDataWorkbook();
         } catch (Exception e) {
             throw new Exception(e);
         }
@@ -187,6 +193,7 @@ public class Resource {
 
         try {
             excelManager.importFile(outFileName);
+            this.dataRepository.randomizeSchoolSchedule();
         } catch (Exception e) {
             return Response.status(500)
                     .entity("Excel processing failed")
