@@ -2,43 +2,6 @@ import { clearCharts } from "./graph.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
-// Dropdown button trigger
-document.querySelectorAll(".top-bar-select").forEach((wrapper) => {
-    const trigger = wrapper.querySelector(".select-trigger");
-    const menu = wrapper.querySelector(".select-menu");
-    if (!trigger || !menu)
-        return;
-    trigger.addEventListener("click", () => {
-        wrapper.classList.toggle("is-open");
-    });
-    // click on dropdown item
-    menu.addEventListener("click", (event) => {
-        const target = event.target;
-        const li = target?.closest("li");
-        if (!li)
-            return;
-        const previouslySelected = menu.querySelector(".selected-item");
-        if (previouslySelected) {
-            previouslySelected.classList.remove("selected-item");
-        }
-        wrapper.classList.remove("is-open");
-        li.classList.add("selected-item");
-        const data = li.dataset.value;
-        const selectedCategory = wrapper.id;
-        if (!data)
-            return;
-        if (selectedCategory === "teachers") {
-            getTimetableByTeacher(data);
-        }
-        if (selectedCategory === "classes") {
-            getTimetableByClass(data);
-        }
-        if (selectedCategory === "rooms") {
-            getTimetableByRoom(data);
-        }
-        // Add more conditions HERE
-    });
-});
 // click out of box closes dropdown
 document.addEventListener("click", (event) => {
     const target = event.target;
@@ -84,7 +47,7 @@ export async function getRandomizedTimeTable() {
     await getFetchResponse("/randomize");
     load();
 }
-function getTimetableByTeacher(teacherId) {
+export function getTimetableByTeacher(teacherId) {
     clearLayout();
     fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
         .then((response) => {
@@ -100,7 +63,7 @@ function getTimetableByTeacher(teacherId) {
         console.error("Error loading Timetable by teacher:", error);
     });
 }
-function getTimetableByClass(classId) {
+export function getTimetableByClass(classId) {
     fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
         .then((response) => {
         return response.json();
@@ -113,7 +76,7 @@ function getTimetableByClass(classId) {
         console.error("Error loading Timetable by class:", error);
     });
 }
-function getTimetableByRoom(roomId) {
+export function getTimetableByRoom(roomId) {
     fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
         .then((response) => {
         return response.json();

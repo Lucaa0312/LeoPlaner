@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
-import { load, getRandomizedTimeTable, clearLayout } from "./timetable.js";
+import { load, getRandomizedTimeTable, clearLayout, getTimetableByTeacher, getTimetableByRoom, getTimetableByClass } from "./timetable.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 
 let toggledAdvanced = false;
@@ -769,6 +769,9 @@ function loadTeachers(itemDiv: HTMLElement): void {
                 listItem.textContent = teach.teacherName;
                 listItem.style.padding = "0.5rem 0";
                 listItem.style.borderBottom = "1px solid rgba(0,0,0,0.08)";
+                listItem.addEventListener("click", () => {
+                    getTimetableByTeacher(teach.id + "");
+                });
                 list.appendChild(listItem);
             });
         })
@@ -797,6 +800,9 @@ function loadClasses(itemDiv: HTMLElement): void {
                 listItem.textContent = clazz.className;
                 listItem.style.padding = "0.5rem 0";
                 listItem.style.borderBottom = "1px solid rgba(0,0,0,0.08)";
+                listItem.addEventListener("click", () => {
+                    getTimetableByClass(clazz.id + "");
+                });
                 list.appendChild(listItem);
             });
         })
@@ -824,6 +830,9 @@ function loadRooms(itemDiv: HTMLElement): void {
                 listItem.textContent = room.roomName;
                 listItem.style.padding = "0.5rem 0";
                 listItem.style.borderBottom = "1px solid rgba(0,0,0,0.08)";
+                listItem.addEventListener("click", () => {
+                    getTimetableByRoom(room.id + "");
+                });
                 list.appendChild(listItem);
             });
         })
