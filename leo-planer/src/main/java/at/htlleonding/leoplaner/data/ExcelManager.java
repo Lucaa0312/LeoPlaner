@@ -2,7 +2,10 @@ package at.htlleonding.leoplaner.data;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -244,7 +247,8 @@ public class ExcelManager {
     public void importAll() throws Exception {
         try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
             DataFormatter formatter = new DataFormatter();
-
+            
+            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);
             importTeachers(importWorkbook.getSheet("Teachers"), formatter);
             importRooms(importWorkbook.getSheet("Rooms"), formatter);

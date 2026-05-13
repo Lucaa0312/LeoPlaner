@@ -4,8 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,9 +146,8 @@ public class Resource {
     @GET
     @Path("/test-export")
     public void triggerExport() throws Exception {
-
         try {
-            excelManager.createBaseDataWorkbook();
+            excelManager.exportTimetable();
         } catch (Exception e) {
             throw new Exception(e);
         }
