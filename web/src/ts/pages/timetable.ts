@@ -141,21 +141,6 @@ type TimetableByRoomResponse = {
     classSubjectInstances: ClassSubjectInstance[];
 };
 
-type ClassItem = {
-    id: number;
-    className: string;
-};
-
-type TeacherItem = {
-    id: number;
-    nameSymbol: string;
-};
-
-type RoomItem = {
-    id: number;
-    roomNumber: string | number;
-};
-
 export function load(): void {
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
@@ -410,76 +395,6 @@ export function clearLayout(): void {
             gridBox.innerHTML = "";
         }
     });
-
-    loadClasses();
-    loadTeachers();
-    loadRooms();
-}
-
-function loadClasses(): void {
-    fetch(`http://localhost:8080/api/getAllClasses`)
-        .then((response) => {
-            return response.json() as Promise<ClassItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("classes");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((clazz) => {
-                dropdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all classes into dropdown: ", error);
-        });
-}
-
-function loadTeachers(): void {
-    fetch(`http://localhost:8080/api/teachers`)
-        .then((response) => {
-            return response.json() as Promise<TeacherItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("teachers");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((teach) => {
-                dropdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all teachers into dropdown: ", error);
-        });
-}
-
-function loadRooms(): void {
-    fetch(`http://localhost:8080/api/rooms`)
-        .then((response) => {
-            return response.json() as Promise<RoomItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("rooms");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((room) => {
-                dropdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all rooms into dropdown: ", error);
-        });
 }
 
 function showLoader(): void {

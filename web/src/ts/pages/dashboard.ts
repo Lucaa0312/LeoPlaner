@@ -1,4 +1,5 @@
-import  initNavbar  from "./navbar.js";
+import initNavbar from "./navbar.js";
+import { initImportButton } from "../features/importButton.js";
 
 //Dashboard id and Label mapping
 type StatItem = {
@@ -9,104 +10,143 @@ type StatItem = {
 
 const statsData: StatItem[] = [
   { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
-  { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
+  { id: "stat-card-subjects", label: "Gesamte<br>Fsächer:", value: 0 },
   { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
-  { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
-
 
 //Gemerates welcome text based on time of day
 function generateWelcomeText() {
-    const welcomeTextElement = document.getElementById("welcome-text");
-    if (!welcomeTextElement) return;
+  const welcomeTextElement = document.getElementById("welcome-text");
+  if (!welcomeTextElement) return;
 
-    const hour = new Date().getHours();
+  const hour = new Date().getHours();
 
-    let greeting;
-    if (hour >= 5 && hour < 12) {
-        greeting = "Guten Morgen";
-    } else if (hour < 18) {
-        greeting = "Guten Nachmittag";
-    } else {
-        greeting = "Guten Abend";
-    }
+  let greeting;
+  if (hour >= 5 && hour < 12) {
+    greeting = "Guten Morgen";
+  } else if (hour < 18) {
+    greeting = "Guten Nachmittag";
+  } else {
+    greeting = "Guten Abend";
+  }
 
-    welcomeTextElement.textContent = `${greeting}, Admin`;
+  welcomeTextElement.textContent = `${greeting}, Admin`;
 }
 
 //Fetches last update time from GitHub API and displays it
 function showLastUpdateTime() {
-    const statusCardTextElement = document.getElementById("status-card-text");
-    if (!statusCardTextElement) return;
+  const statusCardTextElement = document.getElementById("status-card-text");
+  if (!statusCardTextElement) return;
 
-    statusCardTextElement.textContent = "Wird geladen...";
+  statusCardTextElement.textContent = "Wird geladen...";
 }
-
 
 // Generates dashboard statistics cards
 function generateDashboardStats() {
-    const statsContainer = document.getElementById("stat-card-container");
-    if (!statsContainer) return;
+  const statsContainer = document.getElementById("stat-card-container");
+  if (!statsContainer) return;
 
-    statsContainer.replaceChildren(); 
+  statsContainer.replaceChildren();
 
-    statsData.forEach((stat) => {
-        const card = document.createElement("div");
-        card.className = "stat-card";
-        card.id = stat.id;
+  statsData.forEach((stat) => {
+    const card = document.createElement("div");
+    card.className = "stat-card";
+    card.id = stat.id;
 
-        const content = document.createElement("div");
-        content.className = "stat-content";
+    const content = document.createElement("div");
+    content.className = "stat-content";
 
-        const label = document.createElement("h2");
-        label.className = "stat-text";
-        label.innerHTML = stat.label;
+    const label = document.createElement("h2");
+    label.className = "stat-text";
+    label.innerHTML = stat.label;
 
-        const numb: HTMLElement = document.createElement("h1");
-        numb.className = "stat-number";
-        if (stat.id === "stat-card-timetable") {
+    const numb: HTMLElement = document.createElement("h1");
+    numb.className = "stat-number";
+    if (stat.id === "stat-card-timetable") {
+    } else {
+      numb.textContent = String(stat.value);
+    }
 
-        }
-        else {
-            numb.textContent = String(stat.value);
-        }
+    content.appendChild(label);
+    content.appendChild(numb);
 
-        content.appendChild(label);
-        content.appendChild(numb);
+    const arrowIcon = document.createElement("i");
+    arrowIcon.className = "fa-solid fa-angle-down stat-arrow-icon";
 
-        const arrowIcon = document.createElement("i");
-        arrowIcon.className = "fa-solid fa-angle-down stat-arrow-icon";
+    card.appendChild(content);
+    card.appendChild(arrowIcon);
 
-        card.appendChild(content);
-        card.appendChild(arrowIcon);
+    statsContainer.appendChild(card);
+  });
 
-        statsContainer.appendChild(card);
-    });
+  const importCard = document.createElement("div");
+  importCard.className = "import-wrapper stat-card-import";
+
+  const icon = document.createElement("i");
+  icon.className = "ti ti-upload";
+  icon.setAttribute("aria-hidden", "true");
+
+  const label = document.createElement("label");
+  label.className = "import-button";
+  label.textContent = "Stundenplan importieren";
+
+  const hint = document.createElement("p");
+  hint.className = "import-hint";
+  hint.textContent = ".xlsx, .xls akzeptiert";
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.id = "excel-upload";
+  input.accept = ".xlsx,.xls";
+  input.hidden = true;
+
+  const fileName = document.createElement("p");
+  fileName.id = "import-file-name";
+
+  const error = document.createElement("p");
+  error.id = "import-error";
+
+  importCard.appendChild(icon);
+  importCard.appendChild(label);
+  importCard.appendChild(hint);
+  importCard.appendChild(input);
+  importCard.appendChild(fileName);
+  importCard.appendChild(error);
+
+  importCard.addEventListener("click", () => input.click());
+
+  statsContainer.appendChild(importCard);
+
+  initImportButton();
 }
-
 
 // Initialize the dashboard application
 async function initializeApp() {
-    initNavbar();
-    generateWelcomeText();
-    showLastUpdateTime();
+  initNavbar();
+  generateWelcomeText();
+  showLastUpdateTime();
 
-    try {
-        const [teachers, subjects, rooms] = await Promise.all([
-            fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json() as Promise<number>),
-            fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json() as Promise<number>),
-            fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json() as Promise<number>),
-        ]);
+  try {
+    const [teachers, subjects, rooms] = await Promise.all([
+      fetch("http://localhost:8080/api/teachers/getTeacherCount").then(
+        (r) => r.json() as Promise<number>,
+      ),
+      fetch("http://localhost:8080/api/subjects/getSubjectCount").then(
+        (r) => r.json() as Promise<number>,
+      ),
+      fetch("http://localhost:8080/api/rooms/getRoomCount").then(
+        (r) => r.json() as Promise<number>,
+      ),
+    ]);
 
-        statsData[0]!.value = Number(teachers ?? 0);
-        statsData[1]!.value = Number(subjects ?? 0);
-        statsData[2]!.value = Number(rooms ?? 0);
+    statsData[0]!.value = Number(teachers ?? 0);
+    statsData[1]!.value = Number(subjects ?? 0);
+    statsData[2]!.value = Number(rooms ?? 0);
+  } catch (e) {
+    console.error("Fehler beim Laden:", e);
+  }
 
-    } catch (e) {
-        console.error("Fehler beim Laden:", e);
-    }
-
-    generateDashboardStats();
-    }
+  generateDashboardStats();
+}
 
 document.addEventListener("DOMContentLoaded", initializeApp);
