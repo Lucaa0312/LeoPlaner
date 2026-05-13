@@ -121,7 +121,7 @@ function generateDashboardStats() {
 }
 
 // Initialize the dashboard application
-async function initializeApp() {
+export async function initializeApp() {
   initNavbar();
   generateWelcomeText();
   showLastUpdateTime();
