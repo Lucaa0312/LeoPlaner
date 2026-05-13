@@ -3,51 +3,6 @@ import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 
-// Dropdown button trigger
-document.querySelectorAll<HTMLElement>(".top-bar-select").forEach((wrapper) => {
-    const trigger = wrapper.querySelector<HTMLElement>(".select-trigger");
-    const menu = wrapper.querySelector<HTMLElement>(".select-menu");
-
-    if (!trigger || !menu) return;
-
-    trigger.addEventListener("click", () => {
-        wrapper.classList.toggle("is-open");
-    });
-
-    // click on dropdown item
-    menu.addEventListener("click", (event: MouseEvent) => {
-        const target = event.target as Element | null;
-        const li = target?.closest("li") as HTMLLIElement | null;
-        if (!li) return;
-
-        const previouslySelected = menu.querySelector<HTMLElement>(".selected-item");
-        if (previouslySelected) {
-            previouslySelected.classList.remove("selected-item");
-        }
-
-        wrapper.classList.remove("is-open");
-        li.classList.add("selected-item");
-
-        const data = li.dataset.value;
-        const selectedCategory = wrapper.id;
-
-        if (!data) return;
-
-        if (selectedCategory === "teachers") {
-            getTimetableByTeacher(data);
-        }
-
-        if (selectedCategory === "classes") {
-            getTimetableByClass(data);
-        }
-
-        if (selectedCategory === "rooms") {
-            getTimetableByRoom(data);
-        }
-        // Add more conditions HERE
-    });
-});
-
 // click out of box closes dropdown
 document.addEventListener("click", (event: MouseEvent) => {
     const target = event.target as Element | null;
@@ -141,21 +96,6 @@ type TimetableByRoomResponse = {
     classSubjectInstances: ClassSubjectInstance[];
 };
 
-type ClassItem = {
-    id: number;
-    className: string;
-};
-
-type TeacherItem = {
-    id: number;
-    nameSymbol: string;
-};
-
-type RoomItem = {
-    id: number;
-    roomNumber: string | number;
-};
-
 export function load(): void {
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
@@ -182,7 +122,7 @@ export async function getRandomizedTimeTable(): Promise<void> {
     load();
 }
 
-function getTimetableByTeacher(teacherId: string): void {
+export function getTimetableByTeacher(teacherId: string): void {
     clearLayout();
     fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
         .then((response) => {
@@ -199,7 +139,7 @@ function getTimetableByTeacher(teacherId: string): void {
         });
 }
 
-function getTimetableByClass(classId: string): void {
+export function getTimetableByClass(classId: string): void {
     fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
         .then((response) => {
             return response.json() as Promise<TimetableByClassResponse>;
@@ -213,7 +153,7 @@ function getTimetableByClass(classId: string): void {
         });
 }
 
-function getTimetableByRoom(roomId: string): void {
+export function getTimetableByRoom(roomId: string): void {
     fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
         .then((response) => {
             return response.json() as Promise<TimetableByRoomResponse>;
@@ -410,76 +350,6 @@ export function clearLayout(): void {
             gridBox.innerHTML = "";
         }
     });
-
-    loadClasses();
-    loadTeachers();
-    loadRooms();
-}
-
-function loadClasses(): void {
-    fetch(`http://localhost:8080/api/getAllClasses`)
-        .then((response) => {
-            return response.json() as Promise<ClassItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("classes");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((clazz) => {
-                dropdown.innerHTML += `<li data-value="${clazz.id}">${clazz.className}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all classes into dropdown: ", error);
-        });
-}
-
-function loadTeachers(): void {
-    fetch(`http://localhost:8080/api/teachers`)
-        .then((response) => {
-            return response.json() as Promise<TeacherItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("teachers");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((teach) => {
-                dropdown.innerHTML += `<li data-value="${teach.id}">${teach.nameSymbol}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all teachers into dropdown: ", error);
-        });
-}
-
-function loadRooms(): void {
-    fetch(`http://localhost:8080/api/rooms`)
-        .then((response) => {
-            return response.json() as Promise<RoomItem[]>;
-        })
-        .then((data) => {
-            console.log(data);
-            const dropdownWrapper = getElement<HTMLElement>("rooms");
-            const dropdown = dropdownWrapper?.querySelector<HTMLElement>(".select-menu");
-            if (!dropdown) return;
-
-            dropdown.innerHTML = "";
-
-            data.forEach((room) => {
-                dropdown.innerHTML += `<li data-value="${room.id}">${room.roomNumber}</li>`;
-            });
-        })
-        .catch((error) => {
-            console.error("Error loading all rooms into dropdown: ", error);
-        });
 }
 
 function showLoader(): void {

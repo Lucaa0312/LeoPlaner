@@ -31,6 +31,7 @@
     color: var(--leo-text-color);
 
     margin-top: 2vh;
+    margin-left: -4vw;
 }
 
 #top-bar {
@@ -133,6 +134,7 @@
 
     transition: all 400ms ease-out;
     box-shadow: #0000004d 0px 5px 5px;
+    margin-top: 2vh;
 }
 
 .top-bar-btn>div,
@@ -157,7 +159,7 @@
     justify-content: center;
     align-items: center;
 
-    width: 70%;
+    width: 100%;
     height: auto;
     box-sizing: border-box;
     margin-left: 1vw;
@@ -172,14 +174,15 @@
     background-color: white;
     color: var(--leo-text-color);
 
-    border-radius: 36px;
+    border-radius: 10px;
 
     width: 100%;
-    max-height: 85vh;
+    max-height: 88vh;
     padding: 2% 5% 0 5%;
     box-sizing: border-box;
     
     overflow-y: scroll;
+    overflow-x: hidden;
 
     font-size: large;
     /*font-weight: bold;*/
@@ -237,10 +240,12 @@
     margin-top: 5px;
     height: var(--period-height);
     box-sizing: border-box;
+    width: 90%;
 }
 
 .break-line {
     height: var(--break-height);
+    width: 90%;
 }
 
 #timetable-times {
@@ -420,7 +425,7 @@
 #cost-container {
     position: absolute;
     z-index: 10001;
-    bottom: 5vh;
+    bottom: 1vh;
     right: 20%;
     font-size: 1.75rem;
     text-align: center;
@@ -441,27 +446,29 @@
 
 .graph-box {
     background-color: white;
-    width: 20vw;
-    height: 50vh;
+    width: 17vw;
+    height: 37vh;
     border-radius: 0.8em 0.8em 0.8em 0.8em;
-    padding: 0;
+    padding: 0.3vw;
 }
 
 #flex-inner-container {
     display: flex;
     gap: 1vw;
+    height: 102%;
+    margin-top: -6vh;
 }
 
 #graph-container {
     display: flex;
     flex-direction: column;
-    gap: 2.5vw;
+    width: 27vw;
     margin-right: 1vw;
-    width: 30vw;
+    align-items: center;
 }
 #slider-container {
     margin-top: 3vh;
-    width: 20vw;
+    width: 100%;
     position: relative;
     display: block;
     align-items: center;
@@ -470,9 +477,9 @@
 #temperatureSlider {
     appearance: none;
     -webkit-appearance: none;
-    width: 20vw;
-    height: 3vh;
-    background-color: white;
+    width: 100%;
+    height: 2vh;
+    background-color: #EBEBEB;
     border: 2px solid white;
     border-radius: 10px;
     outline: none;
@@ -535,7 +542,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 20vw;
+    width: 100%;
     opacity: 0.8;
 }
 
@@ -544,41 +551,144 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-size: 0.8em;
 }
 
 .slider-line {
     font-size: 0.8em;
     font-weight: lighter;
 }
-#button {
+.button {
     width: 100%;
-    margin-top: 2vh;
+    margin-top: 1vh;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-#optimizeButton {
     font-family: 'alte-haas-grotesk', sans-serif;
     font-weight: bold;
-    font-size: 1.1rem;
-    padding: 0.5vw 1vw;
-    border-radius: 36px;
-    border: none;
-    cursor: pointer;
-    background-color: white;
-    color: var(--leo-text-color);
-    box-shadow: #0000004d 0px 5px 5px;
-    transition: all 300ms ease-out;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+.buttonStyle {
+    box-shadow: #0000004d 0px 5px 5px;
+    transition: all 300ms ease-out;
     gap: 10px;
     outline: none;
+    border: none;
+    padding: 0.5vw 1vw;
+    font-size: 1.2rem;
+    cursor: pointer;
+    height: 5vh;
+}
+
+#optimizeButton {
+    border-radius: 10px;
+    background-color: var(--leo-primary-color1);
+    color: white;
+    width: 100%;
 }
 
 #optimizeButton:hover {
+    transform: translateY(-1px);
+}
+
+#optionButton {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 1vh;
+    border-radius: 10px;
+    background-color: white;
+    color: var(--leo-text-color);
+    width: 100%;
+}
+
+#graphButton {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 1vh;
+    border-radius: 10px;
+    background-color: white;
+    color: var(--leo-text-color);
+    width: 100%;
+}
+
+#advancedButton {
+    border-radius: 4px;
+    background-color: white;
+    color: var(--leo-text-color);
+    width: 60%;
+    height: 6vh;
+    box-shadow: #0000004d 0px 5px 5px;
+    transition: all 300ms ease-out;
+    gap: 10px;
+    outline: none;
+    border: none;
+    padding: 0.5vw 1vw;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+#advancedButton:hover {
+    transform: translateY(-1px);
+}
+
+#buttonImage {
+    width: 3vw;
+    margin-bottom: 0.5vh;
+}
+
+#advancedTextContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+#hintBox {
+    font-family: 'alte-haas-grotesk', sans-serif;
+    background-color: white;
+    width: 100%;
+    height: 7vh;
+    margin-top: 1vh;
+    box-shadow: #0000004d 0px 5px 5px;
+    transition: all 300ms ease-out;
+    border-radius: 10px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#hintBoxContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 1vw;
+}
+
+#hintBoxContainer p {
+    margin-left: 0.2vw;
+}
+
+.optionSubButton {
     background-color: var(--leo-primary-color1);
     color: white;
-    transform: translateY(-1px);
-    box-shadow: #00000066 0px 8px 15px;
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    height: 4vh;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 200ms ease-out;
+}
+
+.optionSubButton:hover {
+    transform: translateX(-3px);
+}
+
+#costChart {
+    width: 100%;
+    height: 100%;
 }

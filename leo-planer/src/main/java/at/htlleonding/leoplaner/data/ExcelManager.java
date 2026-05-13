@@ -2,7 +2,10 @@ package at.htlleonding.leoplaner.data;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -86,6 +89,33 @@ public class ExcelManager {
         createSubjectSheet(dataRepository.getAllSubjects(), workbook);
         createRoomSheet(dataRepository.getAllRooms(), workbook);
         createTeacherSheet(dataRepository.getAllTeachers(), workbook);
+        createSchoolClassSheet(dataRepository.getAllSchoolClasses(), workbook);
+        createClassSubjectSheet(dataRepository.getAllClassSubjects(), workbook);
+
+        try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+            workbook.write(fileOut);
+        } catch (Exception e) {
+            System.err.println("Error writing workbook: " + e.getMessage());
+        }
+    }
+
+    private void createSchoolClassSheet(List<SchoolClass> classes, Workbook workbook) {
+        Sheet schoolClassSheet = workbook.createSheet("SchoolClasses");
+
+        Row header = schoolClassSheet.createRow(0);
+        header.createCell(0).setCellValue("ID");
+        header.createCell(1).setCellValue("Name");
+        header.createCell(2).setCellValue("classRoomID");
+
+        int rtindex = 1;
+
+        for (SchoolClass schoolClass : classes) {
+            Row dataRow = schoolClassSheet.createRow(rtindex++);
+
+            dataRow.createCell(0).setCellValue(schoolClass.getId());
+            dataRow.createCell(1).setCellValue(schoolClass.getClassName());
+            dataRow.createCell(2).setCellValue(schoolClass.getClassRoom().getId());
+        }
     }
 
     private void createSubjectSheet(List<Subject> subjects, Workbook workbook) {
@@ -128,9 +158,10 @@ public class ExcelManager {
         header.createCell(0).setCellValue("ID");
         header.createCell(1).setCellValue("Subject Id");
         header.createCell(2).setCellValue("Teacher Ids");
-        header.createCell(3).setCellValue("Weekly Hours");
-        header.createCell(4).setCellValue("Requires Double Period");
-        header.createCell(5).setCellValue("Is better as Double Period");
+        header.createCell(3).setCellValue("School class ID");
+        header.createCell(4).setCellValue("Weekly Hours");
+        header.createCell(5).setCellValue("Requires Double Period");
+        header.createCell(6).setCellValue("Is better as Double Period");
 
         int rtindex = 1;
 
@@ -139,9 +170,10 @@ public class ExcelManager {
 
             dataRow.createCell(0).setCellValue(subject.getId());
             dataRow.createCell(1).setCellValue(subject.getSubject().getId());
-            dataRow.createCell(3).setCellValue(subject.getWeeklyHours());
-            dataRow.createCell(4).setCellValue(subject.isRequiresDoublePeriod());
-            dataRow.createCell(5).setCellValue(subject.isBetterDoublePeriod());
+            dataRow.createCell(3).setCellValue(subject.getSchoolClass().getId());
+            dataRow.createCell(4).setCellValue(subject.getWeeklyHours());
+            dataRow.createCell(5).setCellValue(subject.isRequiresDoublePeriod());
+            dataRow.createCell(6).setCellValue(subject.isBetterDoublePeriod());
 
             StringBuilder teachersCell = new StringBuilder();
             for (Teacher teacher : subject.getTeachers()) {
@@ -244,7 +276,8 @@ public class ExcelManager {
     public void importAll() throws Exception {
         try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
             DataFormatter formatter = new DataFormatter();
-
+            
+            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);
             importTeachers(importWorkbook.getSheet("Teachers"), formatter);
             importRooms(importWorkbook.getSheet("Rooms"), formatter);
@@ -257,16 +290,36 @@ public class ExcelManager {
 
     @Transactional
     public void importFile(String fileName) throws Exception {
-        try (Workbook importWorkbook = WorkbookFactory.create(new File(directoryPath + fileName))) {
+        try (Workbook importWorkbook = WorkbookFactory.create(new File(fileName))) {
             DataFormatter formatter = new DataFormatter();
 
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);
             importTeachers(importWorkbook.getSheet("Teachers"), formatter);
             importRooms(importWorkbook.getSheet("Rooms"), formatter);
+            importSchoolClasses(importWorkbook.getSheet("SchoolClasses"), formatter);
 
             importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
 
             // importTimetable(importWorkbook.getSheet("Timetable"), formatter);
+        } catch (Exception e) {
+            System.err.println("Error loading workbook: " + e.getMessage());
+            throw new Exception(e);
+        }
+    }
+
+    private void importSchoolClasses(Sheet sheet, DataFormatter fmt) {
+        boolean isFirstRow = true;
+        for (Row row : sheet) {
+            if (isFirstRow) {
+                isFirstRow = false;
+                continue;
+            }
+
+            SchoolClass sc = new SchoolClass();
+            sc.setClassName(fmt.formatCellValue(row.getCell(1)));
+            sc.setClassRoom(Room.findById(Long.parseLong(fmt.formatCellValue(row.getCell(2)))));
+
+            dataRepository.addSchoolClass(sc);
         }
     }
 
@@ -361,12 +414,31 @@ public class ExcelManager {
                 continue;
             ClassSubject cs = new ClassSubject();
 
-            cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
-            cs.setTeachers(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
+            List<Teacher> teachers = new ArrayList<>();
+            teachers.add(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(2)))));
 
-            cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(5))));
-            cs.setRequiresDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(6))));
-            cs.setBetterDoublePeriod(Boolean.parseBoolean(fmt.formatCellValue(row.getCell(7))));
+            cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
+            cs.setTeachers(teachers);
+
+            // System.out.println(fmt.formatCellValue(row.getCell(3)));
+            cs.setSchoolClass(SchoolClass.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
+
+            cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(4))));
+
+            if (fmt.formatCellValue(row.getCell(5)).equals("TRUE")
+                    || fmt.formatCellValue(row.getCell(5)).equals("true")) {
+                cs.setRequiresDoublePeriod(true);
+            } else {
+                cs.setRequiresDoublePeriod(false);
+            }
+
+            if (fmt.formatCellValue(row.getCell(6)).equals("TRUE")
+                    || fmt.formatCellValue(row.getCell(6)).equals("true")) {
+                cs.setBetterDoublePeriod(true);
+            } else {
+                cs.setBetterDoublePeriod(false);
+            }
+
             dataRepository.addClassSubject(cs);
         }
     }
