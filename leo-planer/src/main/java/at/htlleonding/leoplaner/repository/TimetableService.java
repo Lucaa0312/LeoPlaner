@@ -182,7 +182,9 @@ public class TimetableService {
         clear();
 
         for (SchoolClass sc : schoolClassRepository.getAll()) {
+            System.out.println(sc.getClassName());
             List<ClassSubject> subjects = ClassSubject.getAllByClassName(sc.getClassName());
+            System.out.println(subjects.size());
             List<ClassSubjectInstance> instances = createRandomInstances(subjects, sc.getClassRoom());
             addClassSubjectInstances(instances);
             Timetable timetable = new Timetable(instances, sc);

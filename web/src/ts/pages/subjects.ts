@@ -22,6 +22,12 @@ import type { ColorPickerController } from "../features/colorSelector.js";
 import type { RoomType } from "../types/room.js";
 import { initSearchElement } from "../features/searchElement.js";
 
+const DEFAULT_SUBJECT_COLOR: SubjectColor = {
+  red: 128,
+  green: 128,
+  blue: 128,
+};
+
 function createRoomTypesElement(roomTypes: string[]): HTMLElement {
   if (roomTypes.length === 0) {
     return document.createElement("div");
@@ -63,7 +69,12 @@ function createSubjectCard(subject: Subject): HTMLElement {
   }
 
   subjectBox.append(subjectInfo, editDiv);
-  subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.4)`;
+  if (subject.subjectColor) {
+    subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.4)`;
+  }
+  else {
+    subjectBox.style.backgroundColor = `rgba(${DEFAULT_SUBJECT_COLOR.red}, ${DEFAULT_SUBJECT_COLOR.green}, ${DEFAULT_SUBJECT_COLOR.blue}, 0.4)`;
+  }
 
   return subjectBox;
 }
