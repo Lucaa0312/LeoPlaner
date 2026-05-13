@@ -1,9 +1,9 @@
 import initNavbar from "./navbar.js";
+import { initImportButton } from "../features/importButton.js";
 const statsData = [
     { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
-    { id: "stat-card-subjects", label: "Gesamte<br>Fächer:", value: 0 },
+    { id: "stat-card-subjects", label: "Gesamte<br>Fsächer:", value: 0 },
     { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
-    { id: "stat-card-timetable", label: "Zum<br>Stundenplan:", value: 0 },
 ];
 //Gemerates welcome text based on time of day
 function generateWelcomeText() {
@@ -60,6 +60,35 @@ function generateDashboardStats() {
         card.appendChild(arrowIcon);
         statsContainer.appendChild(card);
     });
+    const importCard = document.createElement("div");
+    importCard.className = "import-wrapper stat-card-import";
+    const icon = document.createElement("i");
+    icon.className = "ti ti-upload";
+    icon.setAttribute("aria-hidden", "true");
+    const label = document.createElement("label");
+    label.className = "import-button";
+    label.textContent = "Stundenplan importieren";
+    const hint = document.createElement("p");
+    hint.className = "import-hint";
+    hint.textContent = ".xlsx, .xls akzeptiert";
+    const input = document.createElement("input");
+    input.type = "file";
+    input.id = "excel-upload";
+    input.accept = ".xlsx,.xls";
+    input.hidden = true;
+    const fileName = document.createElement("p");
+    fileName.id = "import-file-name";
+    const error = document.createElement("p");
+    error.id = "import-error";
+    importCard.appendChild(icon);
+    importCard.appendChild(label);
+    importCard.appendChild(hint);
+    importCard.appendChild(input);
+    importCard.appendChild(fileName);
+    importCard.appendChild(error);
+    importCard.addEventListener("click", () => input.click());
+    statsContainer.appendChild(importCard);
+    initImportButton();
 }
 // Initialize the dashboard application
 async function initializeApp() {
@@ -68,9 +97,9 @@ async function initializeApp() {
     showLastUpdateTime();
     try {
         const [teachers, subjects, rooms] = await Promise.all([
-            fetch("http://localhost:8080/api/teachers/getTeacherCount").then(r => r.json()),
-            fetch("http://localhost:8080/api/subjects/getSubjectCount").then(r => r.json()),
-            fetch("http://localhost:8080/api/rooms/getRoomCount").then(r => r.json()),
+            fetch("http://localhost:8080/api/teachers/getTeacherCount").then((r) => r.json()),
+            fetch("http://localhost:8080/api/subjects/getSubjectCount").then((r) => r.json()),
+            fetch("http://localhost:8080/api/rooms/getRoomCount").then((r) => r.json()),
         ]);
         statsData[0].value = Number(teachers ?? 0);
         statsData[1].value = Number(subjects ?? 0);
