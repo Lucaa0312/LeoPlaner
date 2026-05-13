@@ -1,4 +1,5 @@
 import { uploadFile } from "../api/uploadApi.js";
+import { initializeApp } from "../pages/dashboard.js";
 const allowedExtensions = [".xlsx", ".xls"];
 const maxFileSizeMB = 5;
 export function initImportButton() {
@@ -48,6 +49,7 @@ export function initImportButton() {
         console.log("Valid Excel file:", file);
         try {
             await uploadFile(file);
+            await initializeApp();
         }
         catch (error) {
             errorText.textContent = "Fehler beim Hochladen";
