@@ -34,17 +34,16 @@ public class TeacherResource {
     public Response getAllTeachers() {
         try {
             List<TeacherDTO> teachers = dataRepository
-                    .getAllTeachers()
-                    .stream()
-                    .map(UtilBuildFunctions::createTeacherDTO)
-                    .toList();
+                .getAllTeachers()
+                .stream()
+                .map(UtilBuildFunctions::createTeacherDTO)
+                .toList();
 
             return Response.ok(teachers).build();
-
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to fetch teachers")
-                    .build();
+                .entity("Failed to fetch teachers")
+                .build();
         }
     }
 
@@ -53,25 +52,12 @@ public class TeacherResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addTeacher(Teacher teacher) {
         try {
-            Teacher teacherCreated = this.dataRepository.addTeacher(teacher);
-
-            if (teacherCreated == null || teacherCreated.getId() == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity("Failed to create teacher")
-                        .build();
-            }
-
-            UriBuilder uriBuilder = this.uriInfo.getAbsolutePathBuilder();
-            uriBuilder.path(Long.toString(teacherCreated.getId()));
-
-            return Response.created(uriBuilder.build())
-                    .entity(teacherCreated)
-                    .build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
+            this.dataRepository.addTeacher(teacher);
+            return Response.status(Response.Status.CREATED).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_ACCEPTABLE)
+                .entity(e.getMessage())
+                .build();
         }
     }
 
@@ -81,17 +67,16 @@ public class TeacherResource {
     public Response getTeacherWithWishes() {
         try {
             List<TeacherDTOwithWishes> teachersWithWishes =
-                    this.dataRepository.getAllTeachers()
-                            .stream()
-                            .map(UtilBuildFunctions::createTeacherDTOWithWishes)
-                            .toList();
+                this.dataRepository.getAllTeachers()
+                    .stream()
+                    .map(UtilBuildFunctions::createTeacherDTOWithWishes)
+                    .toList();
 
             return Response.ok(teachersWithWishes).build();
-
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to fetch teachers with wishes")
-                    .build();
+                .entity("Failed to fetch teachers with wishes")
+                .build();
         }
     }
 
@@ -103,11 +88,10 @@ public class TeacherResource {
             Long teacherCount = this.dataRepository.getTeacherCount();
 
             return Response.ok(teacherCount).build();
-
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to fetch teacher count")
-                    .build();
+                .entity("Failed to fetch teacher count")
+                .build();
         }
     }
 
@@ -120,22 +104,14 @@ public class TeacherResource {
             Teacher updatedTeacher = dataRepository.updateTeacher(id, teacher);
 
             if (updatedTeacher == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Teacher not found")
-                        .build();
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            return Response.ok(updatedTeacher).build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-
+            return Response.status(Response.Status.CREATED).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to update teacher")
-                    .build();
+                .entity("Failed to update teacher")
+                .build();
         }
     }
 
@@ -148,16 +124,15 @@ public class TeacherResource {
 
             if (teacherToDelete == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Teacher not found")
-                        .build();
+                    .entity("Teacher not found")
+                    .build();
             }
 
             return Response.ok(teacherToDelete).build();
-
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to delete teacher")
-                    .build();
+                .entity("Failed to delete teacher")
+                .build();
         }
     }
 }

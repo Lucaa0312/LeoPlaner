@@ -128,10 +128,15 @@ async function loadAndRenderTeachers() {
             return;
         const tableInfoRow = createTableInfoRow();
         teachersContainer.appendChild(tableInfoRow);
+        const br = document.createElement("br");
         teachers.forEach((teacher) => {
             const teacherRow = createTeacherRow(teacher);
             teachersContainer.appendChild(teacherRow);
         });
+        teachersContainer.appendChild(br);
+        teachersContainer.appendChild(br);
+        teachersContainer.appendChild(br);
+        teachersContainer.appendChild(br);
     }
     catch (error) {
         console.error("Fehler beim Laden der Lehrer: " + error);
