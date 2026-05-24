@@ -19,6 +19,7 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
+          cache-dependency-path: leo-planer/pom.xml
 
       - name: Set up database
         run: docker compose -f database/docker-compose.yaml up -d
