@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import at.htlleonding.leoplaner.algorithm.CoolingMode;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.CSVManager;
@@ -201,6 +202,18 @@ public class Resource {
         }
 
         return Response.ok(outFileName).build();
+    }
+
+    @Path("setLogCooling")
+    @GET
+    public void setLogCooling() {
+        this.dataRepository.setCoolingMode(CoolingMode.LOGARITHMIC);
+    }
+
+    @Path("setGeoCooling")
+    @GET
+    public void setGeoCooling() {
+        this.dataRepository.setCoolingMode(CoolingMode.GEOMETRIC);
     }
 
     @POST
