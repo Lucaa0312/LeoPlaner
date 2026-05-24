@@ -1,4 +1,4 @@
-import { clearCharts } from "./graph.js";
+/*import { clearCharts } from "./graph.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
@@ -390,6 +390,150 @@ function hideTimetableCost(): void {
 function initializeApp(): void {
     load();
     initNavbar();
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);*/
+
+import { getElement } from "../utils/elementHelpers.js";
+import initNavbar from "./navbar.js";
+
+//--------------------------------------------------------------
+type SubjectColor = {
+    red: number;
+    green: number;
+    blue: number;
+};
+
+type TimetableSubject = {
+    id: number;
+    subjectName: string;
+    subjectColor?: SubjectColor;
+    subjectSymbol: string
+};
+
+type TimetableTeacher = {
+    id: number;
+    teacherName: string;
+    nameSymbol: string;
+};
+
+type TimetableClassSubject = {
+    subject?: TimetableSubject;
+    teacher?: TimetableTeacher;
+};
+
+type Period = {
+    schoolDays: string;
+    schoolHour: number;
+    lunchBreak: boolean;
+};
+
+type Room = {
+    id?: number;
+    roomNumber?: string | number;
+};
+
+type ClassSubjectInstance = {
+    classSubject?: TimetableClassSubject;
+    period: Period;
+    duration?: number;
+    room?: Room;
+};
+
+type TeacherNonWorkingHour = {
+    day: string;
+    schoolHour: number;
+};
+
+type TeacherDetails = {
+    id: number;
+    teacherName: string;
+    nameSymbol: string;
+    teacherNonWorkingHours: TeacherNonWorkingHour[];
+};
+
+type TimetableByClassResponse = {
+    classSubjectInstances: ClassSubjectInstance[];
+};
+
+type TimetableByTeacherResponse = {
+    timetableDTO: {
+        classSubjectInstances: ClassSubjectInstance[];
+    };
+    teacher: TeacherDetails;
+};
+
+type TimetableByRoomResponse = {
+    classSubjectInstances: ClassSubjectInstance[];
+};
+
+interface Unit {
+    eh: string;
+    start: string;
+    end: string;
+}
+
+interface Lesson {
+    day: string;
+    rowStart: number;
+    rowSpan: number;
+    subject: string;
+    room: string;
+    teacher: string;
+    color: string;
+}
+
+const DAYS = ["MO", "DI", "MI", "DO", "FR", "SA"];
+
+const units: Unit[] = [
+    { eh: '1. EH', start: '08:00', end: '08:50' },
+    { eh: '2. EH', start: '08:55', end: '09:45' },
+    { eh: '3. EH', start: '10:00', end: '10:50' },
+    { eh: '4. EH', start: '10:55', end: '11:45' },
+    { eh: '5. EH', start: '11:50', end: '12:40' },
+    { eh: '6. EH', start: '12:45', end: '13:35' },
+    { eh: '7. EH', start: '13:40', end: '14:30' },
+    { eh: '8. EH', start: '14:35', end: '15:25' },
+    { eh: '9. EH', start: '15:30', end: '16:20' },
+    { eh: '10. EH', start: '16:25', end: '17:15' },
+]
+
+let lessons: Lesson[] = []
+
+const ROW_HEIGHT = 200;
+
+function initializeLayout() {
+    let grid = getElement<HTMLElement>("timetable-content");
+    
+}
+
+function clearLayout() {
+
+}
+
+function loadTimetable(): void {
+    clearLayout();
+    fetch("http://localhost:8080/api/timetable/getByClass/1")
+        .then((response) => {
+            return response.json() as Promise<TimetableByClassResponse>;
+        })
+        .then((data) => {
+            console.log(data.classSubjectInstances)
+            createLayout(data.classSubjectInstances);
+        })
+        .catch((error) => {
+            console.error("Error loading Timetable:", error);
+        });
+}
+
+function createLayout(data: ClassSubjectInstance[]) {
+
+}
+
+function initializeApp(): void {
+    initNavbar();
+    initializeLayout();
+    loadTimetable();
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

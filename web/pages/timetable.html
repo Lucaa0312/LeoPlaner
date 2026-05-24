@@ -14,10 +14,7 @@
 </head>
 
 <body>
-    <div class="loader" style="display: none;"></div>
-    <div id="optimizing-text" style="display: none;">Optimierung Ihres Stundenplans...</div>
-    <div id="disable-overlay"></div>
-
+    
     <div class="flex-container">
 
         <div id="nav-bar"></div>
@@ -33,7 +30,20 @@
                 </div>   
             </div>
 
-            <!--New Timetable-->
+            <div id="body-container">
+                <div id="timetable-container">
+                    <div id="timetable-content">
+                        <div class="cell-header">Mo</div>
+                        <div class="cell-header">Di</div>
+                        <div class="cell-header">Mi</div>
+                        <div class="cell-header">Do</div>
+                        <div class="cell-header">Fr</div>
+                        <div class="cell-header">Sa</div>
+                    </div>
+                </div>
+                <div id="optimization-container"></div>
+            </div>
+            <!--New Timetable
             <div id="flex-inner-container">
             <div id="timetable">
                 <div id="timetable-content">
@@ -48,11 +58,11 @@
                     </div>
                     <div id="timetable-view">
                         <div id="timetable-background">
-                            <!-- autogen dummy blocks js (!with break!) -->
+                             autogen dummy blocks js (!with break!)
                         </div>
 
                         <div id="timetable-times">
-                            <!-- autogen times js (!with break!) -->
+                             autogen times js (!with break!) 
                         </div>
                         <div id="timetable-days">
                             <div class="school-days" id="MONDAY">
@@ -106,7 +116,7 @@
                     <p id="advancedButtonText">Stundenplan für Fortgeschrittene</p>
                     </div>
                 </div>
-                <!--<div class="graph-box">
+                <div class="graph-box">
                     <div id="costChart"></div>
                 </div>
                 <div id="slider-container">
@@ -117,9 +127,9 @@
                         <div class="slider-value"><p class="slider-line">|</p><p>500</p></div>
                         <div class="slider-value"><p class="slider-line">|</p><p>0</p></div>
                     </div>
-                </div>-->
+                </div>
             </div>
-            </div>
+            </div>-->
         </div>
         
     </div>
@@ -129,8 +139,3 @@
 </body>
 
 </html>
-
-
-<!-- <div id="header">
-        <img src="../assets/img/LeoPlanerLogoSVG.svg" alt="LeoPlaner" onclick="location.href='../index.html'" width="30vw">
-    </div> -->
