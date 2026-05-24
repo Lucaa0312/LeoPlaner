@@ -11,6 +11,10 @@
     <script type="module" src="../dist/js/pages/timetable.js"></script>
     <script type="module" src="../dist/js/pages/graph.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
+    <script type="module" src="../dist/js/features/auth.js"></script>
+    
+    
+
 </head>
 
 <body>
@@ -126,7 +130,13 @@
     
     <div id="cost-container">Kosten: </div>
 
+    <script>
+        window.auth.requireLogin();
+        const user = window.auth.getCurrentUser();
+        document.getElementById('username').textContent = user.username;
+    </script>
 </body>
+
 
 </html>
 
