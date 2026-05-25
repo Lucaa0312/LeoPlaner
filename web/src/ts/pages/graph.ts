@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
-import { load, getRandomizedTimeTable, clearLayout, getTimetableByTeacher, getTimetableByRoom, getTimetableByClass } from "./timetable.js";
+import { loadTimetable, getRandomizedTimeTable, clearLayout, getTimetableByTeacher, getTimetableByRoom, getTimetableByClass } from "./timetable.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 
 let toggledAdvanced = false;
@@ -417,7 +417,7 @@ async function handleOptimizeButton() {
         randomizeButton.style.opacity = "1";
         setAdvancedButtonDisabled(false);
         randomizeButton.addEventListener("click", getRandomizedTimeTable);
-        load();
+        loadTimetable();
         costDisplay.style.display = "block";
         costDisplay.innerHTML = "Kosten: " + lastCost;
         socket.send("pause");
@@ -473,7 +473,7 @@ optionButton?.addEventListener("click", (event: MouseEvent) => {
     if (!optionsToggled) {
         optionsToggled = true;
         hideAdvancedButton();
-        optionButton.style.height = "32vh";
+        optionButton.style.height = "29vh";
         const addButtons = () => {
             const searchBar = document.createElement("div");
             searchBar.setAttribute("id", "search-bar");
@@ -507,7 +507,7 @@ optionButton?.addEventListener("click", (event: MouseEvent) => {
                 classButton.style.padding = "0 1rem";
 
                 if(i == 0) {
-                    classButton.style.marginTop = "4vh";
+                    classButton.style.marginTop = "3vh";
                 }
 
                 classButton.addEventListener("click", () => {
@@ -620,7 +620,7 @@ graphButton?.addEventListener("click", (event: MouseEvent) => {
     if (!diagramToggled) {
         diagramToggled = true;
         hideAdvancedButton();
-        graphButton.style.height = "55vh";
+        graphButton.style.height = "52vh";
         setTimeout(() => {
             graphBox.classList.add("graph-box");
 
@@ -723,7 +723,7 @@ function hideAdvancedButton() {
 function showAdvancedButton() {
     if (advancedButton?.style.display === "none") {
         setTimeout(() => {
-            advancedButton.style.display = "block";
+            advancedButton.style.display = "flex";
         }, 100);
     }
 }

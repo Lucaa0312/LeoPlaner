@@ -379,92 +379,111 @@
     margin-top: 5vh;
 }
 
-
-/* Loader animation */
-/* loader from: https://css-loaders.com/ */
-.loader {
-    height: 50px;
-    aspect-ratio: 2;
-    border: 10px solid #00000000;
-    box-sizing: border-box;
-    background: 
-        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
-        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) left/20px 20px,
-        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) center/20px 20px,
-        radial-gradient(farthest-side,var(--leo-primary-color1) 98%,#0000) right/20px 20px,
-        #00000000;
-    background-repeat: no-repeat;
-    animation: l14 1s infinite;
-
-    position: absolute;
-    z-index: 10000;
-    top: 38vh;
-    left: 57vw;
-    scale: 1.2;
-}
-@keyframes l14 {
-  100%  {background-position:right,left,center,right}
-}
-
-
-
-
-
-#optimizing-text{
-    position: absolute;
-    z-index: 10001;
-    top: 35vh;
-    left: 48.8vw;
-    font-size: 1.75rem;
-    color: var(--leo-primary-color1);
-    text-align: center;
-    font-weight: bold;
-    
-}
-
-#cost-container {
-    position: absolute;
-    z-index: 10001;
-    bottom: 1vh;
-    right: 20%;
-    font-size: 1.75rem;
-    text-align: center;
-    font-weight: bold;
-    background-color: white;
-    width: 15vw;
-    height: 5vh;
-    border-radius: 0.8em 0.8em 0.8em 0.8em;
-    box-shadow: #0000004d 0px 5px 5px;
-    text-align: left;
-    align-content: center;
-    padding-left: 2vw;
-    border-color: rgb(220, 220, 220);
-    border-width: 0.1px;
-    border-style: solid;
-    display: none;
-}
-
-.graph-box {
-    background-color: white;
-    width: 17vw;
-    height: 37vh;
-    border-radius: 0.8em 0.8em 0.8em 0.8em;
-    padding: 0.3vw;
-}
-
-
-
-#flex-inner-container {
+/*------------------------------------NEW TIMETABLE CSS------------------------------------*/
+#body-container {
     display: flex;
-    gap: 1vw;
-    height: 102%;
-    margin-top: -6vh;
+    width: 100%;
+    height: 100%;
+    gap: 2%;
 }
 
+/*------------------------------------TIMETABLE------------------------------------*/
+#timetable-container {
+    width: 74%;
+    height: 100%;
+}
+
+#timetable-content {
+    background-color: white;
+    border-radius: 10px;
+    height: auto;
+    min-height: 0;
+    margin-left: 1%;
+    margin-top: 1%;
+    display: grid;
+    grid-template-columns: 90px repeat(6, 1fr);
+    grid-template-rows: 40px repeat(10, 86px);
+    padding-left: 10px;
+}
+
+.time-cell {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.slot {
+    position: relative;
+    padding: 4px;
+}
+
+.header-cell {
+    font-size: 1.5em;
+    font-weight: 500;
+}
+
+.eh-label {
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.slot {
+    border-top: 3px dashed #dedede;
+    position: relative;
+}
+
+.lesson-block {
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    z-index: 1;
+    color: black;
+    justify-items: start;
+    padding-left: 12px;
+    padding-right: 10px;
+}
+
+.lesson-block::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    width: 3px;
+    background-color: var(--block-color);
+    top: 0;
+    bottom: 0;
+}
+
+.subject {
+    font-weight: bold;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.teacher {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+}
+
+.room {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+}
+
+/*------------------------------------CHART------------------------------------*/
 #graph-container {
     display: flex;
     flex-direction: column;
-    width: 27vw;
+    width: 23vw;
     margin-right: 1vw;
     align-items: center;
 }
@@ -695,37 +714,44 @@
     height: 100%;
 }
 
-/*NEW TIMETABLE CSS*/
-#body-container {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    gap: 1%;
+#optimizing-text{
+    position: absolute;
+    z-index: 10001;
+    top: 35vh;
+    left: 48.8vw;
+    font-size: 1.75rem;
+    color: var(--leo-primary-color1);
+    text-align: center;
+    font-weight: bold;
+    
 }
 
-#timetable-container {
-    width: 76%;
-    height: 100%;
-}
-
-#timetable-content {
+#cost-container {
+    position: absolute;
+    z-index: 10001;
+    bottom: 1vh;
+    right: 23.5%;
+    font-size: 1.75rem;
+    text-align: center;
+    font-weight: bold;
     background-color: white;
-    border-radius: 10px;
-    height: 100%;
-    margin-left: 1%;
-    margin-top: 1%;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(11, 1fr);
+    width: 15vw;
+    height: 5vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    box-shadow: #0000004d 0px 5px 5px;
+    text-align: left;
+    align-content: center;
+    padding-left: 2vw;
+    border-color: rgb(220, 220, 220);
+    border-width: 0.1px;
+    border-style: solid;
+    display: none;
 }
 
-#timetable-content>div {
-    background-color: red;
-    border-color: black;
-    border: 1px solid #000000;
-}
-
-#optimization-container {
-    width: 23%;
-    height: 100%;
+.graph-box {
+    background-color: white;
+    width: 17vw;
+    height: 37vh;
+    border-radius: 0.8em 0.8em 0.8em 0.8em;
+    padding: 0.3vw;
 }
