@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../style/teacher.css">
     <script type="module" defer src="../dist/js/pages/teachers.js"></script>
     <script type="module" defer src="../dist/js/pages/navbar.js"></script>
+    <script src="./web/dist/js/features/auth.js"></script>
     <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
 </head>
 
@@ -63,6 +64,9 @@
         </div>
 
     </div>
+    <script>
+        window.auth.requireLogin();
+    </script>
 </body>
 
 </html>
