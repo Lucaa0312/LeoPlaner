@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
@@ -61,7 +62,11 @@ public class SimulatedAnnealingAlgorithm {
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private final AtomicBoolean automaticMode = new AtomicBoolean(false);
 
-    private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(1000.0));
+    private final CoolingMode initCoolingMode = CoolingMode.GEOMETRIC;
+    private AtomicReference<CoolingMode> coolingMode = new AtomicReference<>(initCoolingMode);
+
+    private static final double INITIAL_TEMPERATURE = 500;
+    private static AtomicLong temperature = new AtomicLong(Double.doubleToLongBits(INITIAL_TEMPERATURE));
     // private final int ITERATIONS = 10000;
     private final double COOLING_RATE = 0.9994;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
@@ -91,6 +96,7 @@ public class SimulatedAnnealingAlgorithm {
 
         final Random random = new Random();
         while (getIsRunning() && iterationCounter < iterationCap) { // main loop
+            this.coolingMode.set(this.dataRepository.getCoolingMode());
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
             currTimetable = schoolSchedule.get(randomClassIndex);
             final String className = currTimetable.getClassSubjectInstances().getFirst().getClassSubject()
@@ -133,9 +139,11 @@ public class SimulatedAnnealingAlgorithm {
             progressEvent.fire(
                     new AlgorithmProgressDTO(iterationCounter, getTemperature(), costCurrSchoolSchedule, false));
 
-            decreaseTemperature();
+            coolTempertaure(iterationCounter);
+            // decreaseTemperature();
+            // decreaseTemperatureLog(200, iterationCounter);
 
-            if (costCurrSchoolSchedule < bestCosts) {
+            if (costCurrSchoolSchedule < bestCosts && costCurrSchoolSchedule > 0) {
                 this.dataRepository.setBestSchoolSchedule(deepCopy(this.dataRepository.getAllTimetables()));
                 bestCosts = costCurrSchoolSchedule;
             }
@@ -163,6 +171,14 @@ public class SimulatedAnnealingAlgorithm {
         this.dataRepository.setAlgorithmRunning(false);
         // setIsRunning(true);
         progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), costFinal, true));
+    }
+
+    private void coolTempertaure(long iteration) {
+        if (coolingMode.get() == CoolingMode.GEOMETRIC) {
+            decreaseTemperature();
+        } else if (coolingMode.get() == CoolingMode.LOGARITHMIC) {
+            decreaseTemperatureLog(INITIAL_TEMPERATURE, iteration);
+        }
     }
 
     private Map<String, Timetable> deepCopy(Map<String, Timetable> original) {
@@ -512,6 +528,10 @@ public class SimulatedAnnealingAlgorithm {
     public void decreaseTemperature() {
         final double current = getTemperature();
         setTemperature(current * COOLING_RATE);
+    }
+
+    public void decreaseTemperatureLog(double T0, double k) {
+        setTemperature(T0 / Math.log(k));
     }
 
     public void setIsRunning(boolean paused) {

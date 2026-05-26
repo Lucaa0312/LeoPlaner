@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.data;
 import java.util.List;
 import java.util.Map;
 
+import at.htlleonding.leoplaner.algorithm.CoolingMode;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.repository.ClassSubjectRepository;
 import at.htlleonding.leoplaner.repository.RoomRepository;
@@ -35,6 +36,8 @@ public class DataRepository {
 
     private boolean algorithmRunning = false;
     private boolean algorithmRunningAtLeastOnce = false;
+
+    private CoolingMode coolingMode = CoolingMode.GEOMETRIC;
 
     private boolean automaticMode = false;
 
@@ -276,6 +279,38 @@ public class DataRepository {
 
     public void setAutomaticMode(boolean automaticMode) {
         this.automaticMode = automaticMode;
+    }
+
+    public void setTimetableService(TimetableService timetableService) {
+        this.timetableService = timetableService;
+    }
+
+    public void setTeacherRepository(TeacherRepository teacherRepository) {
+        this.teacherRepository = teacherRepository;
+    }
+
+    public void setRoomRepository(RoomRepository roomRepository) {
+        this.roomRepository = roomRepository;
+    }
+
+    public void setSubjectRepository(SubjectRepository subjectRepository) {
+        this.subjectRepository = subjectRepository;
+    }
+
+    public void setSchoolClassRepository(SchoolClassRepository schoolClassRepository) {
+        this.schoolClassRepository = schoolClassRepository;
+    }
+
+    public void setClassSubjectRepository(ClassSubjectRepository classSubjectRepository) {
+        this.classSubjectRepository = classSubjectRepository;
+    }
+
+    public CoolingMode getCoolingMode() {
+        return coolingMode;
+    }
+
+    public void setCoolingMode(CoolingMode coolingMode) {
+        this.coolingMode = coolingMode;
     }
 
 }
