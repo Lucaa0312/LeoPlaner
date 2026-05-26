@@ -1,10 +1,5 @@
-export interface Room {
-  id?: number;
-}
-
-export interface ClassSubject {
-  id?: number;
-}
+import type { Room } from "./room.js";
+import type { ClassSubject } from "./classSubject.js";
 
 export interface Timetable {
   id?: number;

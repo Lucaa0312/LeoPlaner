@@ -1,5 +1,6 @@
 import type { Teacher } from "./teacher.js";
 import type { Subject } from "./subject.js";
+import type { SchoolClass } from "./schoolClass.js";
 
 export type ClassSubject = {
   id?: number;
@@ -12,8 +13,9 @@ export type ClassSubject = {
 };
 
 export type GroupedClass = {
-    className: string;
-    weeklyHours: number;
-    subjectCount: number;
-    subjects: ClassSubject[];
+  className: string;
+  weeklyHours: number;
+  subjectCount: number;
+  subjects: ClassSubject[];
+  schoolClass?: SchoolClass | undefined;
 };

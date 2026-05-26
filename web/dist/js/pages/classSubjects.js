@@ -2,6 +2,7 @@ import { toggleEmptyState } from "../components/emptyState.js";
 import { getElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { fetchClassSubjects } from "../api/classSubjectApi.js";
+import { fetchSchoolClasses } from "../api/classSubjectApi.js";
 /**
  * Groups the class subjects by their class name.
  */
@@ -57,7 +58,54 @@ function closeOverview(groupedClassesLength) {
 /**
  * Opens the overview page for the given class.
  */
-function openOverview(groupedClassesLength) {
+/*function openOverview(groupedClassesLength: number) {
+  const headerHoursBox = getElement<HTMLDivElement>("header-hours-box");
+  const headerSubjectCountBox = getElement<HTMLDivElement>(
+    "header-subject-count-box",
+  );
+
+  if (!headerHoursBox || !headerSubjectCountBox) {
+    console.log("headerHoursBox or headerSubjectCountBox is null");
+    return;
+  } else {
+    headerHoursBox.style.display = "none";
+    headerSubjectCountBox.style.display = "none";
+    for (let i = 0; i < groupedClassesLength; i++) {
+      const hoursBox = getElement<HTMLDivElement>("hours-box-" + i);
+      const subjectCountBox = getElement<HTMLDivElement>(
+        "subject-count-box-" + i,
+      );
+      if (!hoursBox || !subjectCountBox) {
+        console.log("hoursBox or subjectCountBox is null");
+        return;
+      } else {
+        hoursBox.style.display = "none";
+        subjectCountBox.style.display = "none";
+      }
+    }
+  }
+
+  const overviewBox = getElement<HTMLDivElement>("overview-box");
+  if (overviewBox) {
+    overviewBox.style.display = "block";
+  }
+
+  const closeOverviewBox = document.createElement("div");
+  closeOverviewBox.id = "close-overview-box";
+
+  const xMark = document.createElement("i");
+  xMark.className = "fa-solid fa-xmark";
+
+  xMark.onclick = () => {
+    closeOverview(groupedClassesLength);
+  };
+
+  closeOverviewBox.appendChild(xMark);
+
+  overviewBox?.replaceChildren(closeOverviewBox);
+}
+*/
+function openOverview(groupedClass, groupedClassesLength) {
     const headerHoursBox = getElement("header-hours-box");
     const headerSubjectCountBox = getElement("header-subject-count-box");
     if (!headerHoursBox || !headerSubjectCountBox) {
@@ -84,6 +132,12 @@ function openOverview(groupedClassesLength) {
     if (overviewBox) {
         overviewBox.style.display = "block";
     }
+    // --- Titelleiste mit Klassennamen + X ----------------------------------
+    const titleBar = document.createElement("div");
+    titleBar.id = "overview-title-bar";
+    const title = document.createElement("span");
+    title.id = "overview-title";
+    title.textContent = `${groupedClass.className.toUpperCase()} - Überblick`;
     const closeOverviewBox = document.createElement("div");
     closeOverviewBox.id = "close-overview-box";
     const xMark = document.createElement("i");
@@ -92,7 +146,70 @@ function openOverview(groupedClassesLength) {
         closeOverview(groupedClassesLength);
     };
     closeOverviewBox.appendChild(xMark);
-    overviewBox?.replaceChildren(closeOverviewBox);
+    titleBar.append(title, closeOverviewBox);
+    // --- Suchfeld ----------------------------------------------------------
+    const searchBox = document.createElement("div");
+    searchBox.id = "overview-search-box";
+    const searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.placeholder = "Suchen";
+    searchInput.id = "overview-search-input";
+    const searchIcon = document.createElement("i");
+    searchIcon.className = "fa-solid fa-magnifying-glass";
+    searchIcon.id = "overview-search-icon";
+    searchBox.append(searchInput, searchIcon);
+    // --- Scrollbarer Inhalt (Fächer) ---------------------------------------
+    const content = document.createElement("div");
+    content.id = "overview-content";
+    // Fächer
+    const subjectsHeader = document.createElement("div");
+    subjectsHeader.className = "overview-section-header";
+    subjectsHeader.textContent = "Fächer";
+    content.appendChild(subjectsHeader);
+    for (const cs of groupedClass.subjects) {
+        const item = document.createElement("div");
+        item.className = "overview-item";
+        const label = document.createElement("span");
+        label.textContent = cs.subject?.subjectName ?? "(unbekannt)";
+        const remove = document.createElement("i");
+        remove.className = "fa-solid fa-xmark overview-item-remove";
+        remove.onclick = () => {
+            console.log("remove subject", cs);
+            // TODO: API-Call zum Entfernen des Fachs
+        };
+        item.append(label, remove);
+        content.appendChild(item);
+    }
+    // Raum
+    const room = groupedClass.schoolClass?.classRoom;
+    if (room) {
+        const roomHeader = document.createElement("div");
+        roomHeader.className = "overview-section-header";
+        roomHeader.textContent = "Raum";
+        content.appendChild(roomHeader);
+        const item = document.createElement("div");
+        item.className = "overview-item";
+        const label = document.createElement("span");
+        label.textContent = room.roomName;
+        const remove = document.createElement("i");
+        remove.className = "fa-solid fa-xmark overview-item-remove";
+        remove.onclick = () => {
+            console.log("remove room", room);
+            // TODO: API-Call zum Entfernen/Ändern des Raums
+        };
+        item.append(label, remove);
+        content.appendChild(item);
+    }
+    // Live-Suche
+    searchInput.addEventListener("input", () => {
+        const q = searchInput.value.trim().toLowerCase();
+        const items = content.querySelectorAll(".overview-item");
+        for (const item of items) {
+            const text = item.querySelector("span")?.textContent ?? "";
+            item.style.display = text.toLowerCase().includes(q) ? "" : "none";
+        }
+    });
+    overviewBox?.replaceChildren(titleBar, searchBox, content);
 }
 /**
  * Creates a class subject card for the given grouped class.
@@ -119,7 +236,7 @@ function createClassSubjectCard(groupedClass, count, groupedClassesLength) {
     overviewBtn.innerHTML =
         'Überblick <i class="fa-regular fa-eye" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.2"></i>';
     overviewBtn.onclick = () => {
-        openOverview(groupedClassesLength);
+        openOverview(groupedClass, groupedClassesLength);
     };
     left.append(classTitle, subjectsBtn, roomBtn, overviewBtn);
     const hoursBox = document.createElement("div");
@@ -147,9 +264,20 @@ async function loadAndRenderClassSubjects() {
         return;
     }
     try {
-        const classSubjects = await fetchClassSubjects();
+        const [classSubjects, schoolClasses] = await Promise.all([
+            fetchClassSubjects(),
+            fetchSchoolClasses(),
+        ]);
         console.log(classSubjects);
         const groupedClasses = groupClasses(classSubjects);
+        // Raum/SchoolClass an jede gruppierte Klasse anhängen
+        const classMap = new Map();
+        for (const sc of schoolClasses) {
+            classMap.set(sc.className.toLowerCase(), sc);
+        }
+        for (const gc of groupedClasses) {
+            gc.schoolClass = classMap.get(gc.className.toLowerCase());
+        }
         toggleEmptyState(noClassSubjectsElement, classSubjects.length > 0);
         classSubjectsContainer.replaceChildren();
         if (classSubjects.length === 0) {
