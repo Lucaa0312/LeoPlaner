@@ -1,15 +1,5 @@
 package at.htlleonding.leoplaner.boundary;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import at.htlleonding.leoplaner.algorithm.CoolingMode;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
@@ -30,24 +20,41 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("api")
 public class Resource {
+
     @Context
     UriInfo uriInfo;
+
     @Inject
     DataRepository dataRepository;
+
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+
     @Inject
     ExcelManager excelManager;
 
     @Path("run/testCsvOriginal")
     @GET
     public void injectTestCsvData() {
-        final String teacherCSVPath = "src/files/csvFiles/test1/testTeacher.csv";
-        final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
-        final String classSubjectCSVPath = "src/files/csvFiles/test1/testClassSubject.csv";
+        final String teacherCSVPath =
+            "src/files/csvFiles/test1/testTeacher.csv";
+        final String subjectCSVPath =
+            "src/files/csvFiles/test1/testSubject.csv";
+        final String classSubjectCSVPath =
+            "src/files/csvFiles/test1/testClassSubject.csv";
         final String roomCSVPath = "src/files/csvFiles/test1/testRoom.csv";
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
@@ -68,7 +75,8 @@ public class Resource {
         final String classSubjectCSVPath = baseDir + "classSubjects.csv";
         final String roomCSVPath = baseDir + "rooms.csv";
 
-        final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
+        final String subjectCSVPath =
+            "src/files/csvFiles/test1/testSubject.csv";
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);
@@ -140,7 +148,9 @@ public class Resource {
     @Path("loadBestSchedule")
     @GET
     public void loadBestSchedule() {
-        this.dataRepository.setAllTimetables(deepCopy(this.dataRepository.getBestSchoolSchedule()));
+        this.dataRepository.setAllTimetables(
+            deepCopy(this.dataRepository.getBestSchoolSchedule())
+        );
     }
 
     private Map<String, Timetable> deepCopy(Map<String, Timetable> original) {
@@ -153,9 +163,19 @@ public class Resource {
 
     @GET
     @Path("/test-export")
-    public void triggerExport() throws Exception {
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response triggerExport() throws Exception {
         try {
             excelManager.createBaseDataWorkbook();
+
+            File file = new File("src/files/excelFiles/export/test1.xlsx");
+
+            return Response.ok(file)
+                .header(
+                    "Content-Disposition",
+                    "attachment; filename=\"export.xlsx\""
+                )
+                .build();
         } catch (Exception e) {
             throw new Exception(e);
         }
@@ -179,7 +199,8 @@ public class Resource {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.TEXT_PLAIN)
     public Response upload(InputStream is) {
-        String outFileName = archivePath + "upload_" + System.currentTimeMillis() + ".xlsx";
+        String outFileName =
+            archivePath + "upload_" + System.currentTimeMillis() + ".xlsx";
         try (OutputStream os = new FileOutputStream(outFileName)) {
             byte[] buffer = new byte[8192];
             int len;
@@ -188,8 +209,8 @@ public class Resource {
             }
         } catch (IOException e) {
             return Response.status(500)
-                    .entity("Failed to save file: " + outFileName)
-                    .build();
+                .entity("Failed to save file: " + outFileName)
+                .build();
         }
 
         try {
@@ -197,8 +218,8 @@ public class Resource {
             this.dataRepository.randomizeSchoolSchedule();
         } catch (Exception e) {
             return Response.status(500)
-                    .entity("Excel processing failed")
-                    .build();
+                .entity("Excel processing failed")
+                .build();
         }
 
         return Response.ok(outFileName).build();
@@ -219,7 +240,8 @@ public class Resource {
     @POST
     @Path("importExcel/{fileName}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public void importFile(@PathParam("fileName") String fileName) throws Exception {
+    public void importFile(@PathParam("fileName") String fileName)
+        throws Exception {
         try {
             excelManager.importFile(fileName);
         } catch (Exception e) {

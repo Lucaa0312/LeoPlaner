@@ -28,17 +28,31 @@ function groupClasses(classSubjects) {
 /**
  * Closes the overview page for the given class.
  */
-function closeOverview() {
+function closeOverview(groupedClassesLength) {
     const headerHoursBox = getElement("header-hours-box");
     const headerSubjectCountBox = getElement("header-subject-count-box");
     if (!headerHoursBox || !headerSubjectCountBox) {
         console.log("headerHoursBox or headerSubjectCountBox is null");
         return;
     }
-    else {
-        headerHoursBox.style.display = "block";
-        headerSubjectCountBox.style.display = "block";
+    headerHoursBox.style.display = "";
+    headerSubjectCountBox.style.display = "";
+    for (let i = 0; i < groupedClassesLength; i++) {
+        const hoursBox = getElement("hours-box-" + i);
+        const subjectCountBox = getElement("subject-count-box-" + i);
+        if (!hoursBox || !subjectCountBox) {
+            console.log("hoursBox or subjectCountBox is null");
+            return;
+        }
+        hoursBox.style.display = "";
+        subjectCountBox.style.display = "";
     }
+    const overviewBox = getElement("overview-box");
+    if (overviewBox) {
+        overviewBox.style.display = "none";
+    }
+    const closeOverviewBox = getElement("close-overview-box");
+    closeOverviewBox?.remove();
 }
 /**
  * Opens the overview page for the given class.
@@ -70,6 +84,15 @@ function openOverview(groupedClassesLength) {
     if (overviewBox) {
         overviewBox.style.display = "block";
     }
+    const closeOverviewBox = document.createElement("div");
+    closeOverviewBox.id = "close-overview-box";
+    const xMark = document.createElement("i");
+    xMark.className = "fa-solid fa-xmark";
+    xMark.onclick = () => {
+        closeOverview(groupedClassesLength);
+    };
+    closeOverviewBox.appendChild(xMark);
+    overviewBox?.replaceChildren(closeOverviewBox);
 }
 /**
  * Creates a class subject card for the given grouped class.

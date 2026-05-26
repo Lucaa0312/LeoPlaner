@@ -2,26 +2,53 @@ import { clearCharts } from "./graph.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
+import { initExportButton } from "../features/exportButton.js";
 // click out of box closes dropdown
 document.addEventListener("click", (event) => {
     const target = event.target;
     const isClickInside = target?.closest(".top-bar-select");
     if (isClickInside)
         return;
-    document.querySelectorAll(".top-bar-select").forEach((wrapper) => {
+    document
+        .querySelectorAll(".top-bar-select")
+        .forEach((wrapper) => {
         wrapper.classList.remove("is-open");
     });
 });
 // JavaScript for Timetable Page
 let breakAfterPeriod = 3;
 const times = [
-    "07:05", "07:55", "08:00", "08:50", "08:55",
-    "09:45", "10:00", "10:50", "10:55", "11:45",
-    "11:50", "12:40", "12:45", "13:35", "13:40",
-    "14:30", "14:35", "15:25", "15:30", "16:20",
-    "16:25", "17:15", "17:20", "18:05", "18:50",
-    "19:00", "19:45", "20:30", "20:40", "21:25",
-    "22:10"
+    "07:05",
+    "07:55",
+    "08:00",
+    "08:50",
+    "08:55",
+    "09:45",
+    "10:00",
+    "10:50",
+    "10:55",
+    "11:45",
+    "11:50",
+    "12:40",
+    "12:45",
+    "13:35",
+    "13:40",
+    "14:30",
+    "14:35",
+    "15:25",
+    "15:30",
+    "16:20",
+    "16:25",
+    "17:15",
+    "17:20",
+    "18:05",
+    "18:50",
+    "19:00",
+    "19:45",
+    "20:30",
+    "20:40",
+    "21:25",
+    "22:10",
 ];
 export function load() {
     clearLayout();
@@ -108,14 +135,14 @@ function createRedArea(teacher) {
                 teacher: {
                     id: teacher.id,
                     teacherName: teacher.teacherName,
-                    nameSymbol: teacher.nameSymbol
-                }
+                    nameSymbol: teacher.nameSymbol,
+                },
             },
             period: {
                 schoolDays: teacher.teacherNonWorkingHours[i].day,
                 schoolHour: teacher.teacherNonWorkingHours[i].schoolHour,
-                lunchBreak: false
-            }
+                lunchBreak: false,
+            },
         });
     }
     console.log("No working hours:", noWorkingHours);
@@ -188,22 +215,28 @@ function createLayout(data) {
                 content += `<div class="period-styling" style=" margin-top: ${currentPeriod == 3 ? "calc(var(--break-height) + 3px)" : "0"};"></div>`;
                 currentPeriod++;
             }
-            if (!lunchBreak && subjectName !== "No lesson" && subjectName !== "RedArea") {
+            if (!lunchBreak &&
+                subjectName !== "No lesson" &&
+                subjectName !== "RedArea") {
                 let height;
                 let marginTop = "0";
-                if (!alreadyAddedBreak && duration >= 3 && period == 1 || duration >= 3 && period == 2 || duration >= 2 && period == 2) {
-                    height = duration === 1
-                        ? "var(--period-height)"
-                        : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
+                if ((!alreadyAddedBreak && duration >= 3 && period == 1) ||
+                    (duration >= 3 && period == 2) ||
+                    (duration >= 2 && period == 2)) {
+                    height =
+                        duration === 1
+                            ? "var(--period-height)"
+                            : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
                     alreadyAddedBreak = true;
                 }
                 else {
                     if (period == 3 && !alreadyAddedBreak) {
                         marginTop = "calc(var(--break-height) + 3px)";
                     }
-                    height = duration === 1
-                        ? "var(--period-height)"
-                        : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
+                    height =
+                        duration === 1
+                            ? "var(--period-height)"
+                            : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
                 }
                 content += `
                 <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4); height: ${height}; margin-top: ${marginTop};">
@@ -239,7 +272,14 @@ function createLayout(data) {
     });
 }
 export function clearLayout() {
-    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    const days = [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+    ];
     days.forEach((day) => {
         const dayContainer = getElement(day);
         const gridBox = dayContainer?.querySelector(".periods");
@@ -276,10 +316,10 @@ function hideLoader() {
         optimizingText.style.display = "none";
     }
 }
-function hideTimetableCost() {
-}
+function hideTimetableCost() { }
 function initializeApp() {
     load();
+    initExportButton();
     initNavbar();
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

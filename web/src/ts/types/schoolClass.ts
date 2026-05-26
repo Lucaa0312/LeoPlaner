@@ -16,4 +16,4 @@ export type SchoolClass = {
   classRoom: Room | null;
   classSubjects: ClassSubject[] | null;
   timetable: Timetable | null;
-}
+};
