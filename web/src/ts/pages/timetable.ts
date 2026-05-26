@@ -197,10 +197,14 @@ function createLayout(data: ClassSubjectInstance[]) {
         const room = item.room?.nameShort ?? "";
 
         block.innerHTML = `
-            <span class="subject">${subject}</span>
+            <span class="subject">${subject}</span> 
             <span class="room">${room}</span>
             <span class="teacher">${teacher}</span>
         `;
+
+        if(item.period.lunchBreak) {
+            block.style.display = "none";
+        }
 
         slot.appendChild(block);
     });

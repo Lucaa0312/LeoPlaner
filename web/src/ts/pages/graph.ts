@@ -357,26 +357,44 @@ async function handleOptimizeButton() {
     if (isStarting) return;
 
     if (!toggledAdvanced) {
-        if (hintBox) {
-            hintBox.style.display = "flex";
-        }
-
-        try {
+    if (hintBox) {
+        hintBox.style.display = "flex";
+    }
+    try {
+        if (!optimizedBefore) {
             fetch("http://localhost:8080/api/run/toggleAutomaticMode");
             optimizedBefore = true;
             paused = false;
             reloadedPage = false;
-            optimizeButton.innerHTML = "Wird optimiert...";
+            optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
             randomizeButton.style.opacity = "0.5";
             setAdvancedButtonDisabled(true);
             clearLayout();
-        } catch (error) {
-            console.log("Error while starting algorithm: ", error);
-        } finally {
-            isStarting = false;
+        } else if (paused || reloadedPage) {
+            fetch("http://localhost:8080/api/run/toggleAutomaticMode");
+            paused = false;
+            reloadedPage = false;
+            optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
+            randomizeButton.style.opacity = "0.5";
+            setAdvancedButtonDisabled(true);
+            clearLayout();
+        } else {
+            fetch("http://localhost:8080/api/run/toggleAutomaticMode");
+            paused = true;
+            optimizeButton.innerHTML = "Optimierung fortsetzen";
+            randomizeButton.style.opacity = "1";
+            setAdvancedButtonDisabled(false);
+            loadTimetable();
+            if (hintBox) {
+                hintBox.style.display = "none";
+            }
         }
-
-        return;
+    } catch (error) {
+        console.log("Error while toggling algorithm: ", error);
+    } finally {
+        isStarting = false;
+    }
+    return;
     }
 
     if (!optimizedBefore) {
