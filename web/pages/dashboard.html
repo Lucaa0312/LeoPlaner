@@ -17,25 +17,36 @@
 
             <div id="nav-bar"></div>
 
-
             <div id="main-content">
-                <h1 id="welcome-text"></h1>
-                <p id="timetable-status-text">Hier ist der Status Ihres Stundenplans</p>
+                <div id="dashboard">
 
-                <div id="dashboard-content">
+                    <header id="dashboard-header">
+                        <h1 id="dashboard-title">Dashboard</h1>
+                        <p id="dashboard-subtitle">
+                            Willkommen bei LeoPlaner. Verwalten Sie Ihre Schuldaten und erstellen Sie optimierte Stundenpläne.
+                        </p>
+                    </header>
 
-                    <div id="status-card-container">
-                        <img id="status-card-img" src="../assets/img/StatusCard.png" alt="StatusCard">
-                        <p id="status-card-text">Letztes Update: <br> </p>
-                    </div>
+                    <section id="stats-grid" class="dashboard-grid">
+                        <!-- Stat cards generated in JavaScript -->
+                    </section>
 
-                    <div id="stat-card-container">
-                        <!-- Generated in JavaScript -->
-                    </div>
+                    <section class="dashboard-section">
+                        <h2 class="section-heading">Schnellaktionen</h2>
+                        <div id="quick-actions" class="dashboard-grid">
+                            <!-- Quick action cards generated in JavaScript -->
+                        </div>
+                    </section>
 
-
+                    <section class="dashboard-section">
+                        <h2 class="section-heading">Datenverwaltung</h2>
+                        <div id="data-management" class="dashboard-grid">
+                            <!-- Data management links generated in JavaScript -->
+                        </div>
+                    </section>
 
                 </div>
+            </div>
         </div>
     </body>
 

@@ -1,113 +1,167 @@
 import initNavbar from "./navbar.js";
 import { initImportButton } from "../features/importButton.js";
-const statsData = [
-    { id: "stat-card-teachers", label: "Gesamte<br>Lehrer:", value: 0 },
-    { id: "stat-card-subjects", label: "Gesamte<br>Fsächer:", value: 0 },
-    { id: "stat-card-rooms", label: "Verfügbare<br>Räume:", value: 0 },
-];
-//Gemerates welcome text based on time of day
-function generateWelcomeText() {
-    const welcomeTextElement = document.getElementById("welcome-text");
-    if (!welcomeTextElement)
-        return;
-    const hour = new Date().getHours();
-    let greeting;
-    if (hour >= 5 && hour < 12) {
-        greeting = "Guten Morgen";
+import { initExportButton } from "../features/exportButton.js";
+import { fetchSchoolClasses } from "../api/classSubjectApi.js";
+const API_BASE_URL = "http://localhost:8080/api";
+// Fetches a single count endpoint, returning 0 on failure.
+async function fetchCount(path) {
+    try {
+        const res = await fetch(`${API_BASE_URL}${path}`);
+        if (!res.ok)
+            return 0;
+        return Number((await res.json()) ?? 0);
     }
-    else if (hour < 18) {
-        greeting = "Guten Nachmittag";
+    catch {
+        return 0;
     }
-    else {
-        greeting = "Guten Abend";
-    }
-    welcomeTextElement.textContent = `${greeting}, Admin`;
 }
-//Fetches last update time from GitHub API and displays it
-function showLastUpdateTime() {
-    const statusCardTextElement = document.getElementById("status-card-text");
-    if (!statusCardTextElement)
-        return;
-    statusCardTextElement.textContent = "Wird geladen...";
+// Loads the four dashboard counts. Klassen has no count endpoint, so it is
+// derived from the length of the class list.
+async function loadStats() {
+    const [teachers, classes, rooms, subjects] = await Promise.all([
+        fetchCount("/teachers/getTeacherCount"),
+        fetchSchoolClasses()
+            .then((list) => list.length)
+            .catch(() => 0),
+        fetchCount("/rooms/getRoomCount"),
+        fetchCount("/subjects/getSubjectCount"),
+    ]);
+    return [
+        { id: "stat-teachers", icon: "fa-solid fa-users", label: "Lehrer", value: teachers },
+        { id: "stat-classes", icon: "fa-solid fa-school", label: "Klassen", value: classes },
+        { id: "stat-rooms", icon: "fa-solid fa-building", label: "Räume", value: rooms },
+        { id: "stat-subjects", icon: "fa-solid fa-book-open", label: "Fächer", value: subjects },
+    ];
 }
-// Generates dashboard statistics cards
-function generateDashboardStats() {
-    const statsContainer = document.getElementById("stat-card-container");
-    if (!statsContainer)
+// Builds an icon container <div><i class="..."></i></div>.
+function iconBox(iconClass, boxClass) {
+    const box = document.createElement("div");
+    box.className = boxClass;
+    const i = document.createElement("i");
+    i.className = iconClass;
+    i.setAttribute("aria-hidden", "true");
+    box.appendChild(i);
+    return box;
+}
+// Renders the four statistics cards.
+function renderStats(stats) {
+    const grid = document.getElementById("stats-grid");
+    if (!grid)
         return;
-    statsContainer.replaceChildren();
-    statsData.forEach((stat) => {
+    grid.replaceChildren();
+    stats.forEach((stat) => {
         const card = document.createElement("div");
         card.className = "stat-card";
         card.id = stat.id;
-        const content = document.createElement("div");
-        content.className = "stat-content";
-        const label = document.createElement("h2");
-        label.className = "stat-text";
-        label.innerHTML = stat.label;
-        const numb = document.createElement("h1");
-        numb.className = "stat-number";
-        if (stat.id === "stat-card-timetable") {
-        }
-        else {
-            numb.textContent = String(stat.value);
-        }
-        content.appendChild(label);
-        content.appendChild(numb);
-        const arrowIcon = document.createElement("i");
-        arrowIcon.className = "fa-solid fa-angle-down stat-arrow-icon";
-        card.appendChild(content);
-        card.appendChild(arrowIcon);
-        statsContainer.appendChild(card);
+        card.appendChild(iconBox(stat.icon, "stat-icon"));
+        const value = document.createElement("span");
+        value.className = "stat-value";
+        value.textContent = String(stat.value);
+        const label = document.createElement("span");
+        label.className = "stat-label";
+        label.textContent = stat.label;
+        card.appendChild(value);
+        card.appendChild(label);
+        grid.appendChild(card);
     });
-    const importCard = document.createElement("div");
-    importCard.className = "import-wrapper stat-card-import";
-    const icon = document.createElement("i");
-    icon.className = "ti ti-upload";
-    icon.setAttribute("aria-hidden", "true");
-    const label = document.createElement("label");
-    label.className = "import-button";
-    label.textContent = "Stundenplan importieren";
-    const hint = document.createElement("p");
-    hint.className = "import-hint";
-    hint.textContent = ".xlsx, .xls akzeptiert";
+}
+// Builds the shared quick-action card shell (icon box, arrow, title, text).
+function quickActionCard(icon, title, description) {
+    const card = document.createElement("div");
+    card.className = "quick-action";
+    const top = document.createElement("div");
+    top.className = "quick-action-top";
+    top.appendChild(iconBox(icon, "action-icon"));
+    const arrow = document.createElement("i");
+    arrow.className = "fa-solid fa-arrow-right action-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    top.appendChild(arrow);
+    const h3 = document.createElement("h3");
+    h3.className = "action-title";
+    h3.textContent = title;
+    const p = document.createElement("p");
+    p.className = "action-description";
+    p.textContent = description;
+    card.appendChild(top);
+    card.appendChild(h3);
+    card.appendChild(p);
+    return card;
+}
+// Renders the three quick actions: import, export, view timetable.
+function renderQuickActions() {
+    const grid = document.getElementById("quick-actions");
+    if (!grid)
+        return;
+    grid.replaceChildren();
+    // Import (reuses importButton.ts which binds #excel-upload)
+    const importCard = quickActionCard("fa-solid fa-upload", "Excel importieren", "Importieren Sie Ihre Schuldaten aus einer Excel-Datei");
     const input = document.createElement("input");
     input.type = "file";
     input.id = "excel-upload";
     input.accept = ".xlsx,.xls";
     input.hidden = true;
-    const fileName = document.createElement("p");
-    fileName.id = "import-file-name";
-    const error = document.createElement("p");
-    error.id = "import-error";
-    importCard.appendChild(icon);
-    importCard.appendChild(label);
-    importCard.appendChild(hint);
-    importCard.appendChild(input);
-    importCard.appendChild(fileName);
-    importCard.appendChild(error);
+    const importName = document.createElement("p");
+    importName.id = "import-file-name";
+    importName.className = "action-status";
+    const importError = document.createElement("p");
+    importError.id = "import-error";
+    importError.className = "action-error";
+    importCard.append(input, importName, importError);
     importCard.addEventListener("click", () => input.click());
-    statsContainer.appendChild(importCard);
+    // Export (reuses exportButton.ts which binds #excel-export)
+    const exportCard = quickActionCard("fa-solid fa-download", "Daten exportieren", "Exportieren Sie Ihre Daten und Stundenpläne als Excel");
+    const exportButton = document.createElement("button");
+    exportButton.id = "excel-export";
+    exportButton.hidden = true;
+    const exportError = document.createElement("p");
+    exportError.id = "export-error";
+    exportError.className = "action-error";
+    exportCard.append(exportButton, exportError);
+    exportCard.addEventListener("click", () => exportButton.click());
+    // View timetable (navigation)
+    const timetableCard = quickActionCard("fa-solid fa-table", "Stundenplan anzeigen", "Sehen Sie den aktuellen Stundenplan ein");
+    timetableCard.addEventListener("click", () => {
+        window.location.href = "timetable.html";
+    });
+    grid.append(importCard, exportCard, timetableCard);
     initImportButton();
+    initExportButton();
 }
-// Initialize the dashboard application
+const dataLinks = [
+    { href: "teacher.html", icon: "fa-solid fa-users", title: "Lehrer" },
+    { href: "classSubjects.html", icon: "fa-solid fa-school", title: "Klassen" },
+    { href: "rooms.html", icon: "fa-solid fa-building", title: "Räume" },
+    { href: "subjects.html", icon: "fa-solid fa-book-open", title: "Fächer" },
+];
+// Renders the four data-management navigation links.
+function renderDataManagement() {
+    const grid = document.getElementById("data-management");
+    if (!grid)
+        return;
+    grid.replaceChildren();
+    dataLinks.forEach((link) => {
+        const a = document.createElement("a");
+        a.className = "data-link";
+        a.href = link.href;
+        const i = document.createElement("i");
+        i.className = `${link.icon} data-link-icon`;
+        i.setAttribute("aria-hidden", "true");
+        const title = document.createElement("span");
+        title.className = "data-link-title";
+        title.textContent = link.title;
+        const sub = document.createElement("span");
+        sub.className = "data-link-sub";
+        sub.textContent = "Verwalten";
+        a.append(i, title, sub);
+        grid.appendChild(a);
+    });
+}
+// Initialize the dashboard application.
 export async function initializeApp() {
     initNavbar();
-    generateWelcomeText();
-    showLastUpdateTime();
-    try {
-        const [teachers, subjects, rooms] = await Promise.all([
-            fetch("http://localhost:8080/api/teachers/getTeacherCount").then((r) => r.json()),
-            fetch("http://localhost:8080/api/subjects/getSubjectCount").then((r) => r.json()),
-            fetch("http://localhost:8080/api/rooms/getRoomCount").then((r) => r.json()),
-        ]);
-        statsData[0].value = Number(teachers ?? 0);
-        statsData[1].value = Number(subjects ?? 0);
-        statsData[2].value = Number(rooms ?? 0);
-    }
-    catch (e) {
-        console.error("Fehler beim Laden:", e);
-    }
-    generateDashboardStats();
+    const stats = await loadStats();
+    renderStats(stats);
+    renderQuickActions();
+    renderDataManagement();
 }
 document.addEventListener("DOMContentLoaded", initializeApp);
