@@ -1,69 +1,111 @@
-import { clearCharts } from "./graph.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
+import { clearCharts } from "./graph.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 import { initExportButton } from "../features/exportButton.js";
-// click out of box closes dropdown
-document.addEventListener("click", (event) => {
-    const target = event.target;
-    const isClickInside = target?.closest(".top-bar-select");
-    if (isClickInside)
-        return;
-    document
-        .querySelectorAll(".top-bar-select")
-        .forEach((wrapper) => {
-        wrapper.classList.remove("is-open");
-    });
-});
-// JavaScript for Timetable Page
-let breakAfterPeriod = 3;
-const times = [
-    "07:05",
-    "07:55",
-    "08:00",
-    "08:50",
-    "08:55",
-    "09:45",
-    "10:00",
-    "10:50",
-    "10:55",
-    "11:45",
-    "11:50",
-    "12:40",
-    "12:45",
-    "13:35",
-    "13:40",
-    "14:30",
-    "14:35",
-    "15:25",
-    "15:30",
-    "16:20",
-    "16:25",
-    "17:15",
-    "17:20",
-    "18:05",
-    "18:50",
-    "19:00",
-    "19:45",
-    "20:30",
-    "20:40",
-    "21:25",
-    "22:10",
+const DAYS = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
 ];
-export function load() {
+const DAYS_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+const units = [
+    { eh: "1. EH", start: "08:00", end: "08:50" },
+    { eh: "2. EH", start: "08:55", end: "09:45" },
+    { eh: "3. EH", start: "10:00", end: "10:50" },
+    { eh: "4. EH", start: "10:55", end: "11:45" },
+    { eh: "5. EH", start: "11:50", end: "12:40" },
+    { eh: "6. EH", start: "12:45", end: "13:35" },
+    { eh: "7. EH", start: "13:40", end: "14:30" },
+    { eh: "8. EH", start: "14:35", end: "15:25" },
+    { eh: "9. EH", start: "15:30", end: "16:20" },
+    { eh: "10. EH", start: "16:25", end: "17:15" },
+];
+let lessons = [];
+const ROW_HEIGHT = 86;
+function initializeLayout() {
+    let grid = getElement("timetable-content");
+    if (!grid)
+        return;
+    const emptyCorner = document.createElement("div");
+    emptyCorner.className = "header-cell";
+    grid.appendChild(emptyCorner);
+    DAYS_LABELS.forEach((label) => {
+        const cell = document.createElement("div");
+        cell.className = "header-cell";
+        cell.textContent = label;
+        grid.appendChild(cell);
+    });
+    units.forEach((unit, index) => {
+        const cell = document.createElement("div");
+        cell.className = "time-cell";
+        cell.innerHTML = `
+            <span class="time-start">${unit.start}</span>
+            <span class="eh-label">${unit.eh}</span>
+            <span class="time-end">${unit.end}</span>
+        `;
+        grid.appendChild(cell);
+        DAYS.forEach((day) => {
+            const slot = document.createElement("div");
+            slot.className = "slot";
+            slot.dataset.day = day;
+            slot.dataset.row = String(index + 1);
+            grid.appendChild(slot);
+        });
+    });
+}
+export function clearLayout() {
+    DAYS.forEach((day) => {
+        units.forEach((_, index) => {
+            const slot = document.querySelector(`.slot[data-day="${day}"][data-row="${index + 1}"]`);
+            if (slot) {
+                slot.innerHTML = "";
+            }
+        });
+    });
+}
+export function loadTimetable() {
     clearLayout();
     fetch("http://localhost:8080/api/timetable/getByClass/1")
         .then((response) => {
         return response.json();
     })
         .then((data) => {
+        console.log(data.classSubjectInstances);
         createLayout(data.classSubjectInstances);
     })
         .catch((error) => {
         console.error("Error loading Timetable:", error);
-    })
-        .finally(() => {
-        //hideLoader();
+    });
+}
+function createLayout(data) {
+    data.forEach((item) => {
+        const day = item.period.schoolDays;
+        const rowStart = item.period.schoolHour;
+        const duration = item.duration ?? 1;
+        const slot = document.querySelector(`.slot[data-day="${day}"][data-row="${rowStart}"]`);
+        if (!slot)
+            return;
+        const r = item.classSubject?.subject?.subjectColor?.red ?? 200;
+        const g = item.classSubject?.subject?.subjectColor?.green ?? 200;
+        const b = item.classSubject?.subject?.subjectColor?.blue ?? 200;
+        const block = document.createElement("div");
+        block.className = "lesson-block";
+        block.style.height = `${duration * ROW_HEIGHT - 10}px`;
+        block.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+        block.style.setProperty("--block-color", `rgb(${r}, ${g}, ${b})`);
+        const subject = item.classSubject?.subject?.subjectSymbol ?? "";
+        const teacher = item.classSubject?.teacher?.[0]?.nameSymbol ?? "";
+        const room = item.room?.nameShort ?? "";
+        block.innerHTML = `
+            <span class="subject">${subject}</span>
+            <span class="room">${room}</span>
+            <span class="teacher">${teacher}</span>
+        `;
+        slot.appendChild(block);
     });
 }
 const randomizeButton = aquireElement("randomizeButton");
@@ -72,8 +114,15 @@ export async function getRandomizedTimeTable() {
     clearLayout();
     clearCharts();
     await getFetchResponse("/randomize");
-    load();
+    loadTimetable();
 }
+function initializeApp() {
+    initNavbar();
+    initializeLayout();
+    loadTimetable();
+    initExportButton();
+}
+document.addEventListener("DOMContentLoaded", initializeApp);
 export function getTimetableByTeacher(teacherId) {
     clearLayout();
     fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
@@ -83,8 +132,6 @@ export function getTimetableByTeacher(teacherId) {
         .then((data) => {
         console.log("Fetched data:", data);
         createLayout(data.timetableDTO.classSubjectInstances);
-        createRedArea(data.teacher);
-        hideTimetableCost();
     })
         .catch((error) => {
         console.error("Error loading Timetable by teacher:", error);
@@ -111,215 +158,8 @@ export function getTimetableByRoom(roomId) {
         .then((data) => {
         console.log(data);
         createLayout(data.classSubjectInstances);
-        hideTimetableCost();
     })
         .catch((error) => {
         console.error("Error loading Timetable by room:", error);
     });
 }
-function clearChoice() {
-    window.location.href = "./timetable.html";
-    load();
-}
-function createRedArea(teacher) {
-    console.log("Teacher data:", teacher);
-    const noWorkingHours = [];
-    for (let i = 0; i < teacher.teacherNonWorkingHours.length; i++) {
-        noWorkingHours.push({
-            classSubject: {
-                subject: {
-                    id: 2,
-                    subjectName: "RedArea",
-                    subjectSymbol: "NA",
-                },
-                teacher: {
-                    id: teacher.id,
-                    teacherName: teacher.teacherName,
-                    nameSymbol: teacher.nameSymbol,
-                },
-            },
-            period: {
-                schoolDays: teacher.teacherNonWorkingHours[i].day,
-                schoolHour: teacher.teacherNonWorkingHours[i].schoolHour,
-                lunchBreak: false,
-            },
-        });
-    }
-    console.log("No working hours:", noWorkingHours);
-    createLayout(noWorkingHours);
-}
-function createLayout(data) {
-    console.log("Raw data:", data);
-    const map = new Map();
-    // Note: Data will not follow any particular order
-    data.forEach((item) => {
-        if (!map.has(item.period.schoolDays)) {
-            map.set(item.period.schoolDays, []);
-        }
-        map.get(item.period.schoolDays)?.push(item);
-    });
-    for (const [, entries] of map) {
-        entries.sort((a, b) => a.period.schoolHour - b.period.schoolHour);
-    }
-    console.log("Map:", map);
-    let timesBuilder = ``;
-    let linePlacer = ``;
-    //load period start and end time
-    for (let i = 0; i < times.length; i += 2) {
-        if (i === breakAfterPeriod * 2) {
-            timesBuilder += `<div class="break-box"></div>\n`;
-            linePlacer += `<div class="break-line"></div>\n`;
-        }
-        timesBuilder += `<div class="period-box">
-        <p class="period-started">${times[i]}</p>
-        <p class="current-period">${i / 2}. EH</p>
-        <p class="period-ended">${times[i + 1] || ""}</p>
-        </div>\n`;
-        linePlacer += `<div class="period-line"></div>\n`;
-    }
-    const timetableTimes = getElement("timetable-times");
-    const timetableBackground = getElement("timetable-background");
-    if (timetableTimes) {
-        timetableTimes.innerHTML = timesBuilder;
-    }
-    if (timetableBackground) {
-        timetableBackground.innerHTML = linePlacer;
-    }
-    // value, key
-    map.forEach((classSubjectInstances, day) => {
-        let content = ``;
-        const dayContainer = getElement(day);
-        const gridBox = dayContainer?.querySelector(".periods");
-        if (!gridBox)
-            return;
-        gridBox.innerHTML = "";
-        let currentPeriod = 0;
-        let alreadyAddedBreak = false;
-        let lessonAfterBreakCounter = 0;
-        // Create HTML
-        classSubjectInstances.forEach((item) => {
-            const subjectSymbol = item.classSubject?.subject?.subjectSymbol || "";
-            const subjectName = item.classSubject?.subject?.subjectName || "No lesson";
-            const teacherSymbol = item.classSubject?.teacher?.nameSymbol || "-";
-            const duration = item.duration || 1;
-            // WARNING: Will overwrite 0 rgb values, so choose 1
-            // e.g. red = rgb(255, 1, 1) instead of rgb(255, 0, 0)
-            const subjectColorRed = item.classSubject?.subject?.subjectColor?.red || 200;
-            const subjectColorGreen = item.classSubject?.subject?.subjectColor?.green || 200;
-            const subjectColorBlue = item.classSubject?.subject?.subjectColor?.blue || 200;
-            const period = item.period.schoolHour;
-            const roomNumber = item.room?.roomNumber;
-            const lunchBreak = item.period.lunchBreak;
-            // Fill empty periods
-            while (currentPeriod < period) {
-                content += `<div class="period-styling" style=" margin-top: ${currentPeriod == 3 ? "calc(var(--break-height) + 3px)" : "0"};"></div>`;
-                currentPeriod++;
-            }
-            if (!lunchBreak &&
-                subjectName !== "No lesson" &&
-                subjectName !== "RedArea") {
-                let height;
-                let marginTop = "0";
-                if ((!alreadyAddedBreak && duration >= 3 && period == 1) ||
-                    (duration >= 3 && period == 2) ||
-                    (duration >= 2 && period == 2)) {
-                    height =
-                        duration === 1
-                            ? "var(--period-height)"
-                            : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1} + var(--break-height) + 3px)`;
-                    alreadyAddedBreak = true;
-                }
-                else {
-                    if (period == 3 && !alreadyAddedBreak) {
-                        marginTop = "calc(var(--break-height) + 3px)";
-                    }
-                    height =
-                        duration === 1
-                            ? "var(--period-height)"
-                            : `calc(var(--period-height) * ${duration} + 5px * ${duration - 1})`;
-                }
-                content += `
-                <div class="period-styling" style="background-color: rgba(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue}, 0.4); height: ${height}; margin-top: ${marginTop};">
-                <div class="subject-color-line" style="background-color: rgb(${subjectColorRed}, ${subjectColorGreen}, ${subjectColorBlue});"></div>
-                    <div class="subject-infos">
-                        <p class="subject-styling">${subjectSymbol}</p>
-                        <div class="room-teacher-container">
-                            <p class="room-styling">E${roomNumber ?? ""}</p>
-                            <p class="teacher-styling">${teacherSymbol}</p>
-                        </div>
-                    </div>
-                </div>
-                `;
-            }
-            else if (subjectName === "RedArea") {
-                content += `
-                    <div class="period-styling non-working-stripes" style="margin-top: ${period == 3 ? "calc(var(--break-height) + 3px)" : "0"};">
-                    <p>Nicht Verfügbar</p>
-                    </div>
-                `;
-            }
-            else {
-                content += `
-                    <div class="period-styling" style=" margin-top: ${period == 3 ? "calc(var(--break-height) + 3px)" : "0"};">
-                    </div>
-                    `;
-            }
-            currentPeriod += duration;
-            //lessonAfterBreakCounter+=duration;
-            //console.log('lessonAfterBreakCounter:', lessonAfterBreakCounter, 'period:', period, 'day:', day);
-        });
-        gridBox.innerHTML = content;
-    });
-}
-export function clearLayout() {
-    const days = [
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-    ];
-    days.forEach((day) => {
-        const dayContainer = getElement(day);
-        const gridBox = dayContainer?.querySelector(".periods");
-        if (gridBox) {
-            gridBox.innerHTML = "";
-        }
-    });
-}
-function showLoader() {
-    const loader = document.querySelector(".loader");
-    const disableOverlay = getElement("disable-overlay");
-    const optimizingText = getElement("optimizing-text");
-    if (loader) {
-        loader.style.display = "grid";
-    }
-    if (disableOverlay) {
-        disableOverlay.style.display = "block";
-    }
-    if (optimizingText) {
-        optimizingText.style.display = "block";
-    }
-}
-function hideLoader() {
-    const loader = document.querySelector(".loader");
-    const disableOverlay = getElement("disable-overlay");
-    const optimizingText = getElement("optimizing-text");
-    if (loader) {
-        loader.style.display = "none";
-    }
-    if (disableOverlay) {
-        disableOverlay.style.display = "none";
-    }
-    if (optimizingText) {
-        optimizingText.style.display = "none";
-    }
-}
-function hideTimetableCost() { }
-function initializeApp() {
-    load();
-    initExportButton();
-    initNavbar();
-}
-document.addEventListener("DOMContentLoaded", initializeApp);
