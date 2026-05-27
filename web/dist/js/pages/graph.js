@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as echarts from "https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.esm.min.js";
-import { load, getRandomizedTimeTable, clearLayout, getTimetableByTeacher, getTimetableByRoom, getTimetableByClass } from "./timetable.js";
+import { loadTimetable, getRandomizedTimeTable, clearLayout, getTimetableByTeacher, getTimetableByRoom, getTimetableByClass, } from "./timetable.js";
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
 let toggledAdvanced = false;
 // Create the echarts instance
@@ -17,7 +17,7 @@ function drawChart() {
         title: {
             text: "Kosten/Iteration Diagramm",
             left: "center",
-            textStyle: { fontSize: 16, color: "#374151" }
+            textStyle: { fontSize: 16, color: "#374151" },
         },
         tooltip: {
             trigger: "axis",
@@ -25,14 +25,14 @@ function drawChart() {
             formatter: (params) => {
                 const val = params[0].value;
                 return `Iteration: <b>${Math.round(val[0])}</b><br/>Kosten: <b>${val[1].toLocaleString()}</b>`;
-            }
+            },
         },
         grid: {
             containLabel: true,
             left: "8%",
             bottom: "23%",
             top: "20%",
-            right: "10%"
+            right: "10%",
         },
         xAxis: {
             type: "log",
@@ -47,9 +47,9 @@ function drawChart() {
                     if (value >= 1000)
                         return value / 1000 + "k";
                     return value;
-                }
+                },
             },
-            splitLine: { lineStyle: { color: "#f3f4f6" } }
+            splitLine: { lineStyle: { color: "#f3f4f6" } },
         },
         yAxis: {
             type: "log",
@@ -65,8 +65,8 @@ function drawChart() {
                     if (value >= 1000)
                         return value / 1000 + "k";
                     return value;
-                }
-            }
+                },
+            },
         },
         visualMap: {
             show: false,
@@ -74,8 +74,8 @@ function drawChart() {
             min: 5000,
             max: 5000000,
             inRange: {
-                color: ["#4F46E5", "#F59E0B"]
-            }
+                color: ["#4F46E5", "#F59E0B"],
+            },
         },
         series: [
             {
@@ -92,25 +92,25 @@ function drawChart() {
                         show: true,
                         fontWeight: "bold",
                         position: "top",
-                        distance: 15
-                    }
+                        distance: 15,
+                    },
                 },
                 lineStyle: {
-                    width: 3
+                    width: 3,
                 },
                 areaStyle: {
                     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                         { offset: 0, color: "rgba(79, 70, 229, 0.2)" },
-                        { offset: 1, color: "rgba(79, 70, 229, 0)" }
-                    ])
-                }
-            }
+                        { offset: 1, color: "rgba(79, 70, 229, 0)" },
+                    ]),
+                },
+            },
         ],
         dataZoom: [
             {
                 type: "inside",
                 start: 0,
-                end: 100
+                end: 100,
             },
             {
                 type: "slider",
@@ -130,14 +130,14 @@ function drawChart() {
                     borderWidth: 1,
                     shadowBlur: 3,
                     shadowColor: "rgba(0, 0, 0, 0.1)",
-                    borderRadius: 2
+                    borderRadius: 2,
                 },
                 moveHandleStyle: {
                     color: "#d1d5db",
-                    opacity: 0.3
-                }
-            }
-        ]
+                    opacity: 0.3,
+                },
+            },
+        ],
     });
 }
 // Get data
@@ -155,13 +155,15 @@ socket.onmessage = function (event) {
     //console.log(data);
     chartRun = true;
     const currentIteration = data.iteration <= 0 ? 1 : data.iteration;
-    if (currentIteration < lastIterationFromServer * 0.1 && lastIterationFromServer > 0) {
+    if (currentIteration < lastIterationFromServer * 0.1 &&
+        lastIterationFromServer > 0) {
         totalIterations += lastIterationFromServer;
     }
     lastIterationFromServer = currentIteration;
     const newIteration = currentIteration + totalIterations;
     const lastPoint = costChartData[costChartData.length - 1];
-    if (costChartData.length === 0 || (lastPoint && newIteration > lastPoint[0])) {
+    if (costChartData.length === 0 ||
+        (lastPoint && newIteration > lastPoint[0])) {
         costChartData.push([newIteration, data.currentCost]);
         lastCost = data.currentCost;
     }
@@ -172,10 +174,10 @@ socket.onmessage = function (event) {
                 {
                     data: costChartData,
                     markPoint: {
-                        data: []
-                    }
-                }
-            ]
+                        data: [],
+                    },
+                },
+            ],
         });
         lastUpdateTime = now;
     }
@@ -201,12 +203,12 @@ function finalizeChart() {
                             type: "min",
                             name: "Min",
                             itemStyle: { color: "#0728a2" },
-                            label: { formatter: "Min: {c}", position: "bottom" }
-                        }
-                    ]
-                }
-            }
-        ]
+                            label: { formatter: "Min: {c}", position: "bottom" },
+                        },
+                    ],
+                },
+            },
+        ],
     });
 }
 // Initialize Chart
@@ -214,17 +216,19 @@ let optimizedBefore = false;
 function initializeChart() {
     console.log("Fetching data:");
     fetch("http://localhost:8080/api/isAlgorithmRunningAtLeastOnce")
-        .then(response => {
+        .then((response) => {
         return response.json();
-    }).then(didRun => {
+    })
+        .then((didRun) => {
         console.log("data:");
         console.log(didRun);
         optimizedBefore = didRun;
         if (didRun) {
             fetch("http://localhost:8080/api/get/algorithmHistory")
-                .then(response => {
+                .then((response) => {
                 return response.json();
-            }).then((data) => {
+            })
+                .then((data) => {
                 console.log(data);
                 if (data && data.length > 0) {
                     let lastIterationFromServerHolder = 0;
@@ -232,11 +236,15 @@ function initializeChart() {
                     let processedHistory = [];
                     for (const item of data) {
                         const currentIteration = item.iteration <= 0 ? 1 : item.iteration;
-                        if (currentIteration < lastIterationFromServerHolder * 0.1 && lastIterationFromServerHolder > 0) {
+                        if (currentIteration < lastIterationFromServerHolder * 0.1 &&
+                            lastIterationFromServerHolder > 0) {
                             totalIterationsHolder += lastIterationFromServerHolder;
                         }
                         lastIterationFromServerHolder = currentIteration;
-                        processedHistory.push([currentIteration + totalIterationsHolder, item.cost]);
+                        processedHistory.push([
+                            currentIteration + totalIterationsHolder,
+                            item.cost,
+                        ]);
                     }
                     costChartData = processedHistory;
                     totalIterations = totalIterationsHolder;
@@ -246,18 +254,20 @@ function initializeChart() {
                             {
                                 data: costChartData,
                                 markPoint: {
-                                    data: []
-                                }
-                            }
-                        ]
+                                    data: [],
+                                },
+                            },
+                        ],
                     });
                 }
-            }).catch(error => {
-                console.error('Error Fetching Algorithm History:', error);
+            })
+                .catch((error) => {
+                console.error("Error Fetching Algorithm History:", error);
             });
         }
-    }).catch(error => {
-        console.error('Error Fetching Algorithm Running:', error);
+    })
+        .catch((error) => {
+        console.error("Error Fetching Algorithm Running:", error);
     });
 }
 // Clear chart
@@ -272,10 +282,10 @@ export function clearCharts() {
             {
                 data: costChartData,
                 markPoint: {
-                    data: []
-                }
-            }
-        ]
+                    data: [],
+                },
+            },
+        ],
     });
     costDisplay.style.display = "none";
 }
@@ -381,7 +391,7 @@ async function handleOptimizeButton() {
         randomizeButton.style.opacity = "1";
         setAdvancedButtonDisabled(false);
         randomizeButton.addEventListener("click", getRandomizedTimeTable);
-        load();
+        loadTimetable();
         costDisplay.style.display = "block";
         costDisplay.innerHTML = "Kosten: " + lastCost;
         socket.send("pause");
@@ -433,7 +443,7 @@ optionButton?.addEventListener("click", (event) => {
     if (!optionsToggled) {
         optionsToggled = true;
         hideAdvancedButton();
-        optionButton.style.height = "32vh";
+        optionButton.style.height = "29vh";
         const addButtons = () => {
             const searchBar = document.createElement("div");
             searchBar.setAttribute("id", "search-bar");
@@ -462,7 +472,7 @@ optionButton?.addEventListener("click", (event) => {
                 classButton.style.alignItems = "center";
                 classButton.style.padding = "0 1rem";
                 if (i == 0) {
-                    classButton.style.marginTop = "4vh";
+                    classButton.style.marginTop = "3vh";
                 }
                 classButton.addEventListener("click", () => {
                     showSingleOption(array[i] + "");
@@ -470,7 +480,8 @@ optionButton?.addEventListener("click", (event) => {
                 const classText = document.createElement("span");
                 classText.textContent = array[i] + "";
                 const svgContainer = document.createElement("div");
-                svgContainer.innerHTML = '<svg width="12" height="23" viewBox="0 0 12 23" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.70786 0.306362L11.7067 10.7604C11.7997 10.8575 11.8735 10.9728 11.9238 11.0997C11.9741 11.2266 12 11.3626 12 11.5C12 11.6374 11.9741 11.7734 11.9238 11.9003C11.8735 12.0272 11.7997 12.1425 11.7067 12.2396L1.70787 22.6936C1.52025 22.8898 1.26578 23 1.00044 23C0.73511 23 0.480642 22.8898 0.293023 22.6936C0.105403 22.4975 -3.35953e-08 22.2314 -4.57214e-08 21.954C-5.78474e-08 21.6766 0.105403 21.4106 0.293023 21.2144L9.58573 11.5L0.293022 1.78561C0.200122 1.68848 0.12643 1.57317 0.0761529 1.44627C0.0258759 1.31936 -9.53636e-07 1.18334 -9.59641e-07 1.04598C-9.65645e-07 0.908625 0.0258758 0.77261 0.0761529 0.645704C0.12643 0.518799 0.200122 0.40349 0.293022 0.306362C0.385922 0.209234 0.49621 0.132187 0.61759 0.0796222C0.738969 0.0270576 0.869063 -3.7988e-08 1.00044 -4.37308e-08C1.13182 -4.94736e-08 1.26192 0.0270576 1.3833 0.0796222C1.50468 0.132187 1.61496 0.209234 1.70786 0.306362Z" fill="white"/></svg>';
+                svgContainer.innerHTML =
+                    '<svg width="12" height="23" viewBox="0 0 12 23" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.70786 0.306362L11.7067 10.7604C11.7997 10.8575 11.8735 10.9728 11.9238 11.0997C11.9741 11.2266 12 11.3626 12 11.5C12 11.6374 11.9741 11.7734 11.9238 11.9003C11.8735 12.0272 11.7997 12.1425 11.7067 12.2396L1.70787 22.6936C1.52025 22.8898 1.26578 23 1.00044 23C0.73511 23 0.480642 22.8898 0.293023 22.6936C0.105403 22.4975 -3.35953e-08 22.2314 -4.57214e-08 21.954C-5.78474e-08 21.6766 0.105403 21.4106 0.293023 21.2144L9.58573 11.5L0.293022 1.78561C0.200122 1.68848 0.12643 1.57317 0.0761529 1.44627C0.0258759 1.31936 -9.53636e-07 1.18334 -9.59641e-07 1.04598C-9.65645e-07 0.908625 0.0258758 0.77261 0.0761529 0.645704C0.12643 0.518799 0.200122 0.40349 0.293022 0.306362C0.385922 0.209234 0.49621 0.132187 0.61759 0.0796222C0.738969 0.0270576 0.869063 -3.7988e-08 1.00044 -4.37308e-08C1.13182 -4.94736e-08 1.26192 0.0270576 1.3833 0.0796222C1.50468 0.132187 1.61496 0.209234 1.70786 0.306362Z" fill="white"/></svg>';
                 classButton.appendChild(classText);
                 classButton.appendChild(svgContainer);
                 optionContainer.appendChild(classButton);
@@ -563,7 +574,7 @@ graphButton?.addEventListener("click", (event) => {
     if (!diagramToggled) {
         diagramToggled = true;
         hideAdvancedButton();
-        graphButton.style.height = "55vh";
+        graphButton.style.height = "52vh";
         setTimeout(() => {
             graphBox.classList.add("graph-box");
             const costChart2 = document.createElement("div");
@@ -651,7 +662,7 @@ function hideAdvancedButton() {
 function showAdvancedButton() {
     if (advancedButton?.style.display === "none") {
         setTimeout(() => {
-            advancedButton.style.display = "block";
+            advancedButton.style.display = "flex";
         }, 100);
     }
 }
