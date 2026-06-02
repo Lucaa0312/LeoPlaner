@@ -1,11 +1,8 @@
 package at.htlleonding.leoplaner.data;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -162,7 +159,8 @@ public class TimetableManager {
         // heap
         final ArrayList<ClassSubjectInstance> clonedClassSubjectInstances = new ArrayList<>();
         for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
-            final Period clonedPeriod = new Period(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour());
+            final Period clonedPeriod = new Period(csi.getPeriod().getSchoolDays(), csi.getPeriod().getSchoolHour(),
+                    csi.getPeriod().isLunchBreak());
             final ClassSubjectInstance clonedCsi = new ClassSubjectInstance(csi.getClassSubject(), clonedPeriod,
                     csi.getRoom(), csi.getDuration());
             clonedClassSubjectInstances.add(clonedCsi);

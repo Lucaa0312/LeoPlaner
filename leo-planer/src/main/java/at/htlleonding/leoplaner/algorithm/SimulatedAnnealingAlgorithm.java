@@ -39,7 +39,7 @@ public class SimulatedAnnealingAlgorithm {
         costOfEachDegree.put(CostDegree.MID, 10);
         costOfEachDegree.put(CostDegree.HIGH, 20);
         costOfEachDegree.put(CostDegree.SEVERE, 50);
-        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 100000000);
+        costOfEachDegree.put(CostDegree.IMPOSSIBLE, 1000);
     }
 
     private static final Integer IMPOSSIBLE_COST = costOfEachDegree.get(CostDegree.IMPOSSIBLE); // is to be never be
@@ -82,6 +82,7 @@ public class SimulatedAnnealingAlgorithm {
     public void algorithmLoop(final Long iterationCap) {
         this.dataRepository.setAlgorithmRunning(true);
         this.dataRepository.setAlgorithmRunningAtLeastOnce(true);
+        setTemperature(INITIAL_TEMPERATURE);
         long iterationCounter = 0;
         long costFinal = 0;
         long bestCosts = Long.MAX_VALUE;
@@ -95,6 +96,7 @@ public class SimulatedAnnealingAlgorithm {
         Timetable nextTimeTable;
 
         final Random random = new Random();
+        System.out.println(getIsRunning());
         while (getIsRunning() && iterationCounter < iterationCap) { // main loop
             this.coolingMode.set(this.dataRepository.getCoolingMode());
             final int randomClassIndex = random.nextInt(schoolSchedule.size());
@@ -113,11 +115,12 @@ public class SimulatedAnnealingAlgorithm {
 
             if (currTimetable.getClassSubjectInstances().get(ranIndex1).getPeriod().isLunchBreak()
                     || currTimetable.getClassSubjectInstances().get(ranIndex2).getPeriod().isLunchBreak()) {
+
                 continue; // no reason to play around with lunch breaks only causes problems
             } // if more checks are needed then itll be moved to a helper method
 
             nextTimeTable = chooseRandomNeighborFunction(ranIndex1, ranIndex2, currTimetable);
-            repairTimetable(nextTimeTable);
+            // repairTimetable(nextTimeTable);
 
             int costCurrSchoolSchedule = determineCost(schoolSchedule);
 
