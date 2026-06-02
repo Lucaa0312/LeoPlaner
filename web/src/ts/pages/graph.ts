@@ -361,34 +361,36 @@ async function handleOptimizeButton() {
         hintBox.style.display = "flex";
     }
     try {
-        if (!optimizedBefore) {
-            fetch("http://localhost:8080/api/run/toggleAutomaticMode");
-            optimizedBefore = true;
-            paused = false;
-            reloadedPage = false;
-            optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
-            randomizeButton.style.opacity = "0.5";
-            setAdvancedButtonDisabled(true);
-            clearLayout();
-        } else if (paused || reloadedPage) {
-            fetch("http://localhost:8080/api/run/toggleAutomaticMode");
-            paused = false;
-            reloadedPage = false;
-            optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
-            randomizeButton.style.opacity = "0.5";
-            setAdvancedButtonDisabled(true);
-            clearLayout();
-        } else {
-            fetch("http://localhost:8080/api/run/toggleAutomaticMode");
-            paused = true;
-            optimizeButton.innerHTML = "Optimierung fortsetzen";
-            randomizeButton.style.opacity = "1";
-            setAdvancedButtonDisabled(false);
-            loadTimetable();
-            if (hintBox) {
-                hintBox.style.display = "none";
-            }
+    if (!optimizedBefore) {
+        await fetch("http://localhost:8080/api/toggleAutomaticMode");
+        await fetch("http://localhost:8080/api/run/algorithmAllClasses");
+        optimizedBefore = true;
+        paused = false;
+        reloadedPage = false;
+        optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
+        randomizeButton.style.opacity = "0.5";
+        setAdvancedButtonDisabled(true);
+        clearLayout();
+    } else if (paused || reloadedPage) {
+        await fetch("http://localhost:8080/api/toggleAutomaticMode");
+        await fetch("http://localhost:8080/api/run/algorithmAllClasses");
+        paused = false;
+        reloadedPage = false;
+        optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
+        randomizeButton.style.opacity = "0.5";
+        setAdvancedButtonDisabled(true);
+        clearLayout();
+    } else {
+        await fetch("http://localhost:8080/api/toggleAutomaticMode");
+        paused = true;
+        optimizeButton.innerHTML = "Optimierung fortsetzen";
+        randomizeButton.style.opacity = "1";
+        setAdvancedButtonDisabled(false);
+        loadTimetable();
+        if (hintBox) {
+            hintBox.style.display = "none";
         }
+    }
     } catch (error) {
         console.log("Error while toggling algorithm: ", error);
     } finally {
