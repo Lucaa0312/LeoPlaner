@@ -204,14 +204,18 @@ function createLayout(data: ClassSubjectInstance[]) {
     const teacher = item.classSubject?.teacher?.[0]?.nameSymbol ?? "";
     const room = item.room?.nameShort ?? "";
 
-    block.innerHTML = `
-            <span class="subject">${subject}</span>
+        block.innerHTML = `
+            <span class="subject">${subject}</span> 
             <span class="room">${room}</span>
             <span class="teacher">${teacher}</span>
         `;
 
-    slot.appendChild(block);
-  });
+        if(item.period.lunchBreak) {
+            block.style.display = "none";
+        }
+
+        slot.appendChild(block);
+    });
 }
 
 const randomizeButton = aquireElement<HTMLElement>("randomizeButton");

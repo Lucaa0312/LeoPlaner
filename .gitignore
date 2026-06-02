@@ -12,3 +12,4 @@ leo-planer/.gitignore
 leo-planer/src/main/resources/privateKey.pem
 
 .vscode
+web/dist/

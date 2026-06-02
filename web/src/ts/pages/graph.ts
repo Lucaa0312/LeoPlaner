@@ -380,6 +380,7 @@ function updateSlider(temperature?: number): void {
 let paused = false;
 let isStarting = false;
 let reloadedPage = true;
+let automaticModeOn = false;
 const randomizeButton = aquireElement<HTMLElement>("randomizeButton");
 const optimizeButton = aquireElement<HTMLElement>("optimizeButton");
 optimizeButton.addEventListener("click", handleOptimizeButton);
@@ -390,22 +391,49 @@ async function handleOptimizeButton() {
     if (hintBox) {
       hintBox.style.display = "flex";
     }
-
     try {
-      fetch("http://localhost:8080/api/run/toggleAutomaticMode");
-      optimizedBefore = true;
-      paused = false;
-      reloadedPage = false;
-      optimizeButton.innerHTML = "Wird optimiert...";
-      randomizeButton.style.opacity = "0.5";
-      setAdvancedButtonDisabled(true);
-      clearLayout();
+      if (!optimizedBefore) {
+    // Allererster Start
+    await fetch("http://localhost:8080/api/toggleAutomaticMode");
+    automaticModeOn = true;
+    fetch("http://localhost:8080/api/run/algorithmAllClasses");
+    optimizedBefore = true;
+    paused = false;
+    reloadedPage = false;
+    optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
+    randomizeButton.style.opacity = "0.5";
+    setAdvancedButtonDisabled(true);
+    clearLayout();
+    costDisplay.style.display = "none";
+} else if (paused || reloadedPage) {
+    // Resume – kein toggleAutomaticMode mehr
+    socket.send("resume");
+    paused = false;
+    reloadedPage = false;
+    optimizeButton.innerHTML = "Optimierungsfortschritt anzeigen";
+    randomizeButton.style.opacity = "0.5";
+    setAdvancedButtonDisabled(true);
+    clearLayout();
+    costDisplay.style.display = "none";
+} else {
+    // Pause – kein toggleAutomaticMode mehr
+    socket.send("pause");
+    paused = true;
+    optimizeButton.innerHTML = "Optimierung fortsetzen";
+    randomizeButton.style.opacity = "1";
+    setAdvancedButtonDisabled(false);
+    loadTimetable();
+    if (hintBox) {
+        hintBox.style.display = "none";
+    }
+    costDisplay.style.display = "block";             
+    costDisplay.innerHTML = "Kosten: " + lastCost;
+}
     } catch (error) {
-      console.log("Error while starting algorithm: ", error);
+      console.log("Error while toggling algorithm: ", error);
     } finally {
       isStarting = false;
     }
-
     return;
   }
 
@@ -425,7 +453,6 @@ async function handleOptimizeButton() {
     } finally {
       isStarting = false;
     }
-
     return;
   }
 
@@ -461,28 +488,38 @@ const graphButtonContainer = document.createElement("div");
 const graphButton = document.createElement("button");
 
 advancedButton?.addEventListener("click", () => {
-  if (!toggledAdvanced) {
-    optimizeButton.textContent = "Optimierung starten";
-    graphButtonContainer.classList.add("button");
-    graphButton.setAttribute("id", "graphButton");
-    graphButton.classList.add("buttonStyle");
-    graphButton.textContent = "Diagramm";
-    graphButtonContainer.appendChild(graphButton);
-    graphContainer?.insertBefore(graphButtonContainer, advancedButton);
-    if (advancedButtonText) {
-      advancedButtonText.textContent = "Einfacher Stundenplan";
+    if (!toggledAdvanced) {
+        // Wechsel zu Fortgeschritten
+        if (automaticModeOn) {
+            fetch("http://localhost:8080/api/toggleAutomaticMode");
+            automaticModeOn = false;
+        }
+        optimizeButton.textContent = "Optimierung starten";
+        graphButtonContainer.classList.add("button");
+        graphButton.setAttribute("id", "graphButton");
+        graphButton.classList.add("buttonStyle");
+        graphButton.textContent = "Diagramm";
+        graphButtonContainer.appendChild(graphButton);
+        graphContainer?.insertBefore(graphButtonContainer, advancedButton);
+        if (advancedButtonText) {
+            advancedButtonText.textContent = "Einfacher Stundenplan";
+        }
+        toggledAdvanced = true;
+    } else {
+        // Wechsel zurück zu Einfach
+        if (!automaticModeOn && optimizedBefore) {
+            fetch("http://localhost:8080/api/toggleAutomaticMode");
+            automaticModeOn = true;
+        }
+        clearGraphBox();
+        optimizeButton.textContent = "Stundenplan optimieren";
+        graphButtonContainer.querySelector("button")?.remove();
+        graphButtonContainer.remove();
+        if (advancedButtonText) {
+            advancedButtonText.textContent = "Stundenplan für Fortgeschrittene";
+        }
+        toggledAdvanced = false;
     }
-    toggledAdvanced = true;
-  } else {
-    clearGraphBox();
-    optimizeButton.textContent = "Stundenplan optimieren";
-    graphButtonContainer.querySelector("button")?.remove();
-    graphButtonContainer.remove();
-    if (advancedButtonText) {
-      advancedButtonText.textContent = "Stundenplan für Fortgeschrittene";
-    }
-    toggledAdvanced = false;
-  }
 });
 
 let optionsToggled = false;
