@@ -180,6 +180,7 @@ export function loadTimetable(): void {
 }
 
 function createLayout(data: ClassSubjectInstance[]) {
+  clearLayout();
   data.forEach((item) => {
     const day = item.period.schoolDays;
     const rowStart = item.period.schoolHour;
@@ -204,18 +205,18 @@ function createLayout(data: ClassSubjectInstance[]) {
     const teacher = item.classSubject?.teacher?.[0]?.nameSymbol ?? "";
     const room = item.room?.nameShort ?? "";
 
-        block.innerHTML = `
-            <span class="subject">${subject}</span> 
+    block.innerHTML = `
+            <span class="subject">${subject}</span>
             <span class="room">${room}</span>
             <span class="teacher">${teacher}</span>
         `;
 
-        if(item.period.lunchBreak) {
-            block.style.display = "none";
-        }
+    if (item.period.lunchBreak) {
+      block.style.display = "none";
+    }
 
-        slot.appendChild(block);
-    });
+    slot.appendChild(block);
+  });
 }
 
 const randomizeButton = aquireElement<HTMLElement>("randomizeButton");
