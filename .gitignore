@@ -7,9 +7,8 @@ stopApplication.sh
 .venv
 node_modules/
 .demo/websockets-quickstart
- 
+
 leo-planer/.gitignore
 leo-planer/src/main/resources/privateKey.pem
 
 .vscode
-web/dist/
