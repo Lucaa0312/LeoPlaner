@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeoPlaner – Hall of Shame 🔥</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css" id="theme">
+
+  <style>
+    :root {
+      --fire: #ff6b35;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+      --bronze: #cd7f32;
+    }
+    .reveal { font-family: "Segoe UI", system-ui, sans-serif; }
+    .reveal h1, .reveal h2, .reveal h3 { text-transform: none; letter-spacing: -1px; }
+    .reveal h1 { font-weight: 900; }
+    .fire-title {
+      background: linear-gradient(90deg, #ff6b35, #ffd700, #ff6b35);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      background-size: 200% auto;
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+
+    .leaderboard { list-style: none; margin: 0; padding: 0; font-size: 0.85em; }
+    .leaderboard li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; margin: 10px 0; border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border-left: 6px solid #444;
+    }
+    .leaderboard li .name { font-weight: 700; }
+    .leaderboard li .count { font-weight: 900; color: var(--fire); font-variant-numeric: tabular-nums; }
+    .leaderboard li .crime { font-size: 0.55em; opacity: 0.6; font-style: italic; }
+    .gold   { border-left-color: var(--gold) !important; }
+    .silver { border-left-color: var(--silver) !important; }
+    .bronze { border-left-color: var(--bronze) !important; }
+
+    .commit {
+      font-family: "Fira Code", "Courier New", monospace;
+      background: #1a1a1a; color: #8aff80;
+      padding: 14px 20px; border-radius: 10px;
+      display: inline-block; margin: 10px 0;
+      border: 1px solid #333; font-size: 0.7em;
+    }
+    .commit::before { content: "$ git commit -m \"" ; color: #555; }
+    .commit::after  { content: "\""; color: #555; }
+
+    .roast {
+      font-size: 0.95em; line-height: 1.5;
+      max-width: 80%; margin: 0.6em auto;
+    }
+    .verdict {
+      display: inline-block; margin-top: 0.4em;
+      padding: 8px 22px; border-radius: 999px;
+      background: var(--fire); color: #000; font-weight: 900;
+      font-size: 0.6em; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .big-emoji { font-size: 2.4em; display: block; margin-bottom: 0.1em; }
+    .stat { color: var(--gold); font-weight: 900; }
+    .reveal section img { border: none; box-shadow: none; }
+    .footer-note { position: fixed; bottom: 12px; right: 18px; font-size: 14px; opacity: 0.3; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card {
+      background: rgba(255,255,255,0.05); border-radius: 14px;
+      padding: 18px; font-size: 0.6em;
+    }
+    .card .num { font-size: 2.2em; font-weight: 900; color: var(--fire); display:block; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- INTRO -->
+    <section data-background-color="#0a0a0a">
+      <h2 style="font-size:1.1em">🔥 LeoPlaner 🔥</h2>
+      <h1 class="fire-title" style="font-size:2.2em">HALL OF SHAME</h1>
+      <p style="opacity:0.6">Eine forensische Analyse von <span class="stat">628 Commits</span></p>
+      <p style="opacity:0.4; font-size:0.6em">Niemand ist sicher. Auch du nicht.</p>
+      <p style="opacity:0.3; font-size:0.5em">→ Pfeiltasten / Leertaste zum Blättern</p>
+    </section>
+
+    <!-- DISCLAIMER -->
+    <section data-background-color="#1a0000">
+      <span class="big-emoji">⚖️</span>
+      <h2>Die Beweislage</h2>
+      <p class="roast">Wir haben jeden einzelnen Commit gelesen.<br>
+      Jede <code>minor change</code>. Jedes <code>merged lol</code>.<br>
+      Jedes <code>doesn't work</code>, das trotzdem gepusht wurde.</p>
+      <p class="verdict">Schuldig bis zum Beweis des Gegenteils</p>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section data-background-color="#0a0a0a">
+      <h2>📊 Das Ranking</h2>
+      <ul class="leaderboard">
+        <li class="gold">  <span class="name">🥇 Marc</span>        <span class="count">176</span></li>
+        <li class="silver"><span class="name">🥈 Sean (scinac)</span><span class="count">164</span></li>
+        <li class="bronze"><span class="name">🥉 Alessandro</span>   <span class="count">111</span></li>
+        <li>              <span class="name">4. Andi</span>          <span class="count">65</span></li>
+        <li>              <span class="name">5. Luca 👑(?)</span>     <span class="count">57</span></li>
+        <li>              <span class="name">6. Julian 👻</span>      <span class="count">17</span></li>
+      </ul>
+      <p style="font-size:0.5em; opacity:0.5">Mehr Commits ≠ besser. Das beweisen wir gleich.</p>
+    </section>
+
+    <!-- MARC -->
+    <section data-background-color="#2a1f00">
+      <section>
+        <span class="big-emoji">🥇</span>
+        <h2 style="color:var(--gold)">Marc</h2>
+        <p class="roast"><span class="stat">176 Commits</span> – der König.<br>
+        Aber: <span class="stat">42 davon sind Merge-Commits.</span></p>
+        <p class="roast" style="font-size:0.8em">Das ist nicht Programmieren. Das ist Buchhaltung.</p>
+      </section>
+      <section>
+        <h3>Tatort-Fotos 📸</h3>
+        <p class="commit">sh script bearbeitet</p><br>
+        <p class="commit">#119 zed editor</p>
+        <p class="roast" style="font-size:0.75em">Plötzlich Deutsch mitten im Repo.<br>
+        Und ja, er hat seinen Editor committet.</p>
+        <p class="verdict">Merge-Süchtiger</p>
+      </section>
+    </section>
+
+    <!-- SEAN -->
+    <section data-background-color="#001a1a">
+      <section>
+        <span class="big-emoji">🥈</span>
+        <h2 style="color:var(--silver)">Sean (aka scinac)</h2>
+        <p class="roast"><span class="stat">164 Commits.</span> Der Algorithmus-Gott.<br>
+        Schreibt brillanten Code. Schreibt katastrophale Commit-Messages.</p>
+      </section>
+      <section>
+        <h3>Die Beweise</h3>
+        <p class="commit">Merge branch 'main' merged lol merged lol</p><br>
+        <p class="commit">alessandro did everything here btw SIKE NOT</p>
+        <p class="roast" style="font-size:0.7em">Passiv-aggressiv im git log.<br>
+        Der Mann hat <code>SIKE</code> in die Versionsgeschichte gemeißelt. Für immer.</p>
+        <p class="verdict">Chaos-Genie</p>
+      </section>
+    </section>
+
+    <!-- ALESSANDRO -->
+    <section data-background-color="#1a0010">
+      <section>
+        <span class="big-emoji">🥉</span>
+        <h2 style="color:var(--bronze)">Alessandro</h2>
+        <p class="roast"><span class="stat">111 Commits.</span><br>
+        Davon gefühlt die Hälfte: <code>minor changes</code>.</p>
+        <div class="grid2" style="margin-top:20px">
+          <div class="card"><span class="num">4×</span> "minor change(s)"</div>
+          <div class="card"><span class="num">1×</span> "content"</div>
+        </div>
+      </section>
+      <section>
+        <h3>Greatest Hits 🎵</h3>
+        <p class="commit">auth doesn't work</p><br>
+        <p class="commit">emergency fix</p><br>
+        <p class="commit">Initiated connection, though temperature acts up terribly now</p>
+        <p class="roast" style="font-size:0.7em">Er weiß, dass es kaputt ist.<br>Er pusht es trotzdem. Ein Mann mit Prinzipien.</p>
+        <p class="verdict">"Funktioniert nicht" – Champion</p>
+      </section>
+    </section>
+
+    <!-- ANDI -->
+    <section data-background-color="#0a1a00">
+      <section>
+        <span class="big-emoji">4️⃣</span>
+        <h2>Andi</h2>
+        <p class="roast"><span class="stat">65 Commits</span> maximaler Vagheit.<br>
+        Niemand weiß, was er getan hat. Andi auch nicht.</p>
+      </section>
+      <section>
+        <h3>Was wurde geändert? 🤷</h3>
+        <p class="commit">Made changes</p><br>
+        <p class="commit">small fix</p><br>
+        <p class="commit">Tried to fix graph</p>
+        <p class="roast" style="font-size:0.75em"><code>Tried</code>.<br>
+        Das ehrlichste Wort im ganzen Repo.</p>
+        <p class="verdict">Meister der Vagheit</p>
+      </section>
+    </section>
+
+    <!-- LUCA -->
+    <section data-background-color="#001028">
+      <section>
+        <span class="big-emoji">5️⃣👑</span>
+        <h2>Luca</h2>
+        <p class="roast">Besitzer des Repos: <code>Lucaa0312/LeoPlaner</code>.<br>
+        Platz im eigenen Repo: <span class="stat">5 von 6.</span></p>
+        <p class="roast" style="font-size:0.8em">Das eigene Haus gebaut – und schläft im Gästezimmer.</p>
+      </section>
+      <section>
+        <h3>Der Penguin-Vorfall 🐧</h3>
+        <p class="commit">closed #108 (verschieb deine Issues!!!🐧)</p>
+        <p class="roast" style="font-size:0.8em">Schreit das Team über Issue-Hygiene an.<br>
+        Mit drei Ausrufezeichen. Und einem Pinguin.<br>
+        Steht selbst auf Platz 5.</p>
+        <p class="verdict">Abwesender Vermieter</p>
+      </section>
+    </section>
+
+    <!-- JULIAN -->
+    <section data-background-color="#0a0a0a">
+      <span class="big-emoji">👻</span>
+      <h2>Julian</h2>
+      <p class="roast"><span class="stat">17 Commits.</span><br>
+      Der Geist-Contributor. War er überhaupt da?</p>
+      <p class="commit">Fixed the time skipping one number</p>
+      <p class="roast" style="font-size:0.75em">Sein Vermächtnis: eine Zahl, die nicht mehr übersprungen wird.<br>
+      Ruhe in Frieden, kleiner Held.</p>
+      <p class="verdict">Das Phantom</p>
+    </section>
+
+    <!-- AWARDS -->
+    <section data-background-color="#1a1500">
+      <h2>🏆 Die Trophäen</h2>
+      <ul class="leaderboard" style="font-size:0.7em">
+        <li><span class="name">🤝 Merge-Buchhalter</span><span class="crime">Marc – 42 Merges</span></li>
+        <li><span class="name">😅 Bester Commit-Poet</span><span class="crime">Sean – "merged lol merged lol"</span></li>
+        <li><span class="name">🪄 "minor changes"-Award</span><span class="crime">Alessandro – 4×</span></li>
+        <li><span class="name">🤷 Vagheits-Pokal</span><span class="crime">Andi – "Made changes"</span></li>
+        <li><span class="name">🐧 Pinguin der Schande</span><span class="crime">Luca – !!!🐧</span></li>
+        <li><span class="name">👻 Phantom-Preis</span><span class="crime">Julian – 17 Commits</span></li>
+      </ul>
+    </section>
+
+    <!-- OUTRO -->
+    <section data-background-color="#0a0a0a">
+      <h1 class="fire-title">Danke fürs Lesen 🔥</h1>
+      <p class="roast">628 Commits. 6 Verdächtige. 0 Unschuldige.</p>
+      <p style="opacity:0.5; font-size:0.7em">Aber ehrlich: ihr habt ein ganzes Stundenplan-System gebaut.<br>
+      Das ist mehr, als die meisten je tun. 💚</p>
+      <p style="opacity:0.3; font-size:0.5em">git blame ist nur ein Werkzeug. Die Schande ist für immer.</p>
+    </section>
+
+  </div>
+</div>
+<div class="footer-note">LeoPlaner Hall of Shame · git log lügt nie</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'convex',
+    backgroundTransition: 'zoom',
+    controls: true,
+    progress: true,
+    center: true,
+  });
+</script>
+</body>
+</html>
