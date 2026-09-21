@@ -1,7 +1,11 @@
 # web-interface Specification
 
 ## Purpose
-TBD - created by archiving change redesign-dashboard. Update Purpose after archive.
+Behaviour of the LeoPlaner web frontend (vanilla TypeScript + static HTML):
+the dashboard overview and the shared shell it lives in. Page-level
+capabilities (design system, app shell, data pages, timetable workbench,
+feedback components, landing page) are specified in their own capability
+specs.
 ## Requirements
 ### Requirement: Dashboard overview layout
 The dashboard SHALL present, in order, a header, a stats grid, a quick-actions

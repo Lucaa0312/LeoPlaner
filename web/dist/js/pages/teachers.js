@@ -1,147 +1,215 @@
 import initNavbar from "./navbar.js";
 import { createTeacher, fetchTeachers, updateTeacher, } from "../api/teacherApi.js";
-import { toggleEmptyState } from "../components/emptyState.js";
+import { renderEmptyState, toggleEmptyState, } from "../components/emptyState.js";
 import { getElement, aquireElement, formatName, } from "../utils/elementHelpers.js";
-import { closePopup, openPopup } from "../components/popup.js";
+import { buildModal, closeModal, openModal } from "../components/modal.js";
+import { toast } from "../components/toast.js";
+import { clearSkeleton, renderSkeleton } from "../components/skeleton.js";
 import { imagePreview } from "../features/imagePreview.js";
 import { fetchSubjects } from "../api/subjectApi.js";
 import { initSubjectSelector } from "../features/subjectSelector.js";
 import { initSetAvailability } from "../features/availabilitySelector.js";
+import { applySearch, bindSearch } from "../features/searchElement.js";
+const SEARCH = {
+    inputId: "input-field",
+    rowSelector: ".teacher-row",
+    values: [".teacher-name", ".teacher-initials", ".subject-chip"],
+    noResultsEl: null,
+};
+// ---------------------------------------------------------------- helpers
+// Deterministic tint for the initials avatar: blends the two brand colours
+// so every teacher gets one of a few brand-adjacent tones.
+function avatarTone(name) {
+    let hash = 0;
+    for (const ch of name)
+        hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    const steps = [100, 66, 33, 0];
+    return steps[hash % steps.length] ?? 100;
+}
+function initialsOf(teacher) {
+    if (teacher.nameSymbol)
+        return teacher.nameSymbol.slice(0, 3);
+    return teacher.teacherName
+        .split(" ")
+        .map((part) => part.charAt(0))
+        .join("")
+        .slice(0, 2);
+}
+function createAvatar(teacher) {
+    const avatar = document.createElement("span");
+    avatar.className = "avatar avatar--tinted";
+    avatar.style.setProperty("--tone", `${avatarTone(teacher.teacherName)}%`);
+    avatar.textContent = initialsOf(teacher);
+    avatar.setAttribute("aria-hidden", "true");
+    return avatar;
+}
+// --------------------------------------------------------- subject chips
 function createTeacherSubjectChips(subjects) {
-    const visibleSubjects = subjects.slice(0, 2);
-    const hiddenSubjects = subjects.slice(2);
+    const visibleSubjects = subjects.slice(0, 3);
+    const hiddenSubjects = subjects.slice(3);
     const remaining = subjects.length - visibleSubjects.length;
     let chips = visibleSubjects
-        .map((subject) => `<span class="subject-chip" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
+        .map((subject) => `<span class="chip chip--soft subject-chip" title="${formatName(subject.subjectName)}">${subject.subjectSymbol.toUpperCase()}</span>`)
         .join("");
     if (remaining > 0) {
-        chips += `<span class="subject-chip extra">+${remaining}</span>`;
+        chips += `<button type="button" class="chip chip--more subject-chip extra" aria-label="${remaining} weitere Fächer anzeigen">+${remaining}</button>`;
     }
     chips += hiddenSubjects
-        .map((subject) => `<span class="subject-chip hidden-subject" style="display: none;" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
+        .map((subject) => `<span class="chip chip--soft subject-chip hidden-subject" hidden title="${formatName(subject.subjectName)}">${subject.subjectSymbol.toUpperCase()}</span>`)
         .join("");
     return chips;
 }
-function showRemainingSubjects(teacherID) {
-    const container = document.querySelector(`.teacher-subjects[data-index="${teacherID}"]`);
-    if (!container)
-        return;
-    const hiddenChips = container.querySelectorAll(".hidden-subject");
-    hiddenChips.forEach((chip) => {
-        chip.style.display = "inline-block";
-    });
+function showRemainingSubjects(container) {
+    container
+        .querySelectorAll(".hidden-subject")
+        .forEach((chip) => (chip.hidden = false));
     const extraChip = container.querySelector(".subject-chip.extra");
-    if (extraChip) {
-        extraChip.style.display = "none";
-    }
+    if (extraChip)
+        extraChip.hidden = true;
 }
 function closeAllTeachers() {
-    const allTeacherContainers = document.querySelectorAll(".teacher-subjects");
-    allTeacherContainers.forEach((container) => {
-        const hiddenChips = container.querySelectorAll(".hidden-subject");
-        hiddenChips.forEach((chip) => {
-            chip.style.display = "none";
-        });
+    document
+        .querySelectorAll(".teacher-subjects")
+        .forEach((container) => {
+        container
+            .querySelectorAll(".hidden-subject")
+            .forEach((chip) => (chip.hidden = true));
         const extraChip = container.querySelector(".subject-chip.extra");
-        if (extraChip) {
-            extraChip.style.display = "inline-block";
-        }
+        if (extraChip)
+            extraChip.hidden = false;
     });
 }
-function createTableInfoRow() {
-    const tableInfo = document.createElement("div");
-    tableInfo.id = "table-info";
-    const nameHeader = document.createElement("p");
-    nameHeader.id = "teacher-left-section";
-    nameHeader.textContent = "Name";
-    const initialsHeader = document.createElement("p");
-    initialsHeader.id = "teacher-initials-section";
-    initialsHeader.innerHTML = "K&uuml;rzel";
-    const subjectsHeader = document.createElement("p");
-    subjectsHeader.id = "teacher-subjects-section";
-    subjectsHeader.innerHTML = "F&auml;cher";
-    const workloadHeader = document.createElement("p");
-    workloadHeader.id = "teacher-workload-section";
-    workloadHeader.textContent = "Arbeitslast";
-    const editHeader = document.createElement("p");
-    editHeader.id = "teacher-edit-section";
-    editHeader.textContent = "Bearbeiten";
-    tableInfo.append(nameHeader, initialsHeader, subjectsHeader, workloadHeader, editHeader);
-    return tableInfo;
+// ---------------------------------------------------------- availability
+function createAvailabilityCell(teacher) {
+    const wrap = document.createElement("div");
+    wrap.className = "teacher-availability";
+    const blocked = teacher.teacherNonWorkingHours?.length ?? 0;
+    const disliked = teacher.teacherNonPreferredHours?.length ?? 0;
+    if (blocked === 0 && disliked === 0) {
+        wrap.innerHTML = `<span class="badge badge--success"><i class="ti ti-check" aria-hidden="true"></i>Immer verfügbar</span>`;
+        return wrap;
+    }
+    if (blocked > 0) {
+        wrap.innerHTML += `<span class="badge badge--danger" title="Stunden, in denen die Lehrkraft nicht verfügbar ist"><i class="ti ti-calendar-off" aria-hidden="true"></i>${blocked} gesperrt</span>`;
+    }
+    if (disliked > 0) {
+        wrap.innerHTML += `<span class="badge badge--accent" title="Stunden, die die Lehrkraft ungern unterrichtet"><i class="ti ti-clock" aria-hidden="true"></i>${disliked} ungern</span>`;
+    }
+    return wrap;
 }
-let subjectChipTeacherID = 0;
+// ------------------------------------------------------------------ table
+function createTableHead() {
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+    <tr>
+      <th scope="col" id="teacher-left-section">Name</th>
+      <th scope="col" id="teacher-initials-section">K&uuml;rzel</th>
+      <th scope="col" id="teacher-subjects-section">F&auml;cher</th>
+      <th scope="col" id="teacher-workload-section">Verf&uuml;gbarkeit</th>
+      <th scope="col" class="is-actions" id="teacher-edit-section"><span class="visually-hidden">Aktionen</span></th>
+    </tr>`;
+    return thead;
+}
 function createTeacherRow(teacher) {
-    const card = document.createElement("div");
-    card.className = "teacher-row";
-    const teacherLeft = document.createElement("div");
-    teacherLeft.className = "teacher-left";
-    const avatarPlaceholder = document.createElement("div");
-    avatarPlaceholder.className = "avatar-placeholder";
-    avatarPlaceholder.textContent = "👤";
-    const teacherInfo = document.createElement("div");
-    teacherInfo.className = "teacher-info";
-    const teacherName = document.createElement("div");
-    teacherName.className = "teacher-name";
-    teacherName.textContent = teacher.teacherName;
-    const teacherInitials = document.createElement("div");
-    teacherInitials.className = "teacher-initials";
-    teacherInitials.textContent = teacher.nameSymbol;
-    const teacherSubjects = document.createElement("div");
-    teacherSubjects.className = "teacher-subjects";
-    const currentTeacherID = subjectChipTeacherID;
-    teacherSubjects.dataset.index = currentTeacherID.toString();
-    teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
-    teacherSubjects.addEventListener("click", (event) => {
+    const row = document.createElement("tr");
+    row.className = "teacher-row";
+    // name
+    const nameCell = document.createElement("td");
+    const primary = document.createElement("div");
+    primary.className = "cell-primary";
+    const text = document.createElement("div");
+    text.className = "cell-primary__text";
+    const name = document.createElement("span");
+    name.className = "cell-primary__title teacher-name";
+    name.textContent = teacher.teacherName;
+    const sub = document.createElement("span");
+    sub.className = "cell-primary__sub";
+    const count = teacher.teachingSubject.length;
+    sub.textContent =
+        count === 0 ? "Keine Fächer" : count === 1 ? "1 Fach" : `${count} Fächer`;
+    text.append(name, sub);
+    primary.append(createAvatar(teacher), text);
+    nameCell.appendChild(primary);
+    // initials
+    const initialsCell = document.createElement("td");
+    const initials = document.createElement("span");
+    initials.className = "badge badge--mono teacher-initials";
+    initials.textContent = teacher.nameSymbol;
+    initialsCell.appendChild(initials);
+    // subjects
+    const subjectsCell = document.createElement("td");
+    const subjects = document.createElement("div");
+    subjects.className = "chip-list teacher-subjects";
+    subjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
+    subjects.addEventListener("click", (event) => {
         const target = event.target;
-        if (target.classList.contains("extra")) {
+        if (target.closest(".extra")) {
             closeAllTeachers();
-            showRemainingSubjects(currentTeacherID);
+            showRemainingSubjects(subjects);
         }
     });
-    subjectChipTeacherID++;
-    const teacherWorkload = document.createElement("div");
-    teacherWorkload.className = "teacher-workload";
-    teacherWorkload.textContent = "—";
-    const teacherEdit = document.createElement("div");
-    teacherEdit.className = "teacher-edit";
-    teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
-    teacherEdit.addEventListener("click", () => {
+    subjectsCell.appendChild(subjects);
+    // availability
+    const availabilityCell = document.createElement("td");
+    availabilityCell.appendChild(createAvailabilityCell(teacher));
+    // actions
+    const actionsCell = document.createElement("td");
+    actionsCell.className = "is-actions";
+    const actions = document.createElement("div");
+    actions.className = "row-actions";
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "icon-btn icon-btn--primary teacher-edit";
+    edit.title = `${teacher.teacherName} bearbeiten`;
+    edit.setAttribute("aria-label", edit.title);
+    edit.innerHTML = `<i class="ti ti-pencil" aria-hidden="true"></i>`;
+    edit.addEventListener("click", () => {
         void openAddTeacherForm(teacher);
     });
-    teacherInfo.appendChild(teacherName);
-    teacherLeft.append(avatarPlaceholder, teacherInfo);
-    card.append(teacherLeft, teacherInitials, teacherSubjects, teacherWorkload, teacherEdit);
-    return card;
+    actions.appendChild(edit);
+    actionsCell.appendChild(actions);
+    row.append(nameCell, initialsCell, subjectsCell, availabilityCell, actionsCell);
+    return row;
 }
+let firstLoad = true;
 async function loadAndRenderTeachers() {
     const noTeachersElement = getElement("no-teachers");
     const teachersContainer = getElement("display-teachers");
     if (!noTeachersElement || !teachersContainer)
         return;
+    if (firstLoad) {
+        renderSkeleton(teachersContainer, 6, "row");
+    }
     try {
         const teachers = await fetchTeachers();
-        toggleEmptyState(noTeachersElement, teachers.length > 0);
+        firstLoad = false;
+        clearSkeleton(teachersContainer);
         teachersContainer.replaceChildren();
+        toggleEmptyState(noTeachersElement, teachers.length > 0);
+        if (SEARCH.noResultsEl)
+            SEARCH.noResultsEl.hidden = true;
         if (teachers.length === 0)
             return;
-        if (!teachersContainer)
-            return;
-        const tableInfoRow = createTableInfoRow();
-        teachersContainer.appendChild(tableInfoRow);
-        const br = document.createElement("br");
-        teachers.forEach((teacher) => {
-            const teacherRow = createTeacherRow(teacher);
-            teachersContainer.appendChild(teacherRow);
-        });
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
+        const wrap = document.createElement("div");
+        wrap.className = "table-wrap rise-in";
+        const table = document.createElement("table");
+        table.className = "data-table teacher-table";
+        table.appendChild(createTableHead());
+        const tbody = document.createElement("tbody");
+        teachers.forEach((teacher) => tbody.appendChild(createTeacherRow(teacher)));
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        teachersContainer.appendChild(wrap);
+        // keep an active search query applied across re-renders
+        applySearch(SEARCH);
     }
     catch (error) {
+        firstLoad = false;
+        clearSkeleton(teachersContainer);
         console.error("Fehler beim Laden der Lehrer: " + error);
     }
 }
+// ------------------------------------------------------------------- form
 function collectTeacherData(state) {
     return {
         teacherName: `${state.firstName} ${state.lastName}`,
@@ -153,156 +221,184 @@ function collectTeacherData(state) {
         teacher_non_preferred_hours: state.nonPreferredHours,
     };
 }
-function buildFormHeader(modal, overlay, scrollContainer) {
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-teacher-header-container";
-    const title = document.createElement("h1");
-    title.id = "add-teacher-header";
-    title.textContent = "Einen neuen Lehrer hinzufügen";
-    const closeScreenButton = document.createElement("div");
-    closeScreenButton.id = "close-add-teacher-screen-btn";
-    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-    closeScreenButton.addEventListener("click", () => {
-        closePopup({
-            modal: modal,
-            overlay: overlay,
-            scrollContainer: scrollContainer,
-        });
-    });
-    headerContainer.append(title, closeScreenButton);
-    return headerContainer;
-}
-function buildAvatarUploadSection() {
-    const avaterUploadDiv = document.createElement("div");
-    avaterUploadDiv.className = "avatar-upload";
-    const teacherImageInput = document.createElement("input");
-    teacherImageInput.type = "file";
-    teacherImageInput.id = "teacher-image-input";
-    teacherImageInput.name = "teacher-image";
-    teacherImageInput.accept = "image/*";
-    const avatarLabel = document.createElement("label");
-    avatarLabel.htmlFor = "teacher-image-input";
-    avatarLabel.className = "avatar-label";
-    const avatarPreview = document.createElement("img");
-    avatarPreview.id = "avatar-preview";
-    avatarPreview.src = "../assets/img/userPreview.svg";
-    avatarPreview.alt = "Upload Photo";
-    const avatarText = document.createElement("p");
-    avatarText.textContent = "Profilbild hochladen";
-    avatarLabel.appendChild(avatarPreview);
-    avaterUploadDiv.append(teacherImageInput, avatarLabel, avatarText);
-    return avaterUploadDiv;
-}
+const STEP_TITLES = {
+    1: "Stammdaten",
+    2: "Fächer",
+    3: "Verfügbarkeit",
+};
 function buildStepIndicator(currentStep) {
     const container = document.createElement("div");
+    container.className = "stepper";
     container.id = "step-indicator";
+    container.setAttribute("aria-label", `Schritt ${currentStep} von 3`);
     const steps = [1, 2, 3];
     steps.forEach((step, index) => {
-        const dot = document.createElement("div");
-        dot.className = "step-dot";
-        if (step === currentStep) {
-            dot.classList.add("active");
-        }
-        if (step < currentStep) {
-            dot.classList.add("completed");
-        }
-        container.appendChild(dot);
+        const item = document.createElement("div");
+        item.className = "stepper__step";
+        if (step === currentStep)
+            item.classList.add("is-active");
+        if (step < currentStep)
+            item.classList.add("is-done");
+        const dot = document.createElement("span");
+        dot.className = "stepper__dot";
+        dot.innerHTML =
+            step < currentStep
+                ? `<i class="ti ti-check" aria-hidden="true"></i>`
+                : String(step);
+        const label = document.createElement("span");
+        label.className = "stepper__label";
+        label.textContent = STEP_TITLES[step];
+        item.append(dot, label);
+        container.appendChild(item);
         if (index < steps.length - 1) {
-            const line = document.createElement("div");
-            line.className = "step-line";
-            if (step < currentStep) {
-                line.classList.add("completed");
-            }
+            const line = document.createElement("span");
+            line.className = "stepper__line";
+            if (step < currentStep)
+                line.classList.add("is-done");
             container.appendChild(line);
         }
     });
     return container;
 }
 function buildNavigationButtons(config) {
-    const navContainer = document.createElement("div");
-    navContainer.id = "wizard-nav";
+    const buttons = [];
     if (config.showBack && config.onBack) {
-        const backButton = document.createElement("div");
+        const backButton = document.createElement("button");
+        backButton.type = "button";
         backButton.id = "back-teacher-btn";
-        backButton.textContent = "Zurück";
-        backButton.addEventListener("click", () => {
-            config.onBack();
-        });
-        navContainer.appendChild(backButton);
+        backButton.className = "btn btn--ghost";
+        backButton.innerHTML = `<i class="ti ti-chevron-left" aria-hidden="true"></i><span>Zurück</span>`;
+        backButton.addEventListener("click", () => config.onBack());
+        buttons.push(backButton);
     }
-    const nextButton = document.createElement("div");
+    const spacer = document.createElement("span");
+    spacer.className = "spacer";
+    buttons.push(spacer);
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
     nextButton.id = "submit-teacher-btn";
-    nextButton.textContent = config.nextLabel;
-    nextButton.addEventListener("click", () => {
-        config.onNext();
-    });
-    navContainer.appendChild(nextButton);
-    return navContainer;
+    nextButton.className = "btn btn--primary";
+    nextButton.innerHTML = `<span>${config.nextLabel}</span><i class="${config.nextIcon ?? "ti ti-arrow-right"}" aria-hidden="true"></i>`;
+    nextButton.addEventListener("click", () => config.onNext());
+    buttons.push(nextButton);
+    return buttons;
+}
+function buildAvatarUploadSection() {
+    const avatarUploadDiv = document.createElement("div");
+    avatarUploadDiv.className = "avatar-upload";
+    const teacherImageInput = document.createElement("input");
+    teacherImageInput.type = "file";
+    teacherImageInput.id = "teacher-image-input";
+    teacherImageInput.name = "teacher-image";
+    teacherImageInput.accept = "image/*";
+    teacherImageInput.className = "visually-hidden";
+    const avatarLabel = document.createElement("label");
+    avatarLabel.htmlFor = "teacher-image-input";
+    avatarLabel.className = "avatar-label";
+    avatarLabel.title = "Profilbild auswählen";
+    const avatarPreview = document.createElement("img");
+    avatarPreview.id = "avatar-preview";
+    avatarPreview.src = "../assets/img/userPreview.svg";
+    avatarPreview.alt = "";
+    const camera = document.createElement("span");
+    camera.className = "avatar-label__badge";
+    camera.innerHTML = `<i class="ti ti-photo-up" aria-hidden="true"></i>`;
+    avatarLabel.append(avatarPreview, camera);
+    const textWrap = document.createElement("div");
+    textWrap.className = "avatar-upload__text";
+    textWrap.innerHTML = `
+    <p class="avatar-upload__title">Profilbild hochladen</p>
+    <p class="avatar-upload__hint">Optional · PNG oder JPG</p>`;
+    avatarUploadDiv.append(teacherImageInput, avatarLabel, textWrap);
+    return avatarUploadDiv;
+}
+function buildField(id, label, placeholder, value, options = {}) {
+    const field = document.createElement("div");
+    field.className = "field";
+    const labelEl = document.createElement("label");
+    labelEl.className = "field__label";
+    labelEl.htmlFor = id;
+    labelEl.innerHTML = options.required
+        ? `${label}<span class="req" aria-hidden="true">*</span>`
+        : label;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = id;
+    input.name = id;
+    input.className = "input";
+    input.placeholder = placeholder;
+    input.value = value;
+    input.autocomplete = "off";
+    if (options.required)
+        input.required = true;
+    if (options.maxLength)
+        input.maxLength = options.maxLength;
+    field.append(labelEl, input);
+    if (options.hint) {
+        const hint = document.createElement("span");
+        hint.className = "field__hint";
+        hint.textContent = options.hint;
+        field.appendChild(hint);
+    }
+    return field;
 }
 function buildStep1(state) {
     const container = document.createElement("div");
     container.id = "step-1-container";
-    const addTeacherForm = document.createElement("form");
-    addTeacherForm.id = "add-teacher-form";
-    const inputContainer = document.createElement("div");
-    inputContainer.className = "input-container";
-    const firstNameLable = document.createElement("label");
-    firstNameLable.htmlFor = "first-name-input";
-    firstNameLable.textContent = "Vorname: ";
-    const firstNameInput = document.createElement("input");
-    firstNameInput.type = "text";
-    firstNameInput.id = "first-name-input";
-    firstNameInput.name = "first-name";
-    firstNameInput.required = true;
-    firstNameInput.placeholder = "Vorname";
-    firstNameInput.value = state.firstName;
-    const lastNameLabel = document.createElement("label");
-    lastNameLabel.htmlFor = "last-name-input";
-    lastNameLabel.textContent = "Nachname: ";
-    const lastNameInput = document.createElement("input");
-    lastNameInput.type = "text";
-    lastNameInput.id = "last-name-input";
-    lastNameInput.name = "last-name";
-    lastNameInput.required = true;
-    lastNameInput.placeholder = "Nachname";
-    lastNameInput.value = state.lastName;
-    const initialsLabel = document.createElement("label");
-    initialsLabel.htmlFor = "initials-input";
-    initialsLabel.textContent = "Kürzel: ";
-    const initialsInput = document.createElement("input");
-    initialsInput.type = "text";
-    initialsInput.id = "initials-input";
-    initialsInput.name = "initials";
-    initialsInput.required = true;
-    initialsInput.placeholder = "Initialen";
-    initialsInput.value = state.nameSymbol;
-    inputContainer.append(firstNameLable, firstNameInput, lastNameLabel, lastNameInput, initialsLabel, initialsInput);
-    addTeacherForm.append(inputContainer);
-    container.appendChild(addTeacherForm);
+    container.appendChild(buildAvatarUploadSection());
+    const form = document.createElement("form");
+    form.id = "add-teacher-form";
+    form.className = "form-grid";
+    form.addEventListener("submit", (event) => event.preventDefault());
+    form.append(buildField("first-name-input", "Vorname", "z. B. Maria", state.firstName, {
+        required: true,
+    }), buildField("last-name-input", "Nachname", "z. B. Musterfrau", state.lastName, {
+        required: true,
+    }), buildField("initials-input", "Kürzel", "z. B. MUM", state.nameSymbol, {
+        required: true,
+        hint: "Erscheint im Stundenplan.",
+        maxLength: 6,
+    }));
+    container.appendChild(form);
     return container;
 }
 async function buildStep2(state) {
     const container = document.createElement("div");
     container.id = "step-2-container";
+    const intro = document.createElement("p");
+    intro.className = "form-intro";
+    intro.textContent =
+        "Welche Fächer unterrichtet diese Lehrkraft? Tippen Sie, um zu suchen, und wählen Sie aus der Liste.";
     const addSubjectsContainer = document.createElement("div");
     addSubjectsContainer.id = "add-subjects-container";
+    addSubjectsContainer.className = "combo";
     const subjectInputContainer = document.createElement("div");
     subjectInputContainer.id = "subject-input-container";
-    const addSubjectImg = document.createElement("img");
-    addSubjectImg.id = "add-subject-img";
-    addSubjectImg.src = "../assets/img/magnifyingGlass.png";
-    addSubjectImg.alt = "Add Subject";
+    subjectInputContainer.className = "combo__input";
+    const icon = document.createElement("i");
+    icon.className = "ti ti-search";
+    icon.setAttribute("aria-hidden", "true");
     const subjectInput = document.createElement("input");
     subjectInput.type = "text";
     subjectInput.id = "subject-input";
-    subjectInput.placeholder = "Fach hinzufügen";
-    subjectInputContainer.append(addSubjectImg, subjectInput);
+    subjectInput.className = "input";
+    subjectInput.placeholder = "Fach suchen …";
+    subjectInput.autocomplete = "off";
+    subjectInput.setAttribute("aria-label", "Fach suchen");
+    subjectInputContainer.append(icon, subjectInput);
     const subjectDropdown = document.createElement("div");
     subjectDropdown.id = "subject-dropdown";
+    subjectDropdown.className = "combo__menu";
+    subjectDropdown.setAttribute("role", "listbox");
+    const selectedLabel = document.createElement("p");
+    selectedLabel.className = "form-section__title";
+    selectedLabel.textContent = "Ausgewählte Fächer";
     const selectedSubjectsContainer = document.createElement("div");
     selectedSubjectsContainer.id = "selected-subjects";
-    addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
-    container.appendChild(addSubjectsContainer);
+    selectedSubjectsContainer.className = "chip-list chip-list--boxed";
+    selectedSubjectsContainer.dataset.empty = "Noch keine Fächer ausgewählt";
+    addSubjectsContainer.append(subjectInputContainer, subjectDropdown);
+    container.append(intro, addSubjectsContainer, selectedLabel, selectedSubjectsContainer);
     const allSubjects = await fetchSubjects();
     const subjectSelector = initSubjectSelector({
         input: subjectInput,
@@ -339,9 +435,13 @@ const periods = [
 function buildStep3(state) {
     const container = document.createElement("div");
     container.id = "step-3-container";
+    const intro = document.createElement("p");
+    intro.className = "form-intro";
+    intro.textContent =
+        "Markieren Sie Stunden, in denen die Lehrkraft nicht oder nur ungern unterrichtet. Der Algorithmus berücksichtigt diese Wünsche.";
     const gridContainer = document.createElement("div");
     gridContainer.id = "availability-grid";
-    container.appendChild(gridContainer);
+    container.append(intro, gridContainer);
     const availability = initSetAvailability({
         container: gridContainer,
         periods,
@@ -349,21 +449,27 @@ function buildStep3(state) {
     container._availability = availability;
     return container;
 }
-async function openAddTeacherForm(existingTeacher) {
-    const noTeachersElement = aquireElement("no-teachers");
-    const disableOverlay = aquireElement("disable-overlay");
-    const displayTeachers = aquireElement("display-teachers");
-    const addTeacherScreen = aquireElement("add-teacher-screen");
-    if (!addTeacherScreen || !disableOverlay || !displayTeachers)
-        return;
-    if (noTeachersElement)
-        noTeachersElement.style.display = "none";
-    openPopup({
-        modal: addTeacherScreen,
-        overlay: disableOverlay,
-        scrollContainer: displayTeachers,
+function validateStep1() {
+    const ids = ["first-name-input", "last-name-input", "initials-input"];
+    const invalid = [];
+    ids.forEach((id) => {
+        const input = getElement(id);
+        if (!input)
+            return;
+        const ok = input.value.trim().length > 0;
+        input.setAttribute("aria-invalid", ok ? "false" : "true");
+        if (!ok)
+            invalid.push(input);
     });
-    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
+    if (invalid.length > 0) {
+        toast.error("Bitte Vorname, Nachname und Kürzel ausfüllen.");
+        invalid[0]?.focus();
+        return false;
+    }
+    return true;
+}
+async function openAddTeacherForm(existingTeacher) {
+    const addTeacherScreen = aquireElement("add-teacher-screen");
     const isEditMode = !!existingTeacher;
     const [firstName, ...lastParts] = (existingTeacher?.teacherName ?? "").split(" ");
     const state = {
@@ -375,7 +481,15 @@ async function openAddTeacherForm(existingTeacher) {
         nonWorkingHours: existingTeacher?.teacherNonWorkingHours ?? [],
         nonPreferredHours: existingTeacher?.teacherNonPreferredHours ?? [],
     };
+    const frame = buildModal(addTeacherScreen, {
+        title: isEditMode
+            ? `${existingTeacher.teacherName} bearbeiten`
+            : "Neue Lehrkraft anlegen",
+        size: "lg",
+    });
+    openModal(addTeacherScreen);
     let currentStep = 1;
+    let saving = false;
     function saveStep1() {
         state.firstName =
             getElement("first-name-input")?.value.trim() ?? "";
@@ -400,23 +514,30 @@ async function openAddTeacherForm(existingTeacher) {
         }
     }
     async function renderStep() {
-        const stepIndicator = buildStepIndicator(currentStep);
+        frame.aside.replaceChildren(buildStepIndicator(currentStep));
+        frame.setTitle(isEditMode
+            ? `${existingTeacher.teacherName} bearbeiten`
+            : "Neue Lehrkraft anlegen", `Schritt ${currentStep} von 3 · ${STEP_TITLES[currentStep]}`);
         if (currentStep === 1) {
-            const avaterUploadDiv = buildAvatarUploadSection();
             const stepContent = buildStep1(state);
             const nav = buildNavigationButtons({
                 showBack: false,
                 nextLabel: "Weiter",
                 onNext: () => {
+                    if (!validateStep1())
+                        return;
                     saveStep1();
                     currentStep = 2;
                     void renderStep();
                 },
             });
-            addTeacherScreen.replaceChildren(header, stepIndicator, avaterUploadDiv, stepContent, nav);
+            frame.body.replaceChildren(stepContent);
+            frame.footer.replaceChildren(...nav);
             imagePreview();
+            getElement("first-name-input")?.focus();
         }
         else if (currentStep === 2) {
+            frame.body.replaceChildren(buildLoadingHint("Fächer werden geladen …"));
             const stepContent = await buildStep2(state);
             const nav = buildNavigationButtons({
                 showBack: true,
@@ -432,50 +553,91 @@ async function openAddTeacherForm(existingTeacher) {
                     void renderStep();
                 },
             });
-            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+            frame.body.replaceChildren(stepContent);
+            frame.footer.replaceChildren(...nav);
+            getElement("subject-input")?.focus();
         }
         else if (currentStep === 3) {
             const stepContent = buildStep3(state);
             const availability = stepContent._availability;
-            if (availability && isEditMode) {
+            if (availability) {
                 availability.restore(state.nonWorkingHours, state.nonPreferredHours);
             }
             const nav = buildNavigationButtons({
                 showBack: true,
-                nextLabel: "Bestätigen",
+                nextLabel: isEditMode ? "Speichern" : "Lehrkraft anlegen",
+                nextIcon: "ti ti-check",
                 onBack: () => {
+                    saveStep3(stepContent);
                     currentStep = 2;
                     void renderStep();
                 },
                 onNext: async () => {
+                    if (saving)
+                        return;
                     saveStep3(stepContent);
+                    saving = true;
+                    const submit = getElement("submit-teacher-btn");
+                    submit?.classList.add("btn--loading");
                     try {
                         const teacherData = collectTeacherData(state);
                         if (isEditMode && existingTeacher) {
                             await updateTeacher(existingTeacher.id, teacherData);
+                            toast.success(`${teacherData.teacherName} wurde aktualisiert.`);
                         }
                         else {
                             await createTeacher(teacherData);
+                            toast.success(`${teacherData.teacherName} wurde angelegt.`);
                         }
-                        closePopup({
-                            modal: addTeacherScreen,
-                            overlay: disableOverlay,
-                            scrollContainer: displayTeachers,
-                        });
+                        closeModal(addTeacherScreen);
                         await loadAndRenderTeachers();
                     }
                     catch (error) {
                         console.error(error);
                     }
+                    finally {
+                        saving = false;
+                        submit?.classList.remove("btn--loading");
+                    }
                 },
             });
-            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+            frame.body.replaceChildren(stepContent);
+            frame.footer.replaceChildren(...nav);
         }
     }
     await renderStep();
 }
+function buildLoadingHint(text) {
+    const hint = document.createElement("p");
+    hint.className = "form-intro text-muted";
+    hint.textContent = text;
+    return hint;
+}
+// ------------------------------------------------------------------- init
 function initializeApp() {
     initNavbar();
+    const noTeachersElement = getElement("no-teachers");
+    if (noTeachersElement) {
+        renderEmptyState(noTeachersElement, {
+            illustration: "teachers",
+            title: "Noch keine Lehrkräfte",
+            hint: "Legen Sie Ihre erste Lehrkraft an oder importieren Sie Ihre Daten über das Dashboard.",
+            ctaLabel: "Lehrer hinzufügen",
+            onCta: () => void openAddTeacherForm(),
+        });
+    }
+    const noResults = getElement("no-results");
+    if (noResults) {
+        renderEmptyState(noResults, {
+            illustration: "search",
+            title: "Keine Treffer",
+            hint: "Kein Lehrer passt zu Ihrer Suche. Versuchen Sie einen anderen Namen oder ein Kürzel.",
+            compact: true,
+        });
+        noResults.hidden = true;
+        SEARCH.noResultsEl = noResults;
+    }
+    bindSearch(SEARCH);
     void loadAndRenderTeachers();
     const addBtn = getElement("add-btn");
     addBtn?.addEventListener("click", () => openAddTeacherForm());

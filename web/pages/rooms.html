@@ -1,61 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R&auml;ume</title>
-    <link rel="stylesheet" href="../style/essentials.css">
-    <link rel="stylesheet" href="../style/rooms.css">
-    <script type="module" defer src="../dist/js/pages/rooms.js"></script>
-    <script type="module" defer src="../dist/js/pages/navbar.js"></script>
-    <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
-</head>
-<body>
-    <div class="flex-container">
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
+        <title>Räume · LeoPlaner</title>
+        <script>
+            // Apply the stored theme + sidebar state before first paint.
+            (function () {
+                try {
+                    var r = document.documentElement;
+                    var t = localStorage.getItem("leo.theme");
+                    if (t === "dark" || t === "light") r.dataset.theme = t;
+                    if (localStorage.getItem("leo.sidebar") === "collapsed")
+                        r.dataset.sidebar = "collapsed";
+                } catch (e) {}
+            })();
+        </script>
+        <link
+            rel="icon"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Crect x='8' y='6' width='5.5' height='20' rx='2.75' fill='%23fff'/%3E%3Crect x='8' y='20.5' width='16' height='5.5' rx='2.75' fill='%23fff'/%3E%3Ccircle cx='22.5' cy='10.5' r='3.25' fill='%23fbbf24'/%3E%3C/svg%3E"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css"
+        />
+        <link rel="stylesheet" href="../style/tokens.css" />
+        <link rel="stylesheet" href="../style/base.css" />
+        <link rel="stylesheet" href="../style/components.css" />
+        <link rel="stylesheet" href="../style/shell.css" />
+        <link rel="stylesheet" href="../style/rooms.css" />
+        <script type="module" src="../dist/js/pages/rooms.js"></script>
+    </head>
 
-        <div id="nav-bar"></div>
+    <body class="app">
+        <nav id="nav-bar" class="sidebar"></nav>
 
-        <div id="main-content">
-            <div class="flex-row" id="rooms-header">
-                <div id="header-section">
-                    <h1 id="header-text">R&auml;ume</h1>
-                    <p id="header-subtext">Verwalten Sie Ihre R&auml;ume</p>
-                </div>
-                <div id="controls">
-                    <div id="search-bar">
-                        <input type="text" id="input-field" placeholder="Nach R&auml;umen suchen">
-                        <img id="search-icon" src="../assets/img/magnifyingGlass.png" alt="Suchsymbol">
+        <main id="main-content" class="main">
+            <div class="page">
+                <header class="page-header" id="room-header">
+                    <button
+                        type="button"
+                        class="icon-btn page-header__menu"
+                        data-drawer-toggle
+                        aria-label="Menü öffnen"
+                    >
+                        <i class="ti ti-menu-2" aria-hidden="true"></i>
+                    </button>
+                    <div class="page-header__text" id="header-section">
+                        <p class="page-header__eyebrow">Verwaltung</p>
+                        <h1 class="page-header__title" id="header-text">Räume</h1>
+                        <p class="page-header__subtitle" id="header-subtext">
+                            Verwalten Sie Ihre R&auml;ume, deren K&uuml;rzel und
+                            Ausstattung (Raumtypen).
+                        </p>
                     </div>
-                    <div id="add-btn">
-                        <i class="fa-solid fa-plus"></i>
-                        <p>Raum hinzufügen</p>
-                         <svg width="38" height="52" viewBox="0 0 38 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="15.5" cy="35.5635" r="13.5" stroke="#F59E0B" stroke-width="4"/>
-                            <circle cx="15.5" cy="35.5635" r="5.5" fill="#F59E0B"/>
-                            <path d="M18.2522 23.9424C17.5417 27.0787 21.5948 28.9833 23.5557 26.4346L37.0636 8.8783C38.2323 7.3593 37.6964 5.1489 35.9618 4.33377L27.3485 0.286163C25.6139 -0.528969 23.5702 0.469229 23.1467 2.33844L18.2522 23.9424Z" fill="#F59E0B"/>
-                        </svg>
+                    <div class="page-header__actions" id="controls">
+                        <label class="search-field" id="search-bar">
+                            <i class="ti ti-search" aria-hidden="true"></i>
+                            <input
+                                type="search"
+                                class="input"
+                                id="input-field"
+                                placeholder="Nach Räumen suchen"
+                                aria-label="Nach Räumen suchen"
+                                autocomplete="off"
+                            />
+                        </label>
+                        <button type="button" class="btn btn--primary" id="add-btn">
+                            <i class="ti ti-plus" aria-hidden="true"></i>
+                            <span>Raum hinzufügen</span>
+                        </button>
                     </div>
+                </header>
+
+                <section class="data-view" id="display-rooms">
+                    <!-- Generated in JavaScript -->
+                </section>
+
+                <div id="no-rooms" hidden></div>
+                <div id="no-results" hidden></div>
+
+                <div class="modal" id="add-room-screen" role="dialog" aria-modal="true">
+                    <!-- Generated in JavaScript -->
                 </div>
             </div>
-
-            <div id="display-rooms">
-                <!-- Generated in JavaScript -->
-            </div>
-
-            <div id="disable-overlay">
-                <div id="add-room-screen">
-                <!-- Generated in JavaScript -->
-                </div>
-            </div>
-
-
-            <div id="no-rooms" style="display: block;">
-                <p>Es wurden noch keine R&auml;ume hinzugefügt.</p>
-                <p>...</p>
-            </div>
-        </div>
-
-    </div>
-    
-</body>
+        </main>
+    </body>
 </html>

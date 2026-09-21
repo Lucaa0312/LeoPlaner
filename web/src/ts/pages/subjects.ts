@@ -9,18 +9,25 @@ import {
   formatName,
   aquireElement,
 } from "../utils/elementHelpers.js";
-import { openPopup, closePopup } from "../components/popup.js";
-import { toggleEmptyState } from "../components/emptyState.js";
-import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
+import { buildModal, closeModal, openModal } from "../components/modal.js";
+import {
+  renderEmptyState,
+  toggleEmptyState,
+} from "../components/emptyState.js";
+import { toast } from "../components/toast.js";
+import { clearSkeleton, renderSkeleton } from "../components/skeleton.js";
+import {
+  initRoomTypeSelector,
+  roomTypeLabel,
+} from "../features/roomTypeSelector.js";
 import type {
   CreateSubjectRequest,
   Subject,
   SubjectColor,
 } from "../types/subject.js";
 import { initColorPicker } from "../features/colorSelector.js";
-import type { ColorPickerController } from "../features/colorSelector.js";
 import type { RoomType } from "../types/room.js";
-import { initSearchElement } from "../features/searchElement.js";
+import { applySearch, bindSearch } from "../features/searchElement.js";
 
 const DEFAULT_SUBJECT_COLOR: SubjectColor = {
   red: 128,
@@ -28,60 +35,93 @@ const DEFAULT_SUBJECT_COLOR: SubjectColor = {
   blue: 128,
 };
 
+const SEARCH = {
+  inputId: "input-field",
+  rowSelector: ".subject-box",
+  values: [".subject-name", ".subject-symbol", ".room-types"],
+  noResultsEl: null as HTMLElement | null,
+};
+
+function cssColor(color: SubjectColor | null | undefined): string {
+  const c = color ?? DEFAULT_SUBJECT_COLOR;
+  return `rgb(${c.red}, ${c.green}, ${c.blue})`;
+}
+
 function createRoomTypesElement(roomTypes: string[]): HTMLElement {
+  const tags = document.createElement("div");
+  tags.className = "entity-card__tags room-types";
+
   if (roomTypes.length === 0) {
-    return document.createElement("div");
+    tags.innerHTML = `<span class="badge badge--outline"><i class="ti ti-door" aria-hidden="true"></i>Beliebiger Raum</span>`;
+    return tags;
   }
 
-  const roomTypesElement = document.createElement("p");
-  roomTypesElement.className = "room-types";
-  roomTypesElement.innerHTML = roomTypes.join("<br>");
+  roomTypes.forEach((type) => {
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = roomTypeLabel(type);
+    badge.title = `Benötigt Raumtyp ${roomTypeLabel(type)}`;
+    tags.appendChild(badge);
+  });
 
-  return roomTypesElement;
+  return tags;
 }
 
 function createSubjectCard(subject: Subject): HTMLElement {
-  const subjectBox = document.createElement("div");
-  subjectBox.className = "subject-box";
+  const subjectBox = document.createElement("article");
+  subjectBox.className =
+    "card card--interactive entity-card entity-card--colored subject-box";
+  subjectBox.style.setProperty("--card-color", cssColor(subject.subjectColor));
 
-  const subjectInfo = document.createElement("div");
-  subjectInfo.className = "subject-info";
+  const head = document.createElement("div");
+  head.className = "entity-card__head";
+
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "subject-info";
 
   const subjectName = document.createElement("h2");
-  subjectName.className = "subject-name";
+  subjectName.className = "entity-card__title subject-name";
   subjectName.title = subject.subjectName;
   subjectName.textContent = formatName(subject.subjectName);
 
-  const requiredRoomTypes = createRoomTypesElement(subject.requiredRoomTypes);
+  const symbol = document.createElement("span");
+  symbol.className = "badge badge--mono subject-symbol";
+  symbol.textContent = subject.subjectSymbol;
 
-  const editDiv = document.createElement("div");
-  editDiv.className = "subject-edit";
-  editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
+  titleWrap.append(subjectName, symbol);
 
-  editDiv.addEventListener("click", () => {
-    openEditSubjectForm(subject);
-  });
+  const swatch = document.createElement("span");
+  swatch.className = "subject-swatch";
+  swatch.setAttribute("aria-hidden", "true");
 
-  subjectInfo.append(subjectName);
+  head.append(titleWrap, swatch);
 
-  if (subject.requiredRoomTypes.length > 0) {
-    subjectInfo.append(requiredRoomTypes);
-  }
+  const actions = document.createElement("div");
+  actions.className = "entity-card__actions";
 
-  subjectBox.append(subjectInfo, editDiv);
-  if (subject.subjectColor) {
-    subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.4)`;
-  }
-  else {
-    subjectBox.style.backgroundColor = `rgba(${DEFAULT_SUBJECT_COLOR.red}, ${DEFAULT_SUBJECT_COLOR.green}, ${DEFAULT_SUBJECT_COLOR.blue}, 0.4)`;
-  }
+  const editDiv = document.createElement("button");
+  editDiv.type = "button";
+  editDiv.className = "icon-btn icon-btn--primary subject-edit";
+  editDiv.title = `${formatName(subject.subjectName)} bearbeiten`;
+  editDiv.setAttribute("aria-label", editDiv.title);
+  editDiv.innerHTML = `<i class="ti ti-pencil" aria-hidden="true"></i>`;
+  editDiv.addEventListener("click", () => openEditSubjectForm(subject));
 
+  actions.appendChild(editDiv);
+
+  subjectBox.append(
+    head,
+    createRoomTypesElement(subject.requiredRoomTypes),
+    actions,
+  );
   return subjectBox;
 }
 
 function openEditSubjectForm(subject: Subject): void {
   openSubjectForm(subject);
 }
+
+let firstLoad = true;
 
 async function loadAndRenderSubjects(): Promise<void> {
   const noSubjectsElement = getElement<HTMLElement>("no-subjects");
@@ -90,25 +130,34 @@ async function loadAndRenderSubjects(): Promise<void> {
   if (!noSubjectsElement || !subjectsContainer) {
     return;
   }
+
+  if (firstLoad) renderSkeleton(subjectsContainer, 8, "card");
+
   try {
     const subjects = await fetchSubjects();
+    firstLoad = false;
 
-    toggleEmptyState(noSubjectsElement, subjects.length > 0);
+    clearSkeleton(subjectsContainer);
     subjectsContainer.replaceChildren();
+    toggleEmptyState(noSubjectsElement, subjects.length > 0);
+    if (SEARCH.noResultsEl) SEARCH.noResultsEl.hidden = true;
 
     if (subjects.length === 0) {
       return;
     }
 
     const gridContainer = document.createElement("div");
-    gridContainer.className = "grid-layout";
+    gridContainer.className = "entity-grid grid-layout rise-in";
 
     for (const subject of subjects) {
       gridContainer.appendChild(createSubjectCard(subject));
     }
 
     subjectsContainer.appendChild(gridContainer);
+    applySearch(SEARCH);
   } catch (error) {
+    firstLoad = false;
+    clearSkeleton(subjectsContainer);
     console.error("Fehler beim Laden der Fächer:", error);
   }
 }
@@ -116,7 +165,7 @@ async function loadAndRenderSubjects(): Promise<void> {
 function collectSubjectData(
   selectetRoomTypes: RoomType[],
   selectedSubjectColor: SubjectColor,
-): CreateSubjectRequest {
+): CreateSubjectRequest | null {
   const nameInput = getElement<HTMLInputElement>("name-input");
   const symbolInput = aquireElement<HTMLInputElement>("initials-input");
 
@@ -124,145 +173,194 @@ function collectSubjectData(
     throw new Error("Fehlendes Formularelement");
   }
 
+  const name = nameInput.value.trim();
+  const symbol = symbolInput.value.trim();
+
+  nameInput.setAttribute("aria-invalid", name ? "false" : "true");
+  symbolInput.setAttribute("aria-invalid", symbol ? "false" : "true");
+
+  if (!name || !symbol) {
+    toast.error("Bitte Name und Abkürzung angeben.");
+    (name ? symbolInput : nameInput).focus();
+    return null;
+  }
+
   return {
-    subjectName: nameInput.value.trim(),
-    subjectSymbol: symbolInput.value.trim(),
+    subjectName: name,
+    subjectSymbol: symbol,
     requiredRoomTypes: selectetRoomTypes,
     subjectColor: selectedSubjectColor,
   };
+}
+
+function buildField(
+  id: string,
+  label: string,
+  placeholder: string,
+  value: string,
+  hint?: string,
+): HTMLElement {
+  const field = document.createElement("div");
+  field.className = "field";
+
+  const labelEl = document.createElement("label");
+  labelEl.className = "field__label";
+  labelEl.htmlFor = id;
+  labelEl.innerHTML = `${label}<span class="req" aria-hidden="true">*</span>`;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = id;
+  input.className = "input subject-input";
+  input.placeholder = placeholder;
+  input.value = value;
+  input.required = true;
+  input.autocomplete = "off";
+
+  field.append(labelEl, input);
+
+  if (hint) {
+    const hintEl = document.createElement("span");
+    hintEl.className = "field__hint";
+    hintEl.textContent = hint;
+    field.appendChild(hintEl);
+  }
+
+  return field;
 }
 
 function buildAddSubjectFormContent(subject?: Subject): HTMLElement {
   const container = document.createElement("div");
   container.id = "subject-modal-content";
 
-  const formGrid = document.createElement("div");
-  formGrid.className = "subject-form-grid";
-
   // name / initials block
-  const nameInitials = document.createElement("div");
-  nameInitials.className = "form-name-initials-inputs";
+  const basics = document.createElement("section");
+  basics.className = "form-section";
+  basics.innerHTML = `<p class="form-section__title">Bezeichnung</p>`;
 
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.id = "name-input";
-  nameInput.className = "subject-input";
-  nameInput.placeholder = "Name";
-
-  const initialsInput = document.createElement("input");
-  initialsInput.type = "text";
-  initialsInput.id = "initials-input";
-  initialsInput.className = "subject-input";
-  initialsInput.placeholder = "Abkürzung";
-
-  nameInput.value = subject?.subjectName ?? "";
-  initialsInput.value = subject?.subjectSymbol ?? "";
-
-  nameInitials.append(nameInput, initialsInput);
+  const formGrid = document.createElement("div");
+  formGrid.className = "form-grid form-name-initials-inputs";
+  formGrid.append(
+    buildField("name-input", "Name", "z. B. Mathematik", subject?.subjectName ?? ""),
+    buildField(
+      "initials-input",
+      "Abkürzung",
+      "z. B. M",
+      subject?.subjectSymbol ?? "",
+      "Erscheint im Stundenplan.",
+    ),
+  );
+  basics.appendChild(formGrid);
 
   // roomtype block
-  const roomtypeBlock = document.createElement("div");
+  const roomtypeBlock = document.createElement("section");
   roomtypeBlock.id = "roomtype-block";
+  roomtypeBlock.className = "form-section";
+  roomtypeBlock.innerHTML = `
+    <p class="form-section__title">Benötigte Raumtypen</p>
+    <p class="form-intro">Nur relevant, wenn das Fach spezielle Räume braucht – etwa einen EDV-Saal oder eine Werkstatt.</p>`;
+
+  const combo = document.createElement("div");
+  combo.className = "combo";
 
   const roomtypeInputContainer = document.createElement("div");
   roomtypeInputContainer.id = "roomtype-input-container";
+  roomtypeInputContainer.className = "combo__input";
 
-  const addRoomImg = document.createElement("img");
+  const addRoomImg = document.createElement("i");
   addRoomImg.id = "add-room-img";
-  addRoomImg.src = "../assets/img/magnifyingGlass.png";
-  addRoomImg.alt = "Add Room";
+  addRoomImg.className = "ti ti-search";
+  addRoomImg.setAttribute("aria-hidden", "true");
 
   const roomtypeInput = document.createElement("input");
   roomtypeInput.type = "text";
   roomtypeInput.id = "roomtype-input";
-  roomtypeInput.placeholder = "Benötigter Raum Typ";
+  roomtypeInput.className = "input";
+  roomtypeInput.placeholder = "Raumtyp suchen …";
+  roomtypeInput.autocomplete = "off";
+  roomtypeInput.setAttribute("aria-label", "Raumtyp suchen");
 
   roomtypeInputContainer.append(addRoomImg, roomtypeInput);
 
   const roomtypeDropdown = document.createElement("div");
   roomtypeDropdown.id = "roomtype-dropdown";
+  roomtypeDropdown.className = "combo__menu";
+  roomtypeDropdown.setAttribute("role", "listbox");
+
+  combo.append(roomtypeInputContainer, roomtypeDropdown);
 
   const selectedRoomtypes = document.createElement("div");
   selectedRoomtypes.id = "selected-roomtypes";
+  selectedRoomtypes.className = "chip-list chip-list--boxed";
+  selectedRoomtypes.dataset.empty = "Kein spezieller Raum nötig";
 
-  roomtypeBlock.append(
-    roomtypeInputContainer,
-    roomtypeDropdown,
-    selectedRoomtypes,
-  );
+  roomtypeBlock.append(combo, selectedRoomtypes);
 
-  formGrid.append(nameInitials, roomtypeBlock);
-  container.appendChild(formGrid);
+  // colour block
+  const colorBlock = document.createElement("section");
+  colorBlock.className = "form-section";
+  colorBlock.innerHTML = `<p class="form-section__title">Farbe im Stundenplan</p>`;
 
+  const colorPickerContainer = document.createElement("div");
+  colorPickerContainer.id = "color-selection-container";
+  colorBlock.appendChild(colorPickerContainer);
+
+  container.append(basics, roomtypeBlock, colorBlock);
   return container;
 }
 
 function openSubjectForm(existingSubject?: Subject): void {
-  const noSubjectsElement = getElement<HTMLElement>("no-subjects");
-  const disableOverlay = getElement<HTMLElement>("disable-overlay");
-  const displaySubjects = getElement<HTMLElement>("display-subjects");
   const addSubjectScreen = getElement<HTMLElement>("add-subject-screen");
-
-  if (!addSubjectScreen || !disableOverlay || !displaySubjects) return;
-
-  if (noSubjectsElement) noSubjectsElement.style.display = "none";
-
-  openPopup({
-    modal: addSubjectScreen,
-    overlay: disableOverlay,
-    scrollContainer: displaySubjects,
-  });
+  if (!addSubjectScreen) return;
 
   const isEditMode = !!existingSubject;
 
-  const headerContainer = document.createElement("div");
-  headerContainer.id = "add-subject-header-container";
-
-  const title = document.createElement("h1");
-  title.id = "add-subject-header";
-  title.textContent = isEditMode
-    ? "Dieses Fach bearbeiten"
-    : "Ein neues Fach hinzufügen";
-
-  const closeScreenButton = document.createElement("div");
-  closeScreenButton.id = "close-add-subject-screen-btn";
-  closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-
-  closeScreenButton.addEventListener("click", () => {
-    closePopup({
-      modal: addSubjectScreen,
-      overlay: disableOverlay,
-      scrollContainer: displaySubjects,
-    });
+  const frame = buildModal(addSubjectScreen, {
+    title: isEditMode
+      ? `${formatName(existingSubject!.subjectName)} bearbeiten`
+      : "Neues Fach anlegen",
+    subtitle: isEditMode
+      ? "Änderungen wirken sich auf alle Klassen aus, die dieses Fach haben."
+      : "Kürzel und Farbe erscheinen später im Stundenplan.",
+    size: "lg",
   });
 
   const formContent = buildAddSubjectFormContent(existingSubject);
+  frame.body.replaceChildren(formContent);
 
-  const colorPickerContainer = document.createElement("div");
-  colorPickerContainer.id = "color-selection-container";
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = "btn btn--ghost";
+  cancelButton.textContent = "Abbrechen";
+  cancelButton.dataset.modalClose = "";
 
-  const confirmButton = document.createElement("div");
+  const spacer = document.createElement("span");
+  spacer.className = "spacer";
+
+  const confirmButton = document.createElement("button");
+  confirmButton.type = "button";
   confirmButton.id = "confirm-subject-btn";
-  confirmButton.textContent = isEditMode ? "Speichern" : "Bestätigen";
+  confirmButton.className = "btn btn--primary";
+  confirmButton.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i><span>${isEditMode ? "Speichern" : "Fach anlegen"}</span>`;
 
-  headerContainer.append(title, closeScreenButton);
-  addSubjectScreen.replaceChildren(
-    headerContainer,
-    formContent,
-    colorPickerContainer,
-    confirmButton,
-  );
+  frame.footer.replaceChildren(cancelButton, spacer, confirmButton);
+
+  openModal(addSubjectScreen);
 
   const selectorInput = getElement<HTMLInputElement>("roomtype-input");
   const selectorDropdown = getElement<HTMLElement>("roomtype-dropdown");
   const selectedContainer = getElement<HTMLElement>("selected-roomtypes");
   const inputContainer = getElement<HTMLElement>("roomtype-input-container");
+  const colorPickerContainer = getElement<HTMLElement>(
+    "color-selection-container",
+  );
 
   if (
     !selectorInput ||
     !selectorDropdown ||
     !selectedContainer ||
-    !inputContainer
+    !inputContainer ||
+    !colorPickerContainer
   )
     return;
 
@@ -281,11 +379,14 @@ function openSubjectForm(existingSubject?: Subject): void {
 
   const colorPicker = initColorPicker(colorPickerContainer);
 
-  if (existingSubject) {
+  if (existingSubject?.subjectColor) {
     colorPicker.setColor?.(existingSubject.subjectColor);
   }
 
+  let saving = false;
   confirmButton.addEventListener("click", async () => {
+    if (saving) return;
+
     try {
       const subjectData = collectSubjectData(
         roomTypeSelector.getSelectedTypes(),
@@ -294,43 +395,59 @@ function openSubjectForm(existingSubject?: Subject): void {
 
       if (!subjectData) return;
 
+      saving = true;
+      confirmButton.classList.add("btn--loading");
+
       if (isEditMode && existingSubject) {
         await updateSubject(existingSubject.id, subjectData);
-        console.log("It works");
+        toast.success(`${formatName(subjectData.subjectName)} wurde aktualisiert.`);
       } else {
-        console.log("SUBJECT DATA:", subjectData);
-        console.log("ROOM TYPES:", subjectData.requiredRoomTypes);
         await createSubject(subjectData);
+        toast.success(`${formatName(subjectData.subjectName)} wurde angelegt.`);
       }
 
-      closePopup({
-        modal: addSubjectScreen,
-        overlay: disableOverlay,
-        scrollContainer: displaySubjects,
-      });
-
+      closeModal(addSubjectScreen);
       await loadAndRenderSubjects();
     } catch (error) {
       console.error("Error occurred:", error);
+    } finally {
+      saving = false;
+      confirmButton.classList.remove("btn--loading");
     }
   });
 }
 
 function initializeApp(): void {
   initNavbar();
+
+  const noSubjects = getElement<HTMLElement>("no-subjects");
+  if (noSubjects) {
+    renderEmptyState(noSubjects, {
+      illustration: "subjects",
+      title: "Noch keine Fächer",
+      hint: "Legen Sie Ihr erstes Fach an. Kürzel und Farbe machen den Stundenplan später auf einen Blick lesbar.",
+      ctaLabel: "Fach hinzufügen",
+      onCta: () => openSubjectForm(),
+    });
+  }
+
+  const noResults = getElement<HTMLElement>("no-results");
+  if (noResults) {
+    renderEmptyState(noResults, {
+      illustration: "search",
+      title: "Keine Treffer",
+      hint: "Kein Fach passt zu Ihrer Suche.",
+      compact: true,
+    });
+    noResults.hidden = true;
+    SEARCH.noResultsEl = noResults;
+  }
+
+  bindSearch(SEARCH);
   void loadAndRenderSubjects();
 
   const addBtn = getElement<HTMLElement>("add-btn");
   addBtn?.addEventListener("click", () => openSubjectForm());
-
-  const inputField = getElement<HTMLInputElement>("input-field");
-  inputField?.addEventListener("input", () => {
-    initSearchElement({
-      inputId: "input-field",
-      selectedRow: ".subject-box",
-      values: [".subject-name", ".room-types"],
-    });
-  });
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);

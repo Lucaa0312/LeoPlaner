@@ -1,10 +1,22 @@
-import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement } from "../utils/elementHelpers.js";
+import {
+  renderEmptyState,
+  toggleEmptyState,
+} from "../components/emptyState.js";
+import { clearSkeleton, renderSkeleton } from "../components/skeleton.js";
+import { formatName, getElement, smartCase } from "../utils/elementHelpers.js";
 import initNavbar from "./navbar.js";
 import { fetchClassSubjects } from "../api/classSubjectApi.js";
 import type { ClassSubject, GroupedClass } from "../types/classSubject.js";
 import type { SchoolClass } from "../types/schoolClass.js";
 import { fetchSchoolClasses } from "../api/classSubjectApi.js";
+import { applySearch, bindSearch } from "../features/searchElement.js";
+
+const SEARCH = {
+  inputId: "input-field",
+  rowSelector: ".class-row",
+  values: [".class-name", ".class-room"],
+  noResultsEl: null as HTMLElement | null,
+};
 
 /**
  * Groups the class subjects by their class name.
@@ -34,287 +46,286 @@ function groupClasses(classSubjects: ClassSubject[]): GroupedClass[] {
   return Array.from(groupedMap.values());
 }
 
+let openOverviewClass: string | null = null;
+
 /**
- * Closes the overview page for the given class.
+ * Closes the overview panel.
  */
-function closeOverview(groupedClassesLength: number) {
-  const headerHoursBox = getElement<HTMLDivElement>("header-hours-box");
-  const headerSubjectCountBox = getElement<HTMLDivElement>(
-    "header-subject-count-box",
-  );
-  if (!headerHoursBox || !headerSubjectCountBox) {
-    console.log("headerHoursBox or headerSubjectCountBox is null");
+function closeOverview() {
+  const workspace = getElement<HTMLDivElement>("class-workspace");
+  const overviewBox = getElement<HTMLDivElement>("overview-box");
+
+  workspace?.classList.remove("workspace--panel-open");
+  if (overviewBox) {
+    overviewBox.hidden = true;
+    overviewBox.replaceChildren();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>(".class-row.is-selected")
+    .forEach((row) => row.classList.remove("is-selected"));
+
+  openOverviewClass = null;
+}
+
+function subjectColor(cs: ClassSubject): string {
+  const c = cs.subject?.subjectColor;
+  if (!c) return "var(--color-border-strong)";
+  return `rgb(${c.red}, ${c.green}, ${c.blue})`;
+}
+
+/**
+ * Opens the overview panel for the given class.
+ */
+function openOverview(groupedClass: GroupedClass) {
+  const workspace = getElement<HTMLDivElement>("class-workspace");
+  const overviewBox = getElement<HTMLDivElement>("overview-box");
+  if (!workspace || !overviewBox) return;
+
+  // clicking the open class again closes the panel
+  if (openOverviewClass === groupedClass.className) {
+    closeOverview();
     return;
   }
-  headerHoursBox.style.display = "";
-  headerSubjectCountBox.style.display = "";
 
-  for (let i = 0; i < groupedClassesLength; i++) {
-    const hoursBox = getElement<HTMLDivElement>("hours-box-" + i);
-    const subjectCountBox = getElement<HTMLDivElement>(
-      "subject-count-box-" + i,
+  openOverviewClass = groupedClass.className;
+  workspace.classList.add("workspace--panel-open");
+  overviewBox.hidden = false;
+
+  document.querySelectorAll<HTMLElement>(".class-row").forEach((row) => {
+    row.classList.toggle(
+      "is-selected",
+      row.dataset.className === groupedClass.className,
     );
-    if (!hoursBox || !subjectCountBox) {
-      console.log("hoursBox or subjectCountBox is null");
-      return;
-    }
-    hoursBox.style.display = "";
-    subjectCountBox.style.display = "";
-  }
+  });
 
-  const overviewBox = getElement<HTMLDivElement>("overview-box");
-  if (overviewBox) {
-    overviewBox.style.display = "none";
-  }
-  const closeOverviewBox = getElement<HTMLDivElement>("close-overview-box");
-  closeOverviewBox?.remove();
-}
-
-/**
- * Opens the overview page for the given class.
- */
-/*function openOverview(groupedClassesLength: number) {
-  const headerHoursBox = getElement<HTMLDivElement>("header-hours-box");
-  const headerSubjectCountBox = getElement<HTMLDivElement>(
-    "header-subject-count-box",
-  );
-
-  if (!headerHoursBox || !headerSubjectCountBox) {
-    console.log("headerHoursBox or headerSubjectCountBox is null");
-    return;
-  } else {
-    headerHoursBox.style.display = "none";
-    headerSubjectCountBox.style.display = "none";
-    for (let i = 0; i < groupedClassesLength; i++) {
-      const hoursBox = getElement<HTMLDivElement>("hours-box-" + i);
-      const subjectCountBox = getElement<HTMLDivElement>(
-        "subject-count-box-" + i,
-      );
-      if (!hoursBox || !subjectCountBox) {
-        console.log("hoursBox or subjectCountBox is null");
-        return;
-      } else {
-        hoursBox.style.display = "none";
-        subjectCountBox.style.display = "none";
-      }
-    }
-  }
-
-  const overviewBox = getElement<HTMLDivElement>("overview-box");
-  if (overviewBox) {
-    overviewBox.style.display = "block";
-  }
-
-  const closeOverviewBox = document.createElement("div");
-  closeOverviewBox.id = "close-overview-box";
-
-  const xMark = document.createElement("i");
-  xMark.className = "fa-solid fa-xmark";
-
-  xMark.onclick = () => {
-    closeOverview(groupedClassesLength);
-  };
-
-  closeOverviewBox.appendChild(xMark);
-
-  overviewBox?.replaceChildren(closeOverviewBox);
-}
-*/
-function openOverview(
-  groupedClass: GroupedClass,
-  groupedClassesLength: number,
-) {
-  const headerHoursBox = getElement<HTMLDivElement>("header-hours-box");
-  const headerSubjectCountBox = getElement<HTMLDivElement>(
-    "header-subject-count-box",
-  );
-
-  if (!headerHoursBox || !headerSubjectCountBox) {
-    console.log("headerHoursBox or headerSubjectCountBox is null");
-    return;
-  } else {
-    headerHoursBox.style.display = "none";
-    headerSubjectCountBox.style.display = "none";
-    for (let i = 0; i < groupedClassesLength; i++) {
-      const hoursBox = getElement<HTMLDivElement>("hours-box-" + i);
-      const subjectCountBox = getElement<HTMLDivElement>(
-        "subject-count-box-" + i,
-      );
-      if (!hoursBox || !subjectCountBox) {
-        console.log("hoursBox or subjectCountBox is null");
-        return;
-      } else {
-        hoursBox.style.display = "none";
-        subjectCountBox.style.display = "none";
-      }
-    }
-  }
-
-  const overviewBox = getElement<HTMLDivElement>("overview-box");
-  if (overviewBox) {
-    overviewBox.style.display = "block";
-  }
-
-  // --- Titelleiste mit Klassennamen + X ----------------------------------
+  // --- title bar ---------------------------------------------------------
   const titleBar = document.createElement("div");
+  titleBar.className = "side-panel__header";
   titleBar.id = "overview-title-bar";
 
-  const title = document.createElement("span");
+  const heading = document.createElement("div");
+  heading.className = "side-panel__heading";
+
+  const eyebrow = document.createElement("span");
+  eyebrow.className = "side-panel__eyebrow";
+  eyebrow.textContent = "Überblick";
+
+  const title = document.createElement("h2");
+  title.className = "side-panel__title";
   title.id = "overview-title";
-  title.textContent = `${groupedClass.className.toUpperCase()} - Überblick`;
+  title.textContent = groupedClass.className.toUpperCase();
 
-  const closeOverviewBox = document.createElement("div");
-  closeOverviewBox.id = "close-overview-box";
+  heading.append(eyebrow, title);
 
-  const xMark = document.createElement("i");
-  xMark.className = "fa-solid fa-xmark";
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "icon-btn";
+  closeButton.id = "close-overview-box";
+  closeButton.setAttribute("aria-label", "Überblick schließen");
+  closeButton.innerHTML = `<i class="ti ti-x" aria-hidden="true"></i>`;
+  closeButton.addEventListener("click", closeOverview);
 
-  xMark.onclick = () => {
-    closeOverview(groupedClassesLength);
-  };
+  titleBar.append(heading, closeButton);
 
-  closeOverviewBox.appendChild(xMark);
-  titleBar.append(title, closeOverviewBox);
+  // --- summary -----------------------------------------------------------
+  const summary = document.createElement("div");
+  summary.className = "side-panel__summary";
+  summary.innerHTML = `
+    <div class="summary-tile">
+      <span class="summary-tile__value">${groupedClass.subjectCount}</span>
+      <span class="summary-tile__label">Fächer</span>
+    </div>
+    <div class="summary-tile">
+      <span class="summary-tile__value">${groupedClass.weeklyHours}</span>
+      <span class="summary-tile__label">Wochenstunden</span>
+    </div>`;
 
-  // --- Suchfeld ----------------------------------------------------------
-  const searchBox = document.createElement("div");
+  // --- search ------------------------------------------------------------
+  const searchBox = document.createElement("label");
+  searchBox.className = "search-field side-panel__search";
   searchBox.id = "overview-search-box";
 
-  const searchInput = document.createElement("input");
-  searchInput.type = "text";
-  searchInput.placeholder = "Suchen";
-  searchInput.id = "overview-search-input";
-
   const searchIcon = document.createElement("i");
-  searchIcon.className = "fa-solid fa-magnifying-glass";
+  searchIcon.className = "ti ti-search";
   searchIcon.id = "overview-search-icon";
+  searchIcon.setAttribute("aria-hidden", "true");
 
-  searchBox.append(searchInput, searchIcon);
+  const searchInput = document.createElement("input");
+  searchInput.type = "search";
+  searchInput.className = "input";
+  searchInput.placeholder = "Fach suchen";
+  searchInput.id = "overview-search-input";
+  searchInput.autocomplete = "off";
+  searchInput.setAttribute("aria-label", "Fach in dieser Klasse suchen");
 
-  // --- Scrollbarer Inhalt (Fächer) ---------------------------------------
+  searchBox.append(searchIcon, searchInput);
+
+  // --- scrollable content ------------------------------------------------
   const content = document.createElement("div");
+  content.className = "side-panel__body";
   content.id = "overview-content";
 
-  // Fächer
-  const subjectsHeader = document.createElement("div");
-  subjectsHeader.className = "overview-section-header";
+  // subjects
+  const subjectsHeader = document.createElement("p");
+  subjectsHeader.className = "form-section__title overview-section-header";
   subjectsHeader.textContent = "Fächer";
   content.appendChild(subjectsHeader);
 
-  for (const cs of groupedClass.subjects) {
-    const item = document.createElement("div");
+  const list = document.createElement("ul");
+  list.className = "overview-list";
+
+  const sorted = [...groupedClass.subjects].sort(
+    (a, b) => b.weeklyHours - a.weeklyHours,
+  );
+
+  for (const cs of sorted) {
+    const item = document.createElement("li");
     item.className = "overview-item";
+    item.style.setProperty("--item-color", subjectColor(cs));
 
-    const label = document.createElement("span");
-    label.textContent = cs.subject?.subjectName ?? "(unbekannt)";
+    const teachers = (cs.teacher ?? [])
+      .map((t) => t.nameSymbol || t.teacherName)
+      .filter(Boolean)
+      .join(", ");
 
-    const remove = document.createElement("i");
-    remove.className = "fa-solid fa-xmark overview-item-remove";
-    remove.onclick = () => {
-      console.log("remove subject", cs);
-      // TODO: API-Call zum Entfernen des Fachs
-    };
+    const flags: string[] = [];
+    if (cs.requiresDoublePeriod) flags.push("Doppelstunde");
+    else if (cs.isBetterDoublePeriod) flags.push("Doppelstunde bevorzugt");
 
-    item.append(label, remove);
-    content.appendChild(item);
+    item.innerHTML = `
+      <span class="overview-item__color" aria-hidden="true"></span>
+      <span class="overview-item__text">
+        <span class="overview-item__title">${formatName(cs.subject?.subjectName ?? "(unbekannt)")}</span>
+        <span class="overview-item__sub">${[teachers || "Kein Lehrer zugewiesen", ...flags].join(" · ")}</span>
+      </span>
+      <span class="overview-item__hours" title="Wochenstunden">${cs.weeklyHours}<small>h</small></span>`;
+
+    list.appendChild(item);
   }
+  content.appendChild(list);
 
-  // Raum
+  // room
   const room = groupedClass.schoolClass?.classRoom;
-  if (room) {
-    const roomHeader = document.createElement("div");
-    roomHeader.className = "overview-section-header";
-    roomHeader.textContent = "Raum";
-    content.appendChild(roomHeader);
+  const roomHeader = document.createElement("p");
+  roomHeader.className = "form-section__title overview-section-header";
+  roomHeader.textContent = "Klassenraum";
+  content.appendChild(roomHeader);
 
-    const item = document.createElement("div");
-    item.className = "overview-item";
-    const label = document.createElement("span");
-    label.textContent = room.roomName;
-    const remove = document.createElement("i");
-    remove.className = "fa-solid fa-xmark overview-item-remove";
-    remove.onclick = () => {
-      console.log("remove room", room);
-      // TODO: API-Call zum Entfernen/Ändern des Raums
-    };
-    item.append(label, remove);
-    content.appendChild(item);
+  const roomItem = document.createElement("div");
+  roomItem.className = "overview-room";
+  if (room) {
+    roomItem.innerHTML = `
+      <span class="entity-card__icon" aria-hidden="true"><i class="ti ti-door"></i></span>
+      <span class="overview-item__text">
+        <span class="overview-item__title">${smartCase(room.roomName)}</span>
+        <span class="overview-item__sub">${room.nameShort}${room.roomNumber ? ` · Nr. ${room.roomNumber}` : ""}</span>
+      </span>`;
+  } else {
+    roomItem.innerHTML = `<span class="badge badge--outline"><i class="ti ti-door" aria-hidden="true"></i>Kein Klassenraum zugewiesen</span>`;
   }
-  // Live-Suche
+  content.appendChild(roomItem);
+
+  // live search within the panel
   searchInput.addEventListener("input", () => {
     const q = searchInput.value.trim().toLowerCase();
-    const items = content.querySelectorAll<HTMLElement>(".overview-item");
-    for (const item of items) {
-      const text = item.querySelector("span")?.textContent ?? "";
-      item.style.display = text.toLowerCase().includes(q) ? "" : "none";
-    }
+    list.querySelectorAll<HTMLElement>(".overview-item").forEach((item) => {
+      const text = item.textContent?.toLowerCase() ?? "";
+      item.hidden = !text.includes(q);
+    });
   });
 
-  overviewBox?.replaceChildren(titleBar, searchBox, content);
+  overviewBox.replaceChildren(titleBar, summary, searchBox, content);
+  closeButton.focus();
 }
+
 /**
- * Creates a class subject card for the given grouped class.
+ * Creates a table row for the given grouped class.
  */
-function createClassSubjectCard(
-  groupedClass: GroupedClass,
-  count: number,
-  groupedClassesLength: number,
-): HTMLElement {
-  const row = document.createElement("div");
+function createClassSubjectRow(groupedClass: GroupedClass): HTMLTableRowElement {
+  const row = document.createElement("tr");
   row.className = "class-row";
+  row.dataset.className = groupedClass.className;
 
-  const left = document.createElement("div");
-  left.className = "class-main";
+  // class name + room
+  const nameCell = document.createElement("td");
+  const primary = document.createElement("div");
+  primary.className = "cell-primary class-main";
 
-  const classTitle = document.createElement("input");
-  classTitle.className = "class-title";
-  classTitle.value = groupedClass.className.toUpperCase();
+  const badge = document.createElement("span");
+  badge.className = "class-badge";
+  badge.setAttribute("aria-hidden", "true");
+  badge.textContent = groupedClass.className.slice(0, 2).toUpperCase();
+
+  const text = document.createElement("div");
+  text.className = "cell-primary__text";
+
+  const classTitle = document.createElement("span");
+  classTitle.className = "cell-primary__title class-name class-title";
+  classTitle.textContent = groupedClass.className.toUpperCase();
+
+  const room = groupedClass.schoolClass?.classRoom;
+  const sub = document.createElement("span");
+  sub.className = "cell-primary__sub class-room";
+  sub.textContent = room
+    ? `Raum ${room.nameShort}`
+    : "Kein Klassenraum";
+
+  text.append(classTitle, sub);
+  primary.append(badge, text);
+  nameCell.appendChild(primary);
+
+  // subject count
+  const subjectCountCell = document.createElement("td");
+  subjectCountCell.className = "is-num info-box";
+  const subjectCount = document.createElement("span");
+  subjectCount.className = "badge badge--primary";
+  subjectCount.textContent = `${groupedClass.subjectCount} ${groupedClass.subjectCount === 1 ? "Fach" : "Fächer"}`;
+  subjectCountCell.appendChild(subjectCount);
+
+  // weekly hours
+  const hoursCell = document.createElement("td");
+  hoursCell.className = "is-num info-box";
+  const hours = document.createElement("span");
+  hours.className = "class-hours";
+  hours.innerHTML = `${groupedClass.weeklyHours}<small>h</small>`;
+  hoursCell.appendChild(hours);
+
+  // actions
+  const actionsCell = document.createElement("td");
+  actionsCell.className = "is-actions";
+
+  const actions = document.createElement("div");
+  actions.className = "class-actions";
 
   const subjectsBtn = document.createElement("button");
-  subjectsBtn.className = "action-btn";
-  subjectsBtn.innerHTML =
-    'Fächer <i class="fa-regular fa-square-plus" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.3"></i>';
-
-  subjectsBtn.onclick = () => {};
+  subjectsBtn.type = "button";
+  subjectsBtn.className = "btn btn--sm btn--ghost action-btn";
+  subjectsBtn.disabled = true;
+  subjectsBtn.title = "Fächer zuweisen – in Arbeit";
+  subjectsBtn.innerHTML = `<i class="ti ti-square-plus" aria-hidden="true"></i><span>Fächer</span>`;
 
   const roomBtn = document.createElement("button");
-  roomBtn.className = "action-btn";
-  roomBtn.innerHTML =
-    'Raum zuweisen <i class="fa-regular fa-square-plus" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.3"></i>';
+  roomBtn.type = "button";
+  roomBtn.className = "btn btn--sm btn--ghost action-btn";
+  roomBtn.disabled = true;
+  roomBtn.title = "Raum zuweisen – in Arbeit";
+  roomBtn.innerHTML = `<i class="ti ti-door" aria-hidden="true"></i><span>Raum</span>`;
 
   const overviewBtn = document.createElement("button");
-  overviewBtn.className = "action-btn";
-  overviewBtn.innerHTML =
-    'Überblick <i class="fa-regular fa-eye" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.2"></i>';
+  overviewBtn.type = "button";
+  overviewBtn.className = "btn btn--sm btn--soft action-btn";
+  overviewBtn.innerHTML = `<i class="ti ti-eye" aria-hidden="true"></i><span>Überblick</span>`;
+  overviewBtn.addEventListener("click", () => openOverview(groupedClass));
 
-  overviewBtn.onclick = () => {
-    openOverview(groupedClass, groupedClassesLength);
-  };
+  actions.append(subjectsBtn, roomBtn, overviewBtn);
+  actionsCell.appendChild(actions);
 
-  left.append(classTitle, subjectsBtn, roomBtn, overviewBtn);
-
-  const hoursBox = document.createElement("div");
-  hoursBox.id = `hours-box-${count}`;
-  hoursBox.className = "info-box";
-
-  const hours = document.createElement("span");
-  hours.textContent = String(groupedClass.weeklyHours);
-
-  hoursBox.appendChild(hours);
-
-  const subjectCountBox = document.createElement("div");
-  subjectCountBox.id = `subject-count-box-${count}`;
-  subjectCountBox.className = "info-box";
-
-  const subjectCount = document.createElement("span");
-  subjectCount.textContent = String(groupedClass.subjectCount);
-
-  subjectCountBox.appendChild(subjectCount);
-
-  row.append(left, hoursBox, subjectCountBox);
-
+  row.append(nameCell, subjectCountCell, hoursCell, actionsCell);
   return row;
 }
+
+let firstLoad = true;
 
 /**
  * Loads and renders the class subjects on the page.
@@ -328,16 +339,21 @@ async function loadAndRenderClassSubjects(): Promise<void> {
   if (!noClassSubjectsElement || !classSubjectsContainer) {
     return;
   }
+
+  if (firstLoad) renderSkeleton(classSubjectsContainer, 6, "row");
+
   try {
     const [classSubjects, schoolClasses] = await Promise.all([
       fetchClassSubjects(),
       fetchSchoolClasses(),
     ]);
+    firstLoad = false;
 
-    console.log(classSubjects);
-    const groupedClasses = groupClasses(classSubjects);
+    const groupedClasses = groupClasses(classSubjects).sort((a, b) =>
+      a.className.localeCompare(b.className, "de", { numeric: true }),
+    );
 
-    // Raum/SchoolClass an jede gruppierte Klasse anhängen
+    // attach room / school class to every grouped class
     const classMap = new Map<string, SchoolClass>();
     for (const sc of schoolClasses) {
       classMap.set(sc.className.toLowerCase(), sc);
@@ -346,45 +362,85 @@ async function loadAndRenderClassSubjects(): Promise<void> {
       gc.schoolClass = classMap.get(gc.className.toLowerCase());
     }
 
-    toggleEmptyState(noClassSubjectsElement, classSubjects.length > 0);
+    clearSkeleton(classSubjectsContainer);
     classSubjectsContainer.replaceChildren();
+    toggleEmptyState(noClassSubjectsElement, classSubjects.length > 0);
+    if (SEARCH.noResultsEl) SEARCH.noResultsEl.hidden = true;
+    closeOverview();
+
+    const workspace = getElement<HTMLElement>("class-workspace");
+    if (workspace) workspace.hidden = classSubjects.length === 0;
 
     if (classSubjects.length === 0) {
       return;
     }
 
-    const gridContainer = document.createElement("div");
-    gridContainer.className = "grid-layout";
+    const wrap = document.createElement("div");
+    wrap.className = "table-wrap rise-in";
 
-    const br = document.createElement("br");
-    const headerRow = document.createElement("div");
-    headerRow.className = "class-header-row";
+    const table = document.createElement("table");
+    table.className = "data-table class-table";
+    table.innerHTML = `
+      <thead>
+        <tr class="class-header-row">
+          <th scope="col" class="header-main">Klasse</th>
+          <th scope="col" class="is-num header-box" id="header-subject-count-box">Fächer</th>
+          <th scope="col" class="is-num header-box" id="header-hours-box">Wochenstunden</th>
+          <th scope="col" class="is-actions"><span class="visually-hidden">Aktionen</span></th>
+        </tr>
+      </thead>`;
 
-    headerRow.innerHTML = `
-        <div class="header-main">Klasse</div>
-        <div id="header-hours-box" class="header-box">Wöchentliche Stunden</div>
-        <div id="header-subject-count-box" class="header-box">Fächer Anzahl</div>
-    `;
-
-    gridContainer.appendChild(headerRow);
-    let groupedClassesLength = groupedClasses.length;
-    let count = 0;
+    const tbody = document.createElement("tbody");
     for (const groupedClass of groupedClasses) {
-      console.log(groupedClass);
-      gridContainer.appendChild(
-        createClassSubjectCard(groupedClass, count, groupedClassesLength),
-      );
-      count++;
+      tbody.appendChild(createClassSubjectRow(groupedClass));
     }
+    table.appendChild(tbody);
+    wrap.appendChild(table);
 
-    classSubjectsContainer.append(gridContainer, br, br, br);
+    classSubjectsContainer.appendChild(wrap);
+    applySearch(SEARCH);
   } catch (error) {
-    console.error("Fehler beim Laden der Fächer:", error);
+    firstLoad = false;
+    clearSkeleton(classSubjectsContainer);
+    console.error("Fehler beim Laden der Klassen:", error);
   }
 }
 
 function initializeApp() {
   initNavbar();
+
+  const noClasses = getElement<HTMLElement>("no-classSubjects");
+  if (noClasses) {
+    renderEmptyState(noClasses, {
+      illustration: "classes",
+      title: "Noch keine Klassen",
+      hint: "Klassen und ihre Fächerzuteilung werden über den Excel-Import auf dem Dashboard angelegt.",
+      ctaLabel: "Zum Dashboard",
+      ctaIcon: "ti ti-upload",
+      onCta: () => {
+        window.location.href = "./dashboard.html";
+      },
+    });
+  }
+
+  const noResults = getElement<HTMLElement>("no-results");
+  if (noResults) {
+    renderEmptyState(noResults, {
+      illustration: "search",
+      title: "Keine Treffer",
+      hint: "Keine Klasse passt zu Ihrer Suche.",
+      compact: true,
+    });
+    noResults.hidden = true;
+    SEARCH.noResultsEl = noResults;
+  }
+
+  bindSearch(SEARCH);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && openOverviewClass) closeOverview();
+  });
+
   void loadAndRenderClassSubjects();
 }
 

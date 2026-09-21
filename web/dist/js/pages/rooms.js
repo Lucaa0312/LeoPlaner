@@ -1,57 +1,116 @@
 import initNavbar from "./navbar.js";
 import { fetchRooms, createRoom, updateRoom } from "../api/roomApi.js";
-import { aquireElement, getElement } from "../utils/elementHelpers.js";
-import { openPopup, closePopup } from "../components/popup.js";
-import { toggleEmptyState } from "../components/emptyState.js";
-import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
-import { initSearchElement } from "../features/searchElement.js";
-let editingRoom = null;
-function formatRoomName(room) {
-    console.log(room);
-    return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
+import { getElement, smartCase } from "../utils/elementHelpers.js";
+import { buildModal, closeModal, openModal } from "../components/modal.js";
+import { renderEmptyState, toggleEmptyState, } from "../components/emptyState.js";
+import { toast } from "../components/toast.js";
+import { clearSkeleton, renderSkeleton } from "../components/skeleton.js";
+import { initRoomTypeSelector, roomTypeLabel, } from "../features/roomTypeSelector.js";
+import { applySearch, bindSearch } from "../features/searchElement.js";
+const SEARCH = {
+    inputId: "input-field",
+    rowSelector: ".room-box",
+    values: [".room-name", ".room-short", ".room-types"],
+    noResultsEl: null,
+};
+// Icon per dominant room type – gives the card grid some visual rhythm.
+const TYPE_ICONS = {
+    CLASSROOM: "ti ti-door",
+    EDV: "ti ti-device-desktop",
+    CHEM: "ti ti-flask",
+    PHY: "ti ti-atom",
+    SPORT: "ti ti-ball-basketball",
+    WORKSHOP: "ti ti-tool",
+};
+function formatRoomTitle(room) {
+    return smartCase(room.roomName);
 }
 function createRoomCard(room) {
-    const roomBox = document.createElement("div");
-    roomBox.className = "room-box";
-    const roomInfo = document.createElement("div");
-    roomInfo.className = "room-info";
+    const roomBox = document.createElement("article");
+    roomBox.className = "card card--interactive entity-card room-box";
+    const head = document.createElement("div");
+    head.className = "entity-card__head";
+    const icon = document.createElement("span");
+    icon.className = "entity-card__icon";
+    icon.setAttribute("aria-hidden", "true");
+    const primaryType = room.roomTypes[0] ?? "CLASSROOM";
+    icon.innerHTML = `<i class="${TYPE_ICONS[primaryType] ?? "ti ti-door"}"></i>`;
+    const info = document.createElement("div");
+    info.className = "room-info";
     const title = document.createElement("h2");
-    title.className = "room-name";
-    title.textContent = formatRoomName(room);
-    const types = document.createElement("p");
-    types.className = "room-types";
-    types.innerHTML = room.roomTypes.join("<br>");
-    const editDiv = document.createElement("div");
-    editDiv.className = "room-edit";
-    editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
-    editDiv.addEventListener("click", () => {
-        openEditRoomForm(room);
-    });
-    roomInfo.append(title, types);
-    roomBox.append(roomInfo, editDiv);
+    title.className = "entity-card__title room-name";
+    title.textContent = formatRoomTitle(room);
+    const meta = document.createElement("div");
+    meta.className = "room-meta";
+    const short = document.createElement("span");
+    short.className = "badge badge--mono room-short";
+    short.textContent = room.nameShort;
+    meta.appendChild(short);
+    if (room.roomNumber) {
+        const number = document.createElement("span");
+        number.className = "entity-card__subtitle";
+        number.textContent = `Nr. ${room.roomNumber}`;
+        meta.appendChild(number);
+    }
+    info.append(title, meta);
+    head.append(icon, info);
+    const types = document.createElement("div");
+    types.className = "entity-card__tags room-types";
+    if (room.roomTypes.length === 0) {
+        types.innerHTML = `<span class="badge badge--outline">Kein Typ</span>`;
+    }
+    else {
+        room.roomTypes.forEach((type) => {
+            const badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = roomTypeLabel(type);
+            types.appendChild(badge);
+        });
+    }
+    const actions = document.createElement("div");
+    actions.className = "entity-card__actions";
+    const editDiv = document.createElement("button");
+    editDiv.type = "button";
+    editDiv.className = "icon-btn icon-btn--primary room-edit";
+    editDiv.title = `${formatRoomTitle(room)} bearbeiten`;
+    editDiv.setAttribute("aria-label", editDiv.title);
+    editDiv.innerHTML = `<i class="ti ti-pencil" aria-hidden="true"></i>`;
+    editDiv.addEventListener("click", () => openEditRoomForm(room));
+    actions.appendChild(editDiv);
+    roomBox.append(head, types, actions);
     return roomBox;
 }
+let firstLoad = true;
 async function loadAndRenderRooms() {
     const noRoomsElement = getElement("no-rooms");
     const roomsContainer = getElement("display-rooms");
     if (!noRoomsElement || !roomsContainer) {
         return;
     }
+    if (firstLoad)
+        renderSkeleton(roomsContainer, 8, "card");
     try {
         const rooms = await fetchRooms();
-        toggleEmptyState(noRoomsElement, rooms.length > 0);
+        firstLoad = false;
+        clearSkeleton(roomsContainer);
         roomsContainer.replaceChildren();
+        toggleEmptyState(noRoomsElement, rooms.length > 0);
+        if (SEARCH.noResultsEl)
+            SEARCH.noResultsEl.hidden = true;
         if (rooms.length === 0) {
             return;
         }
         const gridContainer = document.createElement("div");
-        gridContainer.className = "grid-layout";
+        gridContainer.className = "entity-grid grid-layout rise-in";
         for (const room of rooms) {
             gridContainer.appendChild(createRoomCard(room));
         }
         roomsContainer.appendChild(gridContainer);
+        applySearch(SEARCH);
     }
     catch (error) {
+        firstLoad = false;
+        clearSkeleton(roomsContainer);
         console.error("Fehler beim Laden der Räume:", error);
     }
 }
@@ -62,109 +121,131 @@ function collectRoomFormData(selectedTypes) {
     if (!nameInput || !numberInput || !roomShortInput) {
         return null;
     }
+    const name = nameInput.value.trim();
+    const short = roomShortInput.value.trim();
+    nameInput.setAttribute("aria-invalid", name ? "false" : "true");
+    roomShortInput.setAttribute("aria-invalid", short ? "false" : "true");
+    if (!name || !short) {
+        toast.error("Bitte Name und Abkürzung angeben.");
+        (name ? roomShortInput : nameInput).focus();
+        return null;
+    }
     return {
-        roomName: nameInput.value.trim(),
+        roomName: name,
         roomNumber: Number(numberInput.value || 0),
-        nameShort: roomShortInput.value.trim(),
+        nameShort: short,
         roomTypes: selectedTypes,
     };
+}
+function buildField(id, label, placeholder, options = {}) {
+    const field = document.createElement("div");
+    field.className = "field";
+    const labelEl = document.createElement("label");
+    labelEl.className = "field__label";
+    labelEl.htmlFor = id;
+    labelEl.innerHTML = options.required
+        ? `${label}<span class="req" aria-hidden="true">*</span>`
+        : label;
+    const input = document.createElement("input");
+    input.type = options.type ?? "text";
+    input.id = id;
+    input.className = "input room-input";
+    input.placeholder = placeholder;
+    input.autocomplete = "off";
+    if (options.required)
+        input.required = true;
+    if (options.inputMode)
+        input.inputMode = options.inputMode;
+    field.append(labelEl, input);
+    if (options.hint) {
+        const hint = document.createElement("span");
+        hint.className = "field__hint";
+        hint.textContent = options.hint;
+        field.appendChild(hint);
+    }
+    return field;
 }
 function buildAddRoomModalContent() {
     const content = document.createElement("div");
     content.id = "room-modal-content";
-    const roomFormGrid = document.createElement("div");
-    roomFormGrid.className = "room-form-grid";
+    const basics = document.createElement("section");
+    basics.className = "form-section";
+    basics.innerHTML = `<p class="form-section__title">Bezeichnung</p>`;
     const nameInitialsDiv = document.createElement("div");
-    nameInitialsDiv.className = "form-name-initials-inputs";
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.id = "name-input";
-    nameInput.className = "room-input";
-    nameInput.placeholder = "Name";
-    const initialsInput = document.createElement("input");
-    initialsInput.type = "text";
-    initialsInput.id = "initials-input";
-    initialsInput.className = "room-input";
-    initialsInput.placeholder = "Abkürzung";
-    nameInitialsDiv.append(nameInput, initialsInput);
+    nameInitialsDiv.className = "form-grid form-name-initials-inputs";
+    nameInitialsDiv.append(buildField("name-input", "Name", "z. B. Physiksaal", { required: true }), buildField("initials-input", "Abkürzung", "z. B. PH1", {
+        required: true,
+        hint: "Erscheint im Stundenplan.",
+    }));
+    basics.appendChild(nameInitialsDiv);
+    const numbering = document.createElement("section");
+    numbering.className = "form-section";
+    numbering.innerHTML = `<p class="form-section__title">Nummerierung</p>`;
     const numberPrefixSuffixDiv = document.createElement("div");
-    numberPrefixSuffixDiv.className = "form-number-prefix-suffix-inputs";
-    const numberInput = document.createElement("input");
-    numberInput.type = "text";
-    numberInput.id = "number-input";
-    numberInput.className = "room-input";
-    numberInput.placeholder = "Nummer";
-    const prefixInput = document.createElement("input");
-    prefixInput.type = "text";
-    prefixInput.id = "prefix-input";
-    prefixInput.className = "room-input";
-    prefixInput.placeholder = "Prefix";
-    const suffixInput = document.createElement("input");
-    suffixInput.type = "text";
-    suffixInput.id = "suffix-input";
-    suffixInput.className = "room-input";
-    suffixInput.placeholder = "Suffix";
-    numberPrefixSuffixDiv.append(numberInput, prefixInput, suffixInput);
-    const roomtypeBlock = document.createElement("div");
+    numberPrefixSuffixDiv.className = "form-grid form-grid--3 form-number-prefix-suffix-inputs";
+    numberPrefixSuffixDiv.append(buildField("number-input", "Nummer", "z. B. 204", { inputMode: "numeric" }), buildField("prefix-input", "Präfix", "z. B. E", { hint: "Optional" }), buildField("suffix-input", "Suffix", "z. B. a", { hint: "Optional" }));
+    numbering.appendChild(numberPrefixSuffixDiv);
+    const roomtypeBlock = document.createElement("section");
     roomtypeBlock.id = "roomtype-block";
+    roomtypeBlock.className = "form-section";
+    roomtypeBlock.innerHTML = `
+      <p class="form-section__title">Ausstattung</p>
+      <p class="form-intro">Welche Art von Unterricht kann hier stattfinden? Fächer mit passenden Anforderungen werden diesem Raum zugeteilt.</p>`;
+    const combo = document.createElement("div");
+    combo.className = "combo";
     const roomtypeInputContainer = document.createElement("div");
     roomtypeInputContainer.id = "roomtype-input-container";
-    const img = document.createElement("img");
+    roomtypeInputContainer.className = "combo__input";
+    const img = document.createElement("i");
     img.id = "add-room-img";
-    img.src = "../assets/img/magnifyingGlass.png";
-    img.alt = "Add Room";
+    img.className = "ti ti-search";
+    img.setAttribute("aria-hidden", "true");
     const roomtypeInput = document.createElement("input");
     roomtypeInput.type = "text";
     roomtypeInput.id = "roomtype-input";
-    roomtypeInput.placeholder = "Raum Typen auswählen";
+    roomtypeInput.className = "input";
+    roomtypeInput.placeholder = "Raumtyp auswählen …";
+    roomtypeInput.autocomplete = "off";
+    roomtypeInput.setAttribute("aria-label", "Raumtyp auswählen");
     roomtypeInputContainer.append(img, roomtypeInput);
     const roomtypeDropdown = document.createElement("div");
     roomtypeDropdown.id = "roomtype-dropdown";
+    roomtypeDropdown.className = "combo__menu";
+    roomtypeDropdown.setAttribute("role", "listbox");
+    combo.append(roomtypeInputContainer, roomtypeDropdown);
     const selectedRoomtypes = document.createElement("div");
     selectedRoomtypes.id = "selected-roomtypes";
-    roomtypeBlock.append(roomtypeInputContainer, roomtypeDropdown, selectedRoomtypes);
-    roomFormGrid.append(nameInitialsDiv, numberPrefixSuffixDiv, roomtypeBlock);
-    content.appendChild(roomFormGrid);
+    selectedRoomtypes.className = "chip-list chip-list--boxed";
+    selectedRoomtypes.dataset.empty = "Noch kein Raumtyp ausgewählt";
+    roomtypeBlock.append(combo, selectedRoomtypes);
+    content.append(basics, numbering, roomtypeBlock);
     return content;
 }
 function openEditRoomForm(room) {
-    editingRoom = room;
     openRoomForm(room);
 }
 function openAddRoomForm() {
-    editingRoom = null;
     openRoomForm(null);
 }
 function openRoomForm(room) {
-    const noRooms = getElement("no-rooms");
-    const overlay = getElement("disable-overlay");
-    const displayRooms = getElement("display-rooms");
     const addRoomScreen = getElement("add-room-screen");
-    if (!overlay || !displayRooms || !addRoomScreen) {
+    if (!addRoomScreen) {
         return;
     }
-    if (noRooms) {
-        noRooms.style.display = "none";
-    }
-    openPopup({
-        modal: addRoomScreen,
-        overlay,
-        scrollContainer: displayRooms,
+    const frame = buildModal(addRoomScreen, {
+        title: room ? `${formatRoomTitle(room)} bearbeiten` : "Neuen Raum anlegen",
+        subtitle: room
+            ? "Änderungen wirken sich auf künftige Stundenpläne aus."
+            : "Die Abkürzung erscheint später im Stundenplan.",
+        size: "md",
     });
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-room-header-container";
-    const title = document.createElement("h1");
-    title.id = "add-room-header";
-    title.textContent = room
-        ? "Diesen Raum bearbeiten"
-        : "Einen neuen Raum hinzufügen";
-    const closeButton = document.createElement("div");
-    closeButton.id = "close-add-room-screen-btn";
-    closeButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
     const content = buildAddRoomModalContent();
+    frame.body.replaceChildren(content);
     const nameInput = content.querySelector("#name-input");
     const numberInput = content.querySelector("#number-input");
     const initialsInput = content.querySelector("#initials-input");
+    const prefixInput = content.querySelector("#prefix-input");
+    const suffixInput = content.querySelector("#suffix-input");
     if (room) {
         if (!nameInput || !numberInput || !initialsInput) {
             throw new Error("Form inputs missing");
@@ -172,12 +253,25 @@ function openRoomForm(room) {
         nameInput.value = room.roomName;
         numberInput.value = String(room.roomNumber);
         initialsInput.value = room.nameShort;
+        if (prefixInput)
+            prefixInput.value = room.roomPrefix ?? "";
+        if (suffixInput)
+            suffixInput.value = room.roomSuffix ?? "";
     }
-    const confirmButton = document.createElement("div");
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "btn btn--ghost";
+    cancelButton.textContent = "Abbrechen";
+    cancelButton.dataset.modalClose = "";
+    const spacer = document.createElement("span");
+    spacer.className = "spacer";
+    const confirmButton = document.createElement("button");
+    confirmButton.type = "button";
     confirmButton.id = "confirm-room-btn";
-    confirmButton.textContent = room ? "Speichern" : "Bestätigen";
-    headerContainer.append(title, closeButton);
-    addRoomScreen.replaceChildren(headerContainer, content, confirmButton);
+    confirmButton.className = "btn btn--primary";
+    confirmButton.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i><span>${room ? "Speichern" : "Raum anlegen"}</span>`;
+    frame.footer.replaceChildren(cancelButton, spacer, confirmButton);
+    openModal(addRoomScreen);
     const selectorInput = getElement("roomtype-input");
     const selectorDropdown = getElement("roomtype-dropdown");
     const selectedContainer = getElement("selected-roomtypes");
@@ -192,54 +286,67 @@ function openRoomForm(room) {
         inputContainer,
     });
     if (room) {
-        room.roomTypes.forEach(type => {
+        room.roomTypes.forEach((type) => {
             roomTypeSelector.restore?.(type);
         });
     }
-    closeButton.addEventListener("click", () => {
-        closePopup({
-            modal: addRoomScreen,
-            overlay,
-            scrollContainer: displayRooms,
-        });
-    });
+    let saving = false;
     confirmButton.addEventListener("click", async () => {
+        if (saving)
+            return;
         try {
             const roomData = collectRoomFormData(roomTypeSelector.getSelectedTypes());
             if (!roomData) {
                 return;
             }
+            saving = true;
+            confirmButton.classList.add("btn--loading");
             if (room) {
                 await updateRoom(room.id, roomData);
-                console.log("It works");
+                toast.success(`${formatRoomTitle({ ...room, ...roomData })} wurde aktualisiert.`);
             }
             else {
                 await createRoom(roomData);
+                toast.success(`Raum „${roomData.roomName}“ wurde angelegt.`);
             }
-            closePopup({
-                modal: addRoomScreen,
-                overlay,
-                scrollContainer: displayRooms,
-            });
+            closeModal(addRoomScreen);
             await loadAndRenderRooms();
         }
         catch (error) {
             console.error("Fehler beim Erstellen des Raums:", error);
         }
+        finally {
+            saving = false;
+            confirmButton.classList.remove("btn--loading");
+        }
     });
 }
 function initializeApp() {
     initNavbar();
+    const noRooms = getElement("no-rooms");
+    if (noRooms) {
+        renderEmptyState(noRooms, {
+            illustration: "rooms",
+            title: "Noch keine Räume",
+            hint: "Legen Sie Ihren ersten Raum an und geben Sie an, welche Art von Unterricht dort möglich ist.",
+            ctaLabel: "Raum hinzufügen",
+            onCta: () => openAddRoomForm(),
+        });
+    }
+    const noResults = getElement("no-results");
+    if (noResults) {
+        renderEmptyState(noResults, {
+            illustration: "search",
+            title: "Keine Treffer",
+            hint: "Kein Raum passt zu Ihrer Suche.",
+            compact: true,
+        });
+        noResults.hidden = true;
+        SEARCH.noResultsEl = noResults;
+    }
+    bindSearch(SEARCH);
     void loadAndRenderRooms();
     const addBtn = getElement("add-btn");
     addBtn?.addEventListener("click", openAddRoomForm);
-    const inputField = getElement("input-field");
-    inputField?.addEventListener("input", () => {
-        initSearchElement({
-            inputId: "input-field",
-            selectedRow: ".room-box",
-            values: [".room-name", ".room-types"],
-        });
-    });
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

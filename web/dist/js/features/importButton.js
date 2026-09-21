@@ -1,5 +1,6 @@
 import { uploadFile } from "../api/uploadApi.js";
 import { initializeApp } from "../pages/dashboard.js";
+import { toast } from "../components/toast.js";
 const allowedExtensions = [".xlsx", ".xls"];
 const maxFileSizeMB = 5;
 export function initImportButton() {
@@ -49,10 +50,13 @@ export function initImportButton() {
         console.log("Valid Excel file:", file);
         try {
             await uploadFile(file);
+            toast.success(`„${file.name}“ wurde importiert.`);
             await initializeApp();
         }
         catch (error) {
+            console.error(error);
             errorText.textContent = "Fehler beim Hochladen";
+            toast.error("Import fehlgeschlagen. Bitte Datei prüfen.");
         }
     });
 }

@@ -5,31 +5,50 @@ export interface ColorPickerController {
     setColor(color: SubjectColor): void;
 }
 
+// Quick-pick swatches shown under the wheel.
+const PRESETS: SubjectColor[] = [
+    { red: 79, green: 70, blue: 229 },
+    { red: 14, green: 165, blue: 233 },
+    { red: 16, green: 185, blue: 129 },
+    { red: 132, green: 204, blue: 22 },
+    { red: 245, green: 158, blue: 11 },
+    { red: 239, green: 68, blue: 68 },
+    { red: 236, green: 72, blue: 153 },
+    { red: 139, green: 92, blue: 246 },
+    { red: 100, green: 116, blue: 139 },
+];
+
 export function initColorPicker(container: HTMLElement): ColorPickerController {
+    container.classList.add("color-picker");
     container.innerHTML = `
-      <h2 id="color-title">Wähle eine Farbe aus</h2>
+      <div class="color-picker__wheel-wrap">
+        <canvas id="color-wheel" width="220" height="220" aria-label="Farbrad – klicken oder ziehen, um einen Farbton zu wählen"></canvas>
+      </div>
 
-      <div id="color-ui">
-        <canvas id="color-wheel" width="220" height="220"></canvas>
-
-        <div id="color-side">
-          <div id="color-preview-row">
-            <div id="color-preview"></div>
-            <div>
-              <div id="color-hex">#ded1d6</div>
-              <div id="color-rgb">RGB(222, 209, 214)</div>
-            </div>
+      <div class="color-picker__side" id="color-side">
+        <div class="color-picker__preview-row" id="color-preview-row">
+          <div class="color-picker__preview" id="color-preview" aria-hidden="true"></div>
+          <div class="color-picker__values">
+            <div class="color-picker__hex text-mono" id="color-hex">#ded1d6</div>
+            <div class="color-picker__rgb" id="color-rgb">RGB(222, 209, 214)</div>
           </div>
+        </div>
 
-          <label id="lightness-label">
-            Helligkeit
-            <input id="lightness" type="range" min="0" max="100" value="50">
-          </label>
+        <label class="field" id="lightness-label">
+          <span class="field__label">Helligkeit</span>
+          <input id="lightness" class="range" type="range" min="0" max="100" value="85">
+        </label>
+
+        <div class="color-picker__presets" role="group" aria-label="Schnellauswahl">
+          ${PRESETS.map(
+              (c, i) =>
+                  `<button type="button" class="color-picker__preset" data-preset="${i}" style="--swatch: rgb(${c.red}, ${c.green}, ${c.blue})" aria-label="Farbe ${i + 1}"></button>`,
+          ).join("")}
         </div>
       </div>
     `;
 
-    const canvas = container.querySelector("#color-wheel") as HTMLCanvasElement | null;;
+    const canvas = container.querySelector("#color-wheel") as HTMLCanvasElement | null;
     const lightness = container.querySelector("#lightness") as HTMLInputElement | null;
     const preview = container.querySelector("#color-preview") as HTMLElement | null;
     const hexEl = container.querySelector("#color-hex") as HTMLElement | null;
@@ -61,17 +80,6 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
 
     let selectedColor: SubjectColor = { red: 222, green: 209, blue: 214 };
 
-   
-    function setColor(color: SubjectColor): void {
-        selectedColor = color;
-
-        const hex = rgbToHex(color);
-        preview!.style.background = hex;
-        hexEl!.textContent = hex;
-        rgbEl!.textContent = `RGB(${color.red}, ${color.green}, ${color.blue})`;
-    }
-
-   
     function hslToRgb(h: number, s: number, l: number): SubjectColor {
         h = (h % 360 + 360) % 360;
         const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -96,9 +104,38 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
         };
     }
 
+    function rgbToHsl({ red, green, blue }: SubjectColor): { h: number; s: number; l: number } {
+        const r = red / 255;
+        const g = green / 255;
+        const b = blue / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        const d = max - min;
+
+        if (d === 0) return { h: 0, s: 0, l };
+
+        const s = d / (1 - Math.abs(2 * l - 1));
+        let h = 0;
+        if (max === r) h = ((g - b) / d) % 6;
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h = (h * 60 + 360) % 360;
+
+        return { h, s: Math.min(1, s), l };
+    }
+
     function rgbToHex({ red, green, blue }: SubjectColor): string {
         const to2 = (n: number) => n.toString(16).padStart(2, "0");
         return `#${to2(red)}${to2(green)}${to2(blue)}`;
+    }
+
+    function paintPreview(color: SubjectColor): void {
+        const hex = rgbToHex(color);
+        preview!.style.background = hex;
+        hexEl!.textContent = hex;
+        rgbEl!.textContent = `RGB(${color.red}, ${color.green}, ${color.blue})`;
+        container.style.setProperty("--picked", hex);
     }
 
     function drawWheel(): void {
@@ -126,7 +163,8 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
                 img.data[i] = rgb.red;
                 img.data[i + 1] = rgb.green;
                 img.data[i + 2] = rgb.blue;
-                img.data[i + 3] = 255;
+                // soft anti-aliased edge
+                img.data[i + 3] = dist > radius - 1.5 ? Math.round((radius - dist) / 1.5 * 255) : 255;
             }
         }
 
@@ -138,19 +176,20 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
         const my = cy + Math.sin(ang) * markerRadius;
 
         ctx!.beginPath();
-        ctx!.arc(mx, my, 7, 0, Math.PI * 2);
+        ctx!.arc(mx, my, 8, 0, Math.PI * 2);
         ctx!.lineWidth = 3;
         ctx!.strokeStyle = "white";
         ctx!.stroke();
-        ctx!.lineWidth = 2;
-        ctx!.strokeStyle = "rgba(0,0,0,.35)";
+        ctx!.lineWidth = 1.5;
+        ctx!.strokeStyle = "rgba(0,0,0,.4)";
         ctx!.stroke();
     }
 
     function setFromPoint(clientX: number, clientY: number): void {
         const rect = canvas!.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+        // the canvas is scaled by CSS – map client coordinates back to pixels
+        const x = (clientX - rect.left) * (canvas!.width / rect.width);
+        const y = (clientY - rect.top) * (canvas!.height / rect.height);
 
         const dx = x - cx;
         const dy = y - cy;
@@ -167,12 +206,20 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
     function updateColor(): void {
         lig = Number(lightness!.value) / 100;
         selectedColor = hslToRgb(hue, sat, lig);
+        paintPreview(selectedColor);
+        drawWheel();
+    }
 
-        const hex = rgbToHex(selectedColor);
-        preview!.style.background = hex;
-        hexEl!.textContent = hex;
-        rgbEl!.textContent = `RGB(${selectedColor.red}, ${selectedColor.green}, ${selectedColor.blue})`;
-
+    // Sets an exact colour (edit mode / presets) and moves the wheel marker
+    // and lightness slider to match.
+    function setColor(color: SubjectColor): void {
+        selectedColor = color;
+        const { h, s, l } = rgbToHsl(color);
+        hue = h;
+        sat = s;
+        lig = l;
+        lightness!.value = String(Math.round(l * 100));
+        paintPreview(color);
         drawWheel();
     }
 
@@ -197,6 +244,13 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
 
     lightness.addEventListener("input", updateColor);
 
+    container.querySelectorAll<HTMLButtonElement>("[data-preset]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const preset = PRESETS[Number(button.dataset.preset)];
+            if (preset) setColor(preset);
+        });
+    });
+
     updateColor();
 
     return {
@@ -204,6 +258,5 @@ export function initColorPicker(container: HTMLElement): ColorPickerController {
             return selectedColor;
         },
         setColor,
-
     };
 }

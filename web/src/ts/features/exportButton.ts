@@ -1,4 +1,5 @@
 import { exportFile } from "../api/downloadApi.js";
+import { toast } from "../components/toast.js";
 
 export function initExportButton(): void {
   const button = document.getElementById(
@@ -17,6 +18,7 @@ export function initExportButton(): void {
 
       if (blob.size === 0) {
         errorText.textContent = "Die exportierte Datei ist leer";
+        toast.error("Die exportierte Datei ist leer.");
         return;
       }
 
@@ -32,9 +34,11 @@ export function initExportButton(): void {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
-      console.log("Export successful");
+      toast.success("Export heruntergeladen.");
     } catch (error) {
+      console.error(error);
       errorText.textContent = "Fehler beim Exportieren";
+      toast.error("Export fehlgeschlagen.");
     } finally {
       button.disabled = false;
     }

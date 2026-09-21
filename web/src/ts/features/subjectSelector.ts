@@ -81,7 +81,7 @@ export function initSubjectSelector({
 
         if (matches.length === 0) {
             const noResult = document.createElement("div");
-            noResult.className = "dropdown-item";
+            noResult.className = "dropdown-item is-empty";
             noResult.textContent = "Keine Fächer gefunden";
             dropdown.appendChild(noResult);
             return;
@@ -90,7 +90,9 @@ export function initSubjectSelector({
         matches.forEach((subject) => {
             const item = document.createElement("div");
             item.className = "dropdown-item";
-            item.textContent = formatName(subject.subjectName);
+            item.setAttribute("role", "option");
+            item.innerHTML = `<span class="badge badge--mono">${subject.subjectSymbol}</span>`;
+            item.append(document.createTextNode(" " + formatName(subject.subjectName)));
 
             item.addEventListener("click", () => {
                 addSubject(subject);

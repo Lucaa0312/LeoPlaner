@@ -1,39 +1,191 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
+        <meta
+            name="description"
+            content="LeoPlaner – Stundenplanung für Schulen mit Simulated Annealing. Daten verwalten, Regeln festlegen, optimieren."
+        />
         <title>LeoPlaner</title>
+        <script>
+            // Apply the stored theme before first paint.
+            (function () {
+                try {
+                    var t = localStorage.getItem("leo.theme");
+                    if (t === "dark" || t === "light")
+                        document.documentElement.dataset.theme = t;
+                } catch (e) {}
+            })();
+        </script>
+        <link
+            rel="icon"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Crect x='8' y='6' width='5.5' height='20' rx='2.75' fill='%23fff'/%3E%3Crect x='8' y='20.5' width='16' height='5.5' rx='2.75' fill='%23fff'/%3E%3Ccircle cx='22.5' cy='10.5' r='3.25' fill='%23fbbf24'/%3E%3C/svg%3E"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css"
+        />
+        <link rel="stylesheet" href="./web/style/tokens.css" />
+        <link rel="stylesheet" href="./web/style/base.css" />
+        <link rel="stylesheet" href="./web/style/components.css" />
         <link rel="stylesheet" href="./web/style/index.css" />
-        <link rel="stylesheet" href="./web/style/essentials.css" />
         <script type="module" src="./web/dist/js/pages/index.js"></script>
     </head>
-    <body>
-        <div class="landing-container">
-            <h1>Wilkommen zum LeoPlaner</h1>
+    <body class="landing">
+        <header class="landing-nav">
+            <a class="landing-nav__brand" href="./index.html" aria-label="LeoPlaner">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" focusable="false">
+                        <rect x="8" y="6" width="5.5" height="20" rx="2.75" fill="#fff" />
+                        <rect x="8" y="20.5" width="16" height="5.5" rx="2.75" fill="#fff" />
+                        <circle cx="22.5" cy="10.5" r="3.25" fill="var(--color-accent)" />
+                    </svg>
+                </span>
+                <span class="brand-wordmark" role="img" aria-label="LeoPlaner"></span>
+            </a>
+            <nav class="landing-nav__links" aria-label="Schnellzugriff">
+                <a class="btn btn--ghost" href="./web/pages/dashboard.html">Dashboard</a>
+                <a class="btn btn--ghost" href="./web/pages/timetable.html">Stundenplan</a>
+                <a
+                    class="btn btn--ghost"
+                    href="https://github.com/Lucaa0312/LeoPlaner"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="LeoPlaner auf GitHub"
+                    ><i class="ti ti-brand-github" aria-hidden="true"></i
+                ></a>
+            </nav>
+        </header>
 
-            <p class="landing-subtitle">Der Weg zum optimalen Stundenplan.</p>
+        <main class="landing-main">
+            <section class="hero">
+                <div class="hero__copy">
+                    <p class="hero__eyebrow">
+                        <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+                        HTBLA Leonding · Stundenplanung
+                    </p>
+                    <h1 class="hero__title">
+                        Willkommen zum <span class="hero__brand">LeoPlaner</span>
+                    </h1>
+                    <p class="hero__subtitle">Der Weg zum optimalen Stundenplan.</p>
+                    <p class="hero__lead">
+                        Lehrkräfte, Fächer, Räume und Klassen an einem Ort verwalten –
+                        und den Rest dem Simulated-Annealing-Algorithmus überlassen, der
+                        Ihre Regeln und Wünsche berücksichtigt.
+                    </p>
+                    <div class="hero__actions">
+                        <a class="btn btn--primary btn--lg" href="./web/pages/timetable.html">
+                            <i class="ti ti-calendar-week" aria-hidden="true"></i>
+                            <span>Stundenplan öffnen</span>
+                        </a>
+                        <a class="btn btn--secondary btn--lg" href="./web/pages/dashboard.html">
+                            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>
+                            <span>Daten verwalten</span>
+                        </a>
+                    </div>
+                    <p class="hero__meta">
+                        <i class="ti ti-lock-open" aria-hidden="true"></i>
+                        Open Source · Ein Diplomarbeitsprojekt
+                    </p>
+                </div>
 
-            <div class="landing-nav-buttons">
-                <a
-                    href="./web/pages/timetable.html"
-                    class="landing-btn landing-btn-primary"
-                >
-                    Stundenplan
-                </a>
-                <a
-                    href="./web/pages/dashboard.html"
-                    class="landing-btn landing-btn-secondary"
-                >
-                    Dashboard
-                </a>
-                <a
-                    href="./web/pages/teacher.html"
-                    class="landing-btn landing-btn-secondary"
-                >
-                    Einstellungen
-                </a>
-            </div>
-        </div>
+                <div class="hero__visual" aria-hidden="true">
+                    <div class="mosaic-frame">
+                        <div class="mosaic-frame__bar">
+                            <span></span><span></span><span></span>
+                            <em>1AHIF · Woche 12</em>
+                        </div>
+                        <div class="mosaic-days">
+                            <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span>
+                        </div>
+                        <div class="mosaic">
+                    <span class="mosaic__tile" style="--i:0;--a:var(--c1);--b:var(--c0);grid-column:1;grid-row:1"></span>
+                    <span class="mosaic__tile mosaic__tile--tall" style="--i:1;--a:var(--c4);--b:var(--c0);grid-column:2;grid-row:1 / span 2"></span>
+                    <span class="mosaic__tile mosaic__tile--tall mosaic__tile--empty" style="--i:2;--a:var(--c4);--b:var(--c1);grid-column:3;grid-row:1 / span 2"></span>
+                    <span class="mosaic__tile mosaic__tile--empty" style="--i:3;--a:var(--c0);--b:var(--c2);grid-column:4;grid-row:1"></span>
+                    <span class="mosaic__tile" style="--i:4;--a:var(--c4);--b:var(--c0);grid-column:5;grid-row:1"></span>
+                    <span class="mosaic__tile" style="--i:5;--a:var(--c4);--b:var(--c0);grid-column:1;grid-row:2"></span>
+                    <span class="mosaic__tile" style="--i:6;--a:var(--c1);--b:var(--c2);grid-column:4;grid-row:2"></span>
+                    <span class="mosaic__tile mosaic__tile--tall" style="--i:7;--a:var(--c3);--b:var(--c0);grid-column:5;grid-row:2 / span 2"></span>
+                    <span class="mosaic__tile mosaic__tile--empty" style="--i:8;--a:var(--c4);--b:var(--c1);grid-column:1;grid-row:3"></span>
+                    <span class="mosaic__tile mosaic__tile--empty" style="--i:9;--a:var(--c1);--b:var(--c4);grid-column:2;grid-row:3"></span>
+                    <span class="mosaic__tile" style="--i:10;--a:var(--c4);--b:var(--c0);grid-column:3;grid-row:3"></span>
+                    <span class="mosaic__tile" style="--i:11;--a:var(--c4);--b:var(--c3);grid-column:4;grid-row:3"></span>
+                    <span class="mosaic__tile" style="--i:12;--a:var(--c3);--b:var(--c1);grid-column:1;grid-row:4"></span>
+                    <span class="mosaic__tile" style="--i:13;--a:var(--c1);--b:var(--c2);grid-column:2;grid-row:4"></span>
+                    <span class="mosaic__tile" style="--i:14;--a:var(--c2);--b:var(--c1);grid-column:3;grid-row:4"></span>
+                    <span class="mosaic__tile" style="--i:15;--a:var(--c0);--b:var(--c4);grid-column:4;grid-row:4"></span>
+                    <span class="mosaic__tile mosaic__tile--empty" style="--i:16;--a:var(--c3);--b:var(--c2);grid-column:5;grid-row:4"></span>
+                    <span class="mosaic__tile" style="--i:17;--a:var(--c4);--b:var(--c2);grid-column:1;grid-row:5"></span>
+                    <span class="mosaic__tile mosaic__tile--empty" style="--i:18;--a:var(--c3);--b:var(--c2);grid-column:2;grid-row:5"></span>
+                    <span class="mosaic__tile mosaic__tile--tall" style="--i:19;--a:var(--c2);--b:var(--c1);grid-column:3;grid-row:5 / span 2"></span>
+                    <span class="mosaic__tile mosaic__tile--tall" style="--i:20;--a:var(--c2);--b:var(--c1);grid-column:4;grid-row:5 / span 2"></span>
+                    <span class="mosaic__tile" style="--i:21;--a:var(--c2);--b:var(--c3);grid-column:5;grid-row:5"></span>
+                    <span class="mosaic__tile" style="--i:22;--a:var(--c4);--b:var(--c0);grid-column:1;grid-row:6"></span>
+                    <span class="mosaic__tile" style="--i:23;--a:var(--c2);--b:var(--c4);grid-column:2;grid-row:6"></span>
+                    <span class="mosaic__tile" style="--i:24;--a:var(--c3);--b:var(--c4);grid-column:5;grid-row:6"></span>
+                    <span class="mosaic__tile" style="--i:25;--a:var(--c2);--b:var(--c4);grid-column:1;grid-row:7"></span>
+                    <span class="mosaic__tile" style="--i:26;--a:var(--c2);--b:var(--c1);grid-column:2;grid-row:7"></span>
+                    <span class="mosaic__tile" style="--i:27;--a:var(--c3);--b:var(--c0);grid-column:3;grid-row:7"></span>
+                    <span class="mosaic__tile mosaic__tile--tall mosaic__tile--empty" style="--i:28;--a:var(--c1);--b:var(--c3);grid-column:4;grid-row:7 / span 2"></span>
+                    <span class="mosaic__tile" style="--i:29;--a:var(--c1);--b:var(--c4);grid-column:5;grid-row:7"></span>
+                    <span class="mosaic__tile" style="--i:30;--a:var(--c1);--b:var(--c0);grid-column:1;grid-row:8"></span>
+                    <span class="mosaic__tile" style="--i:31;--a:var(--c4);--b:var(--c2);grid-column:2;grid-row:8"></span>
+                    <span class="mosaic__tile" style="--i:32;--a:var(--c4);--b:var(--c0);grid-column:3;grid-row:8"></span>
+                    <span class="mosaic__tile" style="--i:33;--a:var(--c4);--b:var(--c3);grid-column:5;grid-row:8"></span>
+                        </div>
+                    </div>
+                    <div class="hero__glow"></div>
+                </div>
+            </section>
+
+            <section class="features" aria-label="Funktionen">
+                <article class="feature card">
+                    <span class="feature__icon" style="--tint: var(--color-primary)">
+                        <i class="ti ti-database" aria-hidden="true"></i>
+                    </span>
+                    <h2 class="feature__title">Datenverwaltung</h2>
+                    <p class="feature__text">
+                        Lehrkräfte, Fächer, Räume und Klassen pflegen – per Formular oder
+                        Excel-Import in Sekunden.
+                    </p>
+                </article>
+                <article class="feature card">
+                    <span class="feature__icon" style="--tint: var(--color-accent)">
+                        <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
+                    </span>
+                    <h2 class="feature__title">Eigene Regeln</h2>
+                    <p class="feature__text">
+                        Verfügbarkeiten, Doppelstunden und Raumanforderungen fließen als
+                        Regeln direkt in die Planung ein.
+                    </p>
+                </article>
+                <article class="feature card">
+                    <span class="feature__icon" style="--tint: var(--color-success)">
+                        <i class="ti ti-sparkles" aria-hidden="true"></i>
+                    </span>
+                    <h2 class="feature__title">Optimierung</h2>
+                    <p class="feature__text">
+                        Simulated Annealing sucht den Stundenplan mit den geringsten
+                        Kosten – live nachvollziehbar im Diagramm.
+                    </p>
+                </article>
+            </section>
+        </main>
+
+        <footer class="landing-footer">
+            <span>HTBLA Leonding, 2025</span>
+            <a href="https://github.com/Lucaa0312/LeoPlaner" target="_blank" rel="noopener">
+                <i class="ti ti-brand-github" aria-hidden="true"></i> GitHub
+            </a>
+        </footer>
     </body>
 </html>

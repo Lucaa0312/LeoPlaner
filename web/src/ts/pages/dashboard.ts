@@ -10,6 +10,7 @@ type StatCard = {
   icon: string;
   label: string;
   value: number;
+  color: string;
 };
 
 // Fetches a single count endpoint, returning 0 on failure.
@@ -36,10 +37,34 @@ async function loadStats(): Promise<StatCard[]> {
   ]);
 
   return [
-    { id: "stat-teachers", icon: "fa-solid fa-users", label: "Lehrer", value: teachers },
-    { id: "stat-classes", icon: "fa-solid fa-school", label: "Klassen", value: classes },
-    { id: "stat-rooms", icon: "fa-solid fa-building", label: "Räume", value: rooms },
-    { id: "stat-subjects", icon: "fa-solid fa-book-open", label: "Fächer", value: subjects },
+    {
+      id: "stat-teachers",
+      icon: "ti ti-users",
+      label: "Lehrer",
+      value: teachers,
+      color: "var(--color-primary)",
+    },
+    {
+      id: "stat-classes",
+      icon: "ti ti-school",
+      label: "Klassen",
+      value: classes,
+      color: "var(--color-accent)",
+    },
+    {
+      id: "stat-rooms",
+      icon: "ti ti-door",
+      label: "Räume",
+      value: rooms,
+      color: "var(--color-success)",
+    },
+    {
+      id: "stat-subjects",
+      icon: "ti ti-book-2",
+      label: "Fächer",
+      value: subjects,
+      color: "var(--color-primary-hover)",
+    },
   ];
 }
 
@@ -54,6 +79,30 @@ function iconBox(iconClass: string, boxClass: string): HTMLDivElement {
   return box;
 }
 
+const prefersReducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
+
+// Counts a number up from 0 over ~600 ms (skipped under reduced motion).
+function animateCount(el: HTMLElement, target: number): void {
+  if (prefersReducedMotion || target === 0) {
+    el.textContent = String(target);
+    return;
+  }
+
+  const duration = 600;
+  const start = performance.now();
+
+  const tick = (now: number) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = String(Math.round(target * eased));
+    if (progress < 1) requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+}
+
 // Renders the four statistics cards.
 function renderStats(stats: StatCard[]): void {
   const grid = document.getElementById("stats-grid");
@@ -62,14 +111,15 @@ function renderStats(stats: StatCard[]): void {
 
   stats.forEach((stat) => {
     const card = document.createElement("div");
-    card.className = "stat-card";
+    card.className = "stat-card card";
     card.id = stat.id;
+    card.style.setProperty("--card-color", stat.color);
 
     card.appendChild(iconBox(stat.icon, "stat-icon"));
 
     const value = document.createElement("span");
     value.className = "stat-value";
-    value.textContent = String(stat.value);
+    value.textContent = "0";
 
     const label = document.createElement("span");
     label.className = "stat-label";
@@ -78,6 +128,8 @@ function renderStats(stats: StatCard[]): void {
     card.appendChild(value);
     card.appendChild(label);
     grid.appendChild(card);
+
+    animateCount(value, stat.value);
   });
 }
 
@@ -86,16 +138,19 @@ function quickActionCard(
   icon: string,
   title: string,
   description: string,
+  onActivate: () => void,
 ): HTMLDivElement {
   const card = document.createElement("div");
-  card.className = "quick-action";
+  card.className = "quick-action card card--interactive";
+  card.setAttribute("role", "button");
+  card.tabIndex = 0;
 
   const top = document.createElement("div");
   top.className = "quick-action-top";
   top.appendChild(iconBox(icon, "action-icon"));
 
   const arrow = document.createElement("i");
-  arrow.className = "fa-solid fa-arrow-right action-arrow";
+  arrow.className = "ti ti-arrow-right action-arrow";
   arrow.setAttribute("aria-hidden", "true");
   top.appendChild(arrow);
 
@@ -110,6 +165,15 @@ function quickActionCard(
   card.appendChild(top);
   card.appendChild(h3);
   card.appendChild(p);
+
+  card.addEventListener("click", onActivate);
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onActivate();
+    }
+  });
+
   return card;
 }
 
@@ -120,16 +184,17 @@ function renderQuickActions(): void {
   grid.replaceChildren();
 
   // Import (reuses importButton.ts which binds #excel-upload)
-  const importCard = quickActionCard(
-    "fa-solid fa-upload",
-    "Excel importieren",
-    "Importieren Sie Ihre Schuldaten aus einer Excel-Datei",
-  );
   const input = document.createElement("input");
   input.type = "file";
   input.id = "excel-upload";
   input.accept = ".xlsx,.xls";
   input.hidden = true;
+  const importCard = quickActionCard(
+    "ti ti-upload",
+    "Excel importieren",
+    "Importieren Sie Ihre Schuldaten aus einer Excel-Datei",
+    () => input.click(),
+  );
   const importName = document.createElement("p");
   importName.id = "import-file-name";
   importName.className = "action-status";
@@ -137,32 +202,32 @@ function renderQuickActions(): void {
   importError.id = "import-error";
   importError.className = "action-error";
   importCard.append(input, importName, importError);
-  importCard.addEventListener("click", () => input.click());
 
   // Export (reuses exportButton.ts which binds #excel-export)
-  const exportCard = quickActionCard(
-    "fa-solid fa-download",
-    "Daten exportieren",
-    "Exportieren Sie Ihre Daten und Stundenpläne als Excel",
-  );
   const exportButton = document.createElement("button");
   exportButton.id = "excel-export";
+  exportButton.type = "button";
   exportButton.hidden = true;
+  const exportCard = quickActionCard(
+    "ti ti-download",
+    "Daten exportieren",
+    "Exportieren Sie Ihre Daten und Stundenpläne als Excel",
+    () => exportButton.click(),
+  );
   const exportError = document.createElement("p");
   exportError.id = "export-error";
   exportError.className = "action-error";
   exportCard.append(exportButton, exportError);
-  exportCard.addEventListener("click", () => exportButton.click());
 
   // View timetable (navigation)
   const timetableCard = quickActionCard(
-    "fa-solid fa-table",
+    "ti ti-calendar-week",
     "Stundenplan anzeigen",
     "Sehen Sie den aktuellen Stundenplan ein",
+    () => {
+      window.location.href = "timetable.html";
+    },
   );
-  timetableCard.addEventListener("click", () => {
-    window.location.href = "timetable.html";
-  });
 
   grid.append(importCard, exportCard, timetableCard);
 
@@ -177,10 +242,10 @@ type DataLink = {
 };
 
 const dataLinks: DataLink[] = [
-  { href: "teacher.html", icon: "fa-solid fa-users", title: "Lehrer" },
-  { href: "classSubjects.html", icon: "fa-solid fa-school", title: "Klassen" },
-  { href: "rooms.html", icon: "fa-solid fa-building", title: "Räume" },
-  { href: "subjects.html", icon: "fa-solid fa-book-open", title: "Fächer" },
+  { href: "teacher.html", icon: "ti ti-users", title: "Lehrer" },
+  { href: "classSubjects.html", icon: "ti ti-school", title: "Klassen" },
+  { href: "rooms.html", icon: "ti ti-door", title: "Räume" },
+  { href: "subjects.html", icon: "ti ti-book-2", title: "Fächer" },
 ];
 
 // Renders the four data-management navigation links.
@@ -191,7 +256,7 @@ function renderDataManagement(): void {
 
   dataLinks.forEach((link) => {
     const a = document.createElement("a");
-    a.className = "data-link";
+    a.className = "data-link card card--interactive";
     a.href = link.href;
 
     const i = document.createElement("i");
@@ -204,7 +269,7 @@ function renderDataManagement(): void {
 
     const sub = document.createElement("span");
     sub.className = "data-link-sub";
-    sub.textContent = "Verwalten";
+    sub.innerHTML = `Verwalten <i class="ti ti-arrow-right" aria-hidden="true"></i>`;
 
     a.append(i, title, sub);
     grid.appendChild(a);

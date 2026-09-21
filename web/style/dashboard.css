@@ -1,200 +1,232 @@
-/* ------------------ DASHBOARD ROOT --------------------- */
-#dashboard {
-    height: 100vh;
-    overflow-y: auto;
-    padding: 3rem;
-    box-sizing: border-box;
-}
-
-/* ------------------ HEADER --------------------- */
-#dashboard-header {
-    margin-bottom: 3rem;
-}
-
-#dashboard-title {
-    font-size: 2.25rem;
-    font-weight: 600;
-    color: var(--leo-text-color);
-    margin-bottom: 0.75rem;
-}
-
-#dashboard-subtitle {
-    font-size: 1.125rem;
-    color: #6b7280;
-    max-width: 48rem;
-}
-
-/* ------------------ SECTIONS / GRIDS --------------------- */
-.dashboard-section {
-    margin-bottom: 3rem;
-}
-
-.section-heading {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--leo-text-color);
-    margin-bottom: 1.5rem;
-}
+/* =============================================================================
+   Dashboard
+   ============================================================================= */
 
 .dashboard-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: var(--space-4);
 }
 
-#stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-    margin-bottom: 3rem;
+.stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-#quick-actions {
-    grid-template-columns: repeat(2, 1fr);
+.quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-#data-management {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+.data-management {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-/* ------------------ SHARED ICON BOX --------------------- */
-.stat-icon,
-.action-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.5rem;
-    display: flex;
+/* ----------------------------------------------------------------- stats */
+.stat-card {
+    --card-color: var(--color-primary);
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-5);
+    overflow: hidden;
+    animation: rise-in var(--dur-slow) var(--ease-out) both;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 50ms;
+}
+.stat-card:nth-child(3) {
+    animation-delay: 100ms;
+}
+.stat-card:nth-child(4) {
+    animation-delay: 150ms;
+}
+
+.stat-card::after {
+    content: "";
+    position: absolute;
+    right: -2rem;
+    top: -2rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    background: var(--card-color);
+    opacity: 0.06;
+    pointer-events: none;
+}
+
+.stat-icon {
+    grid-row: 1 / span 2;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(79, 70, 229, 0.1);
-}
-
-.stat-icon i,
-.action-icon i {
-    font-size: 1.25rem;
-    color: var(--leo-primary-color1);
-}
-
-/* ------------------ STAT CARDS --------------------- */
-.stat-card {
-    background-color: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--card-color) 14%, var(--color-surface-raised));
+    color: var(--card-color);
+    font-size: 1.5rem;
 }
 
 .stat-value {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: var(--leo-text-color);
-    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-heading);
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-    font-size: 0.875rem;
-    color: #6b7280;
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
 }
 
-/* ------------------ QUICK ACTIONS --------------------- */
+/* --------------------------------------------------------- quick actions */
 .quick-action {
-    background-color: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    text-align: left;
     cursor: pointer;
-    transition: border-color 0.2s;
+    color: inherit;
+}
+
+.quick-action:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
 }
 
 .quick-action-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 1rem;
 }
 
-.action-arrow {
-    font-size: 1.25rem;
-    color: #6b7280;
-    transition: color 0.2s;
-}
-
-.action-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--leo-text-color);
-    margin-bottom: 0.5rem;
-}
-
-.action-description {
-    color: #6b7280;
-}
-
-.quick-action:hover {
-    border-color: var(--leo-primary-color1);
+.action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-soft);
+    color: var(--color-primary-soft-text);
+    font-size: 1.35rem;
+    transition:
+        background-color var(--dur-base) var(--ease-out),
+        color var(--dur-base) var(--ease-out);
 }
 
 .quick-action:hover .action-icon {
-    background-color: var(--leo-primary-color1);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
-.quick-action:hover .action-icon i {
-    color: white;
+.action-arrow {
+    color: var(--color-text-subtle);
+    font-size: 1.25rem;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        color var(--dur-base) var(--ease-out);
 }
 
 .quick-action:hover .action-arrow {
-    color: var(--leo-primary-color1);
+    transform: translateX(4px);
+    color: var(--color-primary);
+}
+
+.action-title {
+    font-size: var(--text-base);
+    font-weight: 700;
+}
+
+.action-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
 }
 
 .action-status {
-    margin-top: 0.75rem;
-    font-size: 0.8125rem;
-    color: #16a34a;
+    font-size: var(--text-xs);
+    color: var(--color-success);
+    font-weight: 600;
+}
+
+.action-status:empty,
+.action-error:empty {
+    display: none;
 }
 
 .action-error {
-    margin-top: 0.75rem;
-    font-size: 0.8125rem;
-    color: #dc2626;
+    font-size: var(--text-xs);
+    color: var(--color-danger);
+    font-weight: 600;
 }
 
-/* ------------------ DATA MANAGEMENT LINKS --------------------- */
+/* -------------------------------------------------------- data management */
 .data-link {
-    background-color: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1rem;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-5);
+    color: inherit;
     text-decoration: none;
-    transition: border-color 0.2s;
 }
 
 .data-link:hover {
-    border-color: var(--leo-primary-color1);
+    text-decoration: none;
 }
 
 .data-link-icon {
-    font-size: 1.5rem;
-    color: var(--leo-primary-color1);
-    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-soft-text);
+    font-size: 1.25rem;
 }
 
 .data-link-title {
-    font-weight: 500;
-    color: var(--leo-text-color);
+    font-weight: 700;
+    color: var(--color-heading);
 }
 
 .data-link-sub {
-    font-size: 0.875rem;
-    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
 }
 
-/* ------------------ RESPONSIVE --------------------- */
+.data-link-sub .ti {
+    transition: transform var(--dur-base) var(--ease-out);
+}
+
+.data-link:hover .data-link-sub .ti {
+    transform: translateX(3px);
+}
+
+/* -------------------------------------------------------------- responsive */
+@media (max-width: 1280px) {
+    .stats-grid,
+    .data-management {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
-    #stats-grid,
-    #quick-actions,
-    #data-management {
-        grid-template-columns: 1fr;
+    .stats-grid,
+    .quick-actions,
+    .data-management {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

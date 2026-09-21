@@ -1,53 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="de">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Leo Planer</title>
-        <link rel="stylesheet" href="../style/essentials.css">
-        <link rel="stylesheet" href="../style/dashboard.css">
-        <script src="https://kit.fontawesome.com/7dd0aadbc3.js" crossorigin="anonymous"></script>
-        <script type="module" src="../dist/js/pages/dashboard.js" defer></script>
-        <script type="module" src="../dist/js/pages/navbar.js" defer></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
+        <title>Dashboard · LeoPlaner</title>
+        <script>
+            // Apply the stored theme + sidebar state before first paint.
+            (function () {
+                try {
+                    var r = document.documentElement;
+                    var t = localStorage.getItem("leo.theme");
+                    if (t === "dark" || t === "light") r.dataset.theme = t;
+                    if (localStorage.getItem("leo.sidebar") === "collapsed")
+                        r.dataset.sidebar = "collapsed";
+                } catch (e) {}
+            })();
+        </script>
+        <link
+            rel="icon"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Crect x='8' y='6' width='5.5' height='20' rx='2.75' fill='%23fff'/%3E%3Crect x='8' y='20.5' width='16' height='5.5' rx='2.75' fill='%23fff'/%3E%3Ccircle cx='22.5' cy='10.5' r='3.25' fill='%23fbbf24'/%3E%3C/svg%3E"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css"
+        />
+        <link rel="stylesheet" href="../style/tokens.css" />
+        <link rel="stylesheet" href="../style/base.css" />
+        <link rel="stylesheet" href="../style/components.css" />
+        <link rel="stylesheet" href="../style/shell.css" />
+        <link rel="stylesheet" href="../style/dashboard.css" />
+        <script type="module" src="../dist/js/pages/dashboard.js"></script>
     </head>
 
-    <body>
-        <div class="flex-container">
+    <body class="app">
+        <nav id="nav-bar" class="sidebar"></nav>
 
-            <div id="nav-bar"></div>
-
-            <div id="main-content">
-                <div id="dashboard">
-
-                    <header id="dashboard-header">
-                        <h1 id="dashboard-title">Dashboard</h1>
-                        <p id="dashboard-subtitle">
-                            Willkommen bei LeoPlaner. Verwalten Sie Ihre Schuldaten und erstellen Sie optimierte Stundenpläne.
+        <main id="main-content" class="main">
+            <div class="page" id="dashboard">
+                <header class="page-header" id="dashboard-header">
+                    <button
+                        type="button"
+                        class="icon-btn page-header__menu"
+                        data-drawer-toggle
+                        aria-label="Menü öffnen"
+                    >
+                        <i class="ti ti-menu-2" aria-hidden="true"></i>
+                    </button>
+                    <div class="page-header__text">
+                        <p class="page-header__eyebrow">Übersicht</p>
+                        <h1 class="page-header__title" id="dashboard-title">
+                            Dashboard
+                        </h1>
+                        <p class="page-header__subtitle" id="dashboard-subtitle">
+                            Willkommen bei LeoPlaner. Verwalten Sie Ihre
+                            Schuldaten und erstellen Sie optimierte Stundenpläne.
                         </p>
-                    </header>
+                    </div>
+                </header>
 
-                    <section id="stats-grid" class="dashboard-grid">
-                        <!-- Stat cards generated in JavaScript -->
-                    </section>
+                <section
+                    id="stats-grid"
+                    class="dashboard-grid stats-grid"
+                    aria-label="Statistiken"
+                >
+                    <!-- Stat cards generated in JavaScript -->
+                </section>
 
-                    <section class="dashboard-section">
-                        <h2 class="section-heading">Schnellaktionen</h2>
-                        <div id="quick-actions" class="dashboard-grid">
-                            <!-- Quick action cards generated in JavaScript -->
-                        </div>
-                    </section>
+                <section class="section dashboard-section">
+                    <h2 class="section-heading">Schnellaktionen</h2>
+                    <div id="quick-actions" class="dashboard-grid quick-actions">
+                        <!-- Quick action cards generated in JavaScript -->
+                    </div>
+                </section>
 
-                    <section class="dashboard-section">
-                        <h2 class="section-heading">Datenverwaltung</h2>
-                        <div id="data-management" class="dashboard-grid">
-                            <!-- Data management links generated in JavaScript -->
-                        </div>
-                    </section>
-
-                </div>
+                <section class="section dashboard-section">
+                    <h2 class="section-heading">Datenverwaltung</h2>
+                    <div
+                        id="data-management"
+                        class="dashboard-grid data-management"
+                    >
+                        <!-- Data management links generated in JavaScript -->
+                    </div>
+                </section>
             </div>
-        </div>
+        </main>
     </body>
-
 </html>
