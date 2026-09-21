@@ -18,7 +18,7 @@ public class Timetable extends PanacheEntity {
     @JoinTable(name = "timetable_classSubjectInstances", joinColumns = @JoinColumn(name = "timetable_id"), inverseJoinColumns = @JoinColumn(name = "class_subject_instance_id"))
     private List<ClassSubjectInstance> classSubjectInstances;
     private int totalWeeklyHours; // all durations summed up
-    private int costOfTimetable = 0;
+    private long costOfTimetable = 0;
     private double tempAtTimetable = 0;
 
     public Timetable() {
@@ -68,11 +68,11 @@ public class Timetable extends PanacheEntity {
         this.totalWeeklyHours = totalWeeklyHours;
     }
 
-    public int getCostOfTimetable() {
+    public long getCostOfTimetable() {
         return costOfTimetable;
     }
 
-    public void setCostOfTimetable(int costOfTimetable) {
+    public void setCostOfTimetable(long costOfTimetable) {
         this.costOfTimetable = costOfTimetable;
     }
 

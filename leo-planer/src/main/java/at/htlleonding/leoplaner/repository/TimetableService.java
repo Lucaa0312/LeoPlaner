@@ -12,6 +12,9 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class TimetableService {
+    private static final int LAST_REGULAR_HOUR = 8;
+    private static final int MAX_PLACEMENT_ATTEMPTS = 200;
+
     private Map<String, Timetable> bestSchoolSchedule = new HashMap<>();
 
     private Timetable currentTimetable;
@@ -121,21 +124,48 @@ public class TimetableService {
             List<ClassSubject> classSubjects,
             Room classRoom) {
 
-        SchoolDays[] days = SchoolDays.values();
+        return createRandomInstances(classSubjects, classRoom, new HashMap<>());
+    }
+
+    /**
+     * teacherBusy is carried across classes so a teacher is not placed in two
+     * classes at the same time while the starting schedule is built. The
+     * annealing step can only keep a schedule legal, it cannot repair a start
+     * that was already impossible.
+     */
+    public List<ClassSubjectInstance> createRandomInstances(
+            List<ClassSubject> classSubjects,
+            Room classRoom,
+            Map<Long, Map<SchoolDays, Set<Integer>>> teacherBusy) {
+
+        SchoolDays[] days = SchoolDays.schedulableDays();
         Map<SchoolDays, List<Integer>> occupied = new HashMap<>();
         List<ClassSubjectInstance> result = new ArrayList<>();
         Random random = new Random();
 
         for (ClassSubject cs : classSubjects) {
             int hoursLeft = cs.getWeeklyHours();
+            final Set<Long> teacherIds = teacherIdsOf(cs);
+            int attempts = 0;
 
             while (hoursLeft > 0) {
+                // never draw more hours than are left, otherwise most draws are
+                // rejected and the loop can spin for a very long time
+                int duration = random.nextInt(1, hoursLeft + 1);
                 SchoolDays day = days[random.nextInt(days.length)];
-                int hour = random.nextInt(1, 9);
-                int duration = random.nextInt(1, cs.getWeeklyHours() + 1);
+                int hour = random.nextInt(
+                        1, Math.max(2, LAST_REGULAR_HOUR - duration + 2));
+
+                attempts++;
+                // after a long streak of rejections the remaining slots are
+                // most likely blocked by teachers; fall back to a class-legal
+                // slot so generation always terminates. The cost function then
+                // prices the clash in.
+                final boolean ignoreTeachers = attempts > MAX_PLACEMENT_ATTEMPTS;
 
                 if (isFree(occupied, hour, duration, day)
-                        && (hoursLeft - duration) >= 0) {
+                        && (ignoreTeachers
+                                || isTeacherFree(teacherBusy, teacherIds, hour, duration, day))) {
 
                     Period period = new Period(day, hour);
 
@@ -143,13 +173,60 @@ public class TimetableService {
                             cs, period, classRoom, duration));
 
                     reserve(occupied, hour, duration, day);
+                    reserveTeachers(teacherBusy, teacherIds, hour, duration, day);
 
                     hoursLeft -= duration;
+                    attempts = 0;
                 }
             }
         }
 
         return result;
+    }
+
+    private static Set<Long> teacherIdsOf(ClassSubject cs) {
+        if (cs == null || cs.getTeachers() == null) {
+            return Set.of();
+        }
+
+        Set<Long> ids = new HashSet<>();
+        for (Teacher teacher : cs.getTeachers()) {
+            if (teacher != null && teacher.getId() != null) {
+                ids.add(teacher.getId());
+            }
+        }
+        return ids;
+    }
+
+    private boolean isTeacherFree(Map<Long, Map<SchoolDays, Set<Integer>>> teacherBusy,
+            Set<Long> teacherIds, int hour, int duration, SchoolDays day) {
+
+        for (Long teacherId : teacherIds) {
+            Set<Integer> busyHours = teacherBusy
+                    .getOrDefault(teacherId, Map.of())
+                    .getOrDefault(day, Set.of());
+
+            for (int i = 0; i < duration; i++) {
+                if (busyHours.contains(hour + i)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void reserveTeachers(Map<Long, Map<SchoolDays, Set<Integer>>> teacherBusy,
+            Set<Long> teacherIds, int hour, int duration, SchoolDays day) {
+
+        for (Long teacherId : teacherIds) {
+            Set<Integer> busyHours = teacherBusy
+                    .computeIfAbsent(teacherId, id -> new HashMap<>())
+                    .computeIfAbsent(day, d -> new HashSet<>());
+
+            for (int i = 0; i < duration; i++) {
+                busyHours.add(hour + i);
+            }
+        }
     }
 
     private boolean isFree(Map<SchoolDays, List<Integer>> occupied,
@@ -181,11 +258,14 @@ public class TimetableService {
     public void generateForAllClasses() {
         clear();
 
+        // shared across every class so the generated start is already free of
+        // teacher clashes
+        final Map<Long, Map<SchoolDays, Set<Integer>>> teacherBusy = new HashMap<>();
+
         for (SchoolClass sc : schoolClassRepository.getAll()) {
-            System.out.println(sc.getClassName());
             List<ClassSubject> subjects = ClassSubject.getAllByClassName(sc.getClassName());
-            System.out.println(subjects.size());
-            List<ClassSubjectInstance> instances = createRandomInstances(subjects, sc.getClassRoom());
+            List<ClassSubjectInstance> instances = createRandomInstances(subjects, sc.getClassRoom(),
+                    teacherBusy);
             addClassSubjectInstances(instances);
             Timetable timetable = new Timetable(instances, sc);
             currentTimetableList.put(sc.getClassName(), timetable);
