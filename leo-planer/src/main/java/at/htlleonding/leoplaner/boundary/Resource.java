@@ -20,11 +20,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,21 +66,7 @@ public class Resource {
     @Path("run/testCsvNew")
     @GET
     public void injectTestCsvDataNew() {
-        final String baseDir = "../script/fakerGeneration/csvOutput/";
-
-        final String teacherCSVPath = baseDir + "teachers.csv";
-        final String classSubjectCSVPath = baseDir + "classSubjects.csv";
-        final String roomCSVPath = baseDir + "rooms.csv";
-
-        final String subjectCSVPath =
-            "src/files/csvFiles/test1/testSubject.csv";
-
-        CSVManager.processCSV(subjectCSVPath, dataRepository);
-        CSVManager.processCSV(teacherCSVPath, dataRepository);
-        CSVManager.processCSV(roomCSVPath, dataRepository);
-        CSVManager.processCSV(classSubjectCSVPath, dataRepository);
-
-        this.dataRepository.randomizeSchoolSchedule();
+        this.dataRepository.loadDemoData();
     }
 
     @Path("run/generateRandomSchedule")
@@ -166,11 +149,9 @@ public class Resource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response triggerExport() throws Exception {
         try {
-            excelManager.createBaseDataWorkbook();
+            final byte[] workbook = excelManager.createBaseDataWorkbook();
 
-            File file = new File("src/files/excelFiles/export/test1.xlsx");
-
-            return Response.ok(file)
+            return Response.ok(workbook)
                 .header(
                     "Content-Disposition",
                     "attachment; filename=\"export.xlsx\""
@@ -192,29 +173,13 @@ public class Resource {
         }
     }
 
-    private static final String archivePath = "src/files/excelFiles/export/";
-
     @POST
     @Path("/uploadExcel")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.TEXT_PLAIN)
     public Response upload(InputStream is) {
-        String outFileName =
-            archivePath + "upload_" + System.currentTimeMillis() + ".xlsx";
-        try (OutputStream os = new FileOutputStream(outFileName)) {
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                os.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            return Response.status(500)
-                .entity("Failed to save file: " + outFileName)
-                .build();
-        }
-
         try {
-            excelManager.importFile(outFileName);
+            excelManager.importFile(is);
             this.dataRepository.randomizeSchoolSchedule();
         } catch (Exception e) {
             return Response.status(500)
@@ -222,7 +187,7 @@ public class Resource {
                 .build();
         }
 
-        return Response.ok(outFileName).build();
+        return Response.ok("Import successful").build();
     }
 
     @Path("setLogCooling")
@@ -242,8 +207,8 @@ public class Resource {
     @Consumes(MediaType.TEXT_PLAIN)
     public void importFile(@PathParam("fileName") String fileName)
         throws Exception {
-        try {
-            excelManager.importFile(fileName);
+        try (InputStream in = new FileInputStream(fileName)) {
+            excelManager.importFile(in);
         } catch (Exception e) {
             throw new Exception(e);
         }

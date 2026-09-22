@@ -1,7 +1,9 @@
 package at.htlleonding.leoplaner.data;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import at.htlleonding.leoplaner.algorithm.CoolingMode;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
@@ -13,6 +15,8 @@ import at.htlleonding.leoplaner.repository.TeacherRepository;
 import at.htlleonding.leoplaner.repository.TimetableService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DataRepository {
@@ -33,6 +37,9 @@ public class DataRepository {
 
     @Inject
     ClassSubjectRepository classSubjectRepository;
+
+    @Inject
+    EntityManager entityManager;
 
     private boolean algorithmRunning = false;
     private boolean algorithmRunningAtLeastOnce = false;
@@ -55,6 +62,20 @@ public class DataRepository {
 
     public void setAlgorithmRunning(boolean running) {
         this.algorithmRunning = running;
+    }
+
+    // Loads the demo data bundled under src/main/resources/demo-data (order matters: subjects first)
+    public void loadDemoData() {
+        CSVManager.processCSVResource("demo-data/subjects.csv", this);
+        CSVManager.processCSVResource("demo-data/teachers.csv", this);
+        CSVManager.processCSVResource("demo-data/rooms.csv", this);
+        CSVManager.processCSVResource("demo-data/classSubjects.csv", this);
+
+        randomizeSchoolSchedule();
+    }
+
+    public boolean hasSchoolData() {
+        return getTeacherCount() > 0 || getRoomCount() > 0 || getSubjectCount() > 0;
     }
 
     public void randomizeSchoolSchedule() {
@@ -247,6 +268,28 @@ public class DataRepository {
 
     public void clearHistory() {
         timetableService.clearHistory();
+    }
+
+    // Deletes all school data. Truncates every table of the schema (CASCADE handles the foreign keys,
+    // including join and element-collection tables), then clears the in-memory timetables and history.
+    @Transactional
+    public void deleteAllData() {
+        @SuppressWarnings("unchecked")
+        final List<String> tables = entityManager
+                .createNativeQuery("SELECT tablename FROM pg_tables WHERE schemaname = current_schema()")
+                .getResultList();
+
+        if (!tables.isEmpty()) {
+            final String tableList = tables.stream()
+                    .map(table -> "\"" + table + "\"")
+                    .collect(Collectors.joining(", "));
+            entityManager.createNativeQuery("TRUNCATE TABLE " + tableList + " CASCADE").executeUpdate();
+        }
+
+        timetableService.clear();
+        timetableService.clearHistory();
+        timetableService.setBestSchoolSchedule(new HashMap<>());
+        algorithmRunningAtLeastOnce = false;
     }
 
     public TimetableService getTimetableService() {

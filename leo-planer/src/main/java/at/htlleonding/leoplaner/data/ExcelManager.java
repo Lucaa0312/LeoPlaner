@@ -1,7 +1,10 @@
 package at.htlleonding.leoplaner.data;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,19 +86,18 @@ public class ExcelManager {
 
     }
 
-    public void createBaseDataWorkbook() {
-        Workbook workbook = new XSSFWorkbook();
+    // Builds the base-data workbook in memory (no file on disk, so it also works in the container)
+    public byte[] createBaseDataWorkbook() throws IOException {
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            createSubjectSheet(dataRepository.getAllSubjects(), workbook);
+            createRoomSheet(dataRepository.getAllRooms(), workbook);
+            createTeacherSheet(dataRepository.getAllTeachers(), workbook);
+            createSchoolClassSheet(dataRepository.getAllSchoolClasses(), workbook);
+            createClassSubjectSheet(dataRepository.getAllClassSubjects(), workbook);
 
-        createSubjectSheet(dataRepository.getAllSubjects(), workbook);
-        createRoomSheet(dataRepository.getAllRooms(), workbook);
-        createTeacherSheet(dataRepository.getAllTeachers(), workbook);
-        createSchoolClassSheet(dataRepository.getAllSchoolClasses(), workbook);
-        createClassSubjectSheet(dataRepository.getAllClassSubjects(), workbook);
-
-        try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
-            workbook.write(fileOut);
-        } catch (Exception e) {
-            System.err.println("Error writing workbook: " + e.getMessage());
+            workbook.write(out);
+            return out.toByteArray();
         }
     }
 
@@ -289,8 +291,8 @@ public class ExcelManager {
     }
 
     @Transactional
-    public void importFile(String fileName) throws Exception {
-        try (Workbook importWorkbook = WorkbookFactory.create(new File(fileName))) {
+    public void importFile(InputStream inputStream) throws Exception {
+        try (Workbook importWorkbook = WorkbookFactory.create(inputStream)) {
             DataFormatter formatter = new DataFormatter();
 
             importSubjects(importWorkbook.getSheet("Subjects"), formatter);
