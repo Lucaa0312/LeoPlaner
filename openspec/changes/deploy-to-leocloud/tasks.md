@@ -42,7 +42,7 @@
 
 ## 7. Final verification
 
-- [ ] 7.1 Run the unchanged local workflow end to end (`database/` compose + `./mvnw quarkus:dev` + Python server): load demo data, run the algorithm, export, reset, import; verify all of it works and `./mvnw verify` passes
+- [x] 7.1 Run the unchanged local workflow end to end (`database/` compose + `./mvnw quarkus:dev` + Python server): load demo data, run the algorithm, export, reset, import; verify all of it works and `./mvnw verify` passes
 
 ## 8. Follow-up found while testing (reset exposed pre-existing bugs)
 
