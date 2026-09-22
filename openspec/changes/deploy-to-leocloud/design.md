@@ -116,15 +116,16 @@ variable, without rebuilding.
   Rejected.
 
 ### D5 — Reset implementation
-A single `@Transactional` method in `DataRepository` deletes all entities in
-foreign-key-safe order (timetable/period rows → class-subject instances →
-teacher hours → class-subjects → teacher/subject links → teachers, rooms,
-subjects, school classes), then calls `clearTimetableData()` and
-`clearHistory()` for the in-memory state. The exact order is determined from
-the entity mappings during implementation. The endpoint returns 409 if the
-algorithm is currently running (use the existing running state in
-`SimulatedAnnealingAlgorithm`; if its semantics turn out to be unreliable, add
-an explicit "running" flag set around `algorithmLoop()`).
+`DataRepository.deleteAllData()` runs one `TRUNCATE <all tables of the current schema> CASCADE`
+(table list from `pg_tables`), then clears the in-memory timetables, best schedule and history.
+- *Why not delete entity by entity in FK order (the original plan):* the element-collection and join
+  tables (`teacher_non_working_hours`, room types, `class_subject_teachers`, …) aren't reachable with
+  JPQL bulk deletes, and a hand-maintained order breaks silently when an entity is added. TRUNCATE
+  CASCADE is one statement, FK-safe, and covers future tables automatically.
+- *Trade-off:* it's PostgreSQL-specific (the project only uses PostgreSQL), and it wipes every table in
+  the schema, so a future migration-history table (for example Flyway) would have to be excluded.
+- The endpoint returns 409 while `DataRepository.getAlgorithmRunning()` is true. This flag is set at
+  the start and end of `algorithmLoop()`.
 
 ### D6 — Demo data as classpath resources
 Move `script/fakerGeneration/csvOutput/{teachers,rooms,classSubjects}.csv` and
