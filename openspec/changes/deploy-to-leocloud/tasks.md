@@ -29,8 +29,8 @@
 
 ## 5. Production image
 
-- [ ] 5.1 Create `leo-planer/Dockerfile.prod` (node → maven → JRE stages, frontend copied into `META-INF/resources`, non-root user) and a root `.dockerignore`; verify `docker build -f leo-planer/Dockerfile.prod .` succeeds from the repo root
-- [ ] 5.2 (needs sudo docker; the same jar was verified without Docker: prod profile, static files served, admin flags off, data survives restart) Smoke-test the image with `docker run` against the `database/` compose Postgres (env `QUARKUS_DATASOURCE_*`); verify `http://localhost:8080/` shows the landing page, the dashboard loads, the WebSocket connects, and `/api/admin/features` reports both flags false
+- [x] 5.1 Create `leo-planer/Dockerfile.prod` (node → maven → JRE stages, frontend copied into `META-INF/resources`, non-root user) and a root `.dockerignore`; verify `docker build -f leo-planer/Dockerfile.prod .` succeeds from the repo root
+- [x] 5.2 Smoke-test the image with `docker run` against the `database/` compose Postgres (env `QUARKUS_DATASOURCE_*`); verify `http://localhost:8080/` shows the landing page, the dashboard loads, the WebSocket connects, and `/api/admin/features` reports both flags false
 
 ## 6. Kubernetes manifests and docs
 
