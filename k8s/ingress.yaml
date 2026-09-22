@@ -1,0 +1,25 @@
+# Public HTTPS address of LeoPlaner.
+#
+# TODO before the first deploy: replace YOUR-HOST with the hostname LeoCloud assigns to you.
+# Find it with:  leocloud get template nginx   (look at the Ingress in its output)
+# and copy ingressClassName / annotations from there too if it has any.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: leo-planer
+  annotations:
+    # keep the algorithm-progress WebSocket open (nginx ingress; ignored by other controllers)
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: YOUR-HOST.cloud.htl-leonding.ac.at
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: leo-planer
+                port:
+                  number: 8080

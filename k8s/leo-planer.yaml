@@ -1,0 +1,72 @@
+# LeoPlaner backend + frontend (one container, see leo-planer/Dockerfile.prod).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leo-planer
+spec:
+  replicas: 1           # exactly one: the algorithm keeps its state in memory
+  strategy:
+    type: Recreate      # never run old and new version at the same time
+  selector:
+    matchLabels:
+      app: leo-planer
+  template:
+    metadata:
+      labels:
+        app: leo-planer
+    spec:
+      containers:
+        - name: leo-planer
+          # Change the tag for every new version (not "latest"), then kubectl apply again.
+          image: ghcr.io/lucaa0312/leoplaner:0.1.0
+          ports:
+            - containerPort: 8080
+          env:
+            # Credentials from the Secret (k8s/secret.template.yaml)
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef: { name: leoplaner-db, key: POSTGRES_DB }
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef: { name: leoplaner-db, key: POSTGRES_USER }
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: leoplaner-db, key: POSTGRES_PASSWORD }
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://postgres:5432/$(POSTGRES_DB)
+            # Admin actions (reset / demo data) are off in the cloud. To use them temporarily:
+            #   kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED=true
+            # and switch off again with:
+            #   kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED-
+          # Health checks (quarkus-smallrye-health)
+          startupProbe:          # give the JVM up to 150s to start before the other probes begin
+            httpGet: { path: /q/health/started, port: 8080 }
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:         # restart the container if the app hangs
+            httpGet: { path: /q/health/live, port: 8080 }
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:        # only send traffic when the app AND the database are reachable
+            httpGet: { path: /q/health/ready, port: 8080 }
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:            # guaranteed
+              cpu: 250m
+              memory: 512Mi
+            limits:              # maximum (the algorithm is CPU-heavy)
+              cpu: "1"
+              memory: 1Gi
+---
+# Internal address "leo-planer:8080", used by the Ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: leo-planer
+spec:
+  selector:
+    app: leo-planer
+  ports:
+    - port: 8080
+      targetPort: 8080

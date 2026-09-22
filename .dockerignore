@@ -1,0 +1,21 @@
+# Build context for leo-planer/Dockerfile.prod (repo root). Only leo-planer/, web/ and index.html are needed.
+.git
+.github
+.idea
+.vscode
+.claude
+database
+demo
+design
+devops
+documentation
+hall-of-shame
+openspec
+script
+k8s
+node_modules
+**/node_modules
+leo-planer/target
+leo-planer/src/files
+web/dist
+web/javascript
