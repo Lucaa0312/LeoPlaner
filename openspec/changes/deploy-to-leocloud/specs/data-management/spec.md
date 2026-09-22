@@ -76,3 +76,20 @@ disabled the endpoint SHALL respond with HTTP 403 and change nothing.
 #### Scenario: Works from the packaged container
 - **WHEN** the backend runs from the production container image with the demo-data flag enabled
 - **THEN** `POST /api/admin/demo-data` succeeds without depending on the source tree being present
+
+### Requirement: Excel export and import survive a reset
+Exporting the data, resetting, and importing the exported file again SHALL restore the same
+school classes, their rooms, the class-subjects with their subject, teachers and school class,
+and the teachers' subjects. This SHALL NOT depend on the database ids being the same, so a file
+exported from one installation can be imported into another (for example from a laptop into the
+cloud deployment).
+
+#### Scenario: Export, reset, import
+- **WHEN** demo data is loaded, exported, the data is reset, and the exported file is imported
+- **THEN** the same class names exist again, each with its room
+- **AND** every class-subject has a subject, a school class and at least one teacher
+- **AND** the teachers have their subjects again
+
+#### Scenario: Ids differ from the file
+- **WHEN** the rows created by the import get different ids than the ones written in the file
+- **THEN** all relations are still restored correctly

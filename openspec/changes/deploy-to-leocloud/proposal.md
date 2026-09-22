@@ -29,6 +29,12 @@ data get mixed.
   variable.
 - **Demo CSV files become classpath resources** so they are found no matter
   where the app runs (fixes `../script/...` and `src/files/...` paths).
+- **The Excel import no longer relies on database ids.** The file's ids are mapped to the rows
+  created from it, so a file exported before a reset (or on another machine, e.g. local → cloud)
+  restores classes, rooms, teachers and class-subjects correctly.
+- **The timetable page loads the first available class** instead of the hardcoded class id 1, which
+  stops existing after a reset; the timetable endpoint answers 404 instead of a 500 when a class or
+  its timetable does not exist.
 - **Excel upload/export no longer write to `src/files/...`**; they use a
   configurable writable directory (or in-memory streams).
 - **Database schema strategy per profile:** `dev` keeps `drop-and-create`
@@ -61,7 +67,9 @@ frontend with a Python server.
 
 ## Impact
 
-- **Backend:** `boundary/Resource.java` (seed endpoints, upload/export paths),
+- **Backend:** `boundary/TimeTableResource.java` (404 instead of NPE),
+  `repository/SubjectRepository.java` (`add` returns the managed instance from `merge`),
+  `boundary/Resource.java` (seed endpoints, upload/export paths),
   `data/ExcelManager.java`, `data/CSVManager.java`, `data/DataRepository.java`
   (new delete-all), new resource for reset/feature flags,
   `application.properties`, `pom.xml` (+ `quarkus-smallrye-health`).

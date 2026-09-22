@@ -41,6 +41,18 @@ only when the backend reports the corresponding feature as enabled via
 
 ## ADDED Requirements
 
+### Requirement: Timetable page picks an existing class
+The timetable page SHALL display the first class returned by the backend instead of a fixed class
+id, and SHALL show an empty timetable rather than an error when no class or no timetable exists.
+
+#### Scenario: Class ids changed after a reset
+- **WHEN** the timetable page is opened after data was reset and imported, so that no class has id 1
+- **THEN** the timetable of the first available class is displayed
+
+#### Scenario: No data at all
+- **WHEN** the timetable page is opened with an empty database
+- **THEN** the empty grid is shown and no error appears in the browser console
+
 ### Requirement: Landing page does not modify data
 Opening the landing page SHALL NOT create, modify, or delete any data.
 

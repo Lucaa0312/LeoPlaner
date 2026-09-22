@@ -70,13 +70,17 @@ export function clearLayout() {
 }
 export function loadTimetable() {
     clearLayout();
-    fetch(`${API_BASE_URL}/timetable/getByClass/1`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data.classSubjectInstances);
-        createLayout(data.classSubjectInstances);
+    // Show the first class. Its id is not fixed: after a reset or an excel import the ids change.
+    fetch(`${API_BASE_URL}/getAllClasses`)
+        .then((response) => response.json())
+        .then((classes) => {
+        const firstClass = classes[0];
+        if (!firstClass) {
+            return;
+        }
+        return fetch(`${API_BASE_URL}/timetable/getByClass/${firstClass.id}`)
+            .then((response) => response.json())
+            .then((data) => createLayout(data.classSubjectInstances ?? []));
     })
         .catch((error) => {
         console.error("Error loading Timetable:", error);

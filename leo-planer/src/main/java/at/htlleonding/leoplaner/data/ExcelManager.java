@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -279,12 +280,14 @@ public class ExcelManager {
         try (Workbook importWorkbook = WorkbookFactory.create(new File(filePath))) {
             DataFormatter formatter = new DataFormatter();
             
-            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
-            importSubjects(importWorkbook.getSheet("Subjects"), formatter);
-            importTeachers(importWorkbook.getSheet("Teachers"), formatter);
-            importRooms(importWorkbook.getSheet("Rooms"), formatter);
+            final ImportedIds imported = new ImportedIds();
 
-            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
+            importTimetable(importWorkbook.getSheet("Timetable"), formatter);
+            importSubjects(importWorkbook.getSheet("Subjects"), formatter, imported);
+            importTeachers(importWorkbook.getSheet("Teachers"), formatter, imported);
+            importRooms(importWorkbook.getSheet("Rooms"), formatter, imported);
+
+            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter, imported);
 
             // importTimetable(importWorkbook.getSheet("Timetable"), formatter);
         }
@@ -295,12 +298,17 @@ public class ExcelManager {
         try (Workbook importWorkbook = WorkbookFactory.create(inputStream)) {
             DataFormatter formatter = new DataFormatter();
 
-            importSubjects(importWorkbook.getSheet("Subjects"), formatter);
-            importTeachers(importWorkbook.getSheet("Teachers"), formatter);
-            importRooms(importWorkbook.getSheet("Rooms"), formatter);
-            importSchoolClasses(importWorkbook.getSheet("SchoolClasses"), formatter);
+            // The file references rows by the ids of the system it was exported from. Those ids do not
+            // exist here (after a reset, or in another installation like the cloud), so every sheet
+            // records which new row belongs to which id from the file.
+            final ImportedIds imported = new ImportedIds();
 
-            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter);
+            importSubjects(importWorkbook.getSheet("Subjects"), formatter, imported);
+            importTeachers(importWorkbook.getSheet("Teachers"), formatter, imported);
+            importRooms(importWorkbook.getSheet("Rooms"), formatter, imported);
+            importSchoolClasses(importWorkbook.getSheet("SchoolClasses"), formatter, imported);
+
+            importClassSubjects(importWorkbook.getSheet("ClassSubjects"), formatter, imported);
 
             // importTimetable(importWorkbook.getSheet("Timetable"), formatter);
         } catch (Exception e) {
@@ -309,7 +317,28 @@ public class ExcelManager {
         }
     }
 
-    private void importSchoolClasses(Sheet sheet, DataFormatter fmt) {
+    // Maps the ids used inside an excel file to the rows created from it during this import.
+    private static final class ImportedIds {
+        final Map<Long, Subject> subjects = new HashMap<>();
+        final Map<Long, Teacher> teachers = new HashMap<>();
+        final Map<Long, Room> rooms = new HashMap<>();
+        final Map<Long, SchoolClass> schoolClasses = new HashMap<>();
+    }
+
+    // Reads a cell as an id, or null when it is empty or not a number.
+    private static Long readId(Row row, int cell, DataFormatter fmt) {
+        final String value = fmt.formatCellValue(row.getCell(cell)).trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void importSchoolClasses(Sheet sheet, DataFormatter fmt, ImportedIds imported) {
         boolean isFirstRow = true;
         for (Row row : sheet) {
             if (isFirstRow) {
@@ -319,13 +348,14 @@ public class ExcelManager {
 
             SchoolClass sc = new SchoolClass();
             sc.setClassName(fmt.formatCellValue(row.getCell(1)));
-            sc.setClassRoom(Room.findById(Long.parseLong(fmt.formatCellValue(row.getCell(2)))));
+            sc.setClassRoom(imported.rooms.get(readId(row, 2, fmt)));
 
             dataRepository.addSchoolClass(sc);
+            imported.schoolClasses.put(readId(row, 0, fmt), sc);
         }
     }
 
-    private void importSubjects(Sheet sheet, DataFormatter fmt) {
+    private void importSubjects(Sheet sheet, DataFormatter fmt, ImportedIds imported) {
         boolean isFirstRow = true;
         for (Row row : sheet) {
             if (isFirstRow) {
@@ -350,11 +380,11 @@ public class ExcelManager {
             }
             s.setRequiredRoomTypes(roomTypes);
 
-            dataRepository.addSubject(s);
+            imported.subjects.put(readId(row, 0, fmt), dataRepository.addSubject(s));
         }
     }
 
-    private void importTeachers(Sheet sheet, DataFormatter fmt) {
+    private void importTeachers(Sheet sheet, DataFormatter fmt, ImportedIds imported) {
         boolean isFirstRow = true;
         for (Row row : sheet) {
             if (isFirstRow) {
@@ -371,17 +401,18 @@ public class ExcelManager {
                 String[] ids = idString.split(",\\s*");
                 for (String id : ids) {
                     if (!id.isBlank()) {
-                        Subject s = Subject.findById(Long.parseLong(id));
+                        Subject s = imported.subjects.get(Long.parseLong(id.trim()));
                         if (s != null)
                             t.getTeachingSubject().add(s);
                     }
                 }
             }
             dataRepository.addTeacher(t);
+            imported.teachers.put(readId(row, 0, fmt), t);
         }
     }
 
-    private void importRooms(Sheet sheet, DataFormatter fmt) {
+    private void importRooms(Sheet sheet, DataFormatter fmt, ImportedIds imported) {
         if (sheet == null)
             return;
 
@@ -407,23 +438,30 @@ public class ExcelManager {
             room.setRoomTypes(roomTypes);
 
             dataRepository.addRoom(room);
+            imported.rooms.put(readId(row, 0, fmt), room);
         }
     }
 
-    private void importClassSubjects(Sheet sheet, DataFormatter fmt) {
+    private void importClassSubjects(Sheet sheet, DataFormatter fmt, ImportedIds imported) {
         for (Row row : sheet) {
             if (row.getRowNum() == 0)
                 continue;
             ClassSubject cs = new ClassSubject();
 
             List<Teacher> teachers = new ArrayList<>();
-            teachers.add(Teacher.findById(Long.parseLong(fmt.formatCellValue(row.getCell(2)))));
+            for (String teacherId : fmt.formatCellValue(row.getCell(2)).split(",")) {
+                final Teacher teacher = teacherId.isBlank()
+                        ? null
+                        : imported.teachers.get(Long.parseLong(teacherId.trim()));
+                if (teacher != null) {
+                    teachers.add(teacher);
+                }
+            }
 
-            cs.setSubject(Subject.findById(Long.parseLong(fmt.formatCellValue(row.getCell(1)))));
+            cs.setSubject(imported.subjects.get(readId(row, 1, fmt)));
             cs.setTeachers(teachers);
 
-            // System.out.println(fmt.formatCellValue(row.getCell(3)));
-            cs.setSchoolClass(SchoolClass.findById(Long.parseLong(fmt.formatCellValue(row.getCell(3)))));
+            cs.setSchoolClass(imported.schoolClasses.get(readId(row, 3, fmt)));
 
             cs.setWeeklyHours(Integer.parseInt(fmt.formatCellValue(row.getCell(4))));
 

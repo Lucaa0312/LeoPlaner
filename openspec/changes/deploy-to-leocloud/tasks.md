@@ -44,6 +44,12 @@
 
 - [ ] 7.1 Run the unchanged local workflow end to end (`database/` compose + `./mvnw quarkus:dev` + Python server): load demo data, run the algorithm, export, reset, import; verify all of it works and `./mvnw verify` passes
 
+## 8. Follow-up found while testing (reset exposed pre-existing bugs)
+
+- [x] 8.1 Map the ids inside an excel file to the newly imported rows instead of looking them up in the database; verify with the new `ExcelRoundTripTest` (export → reset → import keeps classes, rooms, teachers, class-subjects)
+- [x] 8.2 Return the managed instance from `SubjectRepository.add` (it used `merge` and returned the detached one); verify teachers keep their subjects after an import
+- [x] 8.3 Load the first available class on the timetable page instead of the hardcoded id 1, and answer 404 instead of a 500 for a missing class/timetable; verify `GET /api/timetable/getByClass/<unknown>` returns 404 and the page works after a reset+import
+
 ## Handover (done by the team, not part of implementation)
 
 Build and push the image to ghcr.io, make the package public, `leocloud auth login`,

@@ -206,8 +206,8 @@ public class DataRepository {
         return subjectRepository.getCount();
     }
 
-    public void addSubject(Subject subject) {
-        subjectRepository.add(subject);
+    public Subject addSubject(Subject subject) {
+        return subjectRepository.add(subject);
     }
 
     public Subject updateSubject(Long id, Subject subject) {
@@ -271,7 +271,9 @@ public class DataRepository {
     }
 
     // Deletes all school data. Truncates every table of the schema (CASCADE handles the foreign keys,
-    // including join and element-collection tables), then clears the in-memory timetables and history.
+    // including join and element-collection tables) and clears the in-memory timetables and history.
+    // Ids are NOT reset: hibernate caches id blocks in memory, so restarting the sequences would hand
+    // out ids twice. The excel import therefore maps the ids from the file instead of relying on them.
     @Transactional
     public void deleteAllData() {
         @SuppressWarnings("unchecked")
