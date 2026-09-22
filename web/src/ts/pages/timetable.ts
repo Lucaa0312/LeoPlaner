@@ -3,6 +3,7 @@ import initNavbar from "./navbar.js";
 import { clearCharts } from "./graph.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 import { initExportButton } from "../features/exportButton.js";
+import { API_BASE_URL } from "../utils/apiBase.js";
 
 type SubjectColor = {
   red: number;
@@ -166,7 +167,7 @@ export function clearLayout() {
 
 export function loadTimetable(): void {
   clearLayout();
-  fetch("http://localhost:8080/api/timetable/getByClass/1")
+  fetch(`${API_BASE_URL}/timetable/getByClass/1`)
     .then((response) => {
       return response.json() as Promise<TimetableByClassResponse>;
     })
@@ -239,7 +240,7 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 
 export function getTimetableByTeacher(teacherId: string): void {
   clearLayout();
-  fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
+  fetch(`${API_BASE_URL}/timetable/getByTeacher/${teacherId}`)
     .then((response) => {
       return response.json() as Promise<TimetableByTeacherResponse>;
     })
@@ -253,7 +254,7 @@ export function getTimetableByTeacher(teacherId: string): void {
 }
 
 export function getTimetableByClass(classId: string): void {
-  fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
+  fetch(`${API_BASE_URL}/timetable/getByClass/${classId}`)
     .then((response) => {
       return response.json() as Promise<TimetableByClassResponse>;
     })
@@ -267,7 +268,7 @@ export function getTimetableByClass(classId: string): void {
 }
 
 export function getTimetableByRoom(roomId: string): void {
-  fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
+  fetch(`${API_BASE_URL}/timetable/getByRoom/${roomId}`)
     .then((response) => {
       return response.json() as Promise<TimetableByRoomResponse>;
     })
