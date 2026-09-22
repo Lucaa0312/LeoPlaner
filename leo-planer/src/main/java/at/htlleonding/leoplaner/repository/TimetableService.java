@@ -132,6 +132,16 @@ public class TimetableService {
      * classes at the same time while the starting schedule is built. The
      * annealing step can only keep a schedule legal, it cannot repair a start
      * that was already impossible.
+     *
+     * Lessons are appended to a day rather than dropped on a random hour: the
+     * first repairTimetable compacts every day to run from the first hour
+     * without gaps, so a lesson placed on hour 7 of an otherwise empty day ends
+     * up on hour 1 anyway - and any check done against hour 7 was worthless.
+     * Appending means the hour checked here is the hour the lesson keeps.
+     *
+     * Teacher non working hours are checked alongside the clashes. They cost
+     * just as much, and a violation the start hands over is one the annealer
+     * has to spend the whole run trying to undo.
      */
     public List<ClassSubjectInstance> createRandomInstances(
             List<ClassSubject> classSubjects,
@@ -146,42 +156,93 @@ public class TimetableService {
         for (ClassSubject cs : classSubjects) {
             int hoursLeft = cs.getWeeklyHours();
             final Set<Long> teacherIds = teacherIdsOf(cs);
+            final List<Teacher> teachers = cs.getTeachers() == null
+                    ? List.of()
+                    : cs.getTeachers();
             int attempts = 0;
 
             while (hoursLeft > 0) {
+                attempts++;
+
+                // the constraints are given up one at a time the longer this
+                // takes, so generation always terminates: first the hours the
+                // teachers do not work, then the clashes, then the day length.
+                // Whatever is left over the cost function prices in.
+                final boolean ignoreNonWorking = attempts > MAX_PLACEMENT_ATTEMPTS;
+                final boolean ignoreTeachers = attempts > 2 * MAX_PLACEMENT_ATTEMPTS;
+                final boolean singleHoursOnly = attempts > 3 * MAX_PLACEMENT_ATTEMPTS;
+
                 // never draw more hours than are left, otherwise most draws are
                 // rejected and the loop can spin for a very long time
-                int duration = random.nextInt(1, hoursLeft + 1);
+                int duration = singleHoursOnly
+                        ? 1
+                        : random.nextInt(1, hoursLeft + 1);
                 SchoolDays day = days[random.nextInt(days.length)];
-                int hour = random.nextInt(
-                        1, Math.max(2, LAST_REGULAR_HOUR - duration + 2));
+                int hour = nextFreeHour(occupied, day);
+                int lastAllowedHour = ignoreTeachers
+                        ? TimetableManager.LAST_SCHOOL_HOUR
+                        : LAST_REGULAR_HOUR;
 
-                attempts++;
-                // after a long streak of rejections the remaining slots are
-                // most likely blocked by teachers; fall back to a class-legal
-                // slot so generation always terminates. The cost function then
-                // prices the clash in.
-                final boolean ignoreTeachers = attempts > MAX_PLACEMENT_ATTEMPTS;
-
-                if (isFree(occupied, hour, duration, day)
-                        && (ignoreTeachers
-                                || isTeacherFree(teacherBusy, teacherIds, hour, duration, day))) {
-
-                    Period period = new Period(day, hour);
-
-                    result.add(new ClassSubjectInstance(
-                            cs, period, classRoom, duration));
-
-                    reserve(occupied, hour, duration, day);
-                    reserveTeachers(teacherBusy, teacherIds, hour, duration, day);
-
-                    hoursLeft -= duration;
-                    attempts = 0;
+                if (hour + duration - 1 > lastAllowedHour) {
+                    continue; // day is full
                 }
+
+                if (!ignoreTeachers
+                        && !isTeacherFree(teacherBusy, teacherIds, hour, duration, day)) {
+                    continue;
+                }
+
+                if (!ignoreNonWorking
+                        && !teachersAreWorking(teachers, hour, duration, day)) {
+                    continue;
+                }
+
+                Period period = new Period(day, hour);
+
+                result.add(new ClassSubjectInstance(
+                        cs, period, classRoom, duration));
+
+                reserve(occupied, hour, duration, day);
+                reserveTeachers(teacherBusy, teacherIds, hour, duration, day);
+
+                hoursLeft -= duration;
+                attempts = 0;
             }
         }
 
         return result;
+    }
+
+    /**
+     * The hour a lesson appended to this day would start on. Days are filled
+     * from the first hour without gaps, so this is just how much is on the day
+     * already.
+     */
+    private int nextFreeHour(Map<SchoolDays, List<Integer>> occupied, SchoolDays day) {
+        return TimetableManager.FIRST_SCHOOL_HOUR
+                + occupied.getOrDefault(day, List.of()).size();
+    }
+
+    /** False as soon as one teacher of the lesson does not work on one of its hours. */
+    private boolean teachersAreWorking(List<Teacher> teachers,
+            int hour, int duration, SchoolDays day) {
+
+        for (Teacher teacher : teachers) {
+            if (teacher == null) {
+                continue;
+            }
+
+            for (int i = 0; i < duration; i++) {
+                final TeacherNonWorkingHours nonWorking = new TeacherNonWorkingHours();
+                nonWorking.setDay(day);
+                nonWorking.setSchoolHour(hour + i);
+
+                if (teacher.checkIfHourExistsInNonWorkingList(nonWorking)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private static Set<Long> teacherIdsOf(ClassSubject cs) {

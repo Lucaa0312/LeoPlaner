@@ -3,6 +3,7 @@ package at.htlleonding.leoplaner.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -137,6 +138,70 @@ public class TimetableManager {
         return occupied;
     }
 
+    /**
+     * The hours the teachers of this one lesson never work, in the same shape
+     * as collectTeacherOccupiedHours so the two can be merged into one set of
+     * hours a move must stay away from.
+     *
+     * Both cost IMPOSSIBLE, so blocking only the clashes and leaving these to
+     * the cost function meant the generator kept proposing destinations that
+     * were just as illegal as where the lesson already sat.
+     */
+    public static Map<SchoolDays, Set<Integer>> collectNonWorkingHours(
+        final ClassSubjectInstance csi
+    ) {
+        final Map<SchoolDays, Set<Integer>> nonWorking = new HashMap<>();
+
+        if (csi == null || csi.getClassSubject() == null) {
+            return nonWorking;
+        }
+
+        final List<Teacher> teachers = csi.getClassSubject().getTeachers();
+
+        if (teachers == null) {
+            return nonWorking;
+        }
+
+        for (final Teacher teacher : teachers) {
+            if (teacher == null) {
+                continue;
+            }
+
+            for (final TeacherNonWorkingHours hour : teacher.getTeacher_non_working_hours()) {
+                if (hour.getDay() == null || hour.getSchoolHour() == null) {
+                    continue;
+                }
+
+                nonWorking
+                    .computeIfAbsent(hour.getDay(), day -> new HashSet<>())
+                    .add(hour.getSchoolHour());
+            }
+        }
+
+        return nonWorking;
+    }
+
+    /** Union of two hour maps, neither of them modified. */
+    public static Map<SchoolDays, Set<Integer>> mergeBlockedHours(
+        final Map<SchoolDays, Set<Integer>> first,
+        final Map<SchoolDays, Set<Integer>> second
+    ) {
+        final Map<SchoolDays, Set<Integer>> merged = new HashMap<>();
+
+        for (final Map<SchoolDays, Set<Integer>> source : List.of(
+            first,
+            second
+        )) {
+            for (final Map.Entry<SchoolDays, Set<Integer>> entry : source.entrySet()) {
+                merged
+                    .computeIfAbsent(entry.getKey(), day -> new HashSet<>())
+                    .addAll(entry.getValue());
+            }
+        }
+
+        return merged;
+    }
+
     public static Set<Long> teacherIdsOf(final ClassSubjectInstance csi) {
         if (
             csi == null ||
@@ -155,52 +220,173 @@ public class TimetableManager {
         return ids;
     }
 
-    public static Timetable giveClassSubjectRandomPeriodAndReturn(
+    /**
+     * Every position a lesson could take in a day's order, not only the hours
+     * that happen to be free.
+     *
+     * repairTimetable compacts each day so it runs from the first school hour
+     * without gaps, which leaves returnAllFreePeriodsOnCertainDay with nothing
+     * to offer but the hours past the end of the day - a lesson could only ever
+     * be appended to a tail and the order inside a day could never change. That
+     * froze whole days in place. These candidates are the start hours of the
+     * lessons already on the day plus that tail, so a lesson can be pushed in
+     * anywhere and the rest of the day slides one lesson to the right.
+     */
+    public static ArrayList<Period> returnAllInsertionPeriodsOnCertainDay(
         final Timetable timetable,
-        final int index
-    ) {
-        return giveClassSubjectRandomPeriodAndReturn(
-            timetable,
-            index,
-            Collections.emptyMap()
-        );
-    }
-
-    public static Timetable giveClassSubjectRandomPeriodAndReturn(
-        final Timetable timetable,
-        final int index,
+        final SchoolDays schoolDay,
+        final int indexToMove,
         final Map<SchoolDays, Set<Integer>> blockedHours
     ) {
-        final Random random = new Random();
-        final ArrayList<Period> allFreePeriods = new ArrayList<>();
-        final int duration = timetable
+        final ArrayList<Period> result = new ArrayList<>();
+        final ClassSubjectInstance instanceToMove = timetable
             .getClassSubjectInstances()
-            .get(index)
-            .getDuration();
-
-        for (final SchoolDays schoolDay : SchoolDays.schedulableDays()) {
-            allFreePeriods.addAll(
-                returnAllFreePeriodsOnCertainDay(
-                    timetable,
-                    schoolDay,
-                    duration,
-                    blockedHours
-                )
-            );
-        }
-
-        if (allFreePeriods.isEmpty()) {
-            // every remaining slot would clash with this lesson's teachers, so
-            // there is no legal move - hand back an unchanged copy instead of
-            // forcing an illegal one
-            return cloneCurrentTimeTable(timetable);
-        }
-
-        return switchClassSubjectInstancePeriodAndReturn(
-            timetable,
-            index,
-            allFreePeriods.get(random.nextInt(allFreePeriods.size()))
+            .get(indexToMove);
+        final int duration = instanceToMove.getDuration();
+        final Set<Integer> blockedOnDay = blockedHours.getOrDefault(
+            schoolDay,
+            Collections.emptySet()
         );
+
+        final List<ClassSubjectInstance> lessonsOnDay = timetable
+            .getClassSubjectInstances()
+            .stream()
+            .filter(e -> e != instanceToMove)
+            .filter(e -> e.getPeriod().getSchoolDays() == schoolDay)
+            .filter(e -> !e.getPeriod().isLunchBreak())
+            .sorted(
+                Comparator.comparingInt(e -> e.getPeriod().getSchoolHour())
+            )
+            .toList();
+
+        int occupiedHours = 0;
+        for (final ClassSubjectInstance csi : lessonsOnDay) {
+            occupiedHours += csi.getDuration();
+        }
+
+        if (
+            FIRST_SCHOOL_HOUR + occupiedHours + duration - 1 > LAST_SCHOOL_HOUR
+        ) {
+            return result; // the day cannot hold this lesson on top
+        }
+
+        // one candidate in front of every lesson, plus one behind the last -
+        // the hours themselves are what the day looks like once it is compact,
+        // so they are read off the running total rather than off the periods,
+        // which may still be stale when this is called
+        int candidateHour = FIRST_SCHOOL_HOUR;
+
+        for (int i = 0; i <= lessonsOnDay.size(); i++) {
+            boolean isFree = true;
+
+            for (int hour = 0; hour < duration; hour++) {
+                if (blockedOnDay.contains(candidateHour + hour)) {
+                    isFree = false; // a teacher of this lesson cannot be here
+                    break;
+                }
+            }
+
+            if (isFree) {
+                result.add(new Period(schoolDay, candidateHour));
+            }
+
+            if (i < lessonsOnDay.size()) {
+                candidateHour += lessonsOnDay.get(i).getDuration();
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Whether moving everything from breakHour on one hour later would put a
+     * lesson on an hour one of its teachers does not work.
+     */
+    private static boolean shiftHitsNonWorkingHour(
+        final List<ClassSubjectInstance> lessonsOnDay,
+        final int breakHour,
+        final SchoolDays schoolday
+    ) {
+        for (final ClassSubjectInstance csi : lessonsOnDay) {
+            if (csi.getPeriod().getSchoolHour() < breakHour) {
+                continue; // stays where it is
+            }
+
+            if (csi.getClassSubject() == null) {
+                continue;
+            }
+
+            final List<Teacher> teachers = csi.getClassSubject().getTeachers();
+
+            if (teachers == null) {
+                continue;
+            }
+
+            for (final Teacher teacher : teachers) {
+                if (teacher == null) {
+                    continue;
+                }
+
+                for (int i = 0; i < csi.getDuration(); i++) {
+                    final TeacherNonWorkingHours hour =
+                        new TeacherNonWorkingHours();
+                    hour.setDay(schoolday);
+                    hour.setSchoolHour(
+                        csi.getPeriod().getSchoolHour() + i + 1
+                    );
+
+                    if (teacher.checkIfHourExistsInNonWorkingList(hour)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Moves the lesson at index onto targetPeriod, pushing whatever already
+     * starts at that hour or later one lesson to the right. The day the lesson
+     * came from is left with a gap that repairTimetable closes.
+     */
+    public static Timetable insertClassSubjectInstanceAndReturn(
+        final Timetable timetable,
+        final int index,
+        final Period targetPeriod
+    ) {
+        final Timetable clonedTimetable = cloneCurrentTimeTable(timetable);
+        final ClassSubjectInstance movedInstance = clonedTimetable
+            .getClassSubjectInstances()
+            .get(index);
+        final int duration = movedInstance.getDuration();
+
+        for (final ClassSubjectInstance csi : clonedTimetable.getClassSubjectInstances()) {
+            if (csi == movedInstance) {
+                continue;
+            }
+
+            if (
+                csi.getPeriod().getSchoolDays() !=
+                targetPeriod.getSchoolDays() ||
+                csi.getPeriod().getSchoolHour() < targetPeriod.getSchoolHour()
+            ) {
+                continue;
+            }
+
+            csi
+                .getPeriod()
+                .setSchoolHour(csi.getPeriod().getSchoolHour() + duration);
+        }
+
+        movedInstance.setPeriod(
+            new Period(
+                targetPeriod.getSchoolDays(),
+                targetPeriod.getSchoolHour()
+            )
+        );
+
+        return clonedTimetable;
     }
 
     public static Timetable switchClassSubjectInstancePeriodAndReturn(
@@ -230,7 +416,36 @@ public class TimetableManager {
             );
     }
 
-    public static void implementRandomLunchBreakOnDay(
+    /**
+     * How long a day has to be before it earns a lunch break at all, and how
+     * much class has to sit in front of one.
+     */
+    public static final int LUNCH_BREAK_MIN_DAY_HOURS = 6;
+
+    private static final int MIN_HOURS_BEFORE_LUNCH_BREAK = 2;
+
+    /**
+     * The hour a lunch break would ideally sit on for a day of lessonHours
+     * class hours, the break itself counted: it splits the day as evenly as it
+     * can. Placement below aims for this hour and the cost function prices the
+     * distance from it, so a break that has to dodge a double period ends up
+     * near the middle instead of exactly on it.
+     */
+    public static int idealLunchBreakHour(final int lessonHours) {
+        return (lessonHours + 2) / 2;
+    }
+
+    /**
+     * Places the one lunch break of a day as close to the middle as the
+     * lessons allow.
+     *
+     * Expects the day to already be gap free and to start at the first school
+     * hour - repairTimetable closes the gaps before calling this. A break may
+     * only go on a boundary between two lessons, never inside a double or
+     * triple period, so of those boundaries the one closest to
+     * idealLunchBreakHour wins.
+     */
+    public static void implementLunchBreakOnDay(
         final Timetable timetable,
         final SchoolDays schoolday
     ) {
@@ -238,90 +453,112 @@ public class TimetableManager {
             return; // a day gets exactly one lunch break
         }
 
-        final List<ClassSubjectInstance> instancesOnDay = timetable
+        final List<ClassSubjectInstance> lessonsOnDay = timetable
             .getClassSubjectInstances()
             .stream()
             .filter(e -> e.getPeriod().getSchoolDays() == schoolday)
+            .filter(e -> !e.getPeriod().isLunchBreak())
+            .sorted(
+                Comparator.comparingInt(e -> e.getPeriod().getSchoolHour())
+            )
             .toList();
 
-        if (instancesOnDay.isEmpty()) {
-            return; // nothing to break up
+        if (lessonsOnDay.size() < 2) {
+            return; // nothing a break could split
         }
 
-        final int LOWEST_SCHOOLHOUR = instancesOnDay
-            .stream()
-            .mapToInt(e -> e.getPeriod().getSchoolHour())
-            .min()
-            .getAsInt(); // first occupied hour of the day
-        final int HIGHEST_SCHOOLHOUR = instancesOnDay
-            .stream()
-            .mapToInt(e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1)
-            .max()
-            .getAsInt(); // last occupied hour of the day, durations included
+        final ClassSubjectInstance lastLesson = lessonsOnDay.getLast();
+        final int firstHour = lessonsOnDay
+            .getFirst()
+            .getPeriod()
+            .getSchoolHour();
+        final int lastHour =
+            lastLesson.getPeriod().getSchoolHour() +
+            lastLesson.getDuration() -
+            1;
+        final int lessonHours = lastHour - firstHour + 1;
 
-        // the break needs at least two hours of class before it
-        final int earliestBreakHour = LOWEST_SCHOOLHOUR + 2;
-        final int latestBreakHour = HIGHEST_SCHOOLHOUR;
-
-        if (earliestBreakHour > latestBreakHour) {
-            return; // day is too short to place a break in
+        if (lessonHours <= LUNCH_BREAK_MIN_DAY_HOURS) {
+            return; // short enough to get through in one go
         }
 
-        final Random random = new Random();
-        final int breakHour = random.nextInt(
-            earliestBreakHour,
-            latestBreakHour + 1
-        );
+        if (lastHour + 1 > LAST_SCHOOL_HOUR) {
+            return; // the shift below would push the last lesson off the day
+        }
 
-        final boolean LUNCHBREAK = true;
+        final int idealHour = idealLunchBreakHour(lessonHours);
+        int bestHour = -1;
+        boolean bestIsLegal = false;
 
-        // everything that starts at or spans over the break hour moves one hour
-        // later - filtering on the start hour alone would drop the break into
-        // the middle of a double or triple period
-        instancesOnDay
+        for (int i = 0; i < lessonsOnDay.size() - 1; i++) {
+            // the hour right after lesson i, which is where lesson i + 1
+            // starts - the only kind of hour a break can take over without
+            // cutting a multi hour lesson in two
+            final int boundary =
+                lessonsOnDay.get(i).getPeriod().getSchoolHour() +
+                lessonsOnDay.get(i).getDuration();
+
+            if (boundary - firstHour < MIN_HOURS_BEFORE_LUNCH_BREAK) {
+                continue; // too little class before the break
+            }
+
+            // inserting the break pushes the rest of the day an hour later,
+            // which can land a lesson on an hour its teacher does not work.
+            // Nothing else in the run can see that coming, and it costs far
+            // more than an off centre break, so it wins the comparison.
+            final boolean isLegal = !shiftHitsNonWorkingHour(
+                lessonsOnDay,
+                boundary,
+                schoolday
+            );
+
+            if (bestHour < 0) {
+                bestHour = boundary;
+                bestIsLegal = isLegal;
+                continue;
+            }
+
+            if (isLegal != bestIsLegal) {
+                if (isLegal) {
+                    bestHour = boundary;
+                    bestIsLegal = true;
+                }
+                continue;
+            }
+
+            if (
+                Math.abs(boundary - idealHour) <
+                Math.abs(bestHour - idealHour)
+            ) {
+                bestHour = boundary;
+            }
+        }
+
+        if (bestHour < 0) {
+            return; // one long block, nowhere to cut it
+        }
+
+        final int breakHour = bestHour;
+
+        // the break takes over its hour, so everything from there on moves one
+        // hour later
+        lessonsOnDay
             .stream()
-            .filter(
-                e ->
-                    e.getPeriod().getSchoolHour() + e.getDuration() - 1 >=
-                    breakHour
-            )
+            .filter(e -> e.getPeriod().getSchoolHour() >= breakHour)
             .forEach(e ->
                 e.getPeriod().setSchoolHour(e.getPeriod().getSchoolHour() + 1)
             );
 
-        final Period lunchBreakPeriod = new Period(
-            schoolday,
-            breakHour,
-            LUNCHBREAK
-        );
-
-        // the shift above already frees breakHour; this only guards against a
-        // leftover overlap and is bounded so it can never spin forever
-        while (
-            lunchBreakPeriod.getSchoolHour() <= LAST_SCHOOL_HOUR &&
-            !checkIfPeriodIsFreeOnDay(
-                timetable,
-                lunchBreakPeriod.getSchoolHour(),
-                1,
-                schoolday
-            )
-        ) {
-            lunchBreakPeriod.setSchoolHour(
-                lunchBreakPeriod.getSchoolHour() + 1
-            );
-        }
-
-        if (lunchBreakPeriod.getSchoolHour() > LAST_SCHOOL_HOUR) {
-            return; // no room left on this day, leave it without a break
-        }
-
         timetable
             .getClassSubjectInstances()
-            .add(new ClassSubjectInstance(null, lunchBreakPeriod, null, 1)); // place
-        // holder
-        // fake
-        // csi for lunch
-        // break
+            .add(
+                new ClassSubjectInstance(
+                    null,
+                    new Period(schoolday, breakHour, true),
+                    null,
+                    1
+                )
+            ); // placeholder csi, it only marks the break
     }
 
     public static boolean checkIfPeriodIsFreeOnDay(

@@ -25,5 +25,7 @@ public enum CostCategory {
     /** class day that is too short or too long */
     DAY_LENGTH,
     /** class days of very uneven length */
-    DAY_BALANCE;
+    DAY_BALANCE,
+    /** lunch break sitting away from the middle of its day */
+    LUNCH_BREAK_POSITION;
 }

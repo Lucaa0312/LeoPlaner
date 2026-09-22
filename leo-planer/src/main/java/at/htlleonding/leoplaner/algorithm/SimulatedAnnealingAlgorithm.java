@@ -419,17 +419,26 @@ public class SimulatedAnnealingAlgorithm {
             // hours, not lessons: a double period fills two hours of the day,
             // and the day length rules below are only meaningful in hours
             final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
+            final Map<SchoolDays, Integer> lunchBreakHourPerDay =
+                new HashMap<>();
 
             for (final ClassSubjectInstance classSubjectInstance : new ArrayList<>(
                 timetable.getClassSubjectInstances()
             )) {
                 final Period period = classSubjectInstance.getPeriod();
 
-                if (
-                    period.isLunchBreak() ||
-                    classSubjectInstance.getClassSubject() == null
-                ) {
-                    continue; // lunch break will cause breaks
+                if (period.isLunchBreak()) {
+                    // noted, not costed here: the break carries no lesson, its
+                    // position is priced once per day below
+                    lunchBreakHourPerDay.put(
+                        period.getSchoolDays(),
+                        period.getSchoolHour()
+                    );
+                    continue;
+                }
+
+                if (classSubjectInstance.getClassSubject() == null) {
+                    continue;
                 }
 
                 cost += charge(
@@ -472,6 +481,15 @@ public class SimulatedAnnealingAlgorithm {
                         hoursPerDay.getOrDefault(day, 0)
                     )
                 );
+
+                cost += charge(
+                    breakdown,
+                    CostCategory.LUNCH_BREAK_POSITION,
+                    determineCostForLunchBreakPosition(
+                        lunchBreakHourPerDay.get(day),
+                        hoursPerDay.getOrDefault(day, 0)
+                    )
+                );
             }
 
             cost += charge(
@@ -509,6 +527,86 @@ public class SimulatedAnnealingAlgorithm {
         System.out.println(
             "iteration " + iteration + " cost " + breakdown.format()
         );
+
+        if (breakdown.get(CostCategory.TEACHER_NON_WORKING) > 0) {
+            // the one cost that can survive a whole run without ever moving -
+            // naming the hours says straight away whether what is left is a
+            // schedule the algorithm cannot reach or input it cannot satisfy
+            System.out.println(
+                "  on non working hours: " +
+                String.join(", ", describeNonWorkingViolations(schoolSchedule))
+            );
+        }
+    }
+
+    /**
+     * The lessons sitting on an hour one of their teachers does not work, as
+     * "teacher / class / DAY-hour". Built only when the log above is about to
+     * report some, so it never runs in the annealing loop.
+     */
+    public List<String> describeNonWorkingViolations(
+        final List<Timetable> schoolSchedule
+    ) {
+        final List<String> violations = new ArrayList<>();
+
+        for (final Timetable timetable : schoolSchedule) {
+            for (final ClassSubjectInstance csi : new ArrayList<>(
+                timetable.getClassSubjectInstances()
+            )) {
+                final Period period = csi.getPeriod();
+
+                if (period.isLunchBreak() || csi.getClassSubject() == null) {
+                    continue;
+                }
+
+                final List<Teacher> teachers = csi
+                    .getClassSubject()
+                    .getTeachers();
+
+                if (teachers == null) {
+                    continue;
+                }
+
+                for (final Teacher teacher : teachers) {
+                    if (teacher == null) {
+                        continue;
+                    }
+
+                    for (int i = 0; i < csi.getDuration(); i++) {
+                        final TeacherNonWorkingHours hour =
+                            new TeacherNonWorkingHours();
+                        hour.setDay(period.getSchoolDays());
+                        hour.setSchoolHour(period.getSchoolHour() + i);
+
+                        if (!teacher.checkIfHourExistsInNonWorkingList(hour)) {
+                            continue;
+                        }
+
+                        violations.add(
+                            teacher.getTeacherName() +
+                            " / " +
+                            classNameOf(csi) +
+                            " / " +
+                            period.getSchoolDays() +
+                            "-" +
+                            (period.getSchoolHour() + i)
+                        );
+                    }
+                }
+            }
+        }
+
+        return violations;
+    }
+
+    private static String classNameOf(final ClassSubjectInstance csi) {
+        if (
+            csi.getClassSubject() == null ||
+            csi.getClassSubject().getSchoolClass() == null
+        ) {
+            return "?";
+        }
+        return csi.getClassSubject().getSchoolClass().getClassName();
     }
 
     /** Where the cost stood at the last logged iteration, split by category. */
@@ -517,13 +615,15 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public void repairTimetable(final Timetable timetable) {
+        // lunch breaks are derived state, not placed state: they are dropped
+        // here and recomputed at the end of every repair. Carrying them over
+        // let them ratchet - closing gaps only ever pulls a break earlier,
+        // nothing could push it back, and the annealer never moves one, so
+        // every day ended up with its break in the first hour.
         timetable
             .getClassSubjectInstances()
-            .removeIf(
-                csi ->
-                    csi.getClassSubject() == null &&
-                    !csi.getPeriod().isLunchBreak()
-            );
+            .removeIf(csi -> csi.getClassSubject() == null);
+
         for (final SchoolDays day : SchoolDays.values()) {
             final List<ClassSubjectInstance> classesOnDay = timetable
                 .getClassSubjectInstances()
@@ -536,7 +636,7 @@ public class SimulatedAnnealingAlgorithm {
 
             moveDayToStartAtFirstHour(timetable, classesOnDay);
             closeAllGapsBetweenInstances(timetable, classesOnDay);
-            searchAndImplementLunchBreaks(timetable, classesOnDay, day);
+            TimetableManager.implementLunchBreakOnDay(timetable, day);
         }
     }
 
@@ -571,26 +671,6 @@ public class SimulatedAnnealingAlgorithm {
                 // resulting in a gap
                 nextPeriod.setSchoolHour(currentEndOfClass);
             }
-        }
-    }
-
-    public void searchAndImplementLunchBreaks(
-        final Timetable timetable,
-        final List<ClassSubjectInstance> classesOnDay,
-        final SchoolDays day
-    ) {
-        if (TimetableManager.hasLunchBreakOnDay(timetable, day)) {
-            return; // the day already has its one break
-        }
-
-        if (
-            classesOnDay
-                .stream()
-                .anyMatch(
-                    e -> e.getPeriod().getSchoolHour() + e.getDuration() - 1 > 6
-                )
-        ) {
-            TimetableManager.implementRandomLunchBreakOnDay(timetable, day);
         }
     }
 
@@ -892,6 +972,33 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     /**
+     * Cost of a day's lunch break sitting away from the middle of that day.
+     *
+     * Deliberately soft and deliberately small: a break may only go between two
+     * lessons, so a double period lying across the middle pushes it off centre
+     * and that has to stay allowed. This only makes the more centred placement
+     * the cheaper one, so of two otherwise equal schedules the annealer keeps
+     * the one that leaves room for a break near the middle.
+     *
+     * A day without a break costs nothing here - whether it should have one is
+     * decided by its length in TimetableManager, not priced.
+     */
+    public long determineCostForLunchBreakPosition(
+        final Integer breakHour,
+        final int lessonHours
+    ) {
+        if (breakHour == null || lessonHours <= 0) {
+            return 0;
+        }
+
+        final int deviation = Math.abs(
+            breakHour - TimetableManager.idealLunchBreakHour(lessonHours)
+        );
+
+        return (long) deviation * deviation * LOW_COST;
+    }
+
+    /**
      * Cost of a class's days being of very uneven length, measured across
      * Monday to Thursday only.
      *
@@ -942,14 +1049,18 @@ public class SimulatedAnnealingAlgorithm {
         final List<Timetable> schoolSchedule
     ) {
         final Random random = new Random();
-        final int ranNumber = random.nextInt(1, 2);
+        // nextInt(1, 2) can only ever return 1, so both the swap and the
+        // insertion below were dead and the search was left with a single kind
+        // of move
+        final int ranNumber = random.nextInt(1, 4);
 
         switch (ranNumber) {
             case 1:
                 return changePeriod(currTimetable, index1, schoolSchedule);
-            // return swapPeriods(currTimetable, index1, index2);
             case 2:
-                return changePeriod(currTimetable, index1, schoolSchedule);
+                return insertPeriod(currTimetable, index1, schoolSchedule);
+            case 3:
+                return swapPeriods(currTimetable, index1, index2);
         }
         return null;
     }
@@ -971,26 +1082,180 @@ public class SimulatedAnnealingAlgorithm {
         );
     }
 
+    /**
+     * Hours a move of this lesson has to stay away from: the hours its teachers
+     * already teach in other classes, and - unless they are deliberately left
+     * out - the hours those teachers do not work at all.
+     *
+     * Both cost IMPOSSIBLE. Blocking only the clashes meant the generator kept
+     * offering destinations that were exactly as illegal as where the lesson
+     * already sat, which is how a non working hour could survive a whole run.
+     */
+    private Map<SchoolDays, Set<Integer>> blockedHoursFor(
+        final Timetable timetable,
+        final int index,
+        final List<Timetable> schoolSchedule,
+        final boolean includeNonWorkingHours
+    ) {
+        final ClassSubjectInstance instance = timetable
+            .getClassSubjectInstances()
+            .get(index);
+        final Map<SchoolDays, Set<Integer>> clashes =
+            TimetableManager.collectTeacherOccupiedHours(
+                schoolSchedule,
+                timetable,
+                TimetableManager.teacherIdsOf(instance)
+            );
+
+        if (!includeNonWorkingHours) {
+            return clashes;
+        }
+
+        return TimetableManager.mergeBlockedHours(
+            clashes,
+            TimetableManager.collectNonWorkingHours(instance)
+        );
+    }
+
+    private List<Period> freePeriodsFor(
+        final Timetable timetable,
+        final int index,
+        final Map<SchoolDays, Set<Integer>> blockedHours
+    ) {
+        final int duration = timetable
+            .getClassSubjectInstances()
+            .get(index)
+            .getDuration();
+        final List<Period> periods = new ArrayList<>();
+
+        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+            periods.addAll(
+                TimetableManager.returnAllFreePeriodsOnCertainDay(
+                    timetable,
+                    day,
+                    duration,
+                    blockedHours
+                )
+            );
+        }
+
+        return periods;
+    }
+
+    private List<Period> insertionPeriodsFor(
+        final Timetable timetable,
+        final int index,
+        final Map<SchoolDays, Set<Integer>> blockedHours
+    ) {
+        final List<Period> periods = new ArrayList<>();
+
+        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+            periods.addAll(
+                TimetableManager.returnAllInsertionPeriodsOnCertainDay(
+                    timetable,
+                    day,
+                    index,
+                    blockedHours
+                )
+            );
+        }
+
+        return periods;
+    }
+
+    /**
+     * Candidates with the non working hours blocked, falling back to clashes
+     * only when that leaves nothing at all - a lesson that can go nowhere legal
+     * must still be able to move, otherwise it is frozen for the rest of the
+     * run and the cost function never gets a chance to weigh it.
+     */
+    private List<Period> candidatesWithFallback(
+        final Timetable timetable,
+        final int index,
+        final List<Timetable> schoolSchedule,
+        final boolean insertion
+    ) {
+        final List<Period> strict = insertion
+            ? insertionPeriodsFor(
+                timetable,
+                index,
+                blockedHoursFor(timetable, index, schoolSchedule, true)
+            )
+            : freePeriodsFor(
+                timetable,
+                index,
+                blockedHoursFor(timetable, index, schoolSchedule, true)
+            );
+
+        if (!strict.isEmpty()) {
+            return strict;
+        }
+
+        return insertion
+            ? insertionPeriodsFor(
+                timetable,
+                index,
+                blockedHoursFor(timetable, index, schoolSchedule, false)
+            )
+            : freePeriodsFor(
+                timetable,
+                index,
+                blockedHoursFor(timetable, index, schoolSchedule, false)
+            );
+    }
+
+    /** Moves a lesson to an hour that is free in this class as it stands. */
     public Timetable changePeriod(
         final Timetable timetable,
         final int index,
         final List<Timetable> schoolSchedule
     ) {
-        // hours the teachers of this lesson already teach in other classes are
-        // off limits, so a move can never double-book a teacher
-        final Map<SchoolDays, Set<Integer>> blockedHours =
-            TimetableManager.collectTeacherOccupiedHours(
-                schoolSchedule,
-                timetable,
-                TimetableManager.teacherIdsOf(
-                    timetable.getClassSubjectInstances().get(index)
-                )
-            );
-
-        return TimetableManager.giveClassSubjectRandomPeriodAndReturn(
+        final List<Period> candidates = candidatesWithFallback(
             timetable,
             index,
-            blockedHours
+            schoolSchedule,
+            false
+        );
+
+        if (candidates.isEmpty()) {
+            // no legal move at all - hand back an unchanged copy rather than
+            // forcing an illegal one
+            return TimetableManager.cloneCurrentTimeTable(timetable);
+        }
+
+        return TimetableManager.switchClassSubjectInstancePeriodAndReturn(
+            timetable,
+            index,
+            candidates.get(new Random().nextInt(candidates.size()))
+        );
+    }
+
+    /**
+     * Pushes a lesson in between two others and slides the rest of that day
+     * right. changePeriod alone can only ever append to the end of a day, since
+     * repair leaves no free hour anywhere else, so without this the order
+     * inside a day can never change.
+     */
+    public Timetable insertPeriod(
+        final Timetable timetable,
+        final int index,
+        final List<Timetable> schoolSchedule
+    ) {
+        final List<Period> candidates = candidatesWithFallback(
+            timetable,
+            index,
+            schoolSchedule,
+            true
+        );
+
+        if (candidates.isEmpty()) {
+            return TimetableManager.cloneCurrentTimeTable(timetable);
+        }
+
+        return TimetableManager.insertClassSubjectInstanceAndReturn(
+            timetable,
+            index,
+            candidates.get(new Random().nextInt(candidates.size()))
         );
     }
 
