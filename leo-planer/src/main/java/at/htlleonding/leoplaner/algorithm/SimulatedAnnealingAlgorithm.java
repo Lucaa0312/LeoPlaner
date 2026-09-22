@@ -93,6 +93,23 @@ public class SimulatedAnnealingAlgorithm {
         ); // is to never be accepted
     }
 
+    /**
+     * How a class's week should be shaped, all in school hours. These are the
+     * knobs to turn when the plans come out too long, too lopsided or with
+     * Friday still running to the ninth hour.
+     */
+    private static final int MIN_HOURS_PER_DAY = 4;
+    private static final int MAX_HOURS_PER_DAY = 8;
+    private static final int MAX_HOURS_ON_FRIDAY = 5;
+    private static final int MIN_TEACHER_HOURS_PER_DAY = 4;
+    private static final int LAST_COMFORTABLE_HOUR = 6;
+
+    /** how often the cost is re-evaluated just to log where it comes from */
+    private static final long COST_LOG_INTERVAL = 1000;
+
+    private final AtomicReference<CostBreakdown> lastCostBreakdown =
+        new AtomicReference<>();
+
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private final AtomicBoolean automaticMode = new AtomicBoolean(false);
 
@@ -231,6 +248,10 @@ public class SimulatedAnnealingAlgorithm {
                 )
             );
 
+            if (iterationCounter % COST_LOG_INTERVAL == 0) {
+                logCostBreakdown(schoolSchedule, iterationCounter);
+            }
+
             progressEvent.fire(
                 new AlgorithmProgressDTO(
                     iterationCounter,
@@ -340,16 +361,9 @@ public class SimulatedAnnealingAlgorithm {
             -deltaCost / (BOLTZMANN_CONSTANT * getTemperature())
         );
 
-        System.out.println(
-            costCurrTimeTable +
-                " " +
-                costNextTimeTable +
-                " " +
-                getTemperature() +
-                " " +
-                probability
-        );
-
+        // no logging here: this runs twice per iteration and printing from it
+        // was costing more time than evaluating the schedule. See
+        // logCostBreakdown for where the cost actually comes from.
         return Math.random() < probability;
     }
 
@@ -363,9 +377,20 @@ public class SimulatedAnnealingAlgorithm {
     }
 
     public long determineCost(final List<Timetable> schoolSchedule) {
-        // the later the period the more cost
-        // if against classSubject.isBetterDoublePeriod higher cost
-        // maybe different rooms
+        return determineCost(schoolSchedule, null);
+    }
+
+    /**
+     * Cost of a whole school schedule.
+     *
+     * breakdown may be null: the annealing loop evaluates a schedule twice per
+     * iteration and has no use for the split, so it skips building the map and
+     * only asks for one when the breakdown is about to be logged.
+     */
+    public long determineCost(
+        final List<Timetable> schoolSchedule,
+        final CostBreakdown breakdown
+    ) {
         // accumulated as a long: a handful of IMPOSSIBLE_COST violations
         // overflows an int and would turn an illegal schedule into a cheap one
         long cost = 0;
@@ -375,16 +400,25 @@ public class SimulatedAnnealingAlgorithm {
         final List<Room> allRooms = getAllRoomsInSchoolSchedule(schoolSchedule);
 
         for (final Room room : allRooms) {
-            cost += determineCostOfRoomAttribute(room, schoolSchedule);
+            cost += determineCostOfRoomAttribute(
+                room,
+                schoolSchedule,
+                breakdown
+            );
         }
 
         for (final Teacher teacher : allTeachers) {
-            cost += determineTeacherWorkloadCost(teacher, schoolSchedule);
+            cost += determineTeacherWorkloadCost(
+                teacher,
+                schoolSchedule,
+                breakdown
+            );
         }
 
         for (final Timetable timetable : schoolSchedule) {
-            final Map<SchoolDays, Integer> countOfClassesPerDay =
-                new HashMap<>();
+            // hours, not lessons: a double period fills two hours of the day,
+            // and the day length rules below are only meaningful in hours
+            final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
 
             for (final ClassSubjectInstance classSubjectInstance : new ArrayList<>(
                 timetable.getClassSubjectInstances()
@@ -398,34 +432,88 @@ public class SimulatedAnnealingAlgorithm {
                     continue; // lunch break will cause breaks
                 }
 
-                cost += determineCostOfCertainDay(period.getSchoolDays());
-
-                cost += determineCostForClassPosition(
-                    period.getSchoolHour(),
-                    classSubjectInstance.getDuration()
+                cost += charge(
+                    breakdown,
+                    CostCategory.DAY_OF_WEEK,
+                    determineCostOfCertainDay(period.getSchoolDays())
                 );
 
-                cost += determineCostForDoublePeriodAttributes(
-                    classSubjectInstance
-                );
-
-                if (countOfClassesPerDay.containsKey(period.getSchoolDays())) {
-                    Integer currCount = countOfClassesPerDay.get(
+                cost += charge(
+                    breakdown,
+                    CostCategory.LATE_HOURS,
+                    determineCostForClassPosition(
+                        period.getSchoolHour(),
+                        classSubjectInstance.getDuration(),
                         period.getSchoolDays()
-                    );
-                    countOfClassesPerDay.put(
-                        period.getSchoolDays(),
-                        currCount + 1
-                    );
-                } else {
-                    countOfClassesPerDay.put(period.getSchoolDays(), 1);
-                }
+                    )
+                );
+
+                cost += charge(
+                    breakdown,
+                    CostCategory.DOUBLE_PERIOD,
+                    determineCostForDoublePeriodAttributes(
+                        classSubjectInstance
+                    )
+                );
+
+                hoursPerDay.merge(
+                    period.getSchoolDays(),
+                    classSubjectInstance.getDuration(),
+                    Integer::sum
+                );
             }
 
-            cost += determineCostForSpreadOutClasses(countOfClassesPerDay);
+            for (final SchoolDays day : SchoolDays.schedulableDays()) {
+                cost += charge(
+                    breakdown,
+                    CostCategory.DAY_LENGTH,
+                    determineCostForDayLength(
+                        day,
+                        hoursPerDay.getOrDefault(day, 0)
+                    )
+                );
+            }
+
+            cost += charge(
+                breakdown,
+                CostCategory.DAY_BALANCE,
+                determineCostForDayBalance(hoursPerDay)
+            );
         }
 
         return cost;
+    }
+
+    /**
+     * Records amount under category when a breakdown is being collected, and
+     * hands it back either way so call sites stay a plain "cost += ...".
+     */
+    private static long charge(
+        final CostBreakdown breakdown,
+        final CostCategory category,
+        final long amount
+    ) {
+        if (breakdown != null) {
+            breakdown.add(category, amount);
+        }
+        return amount;
+    }
+
+    private void logCostBreakdown(
+        final List<Timetable> schoolSchedule,
+        final long iteration
+    ) {
+        final CostBreakdown breakdown = new CostBreakdown();
+        determineCost(schoolSchedule, breakdown);
+        lastCostBreakdown.set(breakdown);
+        System.out.println(
+            "iteration " + iteration + " cost " + breakdown.format()
+        );
+    }
+
+    /** Where the cost stood at the last logged iteration, split by category. */
+    public CostBreakdown getLastCostBreakdown() {
+        return lastCostBreakdown.get();
     }
 
     public void repairTimetable(final Timetable timetable) {
@@ -546,7 +634,8 @@ public class SimulatedAnnealingAlgorithm {
 
     private long determineCostOfRoomAttribute(
         Room room,
-        List<Timetable> schoolSchedule
+        List<Timetable> schoolSchedule,
+        CostBreakdown breakdown
     ) {
         List<ClassSubjectInstance> timetablOfRoom = schoolSchedule
             .stream()
@@ -557,7 +646,11 @@ public class SimulatedAnnealingAlgorithm {
 
         // same reasoning as for teachers: count the clashes, do not just flag
         // that there is at least one
-        return (long) countTeacherOverlaps(timetablOfRoom) * IMPOSSIBLE_COST;
+        return charge(
+            breakdown,
+            CostCategory.ROOM_CLASH,
+            (long) countTeacherOverlaps(timetablOfRoom) * IMPOSSIBLE_COST
+        );
     }
 
     private int countTeacherOverlaps(
@@ -571,6 +664,14 @@ public class SimulatedAnnealingAlgorithm {
     public long determineTeacherWorkloadCost(
         final Teacher teacher,
         List<Timetable> schoolSchedule
+    ) {
+        return determineTeacherWorkloadCost(teacher, schoolSchedule, null);
+    }
+
+    public long determineTeacherWorkloadCost(
+        final Teacher teacher,
+        List<Timetable> schoolSchedule,
+        final CostBreakdown breakdown
     ) {
         long cost = 0;
 
@@ -589,8 +690,11 @@ public class SimulatedAnnealingAlgorithm {
 
         // scaled by the number of clashing hours so that resolving one of
         // several clashes is already an improvement the algorithm can follow
-        cost +=
-            (long) countTeacherOverlaps(csiList) * IMPOSSIBLE_COST;
+        cost += charge(
+            breakdown,
+            CostCategory.TEACHER_CLASH,
+            (long) countTeacherOverlaps(csiList) * IMPOSSIBLE_COST
+        );
 
         final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
 
@@ -610,7 +714,8 @@ public class SimulatedAnnealingAlgorithm {
                     new Period(
                         period.getSchoolDays(),
                         period.getSchoolHour() + i
-                    )
+                    ),
+                    breakdown
                 );
             }
 
@@ -619,26 +724,65 @@ public class SimulatedAnnealingAlgorithm {
             // both once per lesson. Charging them again here multiplied them
             // by the number of teachers and distorted the whole landscape.
 
-            hoursPerDay.merge(period.getSchoolDays(), 1, Integer::sum);
+            // durations, not lesson count: a double period is two hours of
+            // the teacher's day and the rule below is about hours worked
+            hoursPerDay.merge(
+                period.getSchoolDays(),
+                csi.getDuration(),
+                Integer::sum
+            );
         }
 
         for (final int hours : hoursPerDay.values()) {
-            if (hours > 0 && hours < 2) {
-                cost += SEVERE_COST;
-            } else if (hours > 0 && hours < 3) {
-                cost += HIGH_COST;
-            } else if (hours > 0 && hours < 4) {
-                cost += MID_COST;
-            }
+            cost += charge(
+                breakdown,
+                CostCategory.TEACHER_SHORT_DAY,
+                determineCostForTeacherDayLength(hours)
+            );
         }
         return cost;
     }
 
-    private int determineCostForClassPosition(int schoolHour, int duration) {
-        if (schoolHour + duration > 6) {
-            return (schoolHour + duration - 5) * LOW_COST;
+    /**
+     * Cost of a teacher coming in for only a couple of hours on a day.
+     *
+     * Days the teacher does not work at all are free, so this must stay a soft,
+     * smoothly growing penalty: the stepped version it replaces jumped from 0
+     * to SEVERE the moment a day got its first lesson, which made emptying a
+     * day the cheapest fix and pushed every teacher's hours into a few long
+     * days - the same mistake the class day rule used to make.
+     */
+    public long determineCostForTeacherDayLength(final int hours) {
+        if (hours <= 0 || hours >= MIN_TEACHER_HOURS_PER_DAY) {
+            return 0;
         }
-        return 0;
+
+        final int missing = MIN_TEACHER_HOURS_PER_DAY - hours;
+        return (long) missing * missing * MID_COST;
+    }
+
+    private int determineCostForClassPosition(
+        final int schoolHour,
+        final int duration,
+        final SchoolDays day
+    ) {
+        // the end hour, not start + duration: the old form charged a lesson
+        // that ends exactly on the last comfortable hour as if it ran past it
+        final int endHour = schoolHour + duration - 1;
+
+        if (endHour <= LAST_COMFORTABLE_HOUR) {
+            return 0;
+        }
+
+        final int hoursOver = endHour - LAST_COMFORTABLE_HOUR;
+        // quadratic, so the ninth hour hurts far more than the seventh. The old
+        // linear form priced a late hour at barely more than an early one, and
+        // the day length rules could always outbid it.
+        // Friday is weighted harder so late Friday hours are the first thing
+        // the algorithm gives up.
+        final int weight = day == SchoolDays.FRIDAY ? MID_COST : LOW_COST;
+
+        return hoursOver * hoursOver * weight;
     }
 
     private int determineCostForDoublePeriodAttributes(
@@ -658,12 +802,25 @@ public class SimulatedAnnealingAlgorithm {
         final Teacher teacher,
         final Period period
     ) {
+        return determineCostForTeacherHours(teacher, period, null);
+    }
+
+    public int determineCostForTeacherHours(
+        final Teacher teacher,
+        final Period period,
+        final CostBreakdown breakdown
+    ) {
         final TeacherNonWorkingHours teacherNonWorkingHour =
             new TeacherNonWorkingHours();
         teacherNonWorkingHour.setDay(period.getSchoolDays());
         teacherNonWorkingHour.setSchoolHour(period.getSchoolHour());
         if (teacher.checkIfHourExistsInNonWorkingList(teacherNonWorkingHour)) {
-            return IMPOSSIBLE_COST; // is to be never be accepted
+            // is to be never be accepted
+            return (int) charge(
+                breakdown,
+                CostCategory.TEACHER_NON_WORKING,
+                IMPOSSIBLE_COST
+            );
         }
 
         final TeacherNonPreferredHours teacherNonPreferredHours =
@@ -675,24 +832,94 @@ public class SimulatedAnnealingAlgorithm {
                 teacherNonPreferredHours
             )
         ) {
-            return SEVERE_COST;
+            return (int) charge(
+                breakdown,
+                CostCategory.TEACHER_NON_PREFERRED,
+                SEVERE_COST
+            );
         }
 
         return 0;
     }
 
-    public int determineCostForSpreadOutClasses(
-        final Map<SchoolDays, Integer> countOfClassesPerDay
+    /**
+     * Cost of a class day being too short or too long.
+     *
+     * Replaces a rule that charged a flat SEVERE for any day with fewer than
+     * three lessons and nothing at all for an empty day - so the cheapest way
+     * to satisfy it was to drain the short days and pile their hours onto the
+     * rest. That is what produced nine hour Fridays next to two hour Mondays.
+     *
+     * Both ends are priced here, and the penalty grows quadratically so the
+     * annealer gets a gradient it can walk down an hour at a time instead of a
+     * cliff it can only jump off.
+     */
+    public long determineCostForDayLength(
+        final SchoolDays day,
+        final int hours
     ) {
-        int determinedCost = 0;
-
-        for (final int countOfClasses : countOfClassesPerDay.values()) {
-            if (countOfClasses < 3) {
-                determinedCost += SEVERE_COST;
-            }
+        if (hours <= 0) {
+            return 0; // a genuinely free day is allowed; DAY_BALANCE prices it
         }
 
-        return determinedCost;
+        long cost = 0;
+
+        if (hours < MIN_HOURS_PER_DAY) {
+            final int missing = MIN_HOURS_PER_DAY - hours;
+            cost += (long) missing * missing * MID_COST;
+        }
+
+        final int maxHours = maxHoursOnDay(day);
+
+        if (hours > maxHours) {
+            final int excess = hours - maxHours;
+            cost += (long) excess * excess * HIGH_COST;
+        }
+
+        return cost;
+    }
+
+    /**
+     * Friday is capped shorter than the rest of the week. This cap, not the
+     * flat per lesson surcharge in costOfEachDay, is what actually keeps Friday
+     * short: that surcharge is the same for every lesson and the number of
+     * lessons is fixed, so on its own it hardly moves the total at all.
+     */
+    public int maxHoursOnDay(final SchoolDays day) {
+        return day == SchoolDays.FRIDAY
+            ? MAX_HOURS_ON_FRIDAY
+            : MAX_HOURS_PER_DAY;
+    }
+
+    /**
+     * Cost of a class's days being of very uneven length, measured across
+     * Monday to Thursday only.
+     *
+     * Friday is deliberately left out: it is meant to be the short day, and
+     * counting it here would make this rule pull against maxHoursOnDay.
+     */
+    public long determineCostForDayBalance(
+        final Map<SchoolDays, Integer> hoursPerDay
+    ) {
+        int max = Integer.MIN_VALUE;
+        int min = Integer.MAX_VALUE;
+
+        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+            if (day == SchoolDays.FRIDAY) {
+                continue;
+            }
+
+            final int hours = hoursPerDay.getOrDefault(day, 0);
+            max = Math.max(max, hours);
+            min = Math.min(min, hours);
+        }
+
+        if (max <= min) {
+            return 0;
+        }
+
+        final int spread = max - min;
+        return (long) spread * spread * LOW_COST;
     }
 
     public boolean checkIfValueInArray(final int[] array, final int value) {
