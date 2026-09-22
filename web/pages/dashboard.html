@@ -59,36 +59,56 @@
                             Dashboard
                         </h1>
                         <p class="page-header__subtitle" id="dashboard-subtitle">
-                            Willkommen bei LeoPlaner. Verwalten Sie Ihre
-                            Schuldaten und erstellen Sie optimierte Stundenpläne.
+                            Der aktuelle Stand Ihrer Schuldaten – und was der
+                            Stundenplanung noch fehlt.
                         </p>
                     </div>
+                    <div
+                        class="page-header__actions"
+                        id="dashboard-actions"
+                    ></div>
                 </header>
+
+                <!-- Shown when the backend is unreachable or has no data yet. -->
+                <div id="dashboard-notice" hidden></div>
 
                 <section
                     id="stats-grid"
-                    class="dashboard-grid stats-grid"
-                    aria-label="Statistiken"
-                >
-                    <!-- Stat cards generated in JavaScript -->
-                </section>
+                    class="stats-grid"
+                    aria-label="Kennzahlen"
+                ></section>
 
-                <section class="section dashboard-section">
-                    <h2 class="section-heading">Schnellaktionen</h2>
-                    <div id="quick-actions" class="dashboard-grid quick-actions">
-                        <!-- Quick action cards generated in JavaScript -->
-                    </div>
-                </section>
+                <div class="dashboard-columns">
+                    <section
+                        id="readiness-panel"
+                        class="panel card"
+                        aria-label="Planungsbereitschaft"
+                    ></section>
+                    <section
+                        id="planning-panel"
+                        class="panel card"
+                        aria-label="Stundenplanung"
+                    ></section>
+                </div>
 
-                <section class="section dashboard-section">
-                    <h2 class="section-heading">Datenverwaltung</h2>
-                    <div
-                        id="data-management"
-                        class="dashboard-grid data-management"
-                    >
-                        <!-- Data management links generated in JavaScript -->
-                    </div>
-                </section>
+                <div class="dashboard-columns">
+                    <section
+                        id="class-hours-panel"
+                        class="panel card"
+                        aria-label="Wochenstunden je Klasse"
+                    ></section>
+                    <section
+                        id="teacher-load-panel"
+                        class="panel card"
+                        aria-label="Lehrerauslastung"
+                    ></section>
+                </div>
+
+                <section
+                    id="room-demand-panel"
+                    class="panel card"
+                    aria-label="Räume und Raumbedarf"
+                ></section>
             </div>
         </main>
     </body>
