@@ -42,7 +42,8 @@ public class UtilBuildFunctions {
                 teacher.getTeacher_non_working_hours().stream()
                         .map(nw -> createTeacherNonWorkingHourDTO(nw)).toList(),
                 teacher.getTeacher_non_preferred_hours().stream()
-                        .map(np -> createTeacherNonPreferredHourDTO(np)).toList());
+                        .map(np -> createTeacherNonPreferredHourDTO(np)).toList(),
+                teacher.getWishText());
     }
 
     public static TeacherNonWorkingHourDTO createTeacherNonWorkingHourDTO(

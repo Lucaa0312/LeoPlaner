@@ -8,6 +8,8 @@ import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Timetable;
+import at.htlleonding.leoplaner.data.TimetableExportImporter;
+import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
@@ -25,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +49,9 @@ public class Resource {
 
     @Inject
     ExcelManager excelManager;
+
+    @Inject
+    TimetableExportImporter timetableExportImporter;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -223,6 +230,42 @@ public class Resource {
         }
 
         return Response.ok(outFileName).build();
+    }
+
+    /**
+     * Imports teachers, their blocked hours and their mapped wishes from the
+     * SQL Server script export (TimetableExportScriptFinal.sql).
+     */
+    @POST
+    @Path("/uploadTimetableExport")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadTimetableExport(InputStream is) {
+        String outFileName =
+            archivePath + "upload_" + System.currentTimeMillis() + ".sql";
+        byte[] sqlBytes;
+        try {
+            sqlBytes = is.readAllBytes();
+            Files.write(Paths.get(outFileName), sqlBytes);
+        } catch (IOException e) {
+            return Response.status(500)
+                .entity("Failed to save file: " + outFileName)
+                .build();
+        }
+
+        try {
+            TimetableExportImportResultDTO result =
+                timetableExportImporter.importExport(sqlBytes);
+            return Response.ok(result).build();
+        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Timetable export could not be parsed: " + e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(500)
+                .entity("Timetable export import failed: " + e.getMessage())
+                .build();
+        }
     }
 
     @Path("setLogCooling")

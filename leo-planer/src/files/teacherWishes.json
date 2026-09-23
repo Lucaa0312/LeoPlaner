@@ -1,0 +1,2116 @@
+{
+  "conventions": [
+    "Generated once from the TeacherPreferences free texts; edit by hand, the importer never interprets text itself.",
+    "textHash = sha256 of the text with CRLF→LF, '' unescaped and trimmed; a changed text is reported as unmapped.",
+    "Hours are LeoPlaner school hours 1–10 (1 = 08:00–08:50, 4 ends 11:45, 8 ends 15:25, 10 ends 17:15).",
+    "Nachmittag = hours 7–10; 'freier Tag X oder Y' = first option, whole day; 'nur an Tag X' = all other days non-preferred.",
+    "Wishes that cannot be expressed as hours keep an empty nonPreferred list and explain why in note."
+  ],
+  "wishes": [
+    {
+      "teacherId": "TR_ABER",
+      "textHash": "0b419f28d8782eb1d455949e876745a7216fd47d98489fb4591b7de1a706500e",
+      "note": "Freitag frei; Montag spät anfangen; Donnerstag ab ca. 15:30 weg",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Schön wäre wenn ich ein möglichst langes Wochenende mit Emmanuelle haben könnte. Ich hätte es gerne wieder ähnlich wie voriges Jahr. Wenn geht Freitag möglichst bald aus und Montag möglichst spät anfangen. Montag gibt es einen Morgen-Flug Paris-Wien um 07:10, Noch superer wäre Freitag ganz frei, dann könnte ich Donnerstag schon zu meiner Emmanuelle nach Paris fliegen, vorausgesetzt ich erwische das Flugzeug Donnerstag Abend noch, da müsste ich aber Donnerstag ca. 15:30 weg."
+    },
+    {
+      "teacherId": "TR_ADLU",
+      "textHash": "eef0895c3e99e6e3c07cd6f6d7e9f30daf75345c2c25da0c9d7b056c149ad1df",
+      "note": "möglichst früh → Nachmittage non-preferred",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte möglichst frühe Stunden, da ich am Nachmittag meine Kurse für das Masterstudium haben werde."
+    },
+    {
+      "teacherId": "TR_AIST",
+      "textHash": "39b248898e6f82e534b037ef435f2fcc82004e864691da8b927e7cc6362a2421",
+      "note": "freier Tag Mo oder Fr → erste Option Montag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Freier Tag gern auch Montag oder Freitag..."
+    },
+    {
+      "teacherId": "TR_AITEN",
+      "textHash": "a686d0330e424d5eae5756d0fca4792774959984c2bf27c393059c7920352a96",
+      "note": "freier Tag Mo, Fr, egal → erste Option Montag; Abendschul-Wünsche außerhalb des Stundenrasters",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Freier Tag, wenn möglich in dieser Reihenfolge: Mo, Fr, egal\n\nAbendschule: Keine Abendschule am Donnerstag – ich gehe schon jahrelang am Do in ein Taekwondo Training um 19:30 in der Auhofschule. Dort würde ich gerne wieder hin gehen können (Geht, wenn ich um 19:00 Schulende habe).\nAbendschule: Ich habe mich (wegen der Schule) für einen Schwimmer – Helfer - Schein angemeldet. Dieser findet an 6 Montagen ab September/Oktober am Abend statt.  Daher ist Mo auch schlecht! (angeblich ab ca. 19:00)"
+    },
+    {
+      "teacherId": "TR_ANDR",
+      "textHash": "dbb6e59c3ea80f01e69397058fe5a00e1915162f0fd9801dd23509708575073a",
+      "note": "nicht als Stunden abbildbar (viele Stunden am Stück)",
+      "nonPreferred": [],
+      "sourceText": "Gerne viele Stunden am Stück. Danke!"
+    },
+    {
+      "teacherId": "TR_ANZD",
+      "textHash": "676aca54d60239b60a12fc6e69182fbb8c72dcc5d9481e1664284bb47e847702",
+      "note": "nach der 7. Einheit frei; Freitag ganz frei; Tageslänge nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplan-Team, \nda ich mich parallel in Ausbildung befinde, ist es mir sehr wichtig, dass ich nach der 7. Einheit keine Unterrichtsstunden eingeteilt bekomme. Nachdem ich am Freitag Praxis habe, muss dieser bitte zur Gänze freigehalten werden. \nBitte auch darauf achten, dass ich nicht 7h durchgehend unterrichten muss (ebenso bitte auch keinen 1 oder 2 Stunden Tag)! Ich bin erst seit März mit 4h an der Schule und muss mich erst in den Oberstufenunterricht einfinden. \nfreundliche Grüße\nDoris Anzinger"
+    },
+    {
+      "teacherId": "TR_ANZE",
+      "textHash": "bdb4175e1e183993ee17d18c8a58bbebbaebacf0b24e9e1d04fd8b8270f9bb0d",
+      "note": "Di Job, Mo+Do Vorlesungen → nur Mi/Fr bevorzugt",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Ich möchte Tages- und Abendschule an einem Tag haben. Ich habe mit Elke (1 Std.) und Markus Haslinger (2 Std.) vereinbart, dass wir am Mi. gemeinsam unterrichten.  \nDi. habe ich einen Job an der Kunst-Uni, Mo. und Do. Vorlesungen an der JKU."
+    },
+    {
+      "teacherId": "TR_APOLL",
+      "textHash": "21284b61487b95e720f17c7db2f509276bfd0f6b9a0bd5c0296c73107a3dcc5b",
+      "note": "Mittwoch frei; max. 6 Stunden durchgehend nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Team!\nBitte so kompakt als möglich, maximal 6 Stunden durchgehend...\nMittwoch zusätzlich frei wäre cool, sonst anderer Tag...!\n(möglicherweise fallen noch Stunden weg...!)\nDankeschön! LG Eva"
+    },
+    {
+      "teacherId": "TR_ARZT",
+      "textHash": "65778f79a17cf3ef5723d244879f458f307a10edef27617ed2558f947239ff8b",
+      "note": "klassenbezogener Wunsch (keine Doppelstunde), nicht als Stunden abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Wenn möglich, bitte KEINE Doppelstunde in der 3AFELA! Grund: sehr kurze Aufmerksamkeitsspanne der Schüler in der Fachschule."
+    },
+    {
+      "teacherId": "TR_AUNIG",
+      "textHash": "6e05543a7334206dde05ff70cf3d441da99668d30ff10f913e69e33362660ac4",
+      "note": "Donnerstag frei",
+      "nonPreferred": [
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "DO bitte kein Unterricht - vorausgesetzt, dass ich wieder am MI Abendschule habe (war zumindest die letzten 9 Jahre so)"
+    },
+    {
+      "teacherId": "TR_AUZG",
+      "textHash": "806584c5f6a45e437eedf2918753be356ba168880759f8c47fe47eb324be0fd7",
+      "note": "Mittwoch freier Tag (PH)",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Ich möchte nächstes Jahr mit der PH anfangen, daher bitte auf jeden Fall Mittwoch als freien Tag! (Hab das als M eingetragen, ich hoffe das passt halbwegs so...)\nUnd sorry dass ich wieder mal einene Tag zu spät dran bin ..."
+    },
+    {
+      "teacherId": "TR_BAAR",
+      "textHash": "1701f091cd00fede723852a9dcc2806dc1c5b79ba809ca0e3770eb2f4c966fb9",
+      "note": "Erklärung zur Mitverwendung, kein Wunsch",
+      "nonPreferred": [],
+      "sourceText": "MITVERWENDUNG habe ich deswegen angekreuzt: Sollten an der HTL wieder Kurse für die Berufsreifeprüfung zustandekommen, dann wäre dies der einzige Nachmittag, an den der Unterricht für Berufstätige gehalten werden könnte. (Sorry, ich konnte dies nicht anders markieren...)"
+    },
+    {
+      "teacherId": "TR_BAUM",
+      "textHash": "aba5f7c35516023ecbc81af5e84b14bc4021214a020e54b5caed3a1bda7358e2",
+      "note": "1. Einheit nicht möglich; alle Einheiten an einem Tag, vorzugsweise Donnerstag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "* 1. Einheit geht bei mir verkehrstechnisch nicht\n* Bitte alle Einheiten an einem Tag, vorzugsweise Donnerstag"
+    },
+    {
+      "teacherId": "TR_BERGE",
+      "textHash": "25084995d19cd7e7c39de9f3391a75f961a75b1d773aa61ea098b22d224b1641",
+      "note": "Erklärung zur Mitverwendung, kein Wunsch",
+      "nonPreferred": [],
+      "sourceText": "Mitverwendung = bin in anderer Schule und nicht für die HTL verfügbar! (ich hoffe das habe ich richtig verstanden?)"
+    },
+    {
+      "teacherId": "TR_BRAU",
+      "textHash": "dea22177d570fe506a4fed873ec66dfb25f2d33be25337a373eb8091f312e448",
+      "note": "Freitag frei; erste Einheit frei (Kindergarten)",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Ich ersuche euch, mir den Freitag frei zu halten. Meine Frau wird voraussichtlich am Freitag arbeiten und ich sollte die Kindergartentermine unserer beiden Kinder, die typischerweise freitags stattfinden, wahrnehmen.\nDa meine Frau eine neue Arbeitsstelle im Herbst beginnt, bitte ich euch sofern möglich, mir generell die erste Einheit freizuhalten, damit ich die Kinder in den Kindergarten bringen kann.\nVielen Dank im Voraus, Matthias."
+    },
+    {
+      "teacherId": "TR_BREN",
+      "textHash": "a87f803280a344e30c92075663a8b3501359c8755eab2b3cb75d2e5fab50bfcb",
+      "note": "Montag frei, zweiter freier Tag Di oder Fr → erste Option Dienstag; max. bis zur 7. Einheit",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Aus gesundheitlichen Gründen (50 % Grad der Behinderung, Beleg liegt vor) reduziere ich meine Lehrverpflichtung und bitte um Folgendes:\n2 unterrichtsfreie Tage: Montag fix (Arzttermine/Therapien), zweiter Tag bevorzugt DI oder FR.\nAn den Unterrichtstagen bitte max. bis zur 7. Einheit. Falls sehr lange Tage entstehen, lieber auf 4 kürzere Tage aufteilen.\n\nKlasse 2BHBG wird fix einstündig, einzelne erste Klassen vermutlich ebenfalls."
+    },
+    {
+      "teacherId": "TR_BRUEA",
+      "textHash": "ac134d0d047c78c710ae57b841f90125a26bffcb52d031fd605507e8026d5b1b",
+      "note": "Dienstag Mitverwendung; Freitagnachmittag frei; Abendschul-/Raumwünsche nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "- Dienstag: Mitverwendung Theresianische Militärakademie in Wr. Neustadt\n- Wenn möglich die 3 UE in NSCS in der Abendschule geblockt am Montag, Donnerstag oder Freitag in der 14. - 16. UE => davor ist noch Kinderbetreuung zuhause möglich.\n- Wichtig!!! Für CPR-HW in der 2BHITM wird der U08 für Arbeiten an der Hardware benötigt!!!\n- Freitagnachmittag nach Möglichkeit frei für die eigene Firma (Kundentermine)\n- CPR und WLC generell nicht gleichzeitig mit mehreren Lehrerteams einplanen, da die Ressourcen (z.B. Arduinos, Lötkolben, ...) im selben Zeitraum gebraucht werden. Heuer z.B. am Donnerstag in den ersten beiden UE: 1AHITM CPR und 1BHIF WLC."
+    },
+    {
+      "teacherId": "TR_BRUEC",
+      "textHash": "da29a611f4fc015b7af6e8161fd5aa7ed62fc023eafd8776cd51b1ab9ca73a39",
+      "note": "Info zur Lehrverpflichtung, kein Wunsch",
+      "nonPreferred": [],
+      "sourceText": "Erratum: ich habe 20 h volle Lehrverpflichtung . Wieso steht da 14?? \nAbendschule nur 2 WE (5abif D)"
+    },
+    {
+      "teacherId": "TR_CHRA",
+      "textHash": "2a3093bbe363ec7a2d71edca511838573229f6574db3e334bc830a64b992dfac",
+      "note": "ein langer Tag Montag + zweiter Tag bis 11:45 — zweiter Tag unbestimmt, nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Bitte einen Tag lang - Montag und einen zweiten Tag bis 11:45 Uhr."
+    },
+    {
+      "teacherId": "TR_DELL",
+      "textHash": "4f02d244ba9dac4b2fc5db54938019c49f5fbd0b478ae19e275f1ab639e7eed7",
+      "note": "Unterricht an einem Tag, bevorzugt Donnerstag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam, wegen selbständiger Arbeit am Bauernhof und Kinderbetreuung sollte der Unterrichtsumfang auf einen Tag beschränkt bleiben. Dieser kann geschoben werden (von DO auf MI oder DI).\nIch vertraue auf euer oft bewiesenes Geschick beim Stundenplanbau  --  sollte es es jedoch unauflösbar haken, so müsste ich mit Peter bzgl. Unterrichtsumfang nochmals Rücksprache halten.\nLG und danke für euren Einsatz,\nFranz"
+    },
+    {
+      "teacherId": "TR_DENKM",
+      "textHash": "a7e16e6f267e9f16149860233435065f7ac3456145349fcd721819b1e1c41911",
+      "note": "alle 6 Stunden am Montag",
+      "nonPreferred": [
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam!\nHabe nächstes Schuljahr (das ist mein letztes SJ!) nur 6 Stunden in der Tagesschule.\nMein letzter Stundenplanwunsch: 6 Stunden am Montag.\nWäre toll, wenn das möglich wäre!\nLG Rainer"
+    },
+    {
+      "teacherId": "TR_DIWM",
+      "textHash": "4186f1d465652450052371068e831b4bc03d3cceed146aaa4acdfa0dae98f49c",
+      "note": "alle Stunden an einem Tag, vorzugsweise Donnerstag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "In Absprache mit AV Bauer: bitte alle meine Stunden (6) auf einen Tag legen. Vorzugsweise Donnerstag - alternativ auch Mittwoch möglich.\nDanke!"
+    },
+    {
+      "teacherId": "TR_EDERL",
+      "textHash": "85a399fc406a2db377962465c7d3b62b6f145810e9bdc4012d7e98d6f4b73c40",
+      "note": "Stunden nur Montag und Dienstag",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Hallo liebes Stundenplanteam,\nwie auch in den letzten Jahren, stehen mir nur zwei Tage für die Kinderbetreuung zu Hause zu Verfügung (dieses Jahr Montag und Dienstag). Daher die Bitte, meine Stunden auf diese beiden Tage zu verteilen. Wenn es irgendwie möglich ist, wäre es spitze, wenn Montag der längere der beiden Tage ist, da da auch mein Mann am Nachmittag daheim für die Kinder da ist. Die Physikstunden wären toll im Physiksaal (2 von 3).\n\nVielen Dank für eure super Arbeit."
+    },
+    {
+      "teacherId": "TR_EHRB",
+      "textHash": "e32fd2ec1faeef4e19eec31bd83695614476124c2ff373614f01da2006103c8e",
+      "note": "Dienstag frei; Freitagnachmittag frei; Raumwünsche nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Gerne am Dienstag einen freien Tag. Am Freitag Nachmittag möglichst frei, da CoderDojo Programmierclub Linz. \nBiomedizin GME 1JG + 2Jg im Computerraum 143a, beide Gruppen gemeinsam, Theorie und Übungen am besten hintereinander.\nElektronik HEU 1JG + 2Jg im Computerraum 143a, beide Gruppen gemeinsam,"
+    },
+    {
+      "teacherId": "TR_EPP",
+      "textHash": "12999919089c2db26beb9a007e022ac31a0ac00b3b61ee632d9521d0dee8c09b",
+      "note": "Freitagnachmittag frei; max. 2 Nachmittage nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Freitag Nachmittag bitte frei, da es keine Nachmittagsbetreuung in der Schule unseres Sohnes gibt. Bitte max. 2 Nachmittage (Mittwoch viele Std. wäre super). Bin aber (bis auf Freitag Nachmittag) relativ flexibel  - sonst bitte zum Absprechen anrufen!"
+    },
+    {
+      "teacherId": "TR_ERNE",
+      "textHash": "e18d650249e4f412c12cbea83ee4be6331eb32dbc5351224d118012294654169",
+      "note": "Mittwoch freier Tag",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Mi als freier Tag wäre super (es geht aber auch Do oder Fr (Mo und Di habe ich Werkstätte, da binn ich eingeteilt)). Wenn Mi nicht der freie Tag wird, dann bitte am Mi etwas später anfangen (1h reicht) und bitte etwas kürzer gestalten."
+    },
+    {
+      "teacherId": "TR_FELS",
+      "textHash": "1489cee6c4088c7d7ecb517d1156c6f147b3211b1e5a29e41e234aa52ad9017a",
+      "note": "freier Tag, bevorzugt Freitag",
+      "nonPreferred": [
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte jedenfalls einen freien Tag, falls Freitag nicht möglich, dann einen anderen."
+    },
+    {
+      "teacherId": "TR_FREYP",
+      "textHash": "eac18c674b8c08f1cb7ea8e876bf56fcad672e9b37e617030c0cda5084c3d406",
+      "note": "Freitag frei; Kompaktheit/Klassenwünsche nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Prio 1: Freitag soll freier Tag sein. Bitte um kompakte Tage: 4-5 UE, 1h Pause, 2-4 UE.\nPrio 2: 4BHIF POSE-OO bitte Theorie und Ue zusammenlegen (also 4 UE POSE-OO durchgängig).\nPrio 3: 3IHIF NSCS bitte Theorie und Ue zusammenlegen (also 2 UE NSCS durchgängig, Teamteacher ist Braun).\nAls KV der 4bhif bitte ich um Zuteilung des Raumes K04 für die Klasse (da wo wir jetzt als 3bhif sind), da das aufgrund der zu erwartenden Schülerzahl eine gute Lösung ist."
+    },
+    {
+      "teacherId": "TR_GALLHO",
+      "textHash": "b71ff80f7275e6644c779a0a82425206cd2f4e9a2103091d420bf6a1d1c4d339",
+      "note": "erste Einheit frei erwünscht; max. 6–7 Stunden durchgehend nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam, \nich verzichte gerne auf einen freien Tag, würde mich aber freuen, wenn ich an keinem Tag mehr als 6 (maximal 7) Stunden am Tag durchgehend unterrichten könnte. Sollte sich die erste Einheit frei nicht ausgehen, ist das auch kein Weltuntergang, ich freue mich aber über jeden Tag, an dem es gelingt. \nNachdem ich nicht weit in die Schule habe, sind auch wenige Stunden an einem Tag für mich in Ordnung. \n\nVielen Dank für eure Mühe! \n\nLG \nKatharina"
+    },
+    {
+      "teacherId": "TR_GIRI",
+      "textHash": "b5713fe54dd63f2fa5b9b75cdfdcb2c71c68189609829989e19c80dcda974e7c",
+      "note": "max. 6 UE pro Tag nicht als Stunden abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Falls möglich, bitte max. 6 UE pro Tag; 7 auch möglich, aber bitte nicht durchgehend (Begründung: fortgeschrittenes Alter :-))"
+    },
+    {
+      "teacherId": "TR_GRULE",
+      "textHash": "a5f52c9624c44901d96c16617ab0f94d01092591b4a3298325fb5940c221eec4",
+      "note": "nur ein Tag an der Schule, Tag unbestimmt",
+      "nonPreferred": [],
+      "sourceText": "Bin nur einen Tag an der Schule. Werde Peter bzgl. einer Ausnahmegenehmigung anfragen."
+    },
+    {
+      "teacherId": "TR_HAMM",
+      "textHash": "730951e1b6f3cce7591d9a8cfda5946f70ae35772ac442e115b0e4cedb916a21",
+      "note": "vormittags Enkelbetreuung; gewünscht Mo 5.–10., Di 7.–10., Mi 5.–10. Einheit",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "sourceText": "Mir wäre sehr geholfen, wenn meine Wünsche berücksichtigt werden könnten, weil ich kommendes Jahr Vormittags auf mein Enkelkind aufpassen soll:\n\nMO  5. bis. 10. Einheit: 5A HIF\nDI    7. bis 10. Einheit: 3B HITM\nMI   5. bis 10. Einheit: 5B HITM"
+    },
+    {
+      "teacherId": "TR_HASLM",
+      "textHash": "bebe5bb763f821108b95b016c6cc1335544cfb57d9bdf1e676885d2aa9f48493",
+      "note": "Montag Firmentag; zweiter freier Tag/Nachmittage unbestimmt",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Da ich nächstes Jahr Haus baue, wäre es ein Traum wenn sich ausnahmsweise noch ein zweiter freier Tag, oder zumindest 1-2 freie Nachmittage, ausgehen, wo ich auf die Baustelle kann. Da ich gleichzeitig maximale Überstunden (27 gehaltene) machen muss um die enormen Kosten irgendwie zu stemmen, ist mir klar, dass es verdammt eng in meinem Stundenplan wird. Bitte versucht es trotzdem, geht wirklich nur einmalig um das nächste Schuljahr.\nMontag war bisher mein von Peter genehmigter Firmentag, heuer konnte ich das nicht mehr als beruflich geblock eintragen => gemäß Telefonat mit Michael habe ich daher meine F/MF Stunden an diesem Tag eingetragen."
+    },
+    {
+      "teacherId": "TR_HUEM",
+      "textHash": "ab5208680bcf1c9a4b9ed31052e25a301b4faeeb87c634096bcbd7f7ec826e6f",
+      "note": "Montag frei",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte Montags frei wegen Kinderbetreuung. Danke :)"
+    },
+    {
+      "teacherId": "TR_IVCES",
+      "textHash": "3d49796db21b4847aa1f4ad26debe77f3fce5658187abbe96382dbcf32594ab5",
+      "note": "Mo, Di vormittags Kinderbetreuung, ab 15 Uhr möglich",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ],
+      "sourceText": "Ich habe eigtl nur 19h, 2h in der 3chif wurden leider noch nicht zu Elke verschoben, obwohl vor langer Zeit ausgemacht.\n\nIch muss Mo, Di vormittags evt. meine kinder betreuen, da sie noch keinen fixen Platz bekommen haben. Ab 15 Uhr kann die Oma betreuen."
+    },
+    {
+      "teacherId": "TR_JAKOB",
+      "textHash": "01ebbb2efdb20ef4baae8cba427548dc369d637ed3b1b4b89f36445b38ee06c0",
+      "note": "Doppelstunden/Abendschule/max. 9 UE nicht als Stunden abbildbar",
+      "nonPreferred": [],
+      "sourceText": "- AM 5.Klasse bitte unbedingt als Doppelstunde (wegen Schularbeiten!), Ph 4.Klasse wenn möglich als Doppelstunde\n- bitte maximal 9 UE an einem Tag (inkl. Abenschule; bitte beachten!\n- sollte die Abendschule bis zum Ende der 16.UE gehen, bitte am Folgetag erst ab der 2.UE\n\n- in der Abenschule: bitte die Stunden auf zwei Abende verteilen (wie perönlich besprochen!)\n\nDanke für's Berücksichtigen!"
+    },
+    {
+      "teacherId": "TR_JANSP",
+      "textHash": "90b025e3b78178295c2ac2652dd51ca3ad52174ddccb2dca24059319bab0e685",
+      "note": "Mittwoch frei",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Alternativ Mittwoch frei. Danke für eure Arbeit"
+    },
+    {
+      "teacherId": "TR_KARP",
+      "textHash": "811ac5f0e2be1a0d647ab38099276b482aa0f41daba9503b5836e4408f275a92",
+      "note": "freier Tag, bevorzugt Mittwoch",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte einen freien Tag - Mittwoch wäre toll, bin aber flexibel.\nDanke für eure Arbeit!"
+    },
+    {
+      "teacherId": "TR_KASMA",
+      "textHash": "aa10be1774db1531c17249e3f5d2d4f3d9966def0561fd9ca0f45142682618bc",
+      "note": "alle 5 Stunden an einem Tag, bevorzugt Donnerstag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam,\nbitte meine 5 Stunden an einem Tag einteilen, ansonsten ist es für mich mit meinem anderen Job nicht zu vereinbaren.\nAm besten für mich wäre es am Donnerstag.\nSchöne Grüße,\nRoland"
+    },
+    {
+      "teacherId": "TR_KEPL",
+      "textHash": "d83d3571f6ef4614d51aac57eb280c764a2c67b6482e1802745fdb466af601f6",
+      "note": "2 freie Tage, Tage unbestimmt",
+      "nonPreferred": [],
+      "sourceText": "2 freie Tage (Pflege meines Vaters)"
+    },
+    {
+      "teacherId": "TR_KLE",
+      "textHash": "add5e22a79153b2273d406ff0e75fb9fc810dae077cc16b2e04f1f48cab7eed5",
+      "note": "Mittwoch frei",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Wenn es geht, bitte wieder den ganzen Mittwoch frei, auch in der Abendschule. Danke & lg"
+    },
+    {
+      "teacherId": "TR_KNOG",
+      "textHash": "7d8450fc3a2b92e63451ab3c17a035b5af6a90bb67cec3232d42b89d69ac6386",
+      "note": "Donnerstagnachmittag Tierarzt",
+      "nonPreferred": [
+        {
+          "day": "THURSDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Am Donnerstag nachmittag arbeite ich als Tierarzt, sonst bin ich wie immer ganz flexibel\nAuch Donnerstag als freien Tag muss nicht sein, ich nehme auch gerne jeden anderen.\nLiebe Grüße und gutes Gelingen."
+    },
+    {
+      "teacherId": "TR_KODR",
+      "textHash": "df27405fafd7480c8d46fa5c1957f997d7e70c754135f664e24557fb5657f0a3",
+      "note": "immer um 08:00 beginnen / Doppeleinheiten nicht als non-preferred abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Liebe Stundenplanteam!\nIch brauche keinen freien Tag, möchte aber gerne immer um 08:00 beginnen.\nIn den Biomed-Klassen sowie in der 1ahif und 2chif bitte Doppeleinheiten einplanen (Lernbüro /SmartLab-Klassen).\nDanke :-) und liebe Grüße, Christina"
+    },
+    {
+      "teacherId": "TR_KURZ",
+      "textHash": "c80a1f0565016977034d7519b3205375d128792c87428cb0477f06c37067e621",
+      "note": "Doppelstunden-Wunsch nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Die \n    HEU  Stunden 1AHEL / 2AHEL  und  \n    GME Stunden 1AHBG /  2AHBG/2BHBG  \nsollte jeweils eine Doppelstunde sein und nur zur Not auf zwei Einzelstunden aufgeteilt werden.\n\nGenerell sind diese Stunden auch gut für den Nachmittag (auf Fr. ) geeignet, weil dieser Unterricht sehr viel praktischen Anteil hat ca.  so wie Labor / Werkstatt)"
+    },
+    {
+      "teacherId": "TR_LEHE",
+      "textHash": "ccf21a49489141f985f88a0b3106107dc801dd55735591903917a75a4adecc4b",
+      "note": "keine 8:00-Stunden",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1
+          ]
+        }
+      ],
+      "sourceText": "Bitte keine 8.00 Stunden weil ich 2 Kids im die KS und Kiga abliefern muss 5 Tage die Woche und dann öffentlich zur HTL fahre!"
+    },
+    {
+      "teacherId": "TR_LUG",
+      "textHash": "2f5b519620aca99bbf8c16531f9559fa720c0926140901ce0e052d0267e3e04a",
+      "note": "Aufteilungswunsch für Klasse nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "1IHIF bitte auf 2 h, 1h und 1 h aufteilen."
+    },
+    {
+      "teacherId": "TR_MATZ",
+      "textHash": "ece28c9938e1e763f24657a1008a96efcf752b1a9100735765ebaa3c68083016",
+      "note": "erste Stunde frei",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1
+          ]
+        }
+      ],
+      "sourceText": "Hallo Stundenplanteam! Es wäre schön, wenn ich die erste Stunde jeweils frei hätte, da ich noch Volksschulkinder habe, die ich in die Schule bringen muss. Einen Tag könnt ihr mir gerne bis zur 10. EH einteilen. Auch freitags habe ich gut Zeit, da mein Mann bei den Kindern ist. \nWenn ihr Unterstützung mit den Ethik-Gruppen braucht, kann ich euch gerne helfen (das wird vielleicht eher im Herbst spruchreif). LG und danke für eure Arbeit, Barbara Matzinger"
+    },
+    {
+      "teacherId": "TR_MIWO",
+      "textHash": "f651c0f3c427bfb50a6f650d185a9f5a9fb4be959a7b34d10bf608aa25c92fbd",
+      "note": "Q-Stunde am Donnerstag, nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Donnerstag Q-Stunde mit Tumfart J. Bauer P. Wiedermann A. Gehrer G. Danke"
+    },
+    {
+      "teacherId": "TR_MOSE",
+      "textHash": "6c506b5064c13087f8c514766a1450d14f88fd64487d7ded87c559721a3ed87f",
+      "note": "kompakt mit Mittagspause, nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Gerne kompakt mit Mittagspause."
+    },
+    {
+      "teacherId": "TR_MOSER",
+      "textHash": "368f9ac6a50c6d0f4fe73a5ade8465a5c30f18ca1840d89ec7ce56fdda7782a4",
+      "note": "erst ab 2. EH; Nachmittag möglichst frei",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Lieber Josef, lieber Markus,\nwie besprochen, kann ich erst in der 2. EH anfangen und brauche am Nachmittag möglichst bald frei wegen der Kinderbetreuung. \nWenn meine Stunden wegen Klassenzusammenlegung weniger  werden wäre en freier Tag fein, aber nicht zwingend. \nLieber möglichst kompakt und kurz ab 2EH.\nDanke! \nLiebe Grüße\nTamara"
+    },
+    {
+      "teacherId": "TR_MUEHL",
+      "textHash": "c1c23e5d1554ffefa5021b50d90fc9eb0d85bd9f3729dbc9f1dd3fff1e96f59d",
+      "note": "zwei zusammenhängende Tage in der Wochenmitte",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Ich hätte meine 8 Einheiten gerne an zwei zusammenhängenden Tagen in der Mitte der Woche.\nVielen Dank!"
+    },
+    {
+      "teacherId": "TR_MUEHP",
+      "textHash": "56893e88b4c073dd8a7ff0b93da028464d17130c34aae789ee6b23f9a5b0bc08",
+      "note": "Freitag nur bis ca. 6. EH",
+      "nonPreferred": [
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam,\nes wäre super, wenn der Freitag nur bis zur ca. 6. EH verplant wird, da ich mit meiner Familie das Wochenende des Öfteren in der Steiermark verbringe. Vielen Dank im Voraus!"
+    },
+    {
+      "teacherId": "TR_POVAC",
+      "textHash": "ec5acacdf6622b69f237ebb8cd5c5188a14bee62da43285e9410a92db894e953",
+      "note": "Montag frei (Ausbildung); Beginn 8:00 nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte Montag frei wegen Ausbildung, \nWenn möglich, immer ab 8:00 Unterricht einplanen"
+    },
+    {
+      "teacherId": "TR_RAMMUE",
+      "textHash": "3146e9693d8253b0c585e6f03fdfaa46832b2d7c39b9d1b85b5f9f8ae170f9c3",
+      "note": "Info Mitverwendung/Raumbedarf, nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "INFO MITVERWENDUNG: eine LV an der PHOÖ, aber die eine Stunde kann im Notfall auch vergeben werden! :) (nur 2 Termine im Wintersemster)\nRAUMBEDARF:\n> EDV-8 (253a) für MEDT3D - 4AHITM/4BHITM/5AHITM/5BHITM/5CHITM mit Patricia Engleitner (aufgrund Rendering, 3D-Software)\n> EDV-8 (253a) für SYTAV in 2AHITM + 2BHITM für Videoschnitt"
+    },
+    {
+      "teacherId": "TR_RASCH",
+      "textHash": "7eed4f9789555d31fd9a4f436648302aa350edd59c68199cf3f487874e32cc19",
+      "note": "Dienstag Vorbereitungstag; Fach-/EMSYS-Wünsche nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Wie oben zu sehen: Ich würde gerne den Dienstag als Vorbereitungstag ganztägig blockieren (d.h. kein Unterricht).\nWenn möglich: HE bitte nicht in die 9./10. UE legen. Hintergrund: Komplexes Thema womit die Schüler*innen sich nach einem langen Tag schwer tun.\nWenn möglich: Bitte EMSYS gleich mitplanen (ist eine Freistunde aber es ist im Nachhinein äußerst schwierig einen passenden Termin zu finden, der sowohl mir als auch der Klasse gut passt). EMSYS jede zweite Woche zwei Stunden oder jede Woche eine Stunde sein."
+    },
+    {
+      "teacherId": "TR_REDER",
+      "textHash": "882681224d794547897657994beb92d960f8da73f9d6d35f7670dd08c6a7a0cf",
+      "note": "kein Wunsch",
+      "nonPreferred": [],
+      "sourceText": "Vielen Dank"
+    },
+    {
+      "teacherId": "TR_REISM",
+      "textHash": "efa3d02a74365edb5f6fb4135857d02e1f69c731230524501be5800b83dd3870",
+      "note": "freier Tag Mi (alternativ Di/Do); Freitag nach der 4. EH frei",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "-Statt freier Tag Mi ist auch Di oder Do möglich (Nötig wegen Kinderbetreuung!)\n-benötige am Freitag nach der 4. EH unbedingt frei (konnte aber keinen Beruf eintragen - hat nicht fuktioniert) - da ich am NM an einigen Tagen an der FH unterrichte"
+    },
+    {
+      "teacherId": "TR_ROCKH",
+      "textHash": "ed7b115ce216fafeb408de66768ea41c13357cb4e3c6008d5f177538bbc55475",
+      "note": "freier Tag Mittwoch",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Mein gewünschter freier Tag wäre der Mittwoch. Wenn es nicht anders geht, ist mir aber auch ein anderer freier Tag recht."
+    },
+    {
+      "teacherId": "TR_SCHCR",
+      "textHash": "6ebf6496e92e28234fc9921ff8459fa0faefbd423ab4ac67db5c179e4fb299e9",
+      "note": "Freitag am BBC; PH-Tag unbestimmt; Klassenwünsche nicht abbildbar",
+      "nonPreferred": [
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte die Stunden der 4AFELA in der Fächern 2 Stunden 0AE und 1LA am Dienstag einplanen. U71 für 1LA. 1h von 0AE an ein Tagesende setzen.\nIch starte im Oktober mit dem Masterstudium an der PH bitte daher freihalten.\nAm Freitag Unterrichte ich am BBC."
+    },
+    {
+      "teacherId": "TR_SCHEIN",
+      "textHash": "13199985ac02fc335977d92d4d5a701e3dcd68daa859397fc179cea5d0006767",
+      "note": "Do+Fr frei; Mo/Mi nicht bis 17:15",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplanteam!\n\nIch habe 13 gehaltene Stunden (Elternteilzeit). Leider kann ich das nicht richtig im System abbilden, da es 18 Stunden in der Tagesschule angibt. Daher kann ich die Eintragung nicht richtig machen.\nBitte Donnerstag und Freitag wieder frei planen. Montag und Mittwoch wäre mir recht, wenn ich nicht bis 17.15 Unterricht habe. \nDanke!\nLiebe Grüße, Silke"
+    },
+    {
+      "teacherId": "TR_SCHLE",
+      "textHash": "38d707525d4e7088f3b5d04e0ef49b374a1e75316091af68dc0528e0e90c4fde",
+      "note": "Mittagspause 4.–6. Einheit / Raumwunsch nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Bitte täglich um Mittagspause in der 4., 5. oder 6. Einheit (aus gesundheitlichen Gründen).\nDas Labor in der 4AHEL für meine Gruppe bitte im Raum U73 einteilen (wegen XILINX-Infrastruktur)."
+    },
+    {
+      "teacherId": "TR_SCHUE",
+      "textHash": "48875d65a76e1b3b220640fa35376865bbe0199ebd0ff33309a986dff0fda833",
+      "note": "generell bis max. 15:25; freier Tag egal",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            9,
+            10
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "hours": [
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "2, max. 3  tage nachmittags (einer davon Mittwoch) generell bis max 15:25\nmind 1 freier tag, egal welcher."
+    },
+    {
+      "teacherId": "TR_SIVAD",
+      "textHash": "2c597b5e8bfe2be0b32156a95f2e6e0bf24fb4358cc7d5aed36a130724945775",
+      "note": "Mittwoch PH-Studium; nur 2 Tage Unterricht",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Da ich neben der Lehrtätigkeit auch unternehmerisch tätig bin und im kommenden Schuljahr sehr wahrscheinlich mit dem PH-Studium (immer mittwochs) anfangen möchte, kann ich nur an 2 Tagen unterrichten. Laut Peter Bauer kein Problem. Dieses Schuljahr konnte ich mit dem Studium nicht anfangen, da meine Tagschulstunden ganztägig auf Mittwoch gelegt wurden, bevor ich meine Wünsch äußern konnte.\n\nAnsonsten war es ideal, da ich alle Tagschulstunden am Mittwoch und alle Abendschulstunden am Montag hatte. Wenn es nächstes Schuljar statt Mittwoch am Dienstag fällt, könnte ich mit dem PH-Studium anfangen.\n\nDa ich mit Sara Ivcevic 2 gemeinsame Kinder habe, wäre es günstig an gegengleichen Tagen zu unterrichten. Sie hat ihre Wünsche entsprechend eingetragen."
+    },
+    {
+      "teacherId": "TR_STEID",
+      "textHash": "0898f6edced91c47b8b862be78170a78d94bc88119aa3b6b0e955af8bdf60c78",
+      "note": "zwei Nachmittage frei aus Mo–Do → erste Optionen Mo, Di",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Aufgrund der Berufstätigkeit meiner Frau und zwei Kids (Gym) bitte ich um zwei Nachmittage in der Woche frei, um meinen Teil der Kinderbetreuung zu erfüllen. Entweder Mo, Di, Mi oder Do. (D.h. ab der 7ten Einheit kann ich nicht mehr unterrichten). \n\n1 insgesamt freier Tag wäre super! \nBlöcke sind mir lieber. \n\nDie Stunden in der Abendschule sollten an 2 Tagen erfolgen, wo ich ohnehin da bin (idealerweise gleich im Anschluss an die Tagesschule)"
+    },
+    {
+      "teacherId": "TR_STEIS",
+      "textHash": "a2a43bfb1707ecae8e92345d466108f9f8ae6148e6b91bad5e2303d878237806",
+      "note": "freier Tag flexibel, kein konkreter Wunsch",
+      "nonPreferred": [],
+      "sourceText": "Der angegebene freie Tag ist flexibel."
+    },
+    {
+      "teacherId": "TR_STRO",
+      "textHash": "109ee638e7d5eb2fd73a119a1c70996a22fecc658f18358233b070e3fcfaeb28",
+      "note": "nur Do+Fr möglich",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Ich kann Do+Fr, idealerweise nur einen Tag, da ich nebenberuflich unterrichte."
+    },
+    {
+      "teacherId": "TR_TRAXA",
+      "textHash": "9caccea81582d144199a65e0593b5c03cfbc85004f076663a59816702a117808",
+      "note": "möglichst wenige Tage, nicht als Stunden abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Beruf = Studium + Kinderbetreuung; wenn möglich bitte an so wenig Tagen wie möglich komprimieren.\nDANKE IHR SEID TOLL!"
+    },
+    {
+      "teacherId": "TR_TSCHM",
+      "textHash": "03ee876c26aa5dc965a9110992e1d554f72d97668a2522601aab0f81d98bd982",
+      "note": "keine langen Tage, nicht als Stunden abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Liebes Stundenplanteam, \nich brauche keinen freien Tag, weil ich durchgehend lange Tage vermeiden möchte - aber nur, wenn möglich! \nLiebe Grüße!"
+    },
+    {
+      "teacherId": "TR_TUMF",
+      "textHash": "3d3c9c39aa68460f162c046cd1b17a06ddd3f40f5d2d14177025b7f91f6d1ccf",
+      "note": "Montag HTL Perg; Freitag frei",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Montag bin ich an der HTL Perg.\nFreitag hätte ich bitte frei, Danke Hannes"
+    },
+    {
+      "teacherId": "TR_UNTEG",
+      "textHash": "53e4205c5a1797c3c0e4f2a17040d3e71db5087311f197b318735b7527a7529b",
+      "note": "'wieder Montags' mehrdeutig, nicht abbildbar",
+      "nonPreferred": [],
+      "sourceText": "Bitte wieder Montags wenn möglich. Danke"
+    },
+    {
+      "teacherId": "TR_WEBEF",
+      "textHash": "6dcacb0ec6e7ead58208a253a2b1dcbc677e8a42f73b06b5795ae745287b8a5c",
+      "note": "Freitagnachmittag frei; freier Tag Mi oder Do → erste Option Mittwoch",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Freitagnachmittag würde ich gerne frei haben, da ich zusätzlich noch an der FH unterrichte und sich dieser Zeitraum in den letzten zwei Jahren dafür gut bewährt hat. Alternativ wäre auch Donnerstagnachmittag möglich.\n\nFalls zusätzlich ein freier Tag möglich wäre, dann bitte idealerweise Mittwoch oder Donnerstag.\n\nFür die weitere Planung wäre es, falls möglich, hilfreich, zumindest zwei gleiche Einheiten zusammenzulegen, zum Beispiel BSV oder MINF. Mir ist bewusst, dass es sicher nicht einfach ist, all diese Wünsche zu berücksichtigen, aber ich würde mich sehr freuen, wenn sich das irgendwie ermöglichen lässt. Danke auf jedenfall schon Mal"
+    },
+    {
+      "teacherId": "TR_WEILG",
+      "textHash": "36c89a1ce3e44182372462b89dce257e29890aa8c6110deb4d9e68971337f470",
+      "note": "Donnerstag FH, idealerweise ganz frei, mindestens nach der 3. EH",
+      "nonPreferred": [
+        {
+          "day": "THURSDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Donnerstag: FH\nIm Idealfall DO frei, aber kann Donnerstag 3./4./9./10. EH nicht mehr B wählen; bitte zumindest nach der 3. EH frei halten, danke!"
+    },
+    {
+      "teacherId": "TR_WELL",
+      "textHash": "34144340eb35cee8c9608004d744ac16b28c40d2e51f4395a3d4c7b241c70cc8",
+      "note": "kein langer Freitag; Mittwoch bis zur 7. EH frei",
+      "nonPreferred": [
+        {
+          "day": "WEDNESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Hallo!\nKein langer Freitag wäre super und Mittwoch bis zur 7. Eh ungefähr frei (kann aber auch Montag sein). \n\nDanke und liebe Grüße\nAlex"
+    },
+    {
+      "teacherId": "TR_WINGE",
+      "textHash": "df02f58ee36a078068d3428c34b53d22331a5391f89473394ce7bb3d146b63d9",
+      "note": "Einheiten nur Mittwoch und Donnerstag",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Bitte meine Einheiten auf Mittwoch und Donnerstag setzen, maximal 9,99 WE"
+    },
+    {
+      "teacherId": "TR_WINKD",
+      "textHash": "ce9853a81a3bb5ee40dafc9064b10d68068fa28b426fd66dd111fd83d6b79b3d",
+      "note": "Montag und Freitag frei",
+      "nonPreferred": [
+        {
+          "day": "MONDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "hours": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      ],
+      "sourceText": "Liebes Stundenplan-Team! \nIch hätte gerne am Montag und am Freitag frei. Die Tage an denen ich fix unterrichten möchte sind Mittwoch und Donnerstag. \nIch kann mir auch vorstellen Stunden in der Abendschule zu übernehmen. Hier ginge jeder Tag. \nLiebe Grüße,\nDoris Winkler"
+    }
+  ]
+}

@@ -30,6 +30,10 @@ public class TeacherRepository {
         return Teacher.getFirstByName(name);
     }
 
+    public Teacher getByNameSymbol(String nameSymbol) {
+        return Teacher.getByNameSymbol(nameSymbol);
+    }
+
     @Transactional
     public Teacher add(Teacher teacher) {
         if (entityManager.contains(teacher)) {
@@ -45,6 +49,7 @@ public class TeacherRepository {
 
         teacher.setNameSymbol(updated.getNameSymbol());
         teacher.setTeacherName(updated.getTeacherName());
+        teacher.setWishText(updated.getWishText());
         teacher.setTeacher_non_preferred_hours(updated.getTeacher_non_preferred_hours());
         teacher.setTeacher_non_working_hours(updated.getTeacher_non_working_hours());
         teacher.setTeachingSubject(updated.getTeachingSubject());

@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.algorithm;
 
 import at.htlleonding.leoplaner.data.ClassSubjectInstance;
 import at.htlleonding.leoplaner.data.DataRepository;
+import at.htlleonding.leoplaner.data.HoursPeriod;
 import at.htlleonding.leoplaner.data.Period;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.SchoolDays;
@@ -14,7 +15,6 @@ import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -107,6 +108,27 @@ public class SimulatedAnnealingAlgorithm {
     /** how often the cost is re-evaluated just to log where it comes from */
     private static final long COST_LOG_INTERVAL = 1000;
 
+    /**
+     * Only every HISTORY_INTERVAL-th iteration (plus every new best) goes into
+     * the history. It is a copy-on-write list read by the graph, so recording
+     * every iteration copied the whole history on each one and a long run
+     * slowed down quadratically.
+     */
+    private static final long HISTORY_INTERVAL = 50;
+
+    /**
+     * Minimum time between two progress events. Firing one per iteration
+     * formatted and sent a websocket message for every single move; the
+     * graph only redraws every 100ms and treats 500ms of silence as the end
+     * of a run, so this has to stay well below that.
+     */
+    private static final long PROGRESS_INTERVAL_NANOS = 50_000_000L;
+
+    private static final SchoolDays[] SCHEDULABLE_DAYS =
+        SchoolDays.schedulableDays();
+
+    private static final int DAY_COUNT = SchoolDays.values().length;
+
     private final AtomicReference<CostBreakdown> lastCostBreakdown =
         new AtomicReference<>();
 
@@ -118,12 +140,22 @@ public class SimulatedAnnealingAlgorithm {
         initCoolingMode
     );
 
-    private static final double INITIAL_TEMPERATURE = 1000;
+    /**
+     * Soft costs move by roughly 3 to 100 per step, so at 100 a bad move is
+     * still taken fairly often. Starting at 1000 spent the first third of the
+     * run accepting practically everything - a random walk, not a search.
+     */
+    private static final double INITIAL_TEMPERATURE = 100;
     private static AtomicLong temperature = new AtomicLong(
         Double.doubleToLongBits(INITIAL_TEMPERATURE)
     );
     // private final int ITERATIONS = 10000;
-    private final double COOLING_RATE = 0.9994;
+    /**
+     * About 69k iterations from INITIAL_TEMPERATURE down to 0.1. 0.9994 got
+     * there in about 15k, barely a dozen moves per lesson for a whole school;
+     * the cheaper cost evaluation pays for the longer run.
+     */
+    private final double COOLING_RATE = 0.9999;
     public static final double BOLTZMANN_CONSTANT = 1; // maybe adjust real constant: 1.380649e-23;
 
     // public static final double BOLTZMANN_CONSTANT = 1.380649e-23;
@@ -153,7 +185,15 @@ public class SimulatedAnnealingAlgorithm {
         Timetable currTimetable;
         Timetable nextTimeTable;
 
-        final Random random = new Random();
+        // the current schedule only changes when a move is accepted, so its
+        // cost is carried from one iteration to the next instead of being
+        // evaluated again every time - that was half of all evaluations
+        long costCurrSchoolSchedule = determineCost(schoolSchedule);
+        long lastCost = costCurrSchoolSchedule;
+        long sameCostStreak = 0;
+        long lastProgressNanos = 0;
+
+        final Random random = ThreadLocalRandom.current();
         System.out.println(getIsRunning());
         while (getIsRunning() && iterationCounter < iterationCap) {
             // main loop
@@ -201,8 +241,6 @@ public class SimulatedAnnealingAlgorithm {
             );
             repairTimetable(nextTimeTable);
 
-            long costCurrSchoolSchedule = determineCost(schoolSchedule);
-
             final List<Timetable> nextSchoolSchedule = new ArrayList<>(
                 schoolSchedule
             );
@@ -240,34 +278,52 @@ public class SimulatedAnnealingAlgorithm {
                 getTemperature()
             );
 
-            this.dataRepository.addHistory(
-                new History(
-                    iterationCounter,
-                    getTemperature(),
-                    costCurrSchoolSchedule
-                )
-            );
+            sameCostStreak = costCurrSchoolSchedule == lastCost
+                ? sameCostStreak + 1
+                : 1;
+            lastCost = costCurrSchoolSchedule;
+
+            final boolean isNewBest =
+                costCurrSchoolSchedule < bestCosts &&
+                costCurrSchoolSchedule > 0;
+
+            // new bests always go in, so the minimum the graph pins is the
+            // real one and not just the lowest sampled point
+            if (iterationCounter % HISTORY_INTERVAL == 0 || isNewBest) {
+                this.dataRepository.addHistory(
+                    new History(
+                        iterationCounter,
+                        getTemperature(),
+                        costCurrSchoolSchedule
+                    )
+                );
+            }
 
             if (iterationCounter % COST_LOG_INTERVAL == 0) {
                 logCostBreakdown(schoolSchedule, iterationCounter);
             }
 
-            progressEvent.fire(
-                new AlgorithmProgressDTO(
-                    iterationCounter,
-                    getTemperature(),
-                    costCurrSchoolSchedule,
-                    false
-                )
-            );
+            final long now = System.nanoTime();
+            if (
+                iterationCounter == 0 ||
+                now - lastProgressNanos >= PROGRESS_INTERVAL_NANOS
+            ) {
+                progressEvent.fire(
+                    new AlgorithmProgressDTO(
+                        iterationCounter,
+                        getTemperature(),
+                        costCurrSchoolSchedule,
+                        false
+                    )
+                );
+                lastProgressNanos = now;
+            }
 
             coolTempertaure(iterationCounter);
             // decreaseTemperature();
             // decreaseTemperatureLog(200, iterationCounter);
 
-            if (
-                costCurrSchoolSchedule < bestCosts && costCurrSchoolSchedule > 0
-            ) {
+            if (isNewBest) {
                 this.dataRepository.setBestSchoolSchedule(
                     deepCopy(this.dataRepository.getAllTimetables())
                 );
@@ -287,7 +343,7 @@ public class SimulatedAnnealingAlgorithm {
                 }
                 // }
                 pushTemperature(
-                    autumaticallyPushTemperatureAmount(costCurrSchoolSchedule)
+                    autumaticallyPushTemperatureAmount(sameCostStreak)
                 );
             }
 
@@ -322,14 +378,16 @@ public class SimulatedAnnealingAlgorithm {
         return copy;
     }
 
-    public double autumaticallyPushTemperatureAmount(double currentCost) {
+    /**
+     * How far to reheat after sameCostStreak iterations in a row ended on the
+     * same cost. Used to walk the whole history backwards to find that streak,
+     * copying it first; the loop now just counts it as it goes.
+     */
+    public double autumaticallyPushTemperatureAmount(final long sameCostStreak) {
         double pushAmount = 0;
-        var reverseHistory = new ArrayList<>(this.dataRepository.getHistory());
-        Collections.reverse(reverseHistory);
-        int counter = 0;
 
-        for (History history : reverseHistory) {
-            if (history.cost() != currentCost || pushAmount >= 100) {
+        for (long counter = 0; counter < sameCostStreak; counter++) {
+            if (pushAmount >= 100) {
                 break;
             }
 
@@ -340,7 +398,6 @@ public class SimulatedAnnealingAlgorithm {
             if (counter % 300 == 0) {
                 pushAmount *= 2;
             }
-            counter++;
         }
 
         return pushAmount;
@@ -364,7 +421,7 @@ public class SimulatedAnnealingAlgorithm {
         // no logging here: this runs twice per iteration and printing from it
         // was costing more time than evaluating the schedule. See
         // logCostBreakdown for where the cost actually comes from.
-        return Math.random() < probability;
+        return ThreadLocalRandom.current().nextDouble() < probability;
     }
 
     public void setAttributesOfTimetable(
@@ -394,46 +451,96 @@ public class SimulatedAnnealingAlgorithm {
         // accumulated as a long: a handful of IMPOSSIBLE_COST violations
         // overflows an int and would turn an illegal schedule into a cheap one
         long cost = 0;
-        final List<Teacher> allTeachers = getAllTeachersInSchoolSchedule(
-            schoolSchedule
-        );
-        final List<Room> allRooms = getAllRoomsInSchoolSchedule(schoolSchedule);
 
-        for (final Room room : allRooms) {
-            cost += determineCostOfRoomAttribute(
-                room,
-                schoolSchedule,
-                breakdown
+        // one pass sorts every lesson under its teachers and its room. Each
+        // teacher and each room used to scan the whole school for its own
+        // lessons, which made this teachers x lessons instead of lessons.
+        // Teachers are keyed by id on purpose: the entities carry no equals(),
+        // and the same teacher loaded twice must not be counted twice.
+        final Map<Long, Teacher> teachersById = new HashMap<>();
+        final Map<Long, List<ClassSubjectInstance>> lessonsByTeacher =
+            new HashMap<>();
+        final Map<Object, List<ClassSubjectInstance>> lessonsByRoom =
+            new HashMap<>();
+
+        for (final Timetable timetable : schoolSchedule) {
+            for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+                final Room room = csi.getRoom();
+
+                if (room != null) {
+                    lessonsByRoom
+                        .computeIfAbsent(
+                            room.getId() != null ? room.getId() : room,
+                            key -> new ArrayList<>()
+                        )
+                        .add(csi);
+                }
+
+                if (
+                    csi.getClassSubject() == null ||
+                    csi.getClassSubject().getTeachers() == null
+                ) {
+                    continue;
+                }
+
+                for (final Teacher teacher : csi
+                    .getClassSubject()
+                    .getTeachers()) {
+                    if (teacher == null || teacher.getId() == null) {
+                        continue;
+                    }
+
+                    teachersById.putIfAbsent(teacher.getId(), teacher);
+                    final List<ClassSubjectInstance> lessons =
+                        lessonsByTeacher.computeIfAbsent(
+                            teacher.getId(),
+                            id -> new ArrayList<>()
+                        );
+
+                    // a lesson listing the same teacher twice is still one
+                    // lesson of theirs
+                    if (lessons.isEmpty() || lessons.getLast() != csi) {
+                        lessons.add(csi);
+                    }
+                }
+            }
+        }
+
+        for (final List<ClassSubjectInstance> lessonsInRoom : lessonsByRoom.values()) {
+            // same reasoning as for teachers: count the clashes, do not just
+            // flag that there is at least one
+            cost += charge(
+                breakdown,
+                CostCategory.ROOM_CLASH,
+                (long) TimetableManager.countOverlappingHours(lessonsInRoom) *
+                IMPOSSIBLE_COST
             );
         }
 
-        for (final Teacher teacher : allTeachers) {
-            cost += determineTeacherWorkloadCost(
-                teacher,
-                schoolSchedule,
+        for (final Map.Entry<Long, List<ClassSubjectInstance>> entry : lessonsByTeacher.entrySet()) {
+            cost += teacherWorkloadCost(
+                teachersById.get(entry.getKey()),
+                entry.getValue(),
                 breakdown
             );
         }
 
         for (final Timetable timetable : schoolSchedule) {
             // hours, not lessons: a double period fills two hours of the day,
-            // and the day length rules below are only meaningful in hours
-            final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
-            final Map<SchoolDays, Integer> lunchBreakHourPerDay =
-                new HashMap<>();
+            // and the day length rules below are only meaningful in hours.
+            // Indexed by SchoolDays.ordinal().
+            final int[] hoursPerDay = new int[DAY_COUNT];
+            final Integer[] lunchBreakHourPerDay = new Integer[DAY_COUNT];
 
-            for (final ClassSubjectInstance classSubjectInstance : new ArrayList<>(
-                timetable.getClassSubjectInstances()
-            )) {
+            for (final ClassSubjectInstance classSubjectInstance : timetable.getClassSubjectInstances()) {
                 final Period period = classSubjectInstance.getPeriod();
 
                 if (period.isLunchBreak()) {
                     // noted, not costed here: the break carries no lesson, its
                     // position is priced once per day below
-                    lunchBreakHourPerDay.put(
-                        period.getSchoolDays(),
-                        period.getSchoolHour()
-                    );
+                    lunchBreakHourPerDay[period
+                        .getSchoolDays()
+                        .ordinal()] = period.getSchoolHour();
                     continue;
                 }
 
@@ -465,29 +572,23 @@ public class SimulatedAnnealingAlgorithm {
                     )
                 );
 
-                hoursPerDay.merge(
-                    period.getSchoolDays(),
-                    classSubjectInstance.getDuration(),
-                    Integer::sum
-                );
+                hoursPerDay[period.getSchoolDays().ordinal()] +=
+                    classSubjectInstance.getDuration();
             }
 
-            for (final SchoolDays day : SchoolDays.schedulableDays()) {
+            for (final SchoolDays day : SCHEDULABLE_DAYS) {
                 cost += charge(
                     breakdown,
                     CostCategory.DAY_LENGTH,
-                    determineCostForDayLength(
-                        day,
-                        hoursPerDay.getOrDefault(day, 0)
-                    )
+                    determineCostForDayLength(day, hoursPerDay[day.ordinal()])
                 );
 
                 cost += charge(
                     breakdown,
                     CostCategory.LUNCH_BREAK_POSITION,
                     determineCostForLunchBreakPosition(
-                        lunchBreakHourPerDay.get(day),
-                        hoursPerDay.getOrDefault(day, 0)
+                        lunchBreakHourPerDay[day.ordinal()],
+                        hoursPerDay[day.ordinal()]
                     )
                 );
             }
@@ -696,49 +797,8 @@ public class SimulatedAnnealingAlgorithm {
         return List.copyOf(byId.values());
     }
 
-    private List<Room> getAllRoomsInSchoolSchedule(
-        List<Timetable> schoolSchedule
-    ) {
-        return schoolSchedule
-            .stream()
-            .flatMap(timetable -> timetable.getClassSubjectInstances().stream())
-            .map(csi -> csi.getRoom())
-            .filter(room -> room != null)
-            .distinct()
-            .toList();
-    }
-
     public int determineCostOfCertainDay(SchoolDays day) {
         return costOfEachDay.get(day);
-    }
-
-    private long determineCostOfRoomAttribute(
-        Room room,
-        List<Timetable> schoolSchedule,
-        CostBreakdown breakdown
-    ) {
-        List<ClassSubjectInstance> timetablOfRoom = schoolSchedule
-            .stream()
-            .flatMap(t -> t.getClassSubjectInstances().stream())
-            .filter(c -> c.getRoom() != null)
-            .filter(csi -> csi.getRoom().getId().equals(room.getId()))
-            .toList();
-
-        // same reasoning as for teachers: count the clashes, do not just flag
-        // that there is at least one
-        return charge(
-            breakdown,
-            CostCategory.ROOM_CLASH,
-            (long) countTeacherOverlaps(timetablOfRoom) * IMPOSSIBLE_COST
-        );
-    }
-
-    private int countTeacherOverlaps(
-        final List<ClassSubjectInstance> instances
-    ) {
-        return TimetableManager.countOverlappingHours(
-            new Timetable(instances)
-        );
     }
 
     public long determineTeacherWorkloadCost(
@@ -753,30 +813,53 @@ public class SimulatedAnnealingAlgorithm {
         List<Timetable> schoolSchedule,
         final CostBreakdown breakdown
     ) {
-        long cost = 0;
+        final List<ClassSubjectInstance> csiList = new ArrayList<>();
 
-        List<ClassSubjectInstance> csiList = schoolSchedule
-            .stream()
-            .flatMap(t -> t.getClassSubjectInstances().stream())
-            .filter(csi -> csi.getClassSubject() != null)
-            .filter(csi ->
-                csi
-                    .getClassSubject()
-                    .getTeachers()
-                    .stream()
-                    .anyMatch(t -> t.getId().equals(teacher.getId()))
-            )
-            .toList();
+        for (final Timetable timetable : schoolSchedule) {
+            for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
+                if (
+                    csi.getClassSubject() != null &&
+                    csi.getClassSubject().getTeachers() != null &&
+                    csi
+                        .getClassSubject()
+                        .getTeachers()
+                        .stream()
+                        .anyMatch(t -> t.getId().equals(teacher.getId()))
+                ) {
+                    csiList.add(csi);
+                }
+            }
+        }
+
+        return teacherWorkloadCost(teacher, csiList, breakdown);
+    }
+
+    /** Workload cost of one teacher, given every lesson they teach. */
+    private long teacherWorkloadCost(
+        final Teacher teacher,
+        final List<ClassSubjectInstance> csiList,
+        final CostBreakdown breakdown
+    ) {
+        long cost = 0;
 
         // scaled by the number of clashing hours so that resolving one of
         // several clashes is already an improvement the algorithm can follow
         cost += charge(
             breakdown,
             CostCategory.TEACHER_CLASH,
-            (long) countTeacherOverlaps(csiList) * IMPOSSIBLE_COST
+            (long) TimetableManager.countOverlappingHours(csiList) *
+            IMPOSSIBLE_COST
         );
 
-        final Map<SchoolDays, Integer> hoursPerDay = new HashMap<>();
+        // read once per teacher into bitmasks instead of searching the lists
+        // with a freshly allocated hour object for every lesson hour
+        final long[] nonWorking = hourMask(
+            teacher.getTeacher_non_working_hours()
+        );
+        final long[] nonPreferred = hourMask(
+            teacher.getTeacher_non_preferred_hours()
+        );
+        final int[] hoursPerDay = new int[DAY_COUNT];
 
         for (final ClassSubjectInstance csi : csiList) {
             final Period period = csi.getPeriod();
@@ -785,18 +868,28 @@ public class SimulatedAnnealingAlgorithm {
                 csi.getClassSubject() == null || period.isLunchBreak()
             ) continue;
 
+            final int day = period.getSchoolDays().ordinal();
+
             // every hour the lesson spans has to be checked, not just the
             // one it starts on: a double period could otherwise sit on a
             // teacher's non working hours with only its first hour costed
             for (int i = 0; i < csi.getDuration(); i++) {
-                cost += determineCostForTeacherHours(
-                    teacher,
-                    new Period(
-                        period.getSchoolDays(),
-                        period.getSchoolHour() + i
-                    ),
-                    breakdown
-                );
+                final int hour = period.getSchoolHour() + i;
+
+                if (maskContains(nonWorking, day, hour)) {
+                    // is to be never be accepted
+                    cost += charge(
+                        breakdown,
+                        CostCategory.TEACHER_NON_WORKING,
+                        IMPOSSIBLE_COST
+                    );
+                } else if (maskContains(nonPreferred, day, hour)) {
+                    cost += charge(
+                        breakdown,
+                        CostCategory.TEACHER_NON_PREFERRED,
+                        SEVERE_COST
+                    );
+                }
             }
 
             // the cost of the day and of the position in the day belong to
@@ -806,14 +899,10 @@ public class SimulatedAnnealingAlgorithm {
 
             // durations, not lesson count: a double period is two hours of
             // the teacher's day and the rule below is about hours worked
-            hoursPerDay.merge(
-                period.getSchoolDays(),
-                csi.getDuration(),
-                Integer::sum
-            );
+            hoursPerDay[day] += csi.getDuration();
         }
 
-        for (final int hours : hoursPerDay.values()) {
+        for (final int hours : hoursPerDay) {
             cost += charge(
                 breakdown,
                 CostCategory.TEACHER_SHORT_DAY,
@@ -821,6 +910,41 @@ public class SimulatedAnnealingAlgorithm {
             );
         }
         return cost;
+    }
+
+    /**
+     * One long per day, bit n set when hour n is in the list. Hours outside
+     * 0..63 cannot be stored and are left out - no school day gets near that.
+     */
+    private static long[] hourMask(final List<? extends HoursPeriod> hours) {
+        final long[] mask = new long[DAY_COUNT];
+
+        if (hours == null) {
+            return mask;
+        }
+
+        for (final HoursPeriod hour : hours) {
+            if (
+                hour == null ||
+                hour.getDay() == null ||
+                hour.getSchoolHour() == null ||
+                hour.getSchoolHour() < 0 ||
+                hour.getSchoolHour() > 63
+            ) {
+                continue;
+            }
+            mask[hour.getDay().ordinal()] |= 1L << hour.getSchoolHour();
+        }
+
+        return mask;
+    }
+
+    private static boolean maskContains(
+        final long[] mask,
+        final int day,
+        final int hour
+    ) {
+        return hour >= 0 && hour <= 63 && (mask[day] & (1L << hour)) != 0;
     }
 
     /**
@@ -1005,18 +1129,16 @@ public class SimulatedAnnealingAlgorithm {
      * Friday is deliberately left out: it is meant to be the short day, and
      * counting it here would make this rule pull against maxHoursOnDay.
      */
-    public long determineCostForDayBalance(
-        final Map<SchoolDays, Integer> hoursPerDay
-    ) {
+    public long determineCostForDayBalance(final int[] hoursPerDay) {
         int max = Integer.MIN_VALUE;
         int min = Integer.MAX_VALUE;
 
-        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+        for (final SchoolDays day : SCHEDULABLE_DAYS) {
             if (day == SchoolDays.FRIDAY) {
                 continue;
             }
 
-            final int hours = hoursPerDay.getOrDefault(day, 0);
+            final int hours = hoursPerDay[day.ordinal()];
             max = Math.max(max, hours);
             min = Math.min(min, hours);
         }
@@ -1048,11 +1170,10 @@ public class SimulatedAnnealingAlgorithm {
         final Timetable currTimetable,
         final List<Timetable> schoolSchedule
     ) {
-        final Random random = new Random();
         // nextInt(1, 2) can only ever return 1, so both the swap and the
         // insertion below were dead and the search was left with a single kind
         // of move
-        final int ranNumber = random.nextInt(1, 4);
+        final int ranNumber = ThreadLocalRandom.current().nextInt(1, 4);
 
         switch (ranNumber) {
             case 1:
@@ -1082,41 +1203,6 @@ public class SimulatedAnnealingAlgorithm {
         );
     }
 
-    /**
-     * Hours a move of this lesson has to stay away from: the hours its teachers
-     * already teach in other classes, and - unless they are deliberately left
-     * out - the hours those teachers do not work at all.
-     *
-     * Both cost IMPOSSIBLE. Blocking only the clashes meant the generator kept
-     * offering destinations that were exactly as illegal as where the lesson
-     * already sat, which is how a non working hour could survive a whole run.
-     */
-    private Map<SchoolDays, Set<Integer>> blockedHoursFor(
-        final Timetable timetable,
-        final int index,
-        final List<Timetable> schoolSchedule,
-        final boolean includeNonWorkingHours
-    ) {
-        final ClassSubjectInstance instance = timetable
-            .getClassSubjectInstances()
-            .get(index);
-        final Map<SchoolDays, Set<Integer>> clashes =
-            TimetableManager.collectTeacherOccupiedHours(
-                schoolSchedule,
-                timetable,
-                TimetableManager.teacherIdsOf(instance)
-            );
-
-        if (!includeNonWorkingHours) {
-            return clashes;
-        }
-
-        return TimetableManager.mergeBlockedHours(
-            clashes,
-            TimetableManager.collectNonWorkingHours(instance)
-        );
-    }
-
     private List<Period> freePeriodsFor(
         final Timetable timetable,
         final int index,
@@ -1128,7 +1214,7 @@ public class SimulatedAnnealingAlgorithm {
             .getDuration();
         final List<Period> periods = new ArrayList<>();
 
-        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+        for (final SchoolDays day : SCHEDULABLE_DAYS) {
             periods.addAll(
                 TimetableManager.returnAllFreePeriodsOnCertainDay(
                     timetable,
@@ -1149,7 +1235,7 @@ public class SimulatedAnnealingAlgorithm {
     ) {
         final List<Period> periods = new ArrayList<>();
 
-        for (final SchoolDays day : SchoolDays.schedulableDays()) {
+        for (final SchoolDays day : SCHEDULABLE_DAYS) {
             periods.addAll(
                 TimetableManager.returnAllInsertionPeriodsOnCertainDay(
                     timetable,
@@ -1163,11 +1249,31 @@ public class SimulatedAnnealingAlgorithm {
         return periods;
     }
 
+    private List<Period> candidatesFor(
+        final Timetable timetable,
+        final int index,
+        final Map<SchoolDays, Set<Integer>> blockedHours,
+        final boolean insertion
+    ) {
+        return insertion
+            ? insertionPeriodsFor(timetable, index, blockedHours)
+            : freePeriodsFor(timetable, index, blockedHours);
+    }
+
     /**
-     * Candidates with the non working hours blocked, falling back to clashes
-     * only when that leaves nothing at all - a lesson that can go nowhere legal
-     * must still be able to move, otherwise it is frozen for the rest of the
-     * run and the cost function never gets a chance to weigh it.
+     * Candidates that stay away from the hours the lesson's teachers already
+     * teach in other classes and from the hours they do not work at all.
+     * Both cost IMPOSSIBLE: blocking only the clashes meant the generator kept
+     * offering destinations exactly as illegal as where the lesson already
+     * sat, which is how a non working hour could survive a whole run.
+     *
+     * Falls back to blocking the clashes only when that leaves nothing at all
+     * - a lesson that can go nowhere legal must still be able to move,
+     * otherwise it is frozen for the rest of the run and the cost function
+     * never gets a chance to weigh it.
+     *
+     * The clashes are collected once and reused for the fallback; that scan
+     * over the whole school is the expensive part of a move.
      */
     private List<Period> candidatesWithFallback(
         final Timetable timetable,
@@ -1175,33 +1281,31 @@ public class SimulatedAnnealingAlgorithm {
         final List<Timetable> schoolSchedule,
         final boolean insertion
     ) {
-        final List<Period> strict = insertion
-            ? insertionPeriodsFor(
+        final ClassSubjectInstance instance = timetable
+            .getClassSubjectInstances()
+            .get(index);
+        final Map<SchoolDays, Set<Integer>> clashes =
+            TimetableManager.collectTeacherOccupiedHours(
+                schoolSchedule,
                 timetable,
-                index,
-                blockedHoursFor(timetable, index, schoolSchedule, true)
-            )
-            : freePeriodsFor(
-                timetable,
-                index,
-                blockedHoursFor(timetable, index, schoolSchedule, true)
+                TimetableManager.teacherIdsOf(instance)
             );
+
+        final List<Period> strict = candidatesFor(
+            timetable,
+            index,
+            TimetableManager.mergeBlockedHours(
+                clashes,
+                TimetableManager.collectNonWorkingHours(instance)
+            ),
+            insertion
+        );
 
         if (!strict.isEmpty()) {
             return strict;
         }
 
-        return insertion
-            ? insertionPeriodsFor(
-                timetable,
-                index,
-                blockedHoursFor(timetable, index, schoolSchedule, false)
-            )
-            : freePeriodsFor(
-                timetable,
-                index,
-                blockedHoursFor(timetable, index, schoolSchedule, false)
-            );
+        return candidatesFor(timetable, index, clashes, insertion);
     }
 
     /** Moves a lesson to an hour that is free in this class as it stands. */
@@ -1226,7 +1330,7 @@ public class SimulatedAnnealingAlgorithm {
         return TimetableManager.switchClassSubjectInstancePeriodAndReturn(
             timetable,
             index,
-            candidates.get(new Random().nextInt(candidates.size()))
+            candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()))
         );
     }
 
@@ -1255,7 +1359,7 @@ public class SimulatedAnnealingAlgorithm {
         return TimetableManager.insertClassSubjectInstanceAndReturn(
             timetable,
             index,
-            candidates.get(new Random().nextInt(candidates.size()))
+            candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()))
         );
     }
 

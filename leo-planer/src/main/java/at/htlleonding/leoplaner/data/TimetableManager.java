@@ -120,7 +120,7 @@ public class TimetableManager {
                     continue;
                 }
 
-                if (Collections.disjoint(teacherIdsOf(csi), teacherIds)) {
+                if (!taughtByAnyOf(csi, teacherIds)) {
                     continue; // none of our teachers teaches this lesson
                 }
 
@@ -200,6 +200,34 @@ public class TimetableManager {
         }
 
         return merged;
+    }
+
+    /**
+     * Whether one of teacherIds teaches this lesson. Asked for every lesson
+     * of the school on every move, so it walks the teacher list instead of
+     * building a set of ids for each lesson the way teacherIdsOf does.
+     */
+    private static boolean taughtByAnyOf(
+        final ClassSubjectInstance csi,
+        final Set<Long> teacherIds
+    ) {
+        if (
+            csi.getClassSubject() == null ||
+            csi.getClassSubject().getTeachers() == null
+        ) {
+            return false;
+        }
+
+        for (final Teacher teacher : csi.getClassSubject().getTeachers()) {
+            if (
+                teacher != null &&
+                teacher.getId() != null &&
+                teacherIds.contains(teacher.getId())
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Set<Long> teacherIdsOf(final ClassSubjectInstance csi) {
@@ -667,27 +695,49 @@ public class TimetableManager {
      * no downhill path out of a badly clashing teacher.
      */
     public static int countOverlappingHours(final Timetable timetable) {
+        return countOverlappingHours(timetable.getClassSubjectInstances());
+    }
+
+    /**
+     * Summed over every hour, bookings - 1 is the same as all booked hours
+     * minus the distinct ones, so a bit per hour is all this needs. It runs
+     * for every teacher and every room on every cost evaluation, which is why
+     * it no longer builds a map per day.
+     */
+    public static int countOverlappingHours(
+        final List<ClassSubjectInstance> instances
+    ) {
+        final long[] bookedPerDay = new long[SchoolDays.values().length];
+        Set<Long> bookedOutOfRange = null; // hours a long cannot hold
         int overlaps = 0;
 
-        for (final SchoolDays day : SchoolDays.values()) {
-            final Map<Integer, Integer> bookingsPerHour = new HashMap<>();
+        for (final ClassSubjectInstance csi : instances) {
+            final SchoolDays day = csi.getPeriod().getSchoolDays();
 
-            for (final ClassSubjectInstance csi : timetable.getClassSubjectInstances()) {
-                if (csi.getPeriod().getSchoolDays() != day) {
+            if (day == null) {
+                continue;
+            }
+
+            for (int i = 0; i < csi.getDuration(); i++) {
+                final int hour = csi.getPeriod().getSchoolHour() + i;
+
+                if (hour >= 0 && hour <= 63) {
+                    final long bit = 1L << hour;
+
+                    if ((bookedPerDay[day.ordinal()] & bit) != 0) {
+                        overlaps++; // one booking per hour is fine
+                    } else {
+                        bookedPerDay[day.ordinal()] |= bit;
+                    }
                     continue;
                 }
 
-                for (int i = 0; i < csi.getDuration(); i++) {
-                    bookingsPerHour.merge(
-                        csi.getPeriod().getSchoolHour() + i,
-                        1,
-                        Integer::sum
-                    );
+                if (bookedOutOfRange == null) {
+                    bookedOutOfRange = new HashSet<>();
                 }
-            }
-
-            for (final int bookings : bookingsPerHour.values()) {
-                overlaps += bookings - 1; // one booking per hour is fine
+                if (!bookedOutOfRange.add((long) day.ordinal() << 32 | (hour & 0xffffffffL))) {
+                    overlaps++;
+                }
             }
         }
 
