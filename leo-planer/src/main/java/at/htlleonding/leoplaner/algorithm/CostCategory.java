@@ -27,5 +27,19 @@ public enum CostCategory {
     /** class days of very uneven length */
     DAY_BALANCE,
     /** lunch break sitting away from the middle of its day */
-    LUNCH_BREAK_POSITION;
+    LUNCH_BREAK_POSITION,
+    /** teacher did not get the free day(s) they asked for, or not their first choice */
+    TEACHER_WISH_FREE_DAY,
+    /** teacher did not get the free afternoon(s) they asked for */
+    TEACHER_WISH_FREE_AFTERNOON,
+    /** teacher starts earlier or ends later than they asked for */
+    TEACHER_WISH_TIME_WINDOW,
+    /** teacher's days are shaped against their wish: too long, too many in a row, gaps, too many days */
+    TEACHER_WISH_DAY_SHAPE,
+    /** two linked teachers not on the same days, or on the same days when they asked for opposite ones */
+    TEACHER_WISH_LINKED,
+    /** teacher's double period wish for a class not met */
+    TEACHER_WISH_DOUBLE_PERIOD,
+    /** teacher's lesson not in the room they asked for */
+    TEACHER_WISH_ROOM;
 }

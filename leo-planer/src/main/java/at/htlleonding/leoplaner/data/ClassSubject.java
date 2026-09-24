@@ -22,7 +22,8 @@ public class ClassSubject extends PanacheEntity {
     private int weeklyHours;
     private boolean requiresDoublePeriod;
     private boolean isBetterDoublePeriod;
-
+    // set from a teacher's AVOID wish: split the weekly hours into single periods only
+    private boolean avoidDoublePeriod;
     @ManyToOne
     @JoinColumn(name = "class_id")
     private SchoolClass schoolClass;
@@ -133,4 +134,11 @@ public class ClassSubject extends PanacheEntity {
         this.teachers = teachers;
     }
 
+    public boolean isAvoidDoublePeriod() {
+        return avoidDoublePeriod;
+    }
+
+    public void setAvoidDoublePeriod(final boolean avoidDoublePeriod) {
+        this.avoidDoublePeriod = avoidDoublePeriod;
+    }
 }
