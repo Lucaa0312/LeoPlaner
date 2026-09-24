@@ -18,3 +18,19 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+
+context: |
+  LeoPlaner: school timetable generator of HTBLA Leonding.
+  Backend: Quarkus 3 (Java, Jakarta, Hibernate/Panache) in leo-planer/.
+  Timetables are built by simulated annealing (algorithm/SimulatedAnnealingAlgorithm);
+  cost is split into CostCategory entries with CostDegree weights. The annealer
+  never changes a lesson's duration: the weekly-hours split happens once in
+  TimetableService.lessonBlocks.
+  Teacher free-text wishes are turned by an AI into TeacherWishProfile and
+  priced by the cost function; DOUBLE_PERIOD wishes become ClassSubject flags.
+  Frontend: vanilla TypeScript + hand-written CSS with --leo-* variables,
+  multi-page HTML in web/ (no React/Tailwind).
+  Live progress via WebSocket (algorithm/Socket). Excel/CSV import and export.
+  Conventions: UI text German, code comments English, sparse and explaining why;
+  keep diffs minimal, do not rewrite existing code or comments without need.
+  Logging is System.out. Build: ./mvnw in leo-planer/.

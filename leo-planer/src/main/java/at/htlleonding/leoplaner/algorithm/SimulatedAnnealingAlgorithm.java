@@ -161,6 +161,11 @@ public class SimulatedAnnealingAlgorithm {
     public void algorithmLoop(final Long iterationCap) {
         this.dataRepository.setAlgorithmRunning(true);
         this.dataRepository.setAlgorithmRunningAtLeastOnce(true);
+        for (final String rejected : setTeacherWishProfiles(
+                dataRepository.getTeacherWishProfiles()
+        )) {
+            System.out.println("Teacher wish rejected: " + rejected);
+        }
         // setTemperature(INITIAL_TEMPERATURE);
         long iterationCounter = 0;
         long costFinal = 0;

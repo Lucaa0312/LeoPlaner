@@ -1,0 +1,65 @@
+[
+  {
+    "teacherId": "TR_SL",
+    "textHash": null,
+    "wishes": [
+      {
+        "type": "FREE_DAY",
+        "degree": "HIGH",
+        "count": 1,
+        "candidates": ["FRIDAY", "MONDAY"],
+        "sourceSnippet": "Am liebsten Freitag frei, sonst Montag."
+      },
+      {
+        "type": "DOUBLE_PERIOD",
+        "degree": "MID",
+        "className": "3IHF",
+        "doublePeriodMode": "AVOID",
+        "sourceSnippet": "Englisch in der 3IHF bitte keine Doppelstunden."
+      }
+    ],
+    "unmappable": ["Möchte nicht im Keller unterrichten."]
+  },
+  {
+    "teacherId": "TR_SA",
+    "textHash": null,
+    "wishes": [
+      {
+        "type": "LATEST_END",
+        "degree": "HIGH",
+        "hour": 6,
+        "day": "WEDNESDAY",
+        "sourceSnippet": "Mittwoch muss ich nach der 6. Stunde weg."
+      },
+      {
+        "type": "DOUBLE_PERIOD",
+        "degree": "LOW",
+        "className": "1CHIF",
+        "doublePeriodMode": "PREFER",
+        "sourceSnippet": "Mathe in der 1CHIF gern als Doppelstunde."
+      }
+    ],
+    "unmappable": []
+  },
+  {
+    "teacherId": "TR_SM",
+    "textHash": null,
+    "wishes": [
+      {
+        "type": "LINKED_TEACHER",
+        "degree": "MID",
+        "otherTeacherId": "TR_SA",
+        "linkMode": "SAME_DAYS",
+        "sourceSnippet": "Wir fahren gemeinsam, gleiche Tage wie Shane Allen."
+      },
+      {
+        "type": "DOUBLE_PERIOD",
+        "degree": "LOW",
+        "className": "4CHITM",
+        "doublePeriodMode": "AVOID",
+        "sourceSnippet": "Geographie 4CHITM lieber einzeln."
+      }
+    ],
+    "unmappable": []
+  }
+]

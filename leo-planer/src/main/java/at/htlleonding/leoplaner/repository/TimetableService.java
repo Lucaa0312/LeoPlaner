@@ -1,7 +1,12 @@
 package at.htlleonding.leoplaner.repository;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.*;
@@ -14,12 +19,15 @@ import jakarta.transaction.Transactional;
 public class TimetableService {
     private static final int LAST_REGULAR_HOUR = 8;
     private static final int MAX_PLACEMENT_ATTEMPTS = 200;
+    public static final String WISH_PROFILES_PATH = "src/files/teacherWishProfiles.json";
 
     private Map<String, Timetable> bestSchoolSchedule = new HashMap<>();
 
     private Timetable currentTimetable;
     private Map<String, Timetable> currentTimetableList = new HashMap<>();
     private List<History> historyList = new CopyOnWriteArrayList<>();
+    // null until loaded; the algorithm thread reads it
+    private volatile List<TeacherWishProfile> teacherWishProfiles;
 
     @Inject
     EntityManager entityManager;
@@ -220,7 +228,8 @@ public class TimetableService {
     /**
      * How a subject's weekly hours are cut into lessons: doubles for subjects
      * that need or prefer them (plus a single for an odd hour), single hours
-     * for everything else.
+     * for everything else. A teacher wish to avoid doubles overrides a
+     * preference, never a requirement.
      *
      * No move ever splits or merges a lesson, so whatever this returns is
      * what the whole run has to work with. Drawing the lengths at random used
@@ -232,7 +241,8 @@ public class TimetableService {
         final Deque<Integer> blocks = new ArrayDeque<>();
         final int hours = Math.max(0, cs.getWeeklyHours());
 
-        if (cs.isRequiresDoublePeriod() || cs.isBetterDoublePeriod()) {
+        if (cs.isRequiresDoublePeriod()
+                || (cs.isBetterDoublePeriod() && !cs.isAvoidDoublePeriod())) {
             // doubles first: they are the harder ones to fit
             for (int i = 0; i < hours / 2; i++) {
                 blocks.add(2);
@@ -355,6 +365,12 @@ public class TimetableService {
     public void generateForAllClasses() {
         clear();
 
+        teacherWishProfiles = loadTeacherWishProfiles();
+        // before any lesson is cut: the split reads the flags this sets
+        for (String problem : applyDoublePeriodWishes(teacherWishProfiles)) {
+            System.out.println("Double period wish not applied: " + problem);
+        }
+
         // shared across every class so the generated start is already free of
         // teacher clashes
         final Map<Long, Map<SchoolDays, Set<Integer>>> teacherBusy = new HashMap<>();
@@ -367,6 +383,52 @@ public class TimetableService {
             Timetable timetable = new Timetable(instances, sc);
             currentTimetableList.put(sc.getClassName(), timetable);
         }
+    }
+
+    public List<TeacherWishProfile> getTeacherWishProfiles() {
+        return teacherWishProfiles;
+    }
+
+    public void setTeacherWishProfiles(List<TeacherWishProfile> teacherWishProfiles) {
+        this.teacherWishProfiles = teacherWishProfiles;
+    }
+
+    /**
+     * The AI's reading of the teachers' wishes. For now a file, later the AI
+     * API; a missing file just means nobody wished for anything.
+     */
+    public List<TeacherWishProfile> loadTeacherWishProfiles() {
+        final File file = new File(WISH_PROFILES_PATH);
+        if (!file.exists()) {
+            return List.of();
+        }
+
+        try {
+            final List<TeacherWishProfile> profiles = new ObjectMapper()
+                    .readValue(file, new TypeReference<List<TeacherWishProfile>>() {
+                    });
+            return profiles == null ? List.of() : profiles;
+        } catch (IOException e) {
+            System.out.println("Could not read " + WISH_PROFILES_PATH + ": " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * avoidDoublePeriod comes from wishes alone, so it is cleared first and a
+     * withdrawn wish stops splitting the subject. isBetterDoublePeriod is left
+     * alone, it can also be set by hand.
+     *
+     * Called from generateForAllClasses on this same bean; Quarkus intercepts
+     * self-invocation of non-private methods, so the transaction still applies.
+     */
+    @Transactional
+    public List<String> applyDoublePeriodWishes(List<TeacherWishProfile> profiles) {
+        final List<ClassSubject> classSubjects = ClassSubject.getAllClassSubjects();
+        for (ClassSubject cs : classSubjects) {
+            cs.setAvoidDoublePeriod(false);
+        }
+        return DoublePeriodWishApplier.apply(profiles, classSubjects);
     }
 
     public void addClassSubjectInstances(List<ClassSubjectInstance> csis) {

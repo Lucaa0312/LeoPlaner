@@ -17,8 +17,10 @@ import at.htlleonding.leoplaner.data.TeacherWishProfile.WishType;
  * never changes a lesson's duration, so pricing these wishes there alone could
  * only ever report them, never act on them.
  *
- * Only ever sets flags, never clears them: a flag set by hand looks exactly
- * like one set here, so a removed wish has to be undone by a human.
+ * Only ever sets flags, never clears them. avoidDoublePeriod comes from wishes
+ * alone and is cleared by TimetableService.applyDoublePeriodWishes before each
+ * run. isBetterDoublePeriod can also be set by hand and looks exactly like one
+ * set here, so a removed PREFER wish has to be undone by a human.
  */
 public final class DoublePeriodWishApplier {
 

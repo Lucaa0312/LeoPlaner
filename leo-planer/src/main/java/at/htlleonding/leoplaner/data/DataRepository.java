@@ -253,6 +253,17 @@ public class DataRepository {
         timetableService.clearHistory();
     }
 
+    /**
+     * Loads on first use: the algorithm can run on timetables that never went
+     * through generateForAllClasses (Excel import, a single class).
+     */
+    public List<TeacherWishProfile> getTeacherWishProfiles() {
+        if (timetableService.getTeacherWishProfiles() == null) {
+            timetableService.setTeacherWishProfiles(timetableService.loadTeacherWishProfiles());
+        }
+        return timetableService.getTeacherWishProfiles();
+    }
+
     public TimetableService getTimetableService() {
         return timetableService;
     }
