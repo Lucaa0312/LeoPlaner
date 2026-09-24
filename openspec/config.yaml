@@ -28,6 +28,10 @@ context: |
   TimetableService.lessonBlocks.
   Teacher free-text wishes are turned by an AI into TeacherWishProfile and
   priced by the cost function; DOUBLE_PERIOD wishes become ClassSubject flags.
+  Extraction (package wishes/) is model-agnostic: any OpenAI compatible API
+  (Mistral, Ollama) or a fake from src/files/teacherWishProfiles.json. Only the
+  wish text is sent, never teacher names (GDPR); teachers and rooms named in a
+  wish are resolved locally, unresolved ones go to unmappable.
   Frontend: vanilla TypeScript + hand-written CSS with --leo-* variables,
   multi-page HTML in web/ (no React/Tailwind).
   Live progress via WebSocket (algorithm/Socket). Excel/CSV import and export.

@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["wishes", "unmappable"],
+  "properties": {
+    "wishes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type", "degree", "count", "hour", "day", "candidates",
+          "otherTeacherName", "linkMode", "className", "doublePeriodMode",
+          "roomName", "sourceSnippet"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FREE_DAY", "FREE_AFTERNOON", "LATEST_END", "EARLIEST_START",
+              "MAX_CONSECUTIVE", "MAX_HOURS_PER_DAY", "FEW_DAYS", "NO_GAPS",
+              "LINKED_TEACHER", "DOUBLE_PERIOD", "ROOM"
+            ]
+          },
+          "degree": { "type": "string", "enum": ["LOW", "MID", "HIGH", "SEVERE"] },
+          "count": { "type": ["integer", "null"] },
+          "hour": { "type": ["integer", "null"] },
+          "day": {
+            "type": ["string", "null"],
+            "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", null]
+          },
+          "candidates": {
+            "type": ["array", "null"],
+            "items": { "type": "string", "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"] }
+          },
+          "otherTeacherName": { "type": ["string", "null"] },
+          "linkMode": { "type": ["string", "null"], "enum": ["SAME_DAYS", "OPPOSITE_DAYS", null] },
+          "className": { "type": ["string", "null"] },
+          "doublePeriodMode": { "type": ["string", "null"], "enum": ["PREFER", "AVOID", null] },
+          "roomName": { "type": ["string", "null"] },
+          "sourceSnippet": { "type": "string" }
+        }
+      }
+    },
+    "unmappable": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 [
   {
     "teacherId": "TR_SL",
-    "textHash": null,
+    "sourceText": "Am liebsten Freitag frei, sonst Montag. Englisch in der 3IHF bitte keine Doppelstunden. Möchte nicht im Keller unterrichten.",
     "wishes": [
       {
         "type": "FREE_DAY",
@@ -22,7 +22,7 @@
   },
   {
     "teacherId": "TR_SA",
-    "textHash": null,
+    "sourceText": "Mittwoch muss ich nach der 6. Stunde weg. Mathe in der 1CHIF gern als Doppelstunde.",
     "wishes": [
       {
         "type": "LATEST_END",
@@ -43,12 +43,12 @@
   },
   {
     "teacherId": "TR_SM",
-    "textHash": null,
+    "sourceText": "Wir fahren gemeinsam, gleiche Tage wie Shane Allen. Geographie 4CHITM lieber einzeln.",
     "wishes": [
       {
         "type": "LINKED_TEACHER",
         "degree": "MID",
-        "otherTeacherId": "TR_SA",
+        "otherTeacherName": "Shane Allen",
         "linkMode": "SAME_DAYS",
         "sourceSnippet": "Wir fahren gemeinsam, gleiche Tage wie Shane Allen."
       },

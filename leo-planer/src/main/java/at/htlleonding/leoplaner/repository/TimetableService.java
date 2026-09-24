@@ -1,15 +1,11 @@
 package at.htlleonding.leoplaner.repository;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.*;
+import at.htlleonding.leoplaner.wishes.TeacherWishExtractor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -19,7 +15,6 @@ import jakarta.transaction.Transactional;
 public class TimetableService {
     private static final int LAST_REGULAR_HOUR = 8;
     private static final int MAX_PLACEMENT_ATTEMPTS = 200;
-    public static final String WISH_PROFILES_PATH = "src/files/teacherWishProfiles.json";
 
     private Map<String, Timetable> bestSchoolSchedule = new HashMap<>();
 
@@ -37,6 +32,9 @@ public class TimetableService {
 
     @Inject
     SchoolClassRepository schoolClassRepository;
+
+    @Inject
+    TeacherWishExtractor teacherWishExtractor;
 
     public List<History> getHistoryList() {
         return historyList;
@@ -394,22 +392,15 @@ public class TimetableService {
     }
 
     /**
-     * The AI's reading of the teachers' wishes. For now a file, later the AI
-     * API; a missing file just means nobody wished for anything.
+     * The AI's reading of the teachers' wishes, see TeacherWishExtractor.
+     * Wishes are never worth failing a run over: anything going wrong means
+     * no wishes.
      */
     public List<TeacherWishProfile> loadTeacherWishProfiles() {
-        final File file = new File(WISH_PROFILES_PATH);
-        if (!file.exists()) {
-            return List.of();
-        }
-
         try {
-            final List<TeacherWishProfile> profiles = new ObjectMapper()
-                    .readValue(file, new TypeReference<List<TeacherWishProfile>>() {
-                    });
-            return profiles == null ? List.of() : profiles;
-        } catch (IOException e) {
-            System.out.println("Could not read " + WISH_PROFILES_PATH + ": " + e.getMessage());
+            return teacherWishExtractor.extractAll();
+        } catch (RuntimeException e) {
+            System.out.println("Teacher wishes could not be extracted: " + e.getMessage());
             return List.of();
         }
     }

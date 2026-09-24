@@ -59,7 +59,7 @@ public record TeacherWishProfile(
         FEW_DAYS,
         /** no parameters */
         NO_GAPS,
-        /** otherTeacherId, linkMode, day optional */
+        /** otherTeacherId (resolved from otherTeacherName), linkMode, day optional */
         LINKED_TEACHER,
         /** className, doublePeriodMode */
         DOUBLE_PERIOD,
@@ -92,6 +92,7 @@ public record TeacherWishProfile(
             SchoolDays day,
             List<SchoolDays> candidates,
             String otherTeacherId,
+            String otherTeacherName,
             LinkMode linkMode,
             String className,
             DoublePeriodMode doublePeriodMode,
