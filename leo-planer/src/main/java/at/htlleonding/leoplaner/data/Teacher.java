@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,6 +18,9 @@ import jakarta.persistence.ManyToMany;
 public class Teacher extends PanacheEntity {
     private String teacherName;
     private String nameSymbol; // Lehrerkürzel
+
+    @Column(length = 4000)
+    private String wishText; // original free-text wish from the timetable export
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable( // create new table
@@ -37,6 +41,10 @@ public class Teacher extends PanacheEntity {
 
     public static Teacher getFirstByName(final String filter) {
         return find("LOWER(teacherName) like LOWER(?1)", "%" + filter + "%").firstResult();
+    }
+
+    public static Teacher getByNameSymbol(final String nameSymbol) {
+        return find("nameSymbol", nameSymbol).firstResult();
     }
 
     public static Teacher getById(final Long id) {
@@ -89,6 +97,14 @@ public class Teacher extends PanacheEntity {
 
     public void setNameSymbol(final String nameSymbol) {
         this.nameSymbol = nameSymbol;
+    }
+
+    public String getWishText() {
+        return wishText;
+    }
+
+    public void setWishText(final String wishText) {
+        this.wishText = wishText;
     }
 
     public List<TeacherNonWorkingHours> getTeacher_non_working_hours() {

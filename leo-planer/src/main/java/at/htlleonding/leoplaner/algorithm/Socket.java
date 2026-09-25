@@ -1,8 +1,8 @@
 package at.htlleonding.leoplaner.algorithm;
 
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -20,7 +20,9 @@ public class Socket {
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
 
-    private final Set<Session> sessions = new HashSet<>();
+    // opened and closed on websocket threads while the algorithm thread
+    // iterates it for every progress event
+    private final Set<Session> sessions = ConcurrentHashMap.newKeySet();
 
     @OnOpen
     public void onOpen(Session session) {

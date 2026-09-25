@@ -134,6 +134,10 @@ public class DataRepository {
         return teacherRepository.getByName(name);
     }
 
+    public Teacher getTeacherByNameSymbol(String nameSymbol) {
+        return teacherRepository.getByNameSymbol(nameSymbol);
+    }
+
     public Long getTeacherCount() {
         return teacherRepository.getCount();
     }

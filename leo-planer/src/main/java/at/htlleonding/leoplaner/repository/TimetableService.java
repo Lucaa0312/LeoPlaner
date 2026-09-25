@@ -154,14 +154,14 @@ public class TimetableService {
         Random random = new Random();
 
         for (ClassSubject cs : classSubjects) {
-            int hoursLeft = cs.getWeeklyHours();
+            final Deque<Integer> blocks = lessonBlocks(cs);
             final Set<Long> teacherIds = teacherIdsOf(cs);
             final List<Teacher> teachers = cs.getTeachers() == null
                     ? List.of()
                     : cs.getTeachers();
             int attempts = 0;
 
-            while (hoursLeft > 0) {
+            while (!blocks.isEmpty()) {
                 attempts++;
 
                 // the constraints are given up one at a time the longer this
@@ -172,11 +172,15 @@ public class TimetableService {
                 final boolean ignoreTeachers = attempts > 2 * MAX_PLACEMENT_ATTEMPTS;
                 final boolean singleHoursOnly = attempts > 3 * MAX_PLACEMENT_ATTEMPTS;
 
-                // never draw more hours than are left, otherwise most draws are
-                // rejected and the loop can spin for a very long time
-                int duration = singleHoursOnly
-                        ? 1
-                        : random.nextInt(1, hoursLeft + 1);
+                if (singleHoursOnly && blocks.peekFirst() > 1) {
+                    // a double that fits nowhere is split rather than left out
+                    final int hours = blocks.pollFirst();
+                    for (int i = 0; i < hours; i++) {
+                        blocks.addFirst(1);
+                    }
+                }
+
+                final int duration = blocks.peekFirst();
                 SchoolDays day = days[random.nextInt(days.length)];
                 int hour = nextFreeHour(occupied, day);
                 int lastAllowedHour = ignoreTeachers
@@ -205,12 +209,44 @@ public class TimetableService {
                 reserve(occupied, hour, duration, day);
                 reserveTeachers(teacherBusy, teacherIds, hour, duration, day);
 
-                hoursLeft -= duration;
+                blocks.pollFirst();
                 attempts = 0;
             }
         }
 
         return result;
+    }
+
+    /**
+     * How a subject's weekly hours are cut into lessons: doubles for subjects
+     * that need or prefer them (plus a single for an odd hour), single hours
+     * for everything else.
+     *
+     * No move ever splits or merges a lesson, so whatever this returns is
+     * what the whole run has to work with. Drawing the lengths at random used
+     * to turn a four hour subject into one four hour block a quarter of the
+     * time, left DOUBLE_PERIOD a constant the annealer could not touch, and
+     * never looked at requiresDoublePeriod at all.
+     */
+    static Deque<Integer> lessonBlocks(ClassSubject cs) {
+        final Deque<Integer> blocks = new ArrayDeque<>();
+        final int hours = Math.max(0, cs.getWeeklyHours());
+
+        if (cs.isRequiresDoublePeriod() || cs.isBetterDoublePeriod()) {
+            // doubles first: they are the harder ones to fit
+            for (int i = 0; i < hours / 2; i++) {
+                blocks.add(2);
+            }
+            if (hours % 2 == 1) {
+                blocks.add(1);
+            }
+            return blocks;
+        }
+
+        for (int i = 0; i < hours; i++) {
+            blocks.add(1);
+        }
+        return blocks;
     }
 
     /**

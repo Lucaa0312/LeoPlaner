@@ -8,6 +8,8 @@ import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.Timetable;
+import at.htlleonding.leoplaner.data.TimetableExportImporter;
+import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
@@ -21,6 +23,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,6 +45,9 @@ public class Resource {
 
     @Inject
     ExcelManager excelManager;
+
+    @Inject
+    TimetableExportImporter timetableExportImporter;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -188,6 +194,39 @@ public class Resource {
         }
 
         return Response.ok("Import successful").build();
+    }
+
+    /**
+     * Imports teachers, their blocked hours and their mapped wishes from the
+     * SQL Server script export (TimetableExportScriptFinal.sql).
+     */
+    @POST
+    @Path("/uploadTimetableExport")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadTimetableExport(InputStream is) {
+        byte[] sqlBytes;
+        try {
+            sqlBytes = is.readAllBytes();
+        } catch (IOException e) {
+            return Response.status(500)
+                .entity("Failed to read the uploaded file")
+                .build();
+        }
+
+        try {
+            TimetableExportImportResultDTO result =
+                timetableExportImporter.importExport(sqlBytes);
+            return Response.ok(result).build();
+        } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Timetable export could not be parsed: " + e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(500)
+                .entity("Timetable export import failed: " + e.getMessage())
+                .build();
+        }
     }
 
     @Path("setLogCooling")
