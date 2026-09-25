@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import at.htlleonding.leoplaner.algorithm.CoolingMode;
+import at.htlleonding.leoplaner.algorithm.Schedule;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.repository.ClassSubjectRepository;
 import at.htlleonding.leoplaner.repository.RoomRepository;
@@ -75,6 +76,18 @@ public class DataRepository {
 
     public Timetable getTeacherTimetable(Long teacherId) {
         return timetableService.getTeacherTimetable(teacherId);
+    }
+
+    public Timetable getRoomTimetable(Long roomId) {
+        return timetableService.getRoomTimetable(roomId);
+    }
+
+    public Schedule getSchedule() {
+        return timetableService.getSchedule();
+    }
+
+    public void loadBestSchedule() {
+        timetableService.loadBestSchedule();
     }
 
     public Map<String, Timetable> getBestSchoolSchedule() {
