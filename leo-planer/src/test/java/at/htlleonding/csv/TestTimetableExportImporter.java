@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class TestTimetableExportImporter {
 
@@ -77,15 +78,18 @@ public class TestTimetableExportImporter {
         assertEquals("Anna Beispiel", teacher.teacherName());
         assertEquals(TimetableExportImporter.normalizeWishText(WISH), teacher.wishText());
 
-        // the duplicate row collapses, period 2 becomes hour 1
-        assertEquals(1, teacher.nonWorking().size());
+        // the duplicate row collapses, period 2 becomes hour 1; period 12 is the
+        // first evening hour, 11, which evening classes are taught in
+        assertEquals(2, teacher.nonWorking().size());
         assertEquals(SchoolDays.MONDAY, teacher.nonWorking().get(0).getDay());
         assertEquals(1, teacher.nonWorking().get(0).getSchoolHour());
+        assertEquals(SchoolDays.WEDNESDAY, teacher.nonWorking().get(1).getDay());
+        assertEquals(11, teacher.nonWorking().get(1).getSchoolHour());
 
         // MF Tuesday hour 3 + wish Friday 1,2; Monday 1 is already non-working
         assertEquals(3, teacher.nonPreferred().size());
-        // period 12 lies outside the day, reason T is ignored
-        assertEquals(2, mapped.skippedReservations());
+        // reason T is ignored
+        assertEquals(1, mapped.skippedReservations());
         assertTrue(mapped.unmappedWishes().isEmpty());
     }
 
@@ -103,6 +107,8 @@ public class TestTimetableExportImporter {
 
     @Test
     public void realExportIsFullyCoveredByWishFile() throws Exception {
+        // the export is personal data and not in the repository, so CI has no copy
+        assumeTrue(Files.exists(Path.of("src/files/TimetableExportScriptFinal.sql")), "timetable export not present");
         final byte[] sql = Files.readAllBytes(Path.of("src/files/TimetableExportScriptFinal.sql"));
         final WishFile wishFile = new ObjectMapper()
                 .readValue(new File(TimetableExportImporter.WISHES_PATH), WishFile.class);

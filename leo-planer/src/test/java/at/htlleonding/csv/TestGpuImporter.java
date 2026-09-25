@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class TestGpuImporter {
 
@@ -193,6 +194,9 @@ public class TestGpuImporter {
 
     @Test
     public void realExportFitsIntoAWeekAndCountsEveryLessonOnce() throws Exception {
+        // the GPU exports are school data and not in the repository, so CI has no copy
+        assumeTrue(Files.exists(Path.of(GpuImporter.SUBJECTS_PATH)) && Files.exists(Path.of(GpuImporter.LESSONS_PATH)),
+                "GPU exports not present");
         final MappedGpu mapped = GpuImporter.map(
                 GpuImporter.parse(Files.readAllBytes(Path.of(GpuImporter.SUBJECTS_PATH))),
                 GpuImporter.parse(Files.readAllBytes(Path.of(GpuImporter.LESSONS_PATH))),

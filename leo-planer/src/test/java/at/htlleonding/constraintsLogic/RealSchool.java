@@ -22,12 +22,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 /**
  * The real school - GPU lessons plus the teachers' blocked hours and wishes
  * from the timetable export - built in memory the way the importers would
  * store it, without a database.
  */
 final class RealSchool {
+
+    static final String EXPORT_PATH = "src/files/TimetableExportScriptFinal.sql";
 
     final MappedGpu mapped;
     final Map<String, Teacher> teachers = new HashMap<>();
@@ -38,7 +42,13 @@ final class RealSchool {
         this.mapped = mapped;
     }
 
+    /**
+     * The exports are school data and not in the repository; without them the
+     * tests built on them are skipped rather than failed.
+     */
     static RealSchool load() throws Exception {
+        assumeTrue(Files.exists(Path.of(GpuImporter.SUBJECTS_PATH)) && Files.exists(Path.of(GpuImporter.LESSONS_PATH))
+                && Files.exists(Path.of(EXPORT_PATH)), "school data exports not present");
         final MappedGpu mapped = GpuImporter.map(
                 GpuImporter.parse(Files.readAllBytes(Path.of(GpuImporter.SUBJECTS_PATH))),
                 GpuImporter.parse(Files.readAllBytes(Path.of(GpuImporter.LESSONS_PATH))),
@@ -48,7 +58,7 @@ final class RealSchool {
 
         final WishFile wishes = new ObjectMapper().readValue(new File(TimetableExportImporter.WISHES_PATH),
                 WishFile.class);
-        final byte[] sql = Files.readAllBytes(Path.of("src/files/TimetableExportScriptFinal.sql"));
+        final byte[] sql = Files.readAllBytes(Path.of(EXPORT_PATH));
         for (final ImportedTeacher imported : TimetableExportImporter
                 .map(TimetableExportImporter.parse(TimetableExportImporter.decode(sql)), wishes.wishes())
                 .teachers()) {
