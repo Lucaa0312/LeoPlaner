@@ -227,6 +227,61 @@ public class TestSchedule {
         assertTrue(cost(schedule, CostCategory.CLASS_GAP) > 0);
     }
 
+    @Test
+    public void startingLaterThanTheFirstHourCosts() {
+        final SchoolClass a = schoolClass("5CHITM", room("E11"));
+        final ClassSubject english = lesson(a, 1, teacher("REIT"));
+        final Schedule schedule = Schedule.of(List.of(english));
+
+        place(schedule, blockOf(schedule, english), 1, 1);
+        assertEquals(0, cost(schedule, CostCategory.LATE_START));
+        place(schedule, blockOf(schedule, english), 1, 3);
+        assertTrue(cost(schedule, CostCategory.LATE_START) > 0);
+    }
+
+    @Test
+    public void aLessonComingBackLaterTheSameDayCostsBackToBackDoesNot() {
+        final SchoolClass a = schoolClass("5CHITM", room("E11"));
+        final ClassSubject english = lesson(a, 2, teacher("REIT"));
+        final ClassSubject other = lesson(a, 1, teacher("MUEHP"));
+        final Schedule schedule = Schedule.of(List.of(english, other));
+        final List<Block> englishBlocks = schedule.getBlocks().stream()
+                .filter(b -> b.getMembers().contains(english)).toList();
+
+        place(schedule, englishBlocks.get(0), 0, 1);
+        place(schedule, englishBlocks.get(1), 0, 2);
+        place(schedule, blockOf(schedule, other), 0, 3);
+        assertEquals(0, cost(schedule, CostCategory.SUBJECT_SAME_DAY));
+
+        place(schedule, englishBlocks.get(1), 0, 4);
+        assertTrue(cost(schedule, CostCategory.SUBJECT_SAME_DAY) > 0);
+    }
+
+    @Test
+    public void classWithoutAHomeRoomStaysInOneRoomForTheDay() {
+        final SchoolClass homeless = schoolClass("5CHITM", null);
+        final ClassSubject first = lesson(homeless, 1, teacher("A"));
+        final ClassSubject second = lesson(homeless, 1, teacher("B"));
+        final ClassSubject third = lesson(homeless, 1, teacher("C"));
+        // two classrooms whose classes are only there on Friday
+        final ClassSubject friday1 = lesson(schoolClass("1AHIF", room("132")), 1, teacher("D"));
+        final ClassSubject friday2 = lesson(schoolClass("2AHIF", room("133")), 1, teacher("E"));
+
+        final Schedule schedule = Schedule.of(List.of(first, second, third, friday1, friday2));
+        place(schedule, blockOf(schedule, first), 0, 1);
+        place(schedule, blockOf(schedule, second), 0, 2);
+        place(schedule, blockOf(schedule, third), 0, 3);
+        place(schedule, blockOf(schedule, friday1), 4, 1);
+        place(schedule, blockOf(schedule, friday2), 4, 1);
+
+        final List<String> rooms = schedule.toTimetables(schedule.snapshot(), 0).get("5CHITM")
+                .getClassSubjectInstances().stream()
+                .map(csi -> csi.getRoom().getNameShort())
+                .distinct()
+                .toList();
+        assertEquals(1, rooms.size(), rooms.toString());
+    }
+
     /** A small school with every kind of rule in it, including a lunch-heavy workshop. */
     private List<ClassSubject> smallSchool() {
         final Random random = new Random(3);

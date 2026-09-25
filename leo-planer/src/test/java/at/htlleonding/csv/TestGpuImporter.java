@@ -142,21 +142,27 @@ public class TestGpuImporter {
     }
 
     @Test
-    public void cutsWorkshopsIntoOneBlockLabsIntoDoublesTheoryIntoSingles() {
+    public void cutsWorkshopsIntoOneBlockMathsIntoSinglesTheRestIntoDoubles() {
         final Map<String, GpuClassSubject> subjects = of(map(null), "1AHIF");
 
         assertEquals("5", subjects.get("1PMW4").blockSizes());
         assertEquals("2", subjects.get("1DBI/1POSE").blockSizes());
+        assertEquals("2", subjects.get("0ETH").blockSizes());
         assertEquals("1,1,1", subjects.get("0AM").blockSizes());
+        assertEquals("1,1", subjects.get("0D").blockSizes());
     }
 
     @Test
-    public void splitsWorkshopsLongerThanADay() {
-        final Map<String, GpuSubject> subjects = Map.of("1PMW4",
-                new GpuSubject("1PMW4", "Prototypenbau", "", "L4", new RgbColor(0, 0, 0)));
+    public void splitsWorkshopsLongerThanADayAndOddHoursIntoDoublesAndASingle() {
+        final RgbColor black = new RgbColor(0, 0, 0);
+        final Map<String, GpuSubject> subjects = Map.of(
+                "1PMW4", new GpuSubject("1PMW4", "Prototypenbau", "", "L4", "PMS_4", black),
+                "1SLAM", new GpuSubject("1SLAM", "SMARTLab AM", "", "L1", "AM", black));
 
         assertEquals("5,5", GpuImporter.blockSizesFor(Set.of("1PMW4"), 10, subjects, 8));
-        assertEquals("2,2,1", GpuImporter.blockSizesFor(Set.of("1DBI"), 5, subjects, 8));
+        assertEquals("2,2,1", GpuImporter.blockSizesFor(Set.of("0ITP"), 5, subjects, 8));
+        // a maths lab is a lab, not a maths lesson
+        assertEquals("2", GpuImporter.blockSizesFor(Set.of("1SLAM"), 2, subjects, 8));
     }
 
     @Test

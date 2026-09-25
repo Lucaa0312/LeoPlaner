@@ -54,6 +54,13 @@ public class GpuImporter {
     public static final String RELIGION = "REL";
     public static final String SPORTS = "BSP";
 
+    /**
+     * Languages and maths are learned in small doses: their hours are spread
+     * over the week as single hours instead of taught as doubles. Matched on
+     * the Untis alias, which groups the variants (0D, 1D, 0DUK, ...).
+     */
+    private static final Set<String> SPREAD_ALIASES = Set.of("D", "DUK", "E1", "E2", "EKO1", "AM", "SPA");
+
     /** Workshops run as one long block, but no longer than a working day. */
     static final int MAX_WORKSHOP_BLOCK = 8;
     private static final String WORKSHOP_LOAD_GROUP = "L4";
@@ -69,6 +76,7 @@ public class GpuImporter {
     private static final int SUBJECT_STATISTICS = 2;
     private static final int SUBJECT_LOAD_GROUP = 13;
     private static final int SUBJECT_BACKGROUND = 18;
+    private static final int SUBJECT_ALIAS = 20;
 
     // GPU002 columns
     private static final int LESSON_NUMBER = 0;
@@ -86,7 +94,8 @@ public class GpuImporter {
     @Inject
     DataRepository dataRepository;
 
-    public record GpuSubject(String symbol, String name, String statistics, String loadGroup, RgbColor color) {
+    public record GpuSubject(String symbol, String name, String statistics, String loadGroup, String alias,
+            RgbColor color) {
     }
 
     public record GpuClass(String name, String homeRoom, int firstHour, int lastHour) {
@@ -299,7 +308,7 @@ public class GpuImporter {
             if (!symbol.isEmpty()) {
                 subjectBySymbol.put(symbol, new GpuSubject(symbol, column(row, SUBJECT_NAME),
                         column(row, SUBJECT_STATISTICS), column(row, SUBJECT_LOAD_GROUP),
-                        toColor(column(row, SUBJECT_BACKGROUND), symbol)));
+                        column(row, SUBJECT_ALIAS), toColor(column(row, SUBJECT_BACKGROUND), symbol)));
             }
         }
 
@@ -442,16 +451,17 @@ public class GpuImporter {
     /**
      * How a lesson's weekly hours are cut, as ClassSubject.blockSizes:
      * workshops (teaching load group L4) as one block, split only when longer
-     * than a working day; other practical lessons (the "1..." subjects, taught
-     * in groups) as doubles; theory as single hours.
+     * than a working day; languages and maths (SPREAD_ALIASES, but not their
+     * labs) as single hours to be spread over the week; everything else as
+     * doubles, plus a single for an odd hour.
      */
     public static String blockSizesFor(final Set<String> symbols, final int hours, final Map<String, GpuSubject> subjects,
             final int maxBlock) {
         final List<Integer> blocks = new ArrayList<>();
-        final boolean workshop = symbols.stream()
-                .map(subjects::get)
-                .anyMatch(s -> s != null && WORKSHOP_LOAD_GROUP.equals(s.loadGroup()));
-        final boolean practical = symbols.stream().anyMatch(s -> s.startsWith("1"));
+        final List<GpuSubject> known = symbols.stream().map(subjects::get).filter(s -> s != null).toList();
+        final boolean workshop = known.stream().anyMatch(s -> WORKSHOP_LOAD_GROUP.equals(s.loadGroup()));
+        final boolean spread = !known.isEmpty() && known.stream()
+                .allMatch(s -> SPREAD_ALIASES.contains(s.alias()) && !s.name().toLowerCase().contains("lab"));
 
         if (workshop) {
             final int count = (hours + maxBlock - 1) / maxBlock;
@@ -459,15 +469,15 @@ public class GpuImporter {
                 // as even as possible, the longer blocks first
                 blocks.add(hours / count + (i < hours % count ? 1 : 0));
             }
-        } else if (practical && hours >= 2) {
+        } else if (spread) {
+            for (int i = 0; i < hours; i++) {
+                blocks.add(1);
+            }
+        } else {
             for (int i = 0; i < hours / 2; i++) {
                 blocks.add(2);
             }
             if (hours % 2 == 1) {
-                blocks.add(1);
-            }
-        } else {
-            for (int i = 0; i < hours; i++) {
                 blocks.add(1);
             }
         }
@@ -528,14 +538,14 @@ public class GpuImporter {
     /** Several subjects coupled in one lesson are taught in parallel and shown as one combined subject. */
     private static GpuSubject subjectOf(final Set<String> symbols, final Map<String, GpuSubject> subjects) {
         final List<GpuSubject> parts = symbols.stream()
-                .map(s -> subjects.getOrDefault(s, new GpuSubject(s, s, "", "", toColor("", s))))
+                .map(s -> subjects.getOrDefault(s, new GpuSubject(s, s, "", "", "", toColor("", s))))
                 .toList();
         if (parts.size() == 1) {
             return parts.get(0);
         }
         final String symbol = parts.stream().map(GpuSubject::symbol).collect(Collectors.joining("/"));
         final String name = parts.stream().map(GpuSubject::name).collect(Collectors.joining(" / "));
-        return new GpuSubject(symbol, name, "", parts.get(0).loadGroup(), parts.get(0).color());
+        return new GpuSubject(symbol, name, "", parts.get(0).loadGroup(), parts.get(0).alias(), parts.get(0).color());
     }
 
     /** Untis stores colors as Windows COLORREF, 0x00BBGGRR; subjects without one get a stable pastel. */

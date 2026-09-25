@@ -439,8 +439,12 @@ public final class Schedule {
                 }
             }
             cost += charge(breakdown, CostCategory.CLASS_GAP, free * CostModel.CLASS_GAP_COST);
+            cost += charge(breakdown, CostCategory.LATE_START,
+                    (long) Math.max(0, first - classFirstHour[c]) * CostModel.LATE_START_COST);
             cost += charge(breakdown, CostCategory.DAY_LENGTH, CostModel.dayLength(day, lessonHours));
         }
+        cost += charge(breakdown, CostCategory.SUBJECT_SAME_DAY,
+                sameDayRepeats(blocksOfClass.get(c)) * CostModel.SUBJECT_SAME_DAY_COST);
         cost += charge(breakdown, CostCategory.DAY_BALANCE, CostModel.dayBalance(hoursPerDay));
 
         for (final Block block : blocksOfClass.get(c)) {
@@ -456,6 +460,43 @@ public final class Schedule {
             }
         }
         return cost;
+    }
+
+    /**
+     * How often a lesson comes back later on a day it was already taught,
+     * counted per lesson and day as the runs of back-to-back hours minus one:
+     * a single and a single right after it are just a double, a single in the
+     * first and one in the seventh hour are a repeat.
+     */
+    private static long sameDayRepeats(final List<Block> classBlocks) {
+        long repeats = 0;
+        final int size = classBlocks.size();
+        for (int i = 0; i < size; i++) {
+            final Block a = classBlocks.get(i);
+            if (!a.isPlaced()) {
+                continue;
+            }
+            boolean firstOfLessonAndDay = true;
+            long hoursOfDay = 0; // bit per hour this lesson covers on a's day
+            for (int j = 0; j < size; j++) {
+                final Block b = classBlocks.get(j);
+                if (b.members != a.members || b.day != a.day) {
+                    continue;
+                }
+                if (j < i) {
+                    firstOfLessonAndDay = false; // counted when its first block came up
+                    break;
+                }
+                for (int h = b.hour; h < b.hour + b.duration && h < 64; h++) {
+                    hoursOfDay |= 1L << h;
+                }
+            }
+            if (firstOfLessonAndDay) {
+                // runs of set bits: count the bits whose lower neighbour is not set
+                repeats += Long.bitCount(hoursOfDay & ~(hoursOfDay << 1)) - 1;
+            }
+        }
+        return repeats;
     }
 
     /**
@@ -1193,11 +1234,22 @@ public final class Schedule {
         }
     }
 
-    /** The long blocks and every block that shares a teacher or a room with one. */
+    /**
+     * A block whose teachers leave it this few hours of the week to start in
+     * is placed exactly too: with one or two legal hours, whatever else the
+     * greedy start put there first blocks it for good.
+     */
+    static final int FEW_POSITIONS = 6;
+
+    /**
+     * The long blocks, the blocks their teachers' availability leaves almost
+     * no hour for, and every block that shares a teacher or a room with one
+     * of those.
+     */
     private List<Block> tightBlocks() {
         final java.util.Set<Block> tight = new java.util.LinkedHashSet<>();
         for (final Block block : blocks) {
-            if (block.duration < LONG_BLOCK) {
+            if (block.duration < LONG_BLOCK && workablePositions(block) > FEW_POSITIONS) {
                 continue;
             }
             tight.add(block);
@@ -1209,6 +1261,28 @@ public final class Schedule {
             }
         }
         return new ArrayList<>(tight);
+    }
+
+    /** Start hours in the block's window at which all its teachers work every hour it spans. */
+    private int workablePositions(final Block block) {
+        int count = 0;
+        for (int d = 0; d < DAY_COUNT; d++) {
+            for (int h = block.firstHour; h + block.duration - 1 <= block.lastHour; h++) {
+                boolean working = true;
+                for (int i = h; i < h + block.duration && working; i++) {
+                    for (final int t : block.teachers) {
+                        if ((nonWorking[t][d] & (1L << i)) != 0) {
+                            working = false;
+                            break;
+                        }
+                    }
+                }
+                if (working) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     /**
@@ -1308,10 +1382,17 @@ public final class Schedule {
     }
 
     /**
-     * Gives every block a room for the views: its fixed room, else the home
-     * room of one of its classes when that is free for all its hours, else any
-     * free home room of the school. Classes sharing a home room, and classes
-     * without one, end up in a room that is actually free.
+     * Gives every block a room for the views, keeping classes in one room as
+     * much as possible:
+     * - a lesson with a fixed room gets it;
+     * - then every lesson gets the home room of one of its classes where that
+     *   is free for all its hours;
+     * - the rest (classes without a home room, or whose home room another
+     *   class sharing it has) first try the room their class was in earlier
+     *   that day, and otherwise take the free classroom that stays free the
+     *   longest after them, so the next lesson can stay there too.
+     * The capacity cost keeps the classrooms from running out; a block that
+     * still finds none keeps null.
      */
     Room[] allocateRooms(final int[] positions) {
         final Room[] result = new Room[blocks.size()];
@@ -1339,6 +1420,7 @@ public final class Schedule {
         }
         ordered.sort(Comparator.comparingInt(b -> positions[b.index]));
 
+        final List<Block> homeless = new ArrayList<>();
         for (final Block block : ordered) {
             final int position = positions[block.index];
             Room chosen = null;
@@ -1350,19 +1432,154 @@ public final class Schedule {
                 }
             }
             if (chosen == null) {
+                homeless.add(block);
+            } else {
+                reserve(busy, chosen, position, block.duration);
+                result[block.index] = chosen;
+            }
+        }
+
+        // the room each class last sat in on each day, for lessons without a home room
+        final Room[][] roomOfDay = new Room[classes.size()][DAY_COUNT];
+        for (final Block block : homeless) {
+            final int position = positions[block.index];
+            final int d = position / HOURS;
+            Room chosen = null;
+            for (final int c : block.classes) {
+                final Room earlier = roomOfDay[c][d];
+                if (earlier != null && isFree(busy, earlier, position, block.duration)) {
+                    chosen = earlier;
+                    break;
+                }
+            }
+            if (chosen == null) {
+                int longest = -1;
                 for (final Room room : pool) {
                     if (isFree(busy, room, position, block.duration)) {
-                        chosen = room;
-                        break;
+                        final int freeAfter = freeRun(busy, room, position + block.duration, (d + 1) * HOURS);
+                        if (freeAfter > longest) {
+                            longest = freeAfter;
+                            chosen = room;
+                        }
                     }
                 }
             }
             if (chosen != null) {
                 reserve(busy, chosen, position, block.duration);
+                for (final int c : block.classes) {
+                    roomOfDay[c][d] = chosen;
+                }
             }
             result[block.index] = chosen;
         }
+
+        for (final Block block : homeless) {
+            if (result[block.index] == null) {
+                makeRoomFor(block, positions, result, busy, pool);
+            }
+        }
         return result;
+    }
+
+    /**
+     * Frees a classroom for a block that found none: every hour has enough
+     * classrooms, but lessons handed out earlier can leave each room free for
+     * only part of a double. Looks for a room whose lessons in the way can all
+     * move to another free room, and moves them.
+     */
+    private void makeRoomFor(final Block block, final int[] positions, final Room[] result,
+            final Map<Room, boolean[]> busy, final List<Room> pool) {
+        final int position = positions[block.index];
+        for (final Room room : pool) {
+            final List<Block> inTheWay = new ArrayList<>();
+            boolean movable = true;
+            for (final Block other : blocks) {
+                final int otherPosition = positions[other.index];
+                if (result[other.index] != room || otherPosition < 0
+                        || otherPosition >= position + block.duration || position >= otherPosition + other.duration) {
+                    continue;
+                }
+                if (other.rooms.length > 0) {
+                    movable = false; // a fixed room stays taken
+                    break;
+                }
+                inTheWay.add(other);
+            }
+            if (!movable || !isFreeExcept(busy, room, position, block.duration, inTheWay, positions)) {
+                continue;
+            }
+
+            for (final Block other : inTheWay) {
+                release(busy, room, positions[other.index], other.duration);
+            }
+            reserve(busy, room, position, block.duration);
+            final Map<Block, Room> moved = new IdentityHashMap<>();
+            for (final Block other : inTheWay) {
+                final Room target = pool.stream()
+                        .filter(r -> r != room && isFree(busy, r, positions[other.index], other.duration))
+                        .findFirst()
+                        .orElse(null);
+                if (target == null) {
+                    break;
+                }
+                reserve(busy, target, positions[other.index], other.duration);
+                moved.put(other, target);
+            }
+            if (moved.size() == inTheWay.size()) {
+                moved.forEach((other, target) -> result[other.index] = target);
+                result[block.index] = room;
+                return;
+            }
+            // undo and try the next room
+            moved.forEach((other, target) -> release(busy, target, positions[other.index], other.duration));
+            release(busy, room, position, block.duration);
+            for (final Block other : inTheWay) {
+                reserve(busy, room, positions[other.index], other.duration);
+            }
+        }
+    }
+
+    /** Whether the room is free for the block's hours once the given blocks are out of it. */
+    private static boolean isFreeExcept(final Map<Room, boolean[]> busy, final Room room, final int position,
+            final int duration, final List<Block> leaving, final int[] positions) {
+        final boolean[] slots = busy.get(room);
+        if (slots == null) {
+            return true;
+        }
+        for (int slot = position; slot < position + duration; slot++) {
+            if (!slots[slot]) {
+                continue;
+            }
+            boolean freedByLeaving = false;
+            for (final Block other : leaving) {
+                if (slot >= positions[other.index] && slot < positions[other.index] + other.duration) {
+                    freedByLeaving = true;
+                    break;
+                }
+            }
+            if (!freedByLeaving) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void release(final Map<Room, boolean[]> busy, final Room room, final int position,
+            final int duration) {
+        final boolean[] slots = busy.get(room);
+        for (int i = 0; slots != null && i < duration && position + i < SLOTS; i++) {
+            slots[position + i] = false;
+        }
+    }
+
+    /** How many slots from from on (up to end, exclusive) the room is still free. */
+    private static int freeRun(final Map<Room, boolean[]> busy, final Room room, final int from, final int end) {
+        final boolean[] slots = busy.get(room);
+        int run = 0;
+        for (int slot = from; slot < end && (slots == null || !slots[slot]); slot++) {
+            run++;
+        }
+        return run;
     }
 
     private static boolean isFree(final Map<Room, boolean[]> busy, final Room room, final int position,

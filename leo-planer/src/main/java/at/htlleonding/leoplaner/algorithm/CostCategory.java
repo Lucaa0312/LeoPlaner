@@ -39,6 +39,10 @@ public enum CostCategory {
     DAY_BALANCE(false),
     /** free hour inside a class day that is not its lunch break */
     CLASS_GAP(false),
+    /** class day starting after the first hour of its window */
+    LATE_START(false),
+    /** the same lesson twice on one day, not back to back */
+    SUBJECT_SAME_DAY(false),
     /** long class day without a free hour for lunch */
     LUNCH_BREAK_MISSING(false),
     /** lunch break sitting away from the middle of its day */

@@ -36,6 +36,13 @@ public final class CostModel {
      * which school timetables avoid almost at any price.
      */
     public static final long CLASS_GAP_COST = SEVERE_COST;
+    /**
+     * A class day starting after the first hour for no reason: the class
+     * could simply have come an hour earlier and gone home an hour earlier.
+     */
+    public static final long LATE_START_COST = SEVERE_COST;
+    /** the same lesson coming back later on a day it was already taught */
+    public static final long SUBJECT_SAME_DAY_COST = HIGH_COST;
     public static final long LUNCH_BREAK_MISSING_COST = 2 * SEVERE_COST;
     public static final long TEACHER_GAP_COST = LOW_COST;
     // a lesson with no room to go to is as impossible as a clash
@@ -88,10 +95,11 @@ public final class CostModel {
             return 0;
         }
         final int hoursOver = endHour - LAST_COMFORTABLE_HOUR;
-        // quadratic, so the ninth hour hurts far more than the seventh; Friday
-        // is weighted harder so late Friday hours are the first thing given up
-        final long weight = day == SchoolDays.FRIDAY ? MID_COST : LOW_COST;
-        return hoursOver * hoursOver * weight;
+        // quadratic, so the ninth hour hurts far more than the seventh. At LOW
+        // a Monday running to the ninth hour next to a short Wednesday was
+        // cheaper than evening them out; Friday is kept short by its own cap
+        // (maxHoursOnDay) and its surcharge per lesson (costOfDay)
+        return hoursOver * hoursOver * MID_COST;
     }
 
     /**
@@ -153,6 +161,8 @@ public final class CostModel {
             return 0;
         }
         final int spread = max - min;
-        return (long) spread * spread * LOW_COST;
+        // MID, tuned on the real school: LOW left days two hours apart on
+        // average, HIGH starts to push lessons onto Friday instead
+        return (long) spread * spread * MID_COST;
     }
 }
