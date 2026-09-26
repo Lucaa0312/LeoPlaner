@@ -92,6 +92,27 @@ kubectl port-forward service/leo-planer 8080:8080
 # open http://localhost:8080
 ```
 
+`port-forward` skips the Ingress. For the checks below, go **through the Ingress** so its limits
+(upload size, WebSocket timeouts) apply, by pointing the placeholder host at minikube:
+
+```bash
+echo "$(minikube ip) YOUR-HOST.cloud.htl-leonding.ac.at" | sudo tee -a /etc/hosts
+# open http://YOUR-HOST.cloud.htl-leonding.ac.at, remove the line from /etc/hosts afterwards
+```
+
+Checks (this is the production image, so it's also the test of prod mode):
+
+1. The dashboard shows **no** "Demodaten laden" / "Daten zurücksetzen", and
+   `/api/run/importSchoolData` answers `403`.
+2. **Daten importieren** with all four real files (see [Real school data](#real-school-data-local-and-cloud))
+   → "Schuldaten importiert: …". A `413` here means the `proxy-body-size` annotation in `k8s/ingress.yaml`
+   is missing. The container has no `src/files`, so this also proves the import doesn't need it.
+3. Run the algorithm on the real data and let it finish; the progress has to update live (WebSocket).
+4. Memory: while it runs `kubectl top pod` (needs `minikube addons enable metrics-server`), afterwards
+   `kubectl describe pod -l app=leo-planer`. It must **not** say `OOMKilled` and `Restart Count` must be 0.
+   If it does, raise `limits.memory` in `k8s/leo-planer.yaml` (1Gi now) and try again.
+5. Export, then import the Excel file again.
+
 ## 4. Deploy to LeoCloud
 
 ```bash

@@ -11,6 +11,9 @@ metadata:
     # keep the algorithm-progress WebSocket open (nginx ingress; ignored by other controllers)
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # nginx rejects bodies over 1 MB by default (413); the real school data import alone is ~0.9 MB.
+    # 10m matches what Quarkus accepts itself.
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
   rules:
     - host: YOUR-HOST.cloud.htl-leonding.ac.at
