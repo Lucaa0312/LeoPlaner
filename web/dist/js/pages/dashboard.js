@@ -2,7 +2,7 @@ import initNavbar from "./navbar.js";
 import { initImportButton } from "../features/importButton.js";
 import { initExportButton } from "../features/exportButton.js";
 import { fetchSchoolClasses } from "../api/classSubjectApi.js";
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../utils/apiBase.js";
 // Fetches a single count endpoint, returning 0 on failure.
 async function fetchCount(path) {
     try {
@@ -93,20 +93,24 @@ function renderQuickActions() {
     if (!grid)
         return;
     grid.replaceChildren();
-    // Import (reuses importButton.ts which binds #excel-upload)
-    const importCard = quickActionCard("fa-solid fa-upload", "Excel importieren", "Importieren Sie Ihre Schuldaten aus einer Excel-Datei");
+    // Import (reuses importButton.ts which binds #data-upload)
+    const importCard = quickActionCard("fa-solid fa-upload", "Daten importieren", "Eine Excel-Datei oder alle Schuldaten-Dateien (.sql, GPU006, GPU002, Wünsche .json) gemeinsam auswählen");
     const input = document.createElement("input");
     input.type = "file";
-    input.id = "excel-upload";
-    input.accept = ".xlsx,.xls";
+    input.id = "data-upload";
+    input.accept = ".xlsx,.xls,.txt,.sql,.json";
+    input.multiple = true;
     input.hidden = true;
-    const importName = document.createElement("p");
-    importName.id = "import-file-name";
-    importName.className = "action-status";
+    const importFiles = document.createElement("ul");
+    importFiles.id = "import-files";
+    importFiles.className = "import-files";
+    const importStatus = document.createElement("p");
+    importStatus.id = "import-status";
+    importStatus.className = "action-status";
     const importError = document.createElement("p");
     importError.id = "import-error";
     importError.className = "action-error";
-    importCard.append(input, importName, importError);
+    importCard.append(input, importFiles, importStatus, importError);
     importCard.addEventListener("click", () => input.click());
     // Export (reuses exportButton.ts which binds #excel-export)
     const exportCard = quickActionCard("fa-solid fa-download", "Daten exportieren", "Exportieren Sie Ihre Daten und Stundenpläne als Excel");
@@ -126,6 +130,67 @@ function renderQuickActions() {
     grid.append(importCard, exportCard, timetableCard);
     initImportButton();
     initExportButton();
+}
+// Asks the backend which admin actions are enabled (dev: both, cloud: none).
+// Any failure counts as "disabled", so the buttons stay hidden.
+async function fetchAdminFeatures() {
+    const disabled = { resetEnabled: false, demoDataEnabled: false };
+    try {
+        const res = await fetch(`${API_BASE_URL}/admin/features`);
+        if (!res.ok)
+            return disabled;
+        return (await res.json());
+    }
+    catch {
+        return disabled;
+    }
+}
+// Builds a quick-action card that runs a request on click and shows the result below it.
+function adminActionCard(icon, title, description, run, conflictMessage, confirmMessage) {
+    const card = quickActionCard(icon, title, description);
+    const error = document.createElement("p");
+    error.className = "action-error";
+    card.appendChild(error);
+    let busy = false;
+    card.addEventListener("click", async () => {
+        if (busy)
+            return;
+        if (confirmMessage && !window.confirm(confirmMessage))
+            return;
+        busy = true;
+        error.textContent = "";
+        try {
+            const res = await run();
+            if (res.ok) {
+                renderStats(await loadStats());
+            }
+            else if (res.status === 409) {
+                error.textContent = conflictMessage;
+            }
+            else {
+                error.textContent = `Fehlgeschlagen (Status ${res.status})`;
+            }
+        }
+        catch {
+            error.textContent = "Server nicht erreichbar";
+        }
+        finally {
+            busy = false;
+        }
+    });
+    return card;
+}
+// Adds "Demodaten laden" / "Daten zurücksetzen" to the quick actions, only if the backend enables them.
+function renderAdminActions(features) {
+    const grid = document.getElementById("quick-actions");
+    if (!grid)
+        return;
+    if (features.demoDataEnabled) {
+        grid.appendChild(adminActionCard("fa-solid fa-database", "Demodaten laden", "Lädt die Beispieldaten (nur bei leerer Datenbank)", () => fetch(`${API_BASE_URL}/admin/demo-data`, { method: "POST" }), "Es sind bereits Daten vorhanden. Bitte zuerst zurücksetzen."));
+    }
+    if (features.resetEnabled) {
+        grid.appendChild(adminActionCard("fa-solid fa-trash", "Daten zurücksetzen", "Löscht alle Lehrer, Klassen, Räume, Fächer und Stundenpläne", () => fetch(`${API_BASE_URL}/admin/data`, { method: "DELETE" }), "Der Algorithmus läuft gerade. Bitte zuerst stoppen.", "Alle Daten (Lehrer, Klassen, Räume, Fächer, Stundenpläne) werden unwiderruflich gelöscht. Fortfahren?"));
+    }
 }
 const dataLinks = [
     { href: "teacher.html", icon: "fa-solid fa-users", title: "Lehrer" },
@@ -162,6 +227,7 @@ export async function initializeApp() {
     const stats = await loadStats();
     renderStats(stats);
     renderQuickActions();
+    renderAdminActions(await fetchAdminFeatures());
     renderDataManagement();
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

@@ -16,6 +16,7 @@ import at.htlleonding.leoplaner.dto.TimetableDTO;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -50,8 +51,16 @@ public class TimeTableResource {
     @Path("/getByClass/{id}")
     public TimetableDTO getTimetableByClass(@PathParam("id") final Long id) {
         final SchoolClass schoolClass = this.dataRepository.getSchoolClassById(id);
-        return UtilBuildFunctions
-                .createTimetableDTO(this.dataRepository.getAllTimetables().get(schoolClass.getClassName()));
+        if (schoolClass == null) {
+            throw new NotFoundException("No school class with id " + id);
+        }
+
+        final Timetable timetable = this.dataRepository.getAllTimetables().get(schoolClass.getClassName());
+        if (timetable == null) {
+            throw new NotFoundException("No timetable for class " + schoolClass.getClassName());
+        }
+
+        return UtilBuildFunctions.createTimetableDTO(timetable);
     }
 
     @GET

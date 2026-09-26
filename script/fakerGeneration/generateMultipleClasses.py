@@ -177,7 +177,14 @@ def formatDayDict(data_dict):
     return ":".join(day_strings)
 
 
-def exportToCsv(filename, fieldnames, data, folder="csvOutput"):
+# The generated CSVs are the backend's bundled demo data ("Demodaten laden").
+DEMO_DATA_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..", "..", "leo-planer", "src", "main", "resources", "demo-data",
+)
+
+
+def exportToCsv(filename, fieldnames, data, folder=DEMO_DATA_DIR):
     if not os.path.exists(folder):
         os.makedirs(folder)
 

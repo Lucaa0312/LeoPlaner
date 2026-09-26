@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../utils/apiBase.js";
 
 export async function exportFile(): Promise<Blob> {
   const response = await fetch(`${API_BASE_URL}/test-export`, {

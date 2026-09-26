@@ -23,13 +23,13 @@ public class TestSpreadOutClasses {
 
     @BeforeEach
     public void injectTestCsvDataNew() {
-        final String baseDir = "../script/fakerGeneration/csvOutput/";
+        final String baseDir = "src/main/resources/demo-data/";
 
         final String teacherCSVPath = baseDir + "teachers.csv";
         final String classSubjectCSVPath = baseDir + "classSubjects.csv";
         final String roomCSVPath = baseDir + "rooms.csv";
 
-        final String subjectCSVPath = "src/files/csvFiles/test1/testSubject.csv";
+        final String subjectCSVPath = "src/main/resources/demo-data/subjects.csv";
 
         CSVManager.processCSV(subjectCSVPath, dataRepository);
         CSVManager.processCSV(teacherCSVPath, dataRepository);

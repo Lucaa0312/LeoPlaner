@@ -106,6 +106,38 @@ public class TestTimetableExportImporter {
     }
 
     @Test
+    public void withoutWishesEveryWishIsReportedAndBlockedHoursStay() {
+        final MappedExport mapped = TimetableExportImporter.map(
+                TimetableExportImporter.parse(SNIPPET), List.of());
+
+        assertEquals(List.of("TR_ABC"), mapped.unmappedWishes());
+        final ImportedTeacher teacher = mapped.teachers().get(0);
+        assertEquals(2, teacher.nonWorking().size());
+        // only the MF reservation, nothing from a wish
+        assertEquals(1, teacher.nonPreferred().size());
+    }
+
+    @Test
+    public void readsWishesAndIgnoresTheConventions() throws Exception {
+        final String json = """
+                {
+                  "conventions": ["Hours are LeoPlaner school hours 1-10."],
+                  "wishes": [
+                    { "teacherId": "TR_ABC", "textHash": "abc", "note": "", "sourceText": "Freitag frei",
+                      "nonPreferred": [ { "day": "FRIDAY", "hours": [1, 2] } ] }
+                  ]
+                }
+                """;
+
+        final List<Wish> wishes = TimetableExportImporter.readWishes(json.getBytes(StandardCharsets.UTF_8));
+
+        assertEquals(1, wishes.size());
+        assertEquals("TR_ABC", wishes.get(0).teacherId());
+        assertEquals(SchoolDays.FRIDAY, wishes.get(0).nonPreferred().get(0).day());
+        assertEquals(List.of(1, 2), wishes.get(0).nonPreferred().get(0).hours());
+    }
+
+    @Test
     public void realExportIsFullyCoveredByWishFile() throws Exception {
         // the export is personal data and not in the repository, so CI has no copy
         assumeTrue(Files.exists(Path.of("src/files/TimetableExportScriptFinal.sql")), "timetable export not present");
