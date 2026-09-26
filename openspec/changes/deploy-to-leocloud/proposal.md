@@ -37,6 +37,11 @@ data get mixed.
   its timetable does not exist.
 - **Excel upload/export no longer write to `src/files/...`**; they use a
   configurable writable directory (or in-memory streams).
+- **One import button for Excel and the real school data:** the dashboard import accepts several
+  files at once (Excel, or the timetable SQL export + Untis GPU006/GPU002 + the optional wishes
+  JSON). The backend recognizes each file by its content and imports them in the right order, so
+  the real data can reach the cloud without being baked into the public image.
+  `run/importSchoolData` becomes a dev-only shortcut.
 - **Database schema strategy per profile:** `dev` keeps `drop-and-create`
   (same as today), `prod` uses `update` so cloud data survives pod restarts.
 - **Production container image:** a new multi-stage Dockerfile that builds the

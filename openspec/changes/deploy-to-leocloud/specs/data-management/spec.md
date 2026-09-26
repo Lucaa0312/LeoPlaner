@@ -93,3 +93,56 @@ cloud deployment).
 #### Scenario: Ids differ from the file
 - **WHEN** the rows created by the import get different ids than the ones written in the file
 - **THEN** all relations are still restored correctly
+
+### Requirement: Import files recognized by their content
+The system SHALL accept one or more files at `POST /api/import` and recognize the type of each
+file from its content, independent of its name: an Excel workbook, the timetable SQL export, the
+teacher wishes JSON, the Untis subjects file (GPU006) or the Untis lessons file (GPU002). A single
+Excel file SHALL be imported as before. The SQL export together with GPU006 and GPU002, with the
+wishes JSON optional, SHALL be imported as the real school data in the order teachers, then
+subjects, rooms, classes and lessons, followed by a new starting schedule. Any other selection
+SHALL be rejected before any data is written. Every response SHALL list each uploaded file with
+the type it was recognized as, and all messages SHALL be in German and name what is missing or
+not allowed, so a valid file is never reported as broken because of a wrong combination.
+
+#### Scenario: Excel file
+- **WHEN** a single exported `.xlsx` file is uploaded
+- **THEN** it is imported the same way as through the previous Excel upload
+
+#### Scenario: Complete school data
+- **WHEN** the SQL export, GPU006, GPU002 and the wishes JSON are uploaded together, in any order
+  and with any file names
+- **THEN** teachers with their blocked hours and wishes, subjects, rooms, classes and lessons are
+  imported and a starting schedule exists
+- **AND** the response contains the import counts
+
+#### Scenario: School data without the wishes file
+- **WHEN** the SQL export, GPU006 and GPU002 are uploaded without the wishes JSON
+- **THEN** the import succeeds, the teachers get their blocked hours
+- **AND** the response reports the wishes as not applied instead of failing
+
+#### Scenario: A file is missing
+- **WHEN** only the SQL export and GPU006 are uploaded
+- **THEN** the response is 400, lists both files as recognized, and names the missing lessons file
+- **AND** no data has changed
+
+#### Scenario: Excel mixed with school files
+- **WHEN** an Excel file and school data files are uploaded together
+- **THEN** the response is 400 and asks to select either the Excel file or the school data files
+- **AND** no data has changed
+
+#### Scenario: Unknown file
+- **WHEN** a file of none of the known types is uploaded
+- **THEN** the response is 400 and names that file as not recognized
+
+#### Scenario: Works from the packaged container
+- **WHEN** the import runs in the production image, which contains no `src/files` directory
+- **THEN** it succeeds using only the uploaded files
+
+### Requirement: Import from the source tree only in development
+`GET /api/run/importSchoolData`, which reads the school data from `src/files`, SHALL only work
+when the reset feature flag is enabled and SHALL answer 403 otherwise.
+
+#### Scenario: Production container
+- **WHEN** `run/importSchoolData` is called with the default production configuration
+- **THEN** the response is 403 and no data has changed

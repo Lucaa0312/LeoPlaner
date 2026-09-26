@@ -93,20 +93,24 @@ function renderQuickActions() {
     if (!grid)
         return;
     grid.replaceChildren();
-    // Import (reuses importButton.ts which binds #excel-upload)
-    const importCard = quickActionCard("fa-solid fa-upload", "Excel importieren", "Importieren Sie Ihre Schuldaten aus einer Excel-Datei");
+    // Import (reuses importButton.ts which binds #data-upload)
+    const importCard = quickActionCard("fa-solid fa-upload", "Daten importieren", "Eine Excel-Datei oder alle Schuldaten-Dateien (.sql, GPU006, GPU002, Wünsche .json) gemeinsam auswählen");
     const input = document.createElement("input");
     input.type = "file";
-    input.id = "excel-upload";
-    input.accept = ".xlsx,.xls";
+    input.id = "data-upload";
+    input.accept = ".xlsx,.xls,.txt,.sql,.json";
+    input.multiple = true;
     input.hidden = true;
-    const importName = document.createElement("p");
-    importName.id = "import-file-name";
-    importName.className = "action-status";
+    const importFiles = document.createElement("ul");
+    importFiles.id = "import-files";
+    importFiles.className = "import-files";
+    const importStatus = document.createElement("p");
+    importStatus.id = "import-status";
+    importStatus.className = "action-status";
     const importError = document.createElement("p");
     importError.id = "import-error";
     importError.className = "action-error";
-    importCard.append(input, importName, importError);
+    importCard.append(input, importFiles, importStatus, importError);
     importCard.addEventListener("click", () => input.click());
     // Export (reuses exportButton.ts which binds #excel-export)
     const exportCard = quickActionCard("fa-solid fa-download", "Daten exportieren", "Exportieren Sie Ihre Daten und Stundenpläne als Excel");

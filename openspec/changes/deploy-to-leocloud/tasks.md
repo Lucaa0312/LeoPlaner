@@ -50,6 +50,18 @@
 - [x] 8.2 Return the managed instance from `SubjectRepository.add` (it used `merge` and returned the detached one); verify teachers keep their subjects after an import
 - [x] 8.3 Load the first available class on the timetable page instead of the hardcoded id 1, and answer 404 instead of a 500 for a missing class/timetable; verify `GET /api/timetable/getByClass/<unknown>` returns 404 and the page works after a reset+import
 
+## 9. Real school data without `src/files` (merged from `main`, see design D12)
+
+- [x] 9.1 Make the importers take their data as bytes only: `TimetableExportImporter.importExport` gets the wishes JSON as an optional parameter (none → every wish is reported as unmapped, blocked hours are still imported) instead of reading `WISHES_PATH`; verify `TestTimetableExportImporter` and `TestGpuImporter` still pass and add a test for the import without the wishes file
+- [x] 9.2 Add a file type detector (Excel, SQL export, wishes JSON, GPU006, GPU002, unknown) that looks at the content only (see the D12 table) and reuses the existing decode/parse helpers for the Windows-1252 GPU files; verify with unit tests on small anonymized sample contents for every type, including a renamed file and an unknown file (no real data in `src/test`)
+- [x] 9.3 Add the combination check and German messages: Excel alone, or SQL + GPU006 + GPU002 (+ optional JSON); missing file, duplicate type, Excel mixed with school files and unknown file each get their own message, and every result lists each file with its recognized type; verify with unit tests for each case
+- [x] 9.4 Create `POST /api/import` (`multipart/form-data`) that detects, checks and then runs either the Excel import or the school import (teachers → GPU → `randomizeSchoolSchedule()`, same order as `run/importSchoolData`); nothing is written when the check fails; verify with a Quarkus test for a 400 on a missing file (the counts stay unchanged) and, when the real files exist locally, a skipped-if-missing test for the full import
+- [x] 9.5 Guard `run/importSchoolData` with `leoplaner.reset-enabled` (403 when off) and keep it reading `src/files` as a dev shortcut; verify in `AdminDisabledTest` that it answers 403
+- [x] 9.6 Frontend: the import button allows `multiple` files with `.xlsx,.xls,.txt,.sql,.json`, drops the MIME check, sends all files as `FormData` to `/api/import`, and shows the per-file result and the message from the backend; rename the quick action to "Daten importieren"; rebuild `web/dist`; verify in the browser: Excel alone, all four school files, three school files without the JSON, only two files (clear message), Excel + a TXT (clear message)
+- [x] 9.7 Grep `leo-planer/src/main/java` for `src/files` again; verify only the dev/legacy endpoints (`run/importSchoolData`, `run/testCsvOriginal`, `test-import`) still reference it
+- [x] 9.8 Update `DEPLOY.md`: how the real data gets to the cloud (select the files in the import on the website), that the files must never be committed or put into the image, and that `run/importSchoolData` is dev-only; verify against the endpoint and the file names
+- [x] 9.9 Run `./mvnw verify` and the local round trip again (demo data, algorithm, export, reset, Excel import, reset, school data import through the website, algorithm on the real data); verify everything works and the browser console stays clean
+
 ## Handover (done by the team, not part of implementation)
 
 Build and push the image to ghcr.io, make the package public, `leocloud auth login`,

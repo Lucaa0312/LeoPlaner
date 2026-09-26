@@ -3,16 +3,19 @@
 ## MODIFIED Requirements
 
 ### Requirement: Dashboard quick actions
-The dashboard SHALL provide three quick actions: Excel importieren, Daten
+The dashboard SHALL provide three quick actions: Daten importieren, Daten
 exportieren, and Stundenplan anzeigen. In addition, the dashboard SHALL
 provide the actions "Demodaten laden" and "Daten zurücksetzen", each shown
 only when the backend reports the corresponding feature as enabled via
 `GET /api/admin/features`.
 
 #### Scenario: Import action
-- WHEN the user activates "Excel importieren"
-- THEN the existing import flow (`importButton.ts`) opens a file picker
-- AND only `.xlsx` and `.xls` files are accepted
+- WHEN the user activates "Daten importieren"
+- THEN the import flow (`importButton.ts`) opens a file picker that allows selecting several files
+- AND `.xlsx`, `.xls`, `.txt`, `.sql` and `.json` files are accepted
+- AND the files are sent together to `POST /api/import`
+- AND the result shows, per file, what it was recognized as, followed by the import counts or the
+  German error message from the backend
 
 #### Scenario: Export action
 - WHEN the user activates "Daten exportieren"

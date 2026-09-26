@@ -7,12 +7,12 @@ import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.GpuImporter;
+import at.htlleonding.leoplaner.data.SchoolDataImport;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.TimetableExportImporter;
-import at.htlleonding.leoplaner.dto.GpuImportResultDTO;
-import at.htlleonding.leoplaner.dto.SchoolDataImportResultDTO;
 import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -55,7 +55,11 @@ public class Resource {
     TimetableExportImporter timetableExportImporter;
 
     @Inject
-    GpuImporter gpuImporter;
+    SchoolDataImport schoolDataImport;
+
+    // run/importSchoolData reads src/files, which only exists on a developer's machine
+    @ConfigProperty(name = "leoplaner.reset-enabled")
+    boolean resetEnabled;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -198,8 +202,9 @@ public class Resource {
     }
 
     /**
-     * Imports teachers, their blocked hours and their mapped wishes from the
-     * SQL Server script export (TimetableExportScriptFinal.sql).
+     * Imports teachers and their blocked hours from the SQL Server script
+     * export (TimetableExportScriptFinal.sql). The wishes are not applied here,
+     * they come with the whole school data through /api/import.
      */
     @POST
     @Path("/uploadTimetableExport")
@@ -217,7 +222,7 @@ public class Resource {
 
         try {
             TimetableExportImportResultDTO result =
-                timetableExportImporter.importExport(sqlBytes);
+                timetableExportImporter.importExport(sqlBytes, List.of());
             return Response.ok(result).build();
         } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -231,7 +236,8 @@ public class Resource {
     }
 
     /**
-     * Imports the whole school from src/files: teachers and their wishes from
+     * Dev shortcut, only when leoplaner.reset-enabled is on (403 otherwise):
+     * imports the whole school from src/files: teachers and their wishes from
      * the SQL Server export first, then subjects, rooms, classes and lessons
      * from the Untis GPU files, and builds a fresh starting schedule.
      * date (yyyy-MM-dd) picks which lessons are active, by default the start
@@ -241,28 +247,26 @@ public class Resource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response importSchoolData(@QueryParam("date") String date) {
+        if (!resetEnabled) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity("Only available in development, use /api/import")
+                .build();
+        }
         try {
             LocalDate referenceDate = date == null || date.isBlank()
                 ? null
                 : LocalDate.parse(date);
 
-            // the placed lessons point at the ClassSubjects the import replaces
-            this.dataRepository.clearTimetableData();
-            this.dataRepository.clearHistory();
-
-            TimetableExportImportResultDTO teachers =
-                timetableExportImporter.importExport(
-                    Files.readAllBytes(Paths.get(TIMETABLE_EXPORT_PATH))
-                );
-            GpuImportResultDTO gpu = gpuImporter.importGpu(
-                Files.readAllBytes(Paths.get(GpuImporter.SUBJECTS_PATH)),
-                Files.readAllBytes(Paths.get(GpuImporter.LESSONS_PATH)),
-                referenceDate
-            );
-
-            this.dataRepository.randomizeSchoolSchedule();
             return Response.ok(
-                new SchoolDataImportResultDTO(teachers, gpu)
+                schoolDataImport.importSchoolData(
+                    Files.readAllBytes(Paths.get(TIMETABLE_EXPORT_PATH)),
+                    Files.readAllBytes(Paths.get(GpuImporter.SUBJECTS_PATH)),
+                    Files.readAllBytes(Paths.get(GpuImporter.LESSONS_PATH)),
+                    TimetableExportImporter.readWishes(
+                        Files.readAllBytes(Paths.get(TimetableExportImporter.WISHES_PATH))
+                    ),
+                    referenceDate
+                )
             ).build();
         } catch (
             DateTimeParseException

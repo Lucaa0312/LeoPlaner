@@ -194,6 +194,51 @@ Once the frontend is served from Quarkus, the cloud setup is same-origin.
 `quarkus.http.cors.origins=*` stays as it is, because the Python-server setup
 still needs cross-origin requests.
 
+### D12 — One import for Excel and the real school data, detected by content
+The real school data (merged from `main`) is read from `src/files/...`
+(`GpuImporter.SUBJECTS_PATH`/`LESSONS_PATH`, `TimetableExportImporter.WISHES_PATH`,
+`Resource.TIMETABLE_EXPORT_PATH`). Those files don't exist in the container and
+must not be baked into the image, because the ghcr package is public and the
+files hold real teacher data. So they are uploaded through the existing import
+button, which accepts several files at once.
+- **Endpoint:** `POST /api/import`, `multipart/form-data`, one or more files.
+  The backend detects each file's type **by content**, not by name or MIME
+  type (browsers report `.TXT`/`.sql` inconsistently):
+
+  | Type | Signal |
+  |---|---|
+  | Excel | ZIP magic bytes `PK\x03\x04` |
+  | Timetable SQL export | contains `CREATE TABLE [dbo].[Teachers]` |
+  | Wishes JSON | parses as JSON with a `wishes` array |
+  | GPU006 (subjects) | `;`-separated, first field a quoted text |
+  | GPU002 (lessons) | `;`-separated, first field a plain number |
+
+  The GPU files are Windows-1252, so detection uses the existing
+  `GpuImporter.parse` / `TimetableExportImporter.decode` and never assumes UTF-8.
+- **Allowed combinations:** one Excel file alone → Excel import (unchanged
+  logic). SQL + GPU006 + GPU002, optionally + wishes JSON → school import, in
+  the fixed order teachers → subjects/rooms/classes/lessons →
+  `randomizeSchoolSchedule()`, the same as `run/importSchoolData`. Anything else
+  (a file missing, a type twice, Excel mixed with school files, an unknown file)
+  → 400 **before anything is written**.
+- **The wishes JSON is optional.** It is an AI translation of the free-text
+  wishes in the SQL export, made once offline and matched by teacher id + text
+  hash. Without it, teachers still get their blocked hours (`Reservations`) and
+  all wishes are reported as not applied. It is not an error.
+- **Response:** always lists every file with the type it was recognized as, so
+  the user can see the files themselves are fine when the *combination* is
+  wrong. On success it contains the import counts and the unmapped wishes.
+  All user-facing texts are German.
+- **`run/importSchoolData` stays as a dev shortcut** (reads `src/files`), but
+  answers 403 unless `leoplaner.reset-enabled` is on (the D4 dev flag), so it
+  can't be triggered on the cloud.
+- *Alternative:* one endpoint + button per file type. The files depend on each
+  other (the lessons need the subjects and teachers), so the user would have to
+  know the order. Rejected.
+- *Alternative:* detection in the frontend. It can't be unit-tested with the
+  existing JUnit setup and would duplicate the parsers. Rejected; the frontend
+  only relaxes its extension/MIME check.
+
 ## Risks / Trade-offs
 
 - [Anyone who can reach the cloud URL can upload Excel files and trigger the
@@ -228,6 +273,11 @@ still needs cross-origin requests.
 6. **Follow-up change:** a CI step that builds and pushes the image on `main`.
 
 ## Open Questions
+
+- The Excel import only adds rows, so importing into a database that already
+  has data creates duplicates. D12 doesn't change that. Whether the import
+  should require an empty database (like "Demodaten laden") is left for a
+  later change.
 
 - The exact Ingress hostname or path pattern LeoCloud assigns. Read it from
   `leocloud get template nginx` / `kubectl describe ingress` and fill the

@@ -21,6 +21,12 @@ After changing TypeScript: `cd web && npm run build`.
 Both buttons only exist in dev mode (`quarkus:dev`). In the cloud they are hidden and the endpoints
 answer `403`. Restarting `quarkus:dev` still empties the database, as before.
 
+- **Daten importieren**: an Excel export from LeoPlaner, or the real school data (see
+  [Real school data](#real-school-data-local-and-cloud)). Works the same locally and in the cloud.
+- Dev shortcut for the real school data without the file dialog:
+  `http://localhost:8080/api/run/importSchoolData` reads the files from `leo-planer/src/files/`.
+  It only works while `leoplaner.reset-enabled` is on (dev mode), otherwise it answers `403`.
+
 To regenerate demo data: `python3 script/fakerGeneration/generateMultipleClasses.py` (writes directly into
 the `demo-data` folder).
 
@@ -116,6 +122,32 @@ kubectl set image deployment/leo-planer leo-planer=ghcr.io/lucaa0312/leoplaner:<
 ```
 
 The database is not affected by this.
+
+## Real school data (local and cloud)
+
+The real data consists of four files. **They are personal data of real teachers: never commit them,
+never copy them into the image or into `src/main/resources`.** `leo-planer/.gitignore` already ignores
+the GPU files and the SQL export.
+
+| File | What it is | Needed |
+|---|---|---|
+| `TimetableExportScriptFinal.sql` | teachers, blocked hours and wish texts (SQL Server export) | yes |
+| `GPU006.TXT` | subjects (Untis export) | yes |
+| `GPU002db.TXT` | lessons (Untis export) | yes |
+| `teacherWishes.json` | the wish texts translated once into hours | no, without it the wishes are not applied |
+
+To import them, local or in the cloud: dashboard → **Daten importieren** → select all files **at once**.
+The names don't matter, the backend recognizes each file by its content and imports them in the right
+order. If something is missing or doesn't belong together, nothing is changed and the message says
+what's wrong; every file is listed with what it was recognized as. An Excel file and school data files
+can't be imported in one go. Each file may be at most 5 MB.
+
+The same import is available as `POST /api/import` (`multipart/form-data`, one part per file), e.g.:
+
+```bash
+curl -F files=@TimetableExportScriptFinal.sql -F files=@GPU006.TXT -F files=@GPU002db.TXT \
+     -F files=@teacherWishes.json https://<host>/api/import
+```
 
 ## Resetting / loading demo data in the cloud
 

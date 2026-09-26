@@ -41,4 +41,9 @@ public class AdminDisabledTest {
     public void demoDataIsForbidden() {
         given().when().post("/api/admin/demo-data").then().statusCode(403);
     }
+
+    @Test
+    public void importFromSourceTreeIsForbidden() {
+        given().when().get("/api/run/importSchoolData").then().statusCode(403);
+    }
 }
