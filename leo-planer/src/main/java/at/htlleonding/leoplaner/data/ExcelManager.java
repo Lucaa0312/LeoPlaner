@@ -117,7 +117,10 @@ public class ExcelManager {
 
             dataRow.createCell(0).setCellValue(schoolClass.getId());
             dataRow.createCell(1).setCellValue(schoolClass.getClassName());
-            dataRow.createCell(2).setCellValue(schoolClass.getClassRoom().getId());
+            // classes from the real school data may have no home room, the cell stays empty then
+            if (schoolClass.getClassRoom() != null) {
+                dataRow.createCell(2).setCellValue(schoolClass.getClassRoom().getId());
+            }
         }
     }
 

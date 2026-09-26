@@ -92,5 +92,18 @@ public class ImportResourceTest {
         assertTrue(dataRepository.getTeacherCount() > 0);
         assertTrue(dataRepository.getAllSchoolClasses().size() > 0);
         assertTrue(dataRepository.getAllClassSubjects().size() > 0);
+
+        // the real data has classes without a home room, the export has to cope with that
+        assertTrue(dataRepository.getAllSchoolClasses().stream().anyMatch(c -> c.getClassRoom() == null),
+                "expected at least one class without a home room in the real data");
+        final long classes = dataRepository.getAllSchoolClasses().size();
+        final byte[] workbook = given().when().get("/api/test-export")
+                .then().statusCode(200).extract().asByteArray();
+
+        given().when().delete("/api/admin/data").then().statusCode(204);
+        given().multiPart("files", "export.xlsx", workbook)
+                .when().post("/api/import")
+                .then().statusCode(200);
+        assertEquals(classes, dataRepository.getAllSchoolClasses().size());
     }
 }
