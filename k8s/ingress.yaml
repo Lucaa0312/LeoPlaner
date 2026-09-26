@@ -16,7 +16,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
   rules:
-    - host: YOUR-HOST.cloud.htl-leonding.ac.at
+    - host: your-host.cloud.htl-leonding.ac.at
       http:
         paths:
           - path: /

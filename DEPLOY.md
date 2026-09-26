@@ -96,8 +96,8 @@ kubectl port-forward service/leo-planer 8080:8080
 (upload size, WebSocket timeouts) apply, by pointing the placeholder host at minikube:
 
 ```bash
-echo "$(minikube ip) YOUR-HOST.cloud.htl-leonding.ac.at" | sudo tee -a /etc/hosts
-# open http://YOUR-HOST.cloud.htl-leonding.ac.at, remove the line from /etc/hosts afterwards
+echo "$(minikube ip) your-host.cloud.htl-leonding.ac.at" | sudo tee -a /etc/hosts
+# open http://your-host.cloud.htl-leonding.ac.at, remove the line from /etc/hosts afterwards
 ```
 
 Checks (this is the production image, so it's also the test of prod mode):
@@ -221,4 +221,4 @@ kubectl delete -f k8s/postgres.yaml && kubectl apply -f k8s/postgres.yaml
 
 - CI building and pushing the image automatically (planned follow-up)
 - `devops/docker-compose.yaml` (known to be broken, not used here)
-- The minikube run of these manifests has not been done yet. Do step 3 before the first LeoCloud deploy.
+- Tested on minikube (2026-09-26): prod flags, real-data import through the Ingress, algorithm with live progress, memory (~235Mi of 1Gi), export.
