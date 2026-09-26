@@ -65,6 +65,13 @@ public class TimeTableResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getByRoom/{id}")
+    public TimetableDTO getTimetableByRoom(@PathParam("id") final Long id) {
+        return UtilBuildFunctions.createTimetableDTO(this.dataRepository.getRoomTimetable(id));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/getByTeacher/{id}")
     public TeacherTimetableDTO getTeacherTimetable(@PathParam("id") Long id) {
         final Timetable timetableTeacher = this.dataRepository.getTeacherTimetable(id);

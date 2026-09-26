@@ -6,9 +6,11 @@ import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
+import at.htlleonding.leoplaner.data.GpuImporter;
 import at.htlleonding.leoplaner.data.Room;
-import at.htlleonding.leoplaner.data.Timetable;
 import at.htlleonding.leoplaner.data.TimetableExportImporter;
+import at.htlleonding.leoplaner.dto.GpuImportResultDTO;
+import at.htlleonding.leoplaner.dto.SchoolDataImportResultDTO;
 import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -18,6 +20,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -25,11 +28,13 @@ import jakarta.ws.rs.core.UriInfo;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Path("api")
 public class Resource {
@@ -48,6 +53,9 @@ public class Resource {
 
     @Inject
     TimetableExportImporter timetableExportImporter;
+
+    @Inject
+    GpuImporter gpuImporter;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -137,17 +145,7 @@ public class Resource {
     @Path("loadBestSchedule")
     @GET
     public void loadBestSchedule() {
-        this.dataRepository.setAllTimetables(
-            deepCopy(this.dataRepository.getBestSchoolSchedule())
-        );
-    }
-
-    private Map<String, Timetable> deepCopy(Map<String, Timetable> original) {
-        Map<String, Timetable> copy = new HashMap<>();
-        for (Map.Entry<String, Timetable> entry : original.entrySet()) {
-            copy.put(entry.getKey(), new Timetable(entry.getValue()));
-        }
-        return copy;
+        this.dataRepository.loadBestSchedule();
     }
 
     @GET
@@ -178,6 +176,9 @@ public class Resource {
             throw new Exception(e);
         }
     }
+
+    private static final String TIMETABLE_EXPORT_PATH =
+        "src/files/TimetableExportScriptFinal.sql";
 
     @POST
     @Path("/uploadExcel")
@@ -225,6 +226,55 @@ public class Resource {
         } catch (Exception e) {
             return Response.status(500)
                 .entity("Timetable export import failed: " + e.getMessage())
+                .build();
+        }
+    }
+
+    /**
+     * Imports the whole school from src/files: teachers and their wishes from
+     * the SQL Server export first, then subjects, rooms, classes and lessons
+     * from the Untis GPU files, and builds a fresh starting schedule.
+     * date (yyyy-MM-dd) picks which lessons are active, by default the start
+     * of the school year.
+     */
+    @Path("run/importSchoolData")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response importSchoolData(@QueryParam("date") String date) {
+        try {
+            LocalDate referenceDate = date == null || date.isBlank()
+                ? null
+                : LocalDate.parse(date);
+
+            // the placed lessons point at the ClassSubjects the import replaces
+            this.dataRepository.clearTimetableData();
+            this.dataRepository.clearHistory();
+
+            TimetableExportImportResultDTO teachers =
+                timetableExportImporter.importExport(
+                    Files.readAllBytes(Paths.get(TIMETABLE_EXPORT_PATH))
+                );
+            GpuImportResultDTO gpu = gpuImporter.importGpu(
+                Files.readAllBytes(Paths.get(GpuImporter.SUBJECTS_PATH)),
+                Files.readAllBytes(Paths.get(GpuImporter.LESSONS_PATH)),
+                referenceDate
+            );
+
+            this.dataRepository.randomizeSchoolSchedule();
+            return Response.ok(
+                new SchoolDataImportResultDTO(teachers, gpu)
+            ).build();
+        } catch (
+            DateTimeParseException
+            | IllegalArgumentException
+            | StringIndexOutOfBoundsException e
+        ) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("School data could not be parsed: " + e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(500)
+                .entity("School data import failed: " + e.getMessage())
                 .build();
         }
     }
