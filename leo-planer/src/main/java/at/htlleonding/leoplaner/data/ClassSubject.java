@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.data;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
@@ -24,6 +26,23 @@ public class ClassSubject extends PanacheEntity {
     private boolean isBetterDoublePeriod;
     // set from a teacher's AVOID wish: split the weekly hours into single periods only
     private boolean avoidDoublePeriod;
+
+    // ClassSubjects sharing a key are one lesson taught to several classes at once
+    private String couplingKey;
+
+    // lessons of the same group may run at the same time inside one class, the
+    // students are split between them (religion and ethics, boys and girls sports)
+    private String parallelGroup;
+
+    // how the weekly hours are cut into lessons, e.g. "2,2,1"; null falls back
+    // to the double period flags
+    private String blockSizes;
+
+    // rooms the lesson has to take place in, all at once when it is split into groups
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "class_subject_fixed_rooms", joinColumns = @JoinColumn(name = "class_subject_id"), inverseJoinColumns = @JoinColumn(name = "room_id"))
+    private Set<Room> fixedRooms = new LinkedHashSet<>();
+
     @ManyToOne
     @JoinColumn(name = "class_id")
     private SchoolClass schoolClass;
@@ -141,4 +160,37 @@ public class ClassSubject extends PanacheEntity {
     public void setAvoidDoublePeriod(final boolean avoidDoublePeriod) {
         this.avoidDoublePeriod = avoidDoublePeriod;
     }
+
+    public String getCouplingKey() {
+        return couplingKey;
+    }
+
+    public void setCouplingKey(final String couplingKey) {
+        this.couplingKey = couplingKey;
+    }
+
+    public String getParallelGroup() {
+        return parallelGroup;
+    }
+
+    public void setParallelGroup(final String parallelGroup) {
+        this.parallelGroup = parallelGroup;
+    }
+
+    public String getBlockSizes() {
+        return blockSizes;
+    }
+
+    public void setBlockSizes(final String blockSizes) {
+        this.blockSizes = blockSizes;
+    }
+
+    public Set<Room> getFixedRooms() {
+        return fixedRooms;
+    }
+
+    public void setFixedRooms(final Set<Room> fixedRooms) {
+        this.fixedRooms = fixedRooms;
+    }
+
 }

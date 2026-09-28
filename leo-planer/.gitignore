@@ -46,3 +46,7 @@ nb-configuration.xml
 
 # Generated at runtime, differs per machine and run
 src/files/teacherWishCache.json
+
+# School data exports (Untis GPU files, timetable SQL export) stay local
+src/files/GPU0*.TXT
+src/files/TimetableExportScriptFinal.sql
