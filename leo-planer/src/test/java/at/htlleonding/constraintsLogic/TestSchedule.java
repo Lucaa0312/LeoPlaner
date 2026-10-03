@@ -342,6 +342,20 @@ public class TestSchedule {
     }
 
     @Test
+    public void measuringTheStartTemperatureLeavesTheScheduleAlone() {
+        final Schedule schedule = Schedule.of(smallSchool());
+        schedule.construct(new Random(1));
+        final int[] before = schedule.snapshot();
+        final long cost = schedule.getTotalCost();
+
+        final double temperature = SimulatedAnnealingAlgorithm.calibrateTemperature(schedule, new Random(2));
+
+        assertTrue(temperature >= 1 && temperature <= 1000, "temperature " + temperature);
+        assertEquals(cost, schedule.getTotalCost());
+        assertTrue(java.util.Arrays.equals(before, schedule.snapshot()));
+    }
+
+    @Test
     public void annealingEndsWithoutHardViolations() {
         final Schedule schedule = Schedule.of(smallSchool());
         schedule.construct(new Random(1));
