@@ -21,8 +21,13 @@ import jakarta.persistence.EntityManager;
 public class TimetableService {
 
     private volatile Schedule schedule;
-    private volatile int[] bestPositions;
-    private volatile long bestCost;
+    /** A schedule worth keeping: where every block sat and what that cost. */
+    public record BestSchedule(int[] positions, long cost) {
+    }
+
+    private static final int BEST_SCHEDULES_KEPT = 3;
+    /** the best schedules seen so far, cheapest first */
+    private volatile List<BestSchedule> bestSchedules = List.of();
 
     private volatile Timetable currentTimetable;
     private volatile Map<String, Timetable> currentTimetableList = new HashMap<>();
@@ -57,7 +62,7 @@ public class TimetableService {
         currentTimetable = null;
         currentTimetableList = new HashMap<>();
         schedule = null;
-        bestPositions = null;
+        bestSchedules = List.of();
         bestSchoolSchedule = null;
     }
 
@@ -65,18 +70,45 @@ public class TimetableService {
         return schedule;
     }
 
-    /** Remembers the best schedule so far; its timetables are only built when asked for. */
-    public void setBest(final int[] positions, final long cost) {
-        bestPositions = positions;
-        bestCost = cost;
-        bestSchoolSchedule = null;
+    /**
+     * Offers a schedule to the best ones kept: it goes in where its cost puts
+     * it and the most expensive one drops out. The timetables of the best are
+     * only built when asked for.
+     */
+    public synchronized void setBest(final int[] positions, final long cost) {
+        final List<BestSchedule> kept = new ArrayList<>(bestSchedules);
+        int at = 0;
+        for (final BestSchedule best : kept) {
+            if (Arrays.equals(best.positions(), positions)) {
+                return;
+            }
+            if (best.cost() <= cost) {
+                at++;
+            }
+        }
+        if (at >= BEST_SCHEDULES_KEPT) {
+            return;
+        }
+        kept.add(at, new BestSchedule(positions, cost));
+        if (kept.size() > BEST_SCHEDULES_KEPT) {
+            kept.removeLast();
+        }
+        bestSchedules = List.copyOf(kept);
+        if (at == 0) {
+            bestSchoolSchedule = null;
+        }
+    }
+
+    /** The best schedules seen so far, cheapest first. */
+    public List<BestSchedule> getBestSchedules() {
+        return bestSchedules;
     }
 
     public Map<String, Timetable> getBestSchoolSchedule() {
         final Schedule current = schedule;
-        final int[] positions = bestPositions;
-        if (bestSchoolSchedule == null && current != null && positions != null) {
-            bestSchoolSchedule = current.toTimetables(positions, bestCost);
+        final List<BestSchedule> kept = bestSchedules;
+        if (bestSchoolSchedule == null && current != null && !kept.isEmpty()) {
+            bestSchoolSchedule = current.toTimetables(kept.getFirst().positions(), kept.getFirst().cost());
         }
         return bestSchoolSchedule != null ? bestSchoolSchedule : new HashMap<>();
     }
@@ -88,8 +120,9 @@ public class TimetableService {
     /** Goes back to the best schedule found so far and continues from there. */
     public void loadBestSchedule() {
         final Schedule current = schedule;
-        if (current != null && bestPositions != null) {
-            current.restore(bestPositions);
+        final List<BestSchedule> kept = bestSchedules;
+        if (current != null && !kept.isEmpty()) {
+            current.restore(kept.getFirst().positions());
             publish();
         }
     }
