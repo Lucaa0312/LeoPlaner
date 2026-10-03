@@ -459,8 +459,7 @@ public final class Schedule {
                     (long) Math.max(0, first - classFirstHour[c]) * CostModel.LATE_START_COST);
             cost += charge(breakdown, CostCategory.DAY_LENGTH, CostModel.dayLength(day, lessonHours));
         }
-        cost += charge(breakdown, CostCategory.SUBJECT_SAME_DAY,
-                sameDayRepeats(blocksOfClass.get(c)) * CostModel.SUBJECT_SAME_DAY_COST);
+        cost += lessonDaysCost(blocksOfClass.get(c), breakdown);
         cost += charge(breakdown, CostCategory.DAY_BALANCE, CostModel.dayBalance(hoursPerDay));
 
         for (final Block block : blocksOfClass.get(c)) {
@@ -471,24 +470,42 @@ public final class Schedule {
             cost += charge(breakdown, CostCategory.DAY_OF_WEEK, CostModel.costOfDay(day));
             cost += charge(breakdown, CostCategory.LATE_HOURS,
                     CostModel.classPosition(block.hour - classFirstHour[c] + 1, block.duration, day));
-            if (block.betterDouble && block.duration == 1) {
+            if (block.betterDouble && block.duration == 1 && !isBackToBack(blocksOfClass.get(c), block)) {
                 cost += charge(breakdown, CostCategory.DOUBLE_PERIOD, CostModel.MID_COST);
             }
         }
         return cost;
     }
 
+    /** Whether another block of the same lesson sits right before or after the block. */
+    private static boolean isBackToBack(final List<Block> classBlocks, final Block block) {
+        for (final Block other : classBlocks) {
+            if (other != block && other.members == block.members && other.day == block.day
+                    && (other.hour + other.duration == block.hour || block.hour + block.duration == other.hour)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
-     * How often a lesson comes back later on a day it was already taught,
-     * counted per lesson and day as the runs of back-to-back hours minus one:
-     * a single and a single right after it are just a double, a single in the
-     * first and one in the seventh hour are a repeat.
+     * What the days a class's lessons sit on cost.
+     *
+     * SUBJECT_SAME_DAY: how often a lesson comes back later on a day it was
+     * already taught, counted per lesson and day as the runs of back-to-back
+     * hours minus one: a single and a single right after it are just a double,
+     * a single in the first and one in the seventh hour are a repeat.
+     *
+     * SUBJECT_SPREAD: a lesson taught on two or three days pays for every two
+     * of them that follow each other, Monday and Tuesday rather than Monday
+     * and Thursday. On four or five days there is nothing left to spread.
      *
      * The blocks of one lesson are built one after the other and so follow
      * each other in a class's list, which is what lets this go through it once.
      */
-    private long sameDayRepeats(final List<Block> classBlocks) {
+    private long lessonDaysCost(final List<Block> classBlocks, final CostBreakdown breakdown) {
         long repeats = 0;
+        long neighbouringDays = 0;
         final int size = classBlocks.size();
         int i = 0;
         while (i < size) {
@@ -504,14 +521,22 @@ public final class Schedule {
                     hoursOfDay[block.day] |= ((1L << block.duration) - 1) << block.hour;
                 }
             }
-            for (final long hours : hoursOfDay) {
+            int days = 0; // bit per day the lesson is taught on
+            for (int d = 0; d < DAY_COUNT; d++) {
+                final long hours = hoursOfDay[d];
                 if (hours != 0) {
                     // runs of set bits: count the bits whose lower neighbour is not set
                     repeats += Long.bitCount(hours & ~(hours << 1)) - 1;
+                    days |= 1 << d;
                 }
             }
+            final int taughtOn = Integer.bitCount(days);
+            if (taughtOn == 2 || taughtOn == 3) {
+                neighbouringDays += Integer.bitCount(days & (days >> 1));
+            }
         }
-        return repeats;
+        return charge(breakdown, CostCategory.SUBJECT_SAME_DAY, repeats * CostModel.SUBJECT_SAME_DAY_COST)
+                + charge(breakdown, CostCategory.SUBJECT_SPREAD, neighbouringDays * CostModel.SUBJECT_SPREAD_COST);
     }
 
     /**

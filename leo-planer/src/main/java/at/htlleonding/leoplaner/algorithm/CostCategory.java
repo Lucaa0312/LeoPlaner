@@ -35,7 +35,7 @@ public enum CostCategory {
     DAY_OF_WEEK(false),
     /** lesson running past the last comfortable hour of the day */
     LATE_HOURS(false),
-    /** subject that wants a double period but got a single one */
+    /** single hour of a subject that wants doubles, not next to another hour of it */
     DOUBLE_PERIOD(false),
     /** class day that is too short or too long */
     DAY_LENGTH(false),
@@ -47,6 +47,8 @@ public enum CostCategory {
     LATE_START(false),
     /** the same lesson twice on one day, not back to back */
     SUBJECT_SAME_DAY(false),
+    /** lesson taught on few days of the week and those right after each other */
+    SUBJECT_SPREAD(false),
     /** long class day without a free hour for lunch */
     LUNCH_BREAK_MISSING(false),
     /** lunch break sitting away from the middle of its day */

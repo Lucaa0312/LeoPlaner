@@ -229,6 +229,56 @@ public class TestSchedule {
     }
 
     @Test
+    public void aFreeHourFarFromMiddayIsNoCheapLunch() {
+        final SchoolClass a = schoolClass("2AHIF", room("132"));
+        final List<ClassSubject> lessons = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            lessons.add(lesson(a, 1, teacher("T" + i)));
+        }
+        final Schedule schedule = Schedule.of(lessons);
+        final int[] hours = { 1, 3, 4, 5, 6, 7, 8, 9 };
+        for (int i = 0; i < hours.length; i++) {
+            place(schedule, schedule.getBlocks().get(i), 0, hours[i]);
+        }
+
+        assertTrue(cost(schedule, CostCategory.LUNCH_BREAK_POSITION) > CostModel.CLASS_GAP_COST);
+    }
+
+    @Test
+    public void singlesOfASubjectPreferringDoublesBelongBackToBack() {
+        final SchoolClass a = schoolClass("3BHIF", room("133"));
+        final ClassSubject maths = lesson(a, 2, teacher("KERD"));
+        maths.setBetterDoublePeriod(true);
+        maths.setBlockSizes("1,1");
+        final Schedule schedule = Schedule.of(List.of(maths));
+        final List<Block> singles = schedule.getBlocks();
+
+        place(schedule, singles.get(0), 0, 1);
+        place(schedule, singles.get(1), 0, 2);
+        assertEquals(0, cost(schedule, CostCategory.DOUBLE_PERIOD));
+
+        place(schedule, singles.get(1), 0, 4);
+        assertTrue(cost(schedule, CostCategory.DOUBLE_PERIOD) > 0);
+        place(schedule, singles.get(1), 1, 2);
+        assertTrue(cost(schedule, CostCategory.DOUBLE_PERIOD) > 0);
+    }
+
+    @Test
+    public void aLessonOnTwoDaysBelongsOnDaysApart() {
+        final SchoolClass a = schoolClass("3BHIF", room("133"));
+        final ClassSubject maths = lesson(a, 4, teacher("KERD"));
+        maths.setBlockSizes("2,2");
+        final Schedule schedule = Schedule.of(List.of(maths));
+
+        place(schedule, schedule.getBlocks().get(0), 0, 1);
+        place(schedule, schedule.getBlocks().get(1), 1, 1);
+        assertTrue(cost(schedule, CostCategory.SUBJECT_SPREAD) > 0);
+
+        place(schedule, schedule.getBlocks().get(1), 3, 1);
+        assertEquals(0, cost(schedule, CostCategory.SUBJECT_SPREAD));
+    }
+
+    @Test
     public void startingLaterThanTheFirstHourCosts() {
         final SchoolClass a = schoolClass("5CHITM", room("E11"));
         final ClassSubject english = lesson(a, 1, teacher("REIT"));
