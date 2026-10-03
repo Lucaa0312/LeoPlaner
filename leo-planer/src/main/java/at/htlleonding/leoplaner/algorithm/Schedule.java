@@ -567,9 +567,19 @@ public final class Schedule {
             cost += charge(breakdown, CostCategory.TEACHER_NON_WORKING, nonWorkingHours * CostModel.IMPOSSIBLE_COST);
             cost += charge(breakdown, CostCategory.TEACHER_NON_PREFERRED, nonPreferredHours * CostModel.SEVERE_COST);
             cost += charge(breakdown, CostCategory.TEACHER_SHORT_DAY, CostModel.teacherDayLength(hours));
+            cost += charge(breakdown, CostCategory.TEACHER_LONG_DAY, CostModel.teacherLongDay(hours));
             if (hours > 0) {
-                cost += charge(breakdown, CostCategory.TEACHER_GAP,
-                        (long) (last - first + 1 - hours) * CostModel.TEACHER_GAP_COST);
+                int free = last - first + 1 - hours;
+                // as for a class: a long day needs one free hour, and that one is no gap
+                if (hours > CostModel.LUNCH_BREAK_MIN_DAY_HOURS) {
+                    if (free == 0) {
+                        cost += charge(breakdown, CostCategory.TEACHER_LUNCH_MISSING,
+                                CostModel.LUNCH_BREAK_MISSING_COST);
+                    } else {
+                        free--;
+                    }
+                }
+                cost += charge(breakdown, CostCategory.TEACHER_GAP, CostModel.teacherGap(free));
             }
         }
         return cost;

@@ -25,6 +25,10 @@ public enum CostCategory {
     TEACHER_NON_PREFERRED(false),
     /** teacher comes in for only a handful of hours on a day */
     TEACHER_SHORT_DAY(false),
+    /** teacher with more hours on a day than anyone should teach */
+    TEACHER_LONG_DAY(false),
+    /** long teacher day without a free hour for lunch */
+    TEACHER_LUNCH_MISSING(false),
     /** teacher waiting between two lessons */
     TEACHER_GAP(false),
     /** flat surcharge for the weekday a lesson sits on */

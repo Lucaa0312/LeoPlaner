@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import at.htlleonding.leoplaner.algorithm.Block;
 import at.htlleonding.leoplaner.algorithm.CostBreakdown;
 import at.htlleonding.leoplaner.algorithm.CostCategory;
+import at.htlleonding.leoplaner.algorithm.CostModel;
 import at.htlleonding.leoplaner.algorithm.Schedule;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.data.ClassSubject;
@@ -280,6 +281,49 @@ public class TestSchedule {
                 .distinct()
                 .toList();
         assertEquals(1, rooms.size(), rooms.toString());
+    }
+
+    /** One teacher with a single hour in each of the given hours of Monday. */
+    private Schedule teacherDay(final int... hours) {
+        final Teacher teacher = teacher("KLE");
+        final SchoolClass a = schoolClass("4AHIF", room("141"));
+        final List<ClassSubject> lessons = new ArrayList<>();
+        for (int i = 0; i < hours.length; i++) {
+            lessons.add(lesson(a, 1, teacher));
+        }
+        final Schedule schedule = Schedule.of(lessons);
+        for (int i = 0; i < hours.length; i++) {
+            place(schedule, schedule.getBlocks().get(i), 0, hours[i]);
+        }
+        return schedule;
+    }
+
+    @Test
+    public void teacherDayPastEightHoursCosts() {
+        assertEquals(0, cost(teacherDay(1, 2, 3, 4, 6, 7, 8, 9), CostCategory.TEACHER_LONG_DAY));
+        assertTrue(cost(teacherDay(1, 2, 3, 4, 5, 7, 8, 9, 10), CostCategory.TEACHER_LONG_DAY) > 0);
+    }
+
+    @Test
+    public void longTeacherDayNeedsAFreeHourAndThatOneIsNoGap() {
+        final Schedule without = teacherDay(1, 2, 3, 4, 5, 6, 7);
+        assertTrue(cost(without, CostCategory.TEACHER_LUNCH_MISSING) > 0);
+
+        final Schedule with = teacherDay(1, 2, 3, 5, 6, 7, 8);
+        assertEquals(0, cost(with, CostCategory.TEACHER_LUNCH_MISSING));
+        assertEquals(0, cost(with, CostCategory.TEACHER_GAP));
+
+        // six hours need no break
+        assertEquals(0, cost(teacherDay(1, 2, 3, 4, 5, 6), CostCategory.TEACHER_LUNCH_MISSING));
+    }
+
+    @Test
+    public void aLongTeacherGapCostsFarMoreThanItsHoursOneByOne() {
+        final long one = cost(teacherDay(1, 3), CostCategory.TEACHER_GAP);
+        final long seven = cost(teacherDay(1, 9), CostCategory.TEACHER_GAP);
+
+        assertEquals(CostModel.teacherGap(1), one);
+        assertTrue(seven > 7 * one, seven + " against " + one);
     }
 
     /** A small school with every kind of rule in it, including a lunch-heavy workshop. */

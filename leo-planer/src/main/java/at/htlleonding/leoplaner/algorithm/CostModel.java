@@ -26,6 +26,7 @@ public final class CostModel {
     public static final int MAX_HOURS_PER_DAY = 8;
     public static final int MAX_HOURS_ON_FRIDAY = 5;
     public static final int MIN_TEACHER_HOURS_PER_DAY = 4;
+    public static final int MAX_TEACHER_HOURS_PER_DAY = 8;
     public static final int LAST_COMFORTABLE_HOUR = 6;
 
     /** How long a day has to be before it needs a lunch break at all. */
@@ -82,6 +83,21 @@ public final class CostModel {
         }
         final int missing = MIN_TEACHER_HOURS_PER_DAY - hours;
         return (long) missing * missing * MID_COST;
+    }
+
+    /** Cost of a teacher's day running past the most hours one should teach. */
+    public static long teacherLongDay(final int hours) {
+        final int excess = hours - MAX_TEACHER_HOURS_PER_DAY;
+        return excess <= 0 ? 0 : (long) excess * excess * HIGH_COST;
+    }
+
+    /**
+     * Cost of the free hours between a teacher's lessons of one day. One is
+     * next to nothing, but it grows quadratically: a lesson in the first hour
+     * and one in the ninth is a day spent waiting.
+     */
+    public static long teacherGap(final int gaps) {
+        return (long) gaps * gaps * TEACHER_GAP_COST;
     }
 
     /**
