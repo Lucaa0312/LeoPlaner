@@ -1,0 +1,28 @@
+# Public HTTPS address of LeoPlaner.
+#
+# The host belongs to the LeoCloud account (<username>.cloud.htl-leonding.ac.at, lowercase).
+# When switching accounts, take it from:  leocloud get template nginx   (the Ingress in its output)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: leo-planer
+  annotations:
+    # keep the algorithm-progress WebSocket open (nginx ingress; ignored by other controllers)
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # nginx rejects bodies over 1 MB by default (413); the real school data import alone is ~0.9 MB.
+    # 10m matches what Quarkus accepts itself.
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: it220219.cloud.htl-leonding.ac.at
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: leo-planer
+                port:
+                  number: 8080

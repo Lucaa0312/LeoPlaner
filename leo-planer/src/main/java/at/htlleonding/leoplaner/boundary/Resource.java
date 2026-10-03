@@ -7,12 +7,12 @@ import at.htlleonding.leoplaner.data.CSVManager;
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.data.ExcelManager;
 import at.htlleonding.leoplaner.data.GpuImporter;
+import at.htlleonding.leoplaner.data.SchoolDataImport;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.TimetableExportImporter;
-import at.htlleonding.leoplaner.dto.GpuImportResultDTO;
-import at.htlleonding.leoplaner.dto.SchoolDataImportResultDTO;
 import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -25,11 +25,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -57,7 +55,11 @@ public class Resource {
     TimetableExportImporter timetableExportImporter;
 
     @Inject
-    GpuImporter gpuImporter;
+    SchoolDataImport schoolDataImport;
+
+    // run/importSchoolData reads src/files, which only exists on a developer's machine
+    @ConfigProperty(name = "leoplaner.reset-enabled")
+    boolean resetEnabled;
 
     @Path("run/testCsvOriginal")
     @GET
@@ -82,21 +84,7 @@ public class Resource {
     @Path("run/testCsvNew")
     @GET
     public void injectTestCsvDataNew() {
-        final String baseDir = "../script/fakerGeneration/csvOutput/";
-
-        final String teacherCSVPath = baseDir + "teachers.csv";
-        final String classSubjectCSVPath = baseDir + "classSubjects.csv";
-        final String roomCSVPath = baseDir + "rooms.csv";
-
-        final String subjectCSVPath =
-            "src/files/csvFiles/test1/testSubject.csv";
-
-        CSVManager.processCSV(subjectCSVPath, dataRepository);
-        CSVManager.processCSV(teacherCSVPath, dataRepository);
-        CSVManager.processCSV(roomCSVPath, dataRepository);
-        CSVManager.processCSV(classSubjectCSVPath, dataRepository);
-
-        this.dataRepository.randomizeSchoolSchedule();
+        this.dataRepository.loadDemoData();
     }
 
     @Path("run/generateRandomSchedule")
@@ -169,11 +157,9 @@ public class Resource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response triggerExport() throws Exception {
         try {
-            excelManager.createBaseDataWorkbook();
+            final byte[] workbook = excelManager.createBaseDataWorkbook();
 
-            File file = new File("src/files/excelFiles/export/test1.xlsx");
-
-            return Response.ok(file)
+            return Response.ok(workbook)
                 .header(
                     "Content-Disposition",
                     "attachment; filename=\"export.xlsx\""
@@ -195,7 +181,6 @@ public class Resource {
         }
     }
 
-    private static final String archivePath = "src/files/excelFiles/export/";
     private static final String TIMETABLE_EXPORT_PATH =
         "src/files/TimetableExportScriptFinal.sql";
 
@@ -204,22 +189,8 @@ public class Resource {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.TEXT_PLAIN)
     public Response upload(InputStream is) {
-        String outFileName =
-            archivePath + "upload_" + System.currentTimeMillis() + ".xlsx";
-        try (OutputStream os = new FileOutputStream(outFileName)) {
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                os.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            return Response.status(500)
-                .entity("Failed to save file: " + outFileName)
-                .build();
-        }
-
         try {
-            excelManager.importFile(outFileName);
+            excelManager.importFile(is);
             this.dataRepository.randomizeSchoolSchedule();
         } catch (Exception e) {
             return Response.status(500)
@@ -227,33 +198,31 @@ public class Resource {
                 .build();
         }
 
-        return Response.ok(outFileName).build();
+        return Response.ok("Import successful").build();
     }
 
     /**
-     * Imports teachers, their blocked hours and their mapped wishes from the
-     * SQL Server script export (TimetableExportScriptFinal.sql).
+     * Imports teachers and their blocked hours from the SQL Server script
+     * export (TimetableExportScriptFinal.sql). The wishes are not applied here,
+     * they come with the whole school data through /api/import.
      */
     @POST
     @Path("/uploadTimetableExport")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadTimetableExport(InputStream is) {
-        String outFileName =
-            archivePath + "upload_" + System.currentTimeMillis() + ".sql";
         byte[] sqlBytes;
         try {
             sqlBytes = is.readAllBytes();
-            Files.write(Paths.get(outFileName), sqlBytes);
         } catch (IOException e) {
             return Response.status(500)
-                .entity("Failed to save file: " + outFileName)
+                .entity("Failed to read the uploaded file")
                 .build();
         }
 
         try {
             TimetableExportImportResultDTO result =
-                timetableExportImporter.importExport(sqlBytes);
+                timetableExportImporter.importExport(sqlBytes, List.of());
             return Response.ok(result).build();
         } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -267,7 +236,8 @@ public class Resource {
     }
 
     /**
-     * Imports the whole school from src/files: teachers and their wishes from
+     * Dev shortcut, only when leoplaner.reset-enabled is on (403 otherwise):
+     * imports the whole school from src/files: teachers and their wishes from
      * the SQL Server export first, then subjects, rooms, classes and lessons
      * from the Untis GPU files, and builds a fresh starting schedule.
      * date (yyyy-MM-dd) picks which lessons are active, by default the start
@@ -277,28 +247,26 @@ public class Resource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response importSchoolData(@QueryParam("date") String date) {
+        if (!resetEnabled) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity("Only available in development, use /api/import")
+                .build();
+        }
         try {
             LocalDate referenceDate = date == null || date.isBlank()
                 ? null
                 : LocalDate.parse(date);
 
-            // the placed lessons point at the ClassSubjects the import replaces
-            this.dataRepository.clearTimetableData();
-            this.dataRepository.clearHistory();
-
-            TimetableExportImportResultDTO teachers =
-                timetableExportImporter.importExport(
-                    Files.readAllBytes(Paths.get(TIMETABLE_EXPORT_PATH))
-                );
-            GpuImportResultDTO gpu = gpuImporter.importGpu(
-                Files.readAllBytes(Paths.get(GpuImporter.SUBJECTS_PATH)),
-                Files.readAllBytes(Paths.get(GpuImporter.LESSONS_PATH)),
-                referenceDate
-            );
-
-            this.dataRepository.randomizeSchoolSchedule();
             return Response.ok(
-                new SchoolDataImportResultDTO(teachers, gpu)
+                schoolDataImport.importSchoolData(
+                    Files.readAllBytes(Paths.get(TIMETABLE_EXPORT_PATH)),
+                    Files.readAllBytes(Paths.get(GpuImporter.SUBJECTS_PATH)),
+                    Files.readAllBytes(Paths.get(GpuImporter.LESSONS_PATH)),
+                    TimetableExportImporter.readWishes(
+                        Files.readAllBytes(Paths.get(TimetableExportImporter.WISHES_PATH))
+                    ),
+                    referenceDate
+                )
             ).build();
         } catch (
             DateTimeParseException
@@ -332,8 +300,8 @@ public class Resource {
     @Consumes(MediaType.TEXT_PLAIN)
     public void importFile(@PathParam("fileName") String fileName)
         throws Exception {
-        try {
-            excelManager.importFile(fileName);
+        try (InputStream in = new FileInputStream(fileName)) {
+            excelManager.importFile(in);
         } catch (Exception e) {
             throw new Exception(e);
         }

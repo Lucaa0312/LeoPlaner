@@ -158,6 +158,26 @@
     color: #dc2626;
 }
 
+/* one line per imported file: name → what it was recognized as */
+.import-files {
+    margin-top: 0.75rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--leo-text-color);
+    overflow-wrap: anywhere;
+}
+
+.import-file.unknown {
+    color: #dc2626;
+}
+
+.import-warning {
+    display: block;
+    margin-top: 0.25rem;
+    color: #b45309;
+}
+
 /* ------------------ DATA MANAGEMENT LINKS --------------------- */
 .data-link {
     background-color: white;

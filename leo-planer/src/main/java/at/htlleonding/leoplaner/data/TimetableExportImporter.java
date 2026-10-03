@@ -1,6 +1,5 @@
 package at.htlleonding.leoplaner.data;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -27,11 +26,14 @@ import jakarta.transaction.Transactional;
  *
  * The free-text wishes are never interpreted here: they were translated once
  * into teacherWishes.json and are only looked up by teacher and text hash, so
- * a wish whose text changed is reported instead of guessed.
+ * a wish whose text changed is reported instead of guessed. The wishes are
+ * optional: without them every wish is reported as unmapped, the blocked
+ * hours from the reservations are imported either way.
  */
 @ApplicationScoped
 public class TimetableExportImporter {
 
+    // only read by the dev shortcut run/importSchoolData and the tests, uploads bring their own copy
     public static final String WISHES_PATH = "src/files/teacherWishes.json";
 
     private static final String TEACHER_PREFIX = "TR_";
@@ -61,10 +63,16 @@ public class TimetableExportImporter {
             List<String> unmappedWishes, List<String> warnings) {
     }
 
+    /** Reads the wishes out of a teacherWishes.json. */
+    public static List<Wish> readWishes(final byte[] json) throws IOException {
+        final WishFile wishFile = new ObjectMapper().readValue(json, WishFile.class);
+        return wishFile.wishes() == null ? List.of() : wishFile.wishes();
+    }
+
+    /** wishes may be empty, then every wish of the export is reported as unmapped. */
     @Transactional
-    public TimetableExportImportResultDTO importExport(final byte[] sqlBytes) throws IOException {
-        final WishFile wishFile = new ObjectMapper().readValue(new File(WISHES_PATH), WishFile.class);
-        final MappedExport mapped = map(parse(decode(sqlBytes)), wishFile.wishes());
+    public TimetableExportImportResultDTO importExport(final byte[] sqlBytes, final List<Wish> wishes) {
+        final MappedExport mapped = map(parse(decode(sqlBytes)), wishes);
 
         int created = 0;
         int updated = 0;

@@ -35,8 +35,8 @@ public class SubjectRepository {
         if (entityManager.contains(subject)) {
             throw new IllegalArgumentException();
         }
-        entityManager.merge(subject);
-        return subject;
+        // merge returns the managed copy; the passed instance stays detached and has no id
+        return entityManager.merge(subject);
     }
 
     @Transactional

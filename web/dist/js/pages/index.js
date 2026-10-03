@@ -1,5 +1,3 @@
-import { getFetchResponse } from "../utils/apiHelpers.js";
-async function initializeApp() {
-    await getFetchResponse("/run/testCsvNew");
-}
-document.addEventListener("DOMContentLoaded", initializeApp);
+// The landing page only links to the other pages. It no longer loads demo data on every visit;
+// use "Demodaten laden" on the dashboard instead.
+export {};

@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "./apiBase.js";
 export async function getJson(path) {
     const response = await fetch(`${API_BASE_URL}${path}`);
     if (!response.ok) {
