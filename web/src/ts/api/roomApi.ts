@@ -1,4 +1,4 @@
-import { getJson, postJson, putJson } from "../utils/apiHelpers.js";
+import { deleteRequest, getJson, postJson, putJson } from "../utils/apiHelpers.js";
 import type { CreateRoomRequest, Room } from "../types/room.js";
 
 export function fetchRooms(): Promise<Room[]> {
@@ -11,4 +11,8 @@ export function createRoom(room: CreateRoomRequest): Promise<void> {
 
 export function updateRoom(roomId: number, room: CreateRoomRequest): Promise<void> {
     return putJson<CreateRoomRequest>(`/rooms/update/${roomId}`, room);
+}
+
+export function deleteRoom(roomId: number): Promise<void> {
+    return deleteRequest(`/rooms/delete/${roomId}`);
 }

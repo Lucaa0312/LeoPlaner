@@ -1,14 +1,8 @@
 import { exportFile } from "../api/downloadApi.js";
 
-export function initExportButton(): void {
-  const button = document.getElementById(
-    "excel-export",
-  ) as HTMLButtonElement | null;
-  const errorText = document.getElementById("export-error");
-
-  if (!button || !errorText) return;
-
-  button.addEventListener("click", async () => {
+// Downloads the master data as leoplaner-export-<date>.xlsx. errorText shows what went wrong.
+export function initExportButton(button: HTMLButtonElement, errorText: HTMLElement): void {
+  async function handleExportClick(): Promise<void> {
     errorText.textContent = "";
     button.disabled = true;
 
@@ -21,22 +15,22 @@ export function initExportButton(): void {
       }
 
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
+      const link = document.createElement("a");
+      link.href = url;
 
       const timestamp = new Date().toISOString().slice(0, 10);
-      a.download = `leoplaner-export-${timestamp}.xlsx`;
+      link.download = `leoplaner-export-${timestamp}.xlsx`;
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      console.log("Export successful");
     } catch (error) {
       errorText.textContent = "Fehler beim Exportieren";
     } finally {
       button.disabled = false;
     }
-  });
+  }
+
+  button.addEventListener("click", handleExportClick);
 }

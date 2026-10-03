@@ -1,174 +1,308 @@
-import { getElement, aquireElement } from "../utils/elementHelpers.js";
-import initNavbar from "./navbar.js";
-import { clearCharts } from "./graph.js";
-import { getFetchResponse } from "../utils/apiHelpers.js";
+import { initAppShell, setRunningDot } from "../components/appShell.js";
+import { createPageHeader } from "../components/pageHeader.js";
+import { addEmptyCells, createWeekGrid, placeInGrid } from "../components/weekGrid.js";
+import { createSearchSelect } from "../components/searchSelect.js";
 import { initExportButton } from "../features/exportButton.js";
-import { API_BASE_URL } from "../utils/apiBase.js";
-const DAYS = [
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-];
-const DAYS_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const units = [
-    { eh: "1. EH", start: "08:00", end: "08:50" },
-    { eh: "2. EH", start: "08:55", end: "09:45" },
-    { eh: "3. EH", start: "10:00", end: "10:50" },
-    { eh: "4. EH", start: "10:55", end: "11:45" },
-    { eh: "5. EH", start: "11:50", end: "12:40" },
-    { eh: "6. EH", start: "12:45", end: "13:35" },
-    { eh: "7. EH", start: "13:40", end: "14:30" },
-    { eh: "8. EH", start: "14:35", end: "15:25" },
-    { eh: "9. EH", start: "15:30", end: "16:20" },
-    { eh: "10. EH", start: "16:25", end: "17:15" },
-];
-let lessons = [];
-const ROW_HEIGHT = 86;
-function initializeLayout() {
-    let grid = getElement("timetable-content");
-    if (!grid)
+import { fetchIsAlgorithmRunning } from "../api/algorithmApi.js";
+import { fetchSchoolClasses } from "../api/classSubjectApi.js";
+import { fetchRooms } from "../api/roomApi.js";
+import { fetchTeachers } from "../api/teacherApi.js";
+import { fetchTimetableByClass, fetchTimetableByRoom, fetchTimetableByTeacher, } from "../api/timetableApi.js";
+import { aquireElement } from "../utils/elementHelpers.js";
+import { readSetting, writeSetting } from "../utils/storage.js";
+import { DAYS } from "../utils/periods.js";
+const VIEWS = ["Klasse", "Lehrer", "Raum"];
+const VIEW_KEY = "leoplaner-timetable-view";
+let currentView = "Klasse";
+let schoolClasses = [];
+let teachers = [];
+let rooms = [];
+let viewSwitch = null;
+let selection = null;
+let summary = null;
+let gridContainer = null;
+let liveBanner = null;
+function readSavedView() {
+    const saved = readSetting(VIEW_KEY);
+    if (saved === "Lehrer" || saved === "Raum") {
+        return saved;
+    }
+    return "Klasse";
+}
+function buildPage() {
+    const page = aquireElement("page");
+    const header = createPageHeader({
+        kicker: "Planung",
+        title: "Stundenplan",
+        actions: [
+            { id: "excel-export", icon: "ti-download", label: "Excel-Export", primary: false },
+        ],
+    });
+    const exportError = document.createElement("p");
+    exportError.className = "text-bad";
+    liveBanner = document.createElement("div");
+    liveBanner.className = "notice live hidden";
+    liveBanner.innerHTML = `<span class="status-dot"></span>`;
+    const liveText = document.createElement("span");
+    liveText.className = "notice-text";
+    liveText.textContent = "Optimierung läuft. Der Stundenplan zeigt den zuletzt geladenen Stand.";
+    const liveLink = document.createElement("a");
+    liveLink.className = "link-btn";
+    liveLink.href = "./optimization.html";
+    liveLink.innerHTML = `Verlauf ansehen <i class="ti ti-arrow-right"></i>`;
+    liveBanner.append(liveText, liveLink);
+    const toolbar = document.createElement("div");
+    toolbar.className = "toolbar";
+    viewSwitch = document.createElement("div");
+    viewSwitch.className = "segmented";
+    selection = createSearchSelect(handleSelectionChange);
+    selection.element.classList.add("timetable-select");
+    summary = document.createElement("span");
+    summary.className = "muted timetable-summary";
+    toolbar.append(viewSwitch, selection.element, summary);
+    const card = document.createElement("div");
+    card.className = "card timetable-card";
+    gridContainer = document.createElement("div");
+    gridContainer.className = "grid-scroller";
+    card.appendChild(gridContainer);
+    page.replaceChildren(header, exportError, liveBanner, toolbar, card);
+    initExportButton(aquireElement("excel-export"), exportError);
+}
+function handleSelectionChange() {
+    void loadTimetable();
+}
+function renderViewSwitch() {
+    if (!viewSwitch) {
         return;
-    const emptyCorner = document.createElement("div");
-    emptyCorner.className = "header-cell";
-    grid.appendChild(emptyCorner);
-    DAYS_LABELS.forEach((label) => {
-        const cell = document.createElement("div");
-        cell.className = "header-cell";
-        cell.textContent = label;
-        grid.appendChild(cell);
-    });
-    units.forEach((unit, index) => {
-        const cell = document.createElement("div");
-        cell.className = "time-cell";
-        cell.innerHTML = `
-            <span class="time-start">${unit.start}</span>
-            <span class="eh-label">${unit.eh}</span>
-            <span class="time-end">${unit.end}</span>
-        `;
-        grid.appendChild(cell);
-        DAYS.forEach((day) => {
-            const slot = document.createElement("div");
-            slot.className = "slot";
-            slot.dataset.day = day;
-            slot.dataset.row = String(index + 1);
-            grid.appendChild(slot);
-        });
-    });
+    }
+    viewSwitch.replaceChildren();
+    for (const view of VIEWS) {
+        viewSwitch.appendChild(createViewButton(view));
+    }
 }
-export function clearLayout() {
-    DAYS.forEach((day) => {
-        units.forEach((_, index) => {
-            const slot = document.querySelector(`.slot[data-day="${day}"][data-row="${index + 1}"]`);
-            if (slot) {
-                slot.innerHTML = "";
+function createViewButton(view) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "segment";
+    button.textContent = view;
+    if (view === currentView) {
+        button.classList.add("active");
+    }
+    function handleViewClick() {
+        currentView = view;
+        writeSetting(VIEW_KEY, view);
+        renderViewSwitch();
+        fillSelectionOptions();
+        void loadTimetable();
+    }
+    button.addEventListener("click", handleViewClick);
+    return button;
+}
+// The first entry from the backend is the default, so after a reset the first existing class is
+// shown. The search select itself lists the entries sorted by name.
+function fillSelectionOptions() {
+    if (!selection) {
+        return;
+    }
+    const options = [];
+    if (currentView === "Klasse") {
+        for (const schoolClass of schoolClasses) {
+            options.push({ value: String(schoolClass.id), label: schoolClass.className });
+        }
+    }
+    else if (currentView === "Lehrer") {
+        for (const teacher of teachers) {
+            options.push({ value: String(teacher.id), label: `${teacher.nameSymbol} · ${teacher.teacherName}` });
+        }
+    }
+    else {
+        for (const room of rooms) {
+            options.push({ value: String(room.id), label: `${room.nameShort} · ${room.roomName}` });
+        }
+    }
+    let firstValue = "";
+    if (options.length > 0) {
+        firstValue = options[0].value;
+    }
+    selection.setOptions(options, firstValue);
+}
+async function loadLists() {
+    try {
+        schoolClasses = await fetchSchoolClasses();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Klassen:", error);
+        schoolClasses = [];
+    }
+    try {
+        teachers = await fetchTeachers();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Lehrer:", error);
+        teachers = [];
+    }
+    try {
+        rooms = await fetchRooms();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Räume:", error);
+        rooms = [];
+    }
+}
+async function loadTimetable() {
+    if (!selection) {
+        return;
+    }
+    let lessons = [];
+    const selectedValue = selection.getValue();
+    const selectedId = Number(selectedValue);
+    // No class or no timetable yet: the empty grid is shown.
+    if (selectedValue !== "") {
+        try {
+            if (currentView === "Klasse") {
+                lessons = await fetchTimetableByClass(selectedId);
             }
-        });
-    });
-}
-export function loadTimetable() {
-    clearLayout();
-    // Show the first class. Its id is not fixed: after a reset or an excel import the ids change.
-    fetch(`${API_BASE_URL}/getAllClasses`)
-        .then((response) => response.json())
-        .then((classes) => {
-        const firstClass = classes[0];
-        if (!firstClass) {
-            return;
+            else if (currentView === "Lehrer") {
+                lessons = await fetchTimetableByTeacher(selectedId);
+            }
+            else {
+                lessons = await fetchTimetableByRoom(selectedId);
+            }
         }
-        return fetch(`${API_BASE_URL}/timetable/getByClass/${firstClass.id}`)
-            .then((response) => response.json())
-            .then((data) => createLayout(data.classSubjectInstances ?? []));
-    })
-        .catch((error) => {
-        console.error("Error loading Timetable:", error);
-    });
-}
-function createLayout(data) {
-    clearLayout();
-    data.forEach((item) => {
-        const day = item.period.schoolDays;
-        const rowStart = item.period.schoolHour;
-        const duration = item.duration ?? 1;
-        const slot = document.querySelector(`.slot[data-day="${day}"][data-row="${rowStart}"]`);
-        if (!slot)
-            return;
-        const r = item.classSubject?.subject?.subjectColor?.red ?? 200;
-        const g = item.classSubject?.subject?.subjectColor?.green ?? 200;
-        const b = item.classSubject?.subject?.subjectColor?.blue ?? 200;
-        const block = document.createElement("div");
-        block.className = "lesson-block";
-        block.style.height = `${duration * ROW_HEIGHT - 10}px`;
-        block.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
-        block.style.setProperty("--block-color", `rgb(${r}, ${g}, ${b})`);
-        const subject = item.classSubject?.subject?.subjectSymbol ?? "";
-        const teacher = item.classSubject?.teacher?.[0]?.nameSymbol ?? "";
-        const room = item.room?.nameShort ?? "";
-        block.innerHTML = `
-            <span class="subject">${subject}</span>
-            <span class="room">${room}</span>
-            <span class="teacher">${teacher}</span>
-        `;
-        if (item.period.lunchBreak) {
-            block.style.display = "none";
+        catch {
+            lessons = [];
         }
-        slot.appendChild(block);
-    });
+    }
+    renderGrid(lessons, selectedId);
 }
-const randomizeButton = aquireElement("randomizeButton");
-randomizeButton.addEventListener("click", getRandomizedTimeTable);
-export async function getRandomizedTimeTable() {
-    clearLayout();
-    clearCharts();
-    await getFetchResponse("/randomize");
-    loadTimetable();
+function findTeacher(id) {
+    for (const teacher of teachers) {
+        if (teacher.id === id) {
+            return teacher;
+        }
+    }
+    return null;
 }
-function initializeApp() {
-    initNavbar();
-    initializeLayout();
-    loadTimetable();
-    initExportButton();
+function findDayIndex(dayKey) {
+    for (let i = 0; i < DAYS.length; i++) {
+        if (DAYS[i].key === dayKey) {
+            return i;
+        }
+    }
+    return -1;
+}
+function renderGrid(lessons, selectedId) {
+    if (!gridContainer || !summary) {
+        return;
+    }
+    const grid = createWeekGrid();
+    addEmptyCells(grid);
+    if (currentView === "Lehrer") {
+        const teacher = findTeacher(selectedId);
+        if (teacher) {
+            addBlockedSlots(grid, teacher);
+        }
+    }
+    let hours = 0;
+    for (const lesson of lessons) {
+        const dayIndex = findDayIndex(lesson.period.schoolDays);
+        if (dayIndex >= 0 && !lesson.period.lunchBreak) {
+            grid.appendChild(createLessonBlock(lesson, dayIndex));
+            hours = hours + getDuration(lesson);
+        }
+    }
+    summary.textContent = `${hours} Std.`;
+    gridContainer.replaceChildren(grid);
+}
+function getDuration(lesson) {
+    if (lesson.duration && lesson.duration > 0) {
+        return lesson.duration;
+    }
+    return 1;
+}
+// "kann nicht" periods of the selected teacher, drawn under the lessons.
+function addBlockedSlots(grid, teacher) {
+    for (const slot of teacher.teacherNonWorkingHours) {
+        const dayIndex = findDayIndex(slot.day);
+        if (dayIndex >= 0) {
+            const blocked = document.createElement("div");
+            blocked.className = "blocked-slot";
+            blocked.title = "kann nicht";
+            placeInGrid(blocked, dayIndex, slot.schoolHour, 1);
+            grid.appendChild(blocked);
+        }
+    }
+}
+function createLessonBlock(lesson, dayIndex) {
+    const block = document.createElement("div");
+    block.className = "lesson";
+    placeInGrid(block, dayIndex, lesson.period.schoolHour, getDuration(lesson));
+    let subjectSymbol = "";
+    let subjectName = "";
+    let className = "";
+    let teacherSymbol = "";
+    let roomShort = "–";
+    const classSubject = lesson.classSubject;
+    if (classSubject) {
+        if (classSubject.subject) {
+            subjectSymbol = classSubject.subject.subjectSymbol;
+            subjectName = classSubject.subject.subjectName;
+            if (classSubject.subject.subjectColor) {
+                const color = classSubject.subject.subjectColor;
+                block.style.setProperty("--lesson-color", `rgb(${color.red}, ${color.green}, ${color.blue})`);
+            }
+        }
+        if (classSubject.className) {
+            className = classSubject.className;
+        }
+        if (classSubject.teacher && classSubject.teacher.length > 0) {
+            teacherSymbol = classSubject.teacher[0].nameSymbol;
+        }
+    }
+    if (lesson.room) {
+        roomShort = lesson.room.nameShort;
+    }
+    let secondLine = "";
+    if (currentView === "Klasse") {
+        secondLine = `${teacherSymbol} · ${roomShort}`;
+    }
+    else if (currentView === "Lehrer") {
+        secondLine = `${className} · ${roomShort}`;
+    }
+    else {
+        secondLine = `${className} · ${teacherSymbol}`;
+    }
+    const subjectElement = document.createElement("span");
+    subjectElement.className = "lesson-subject";
+    subjectElement.textContent = subjectSymbol;
+    const secondElement = document.createElement("span");
+    secondElement.className = "lesson-sub";
+    secondElement.textContent = secondLine;
+    block.title = `${subjectName} · ${className} · ${teacherSymbol} · Raum ${roomShort}`;
+    block.append(subjectElement, secondElement);
+    return block;
+}
+async function showLiveBanner() {
+    let running = false;
+    try {
+        running = await fetchIsAlgorithmRunning();
+    }
+    catch {
+        running = false;
+    }
+    setRunningDot(running);
+    if (liveBanner && running) {
+        liveBanner.classList.remove("hidden");
+    }
+}
+async function initializeApp() {
+    initAppShell("timetable");
+    currentView = readSavedView();
+    buildPage();
+    renderViewSwitch();
+    void showLiveBanner();
+    await loadLists();
+    fillSelectionOptions();
+    await loadTimetable();
 }
 document.addEventListener("DOMContentLoaded", initializeApp);
-export function getTimetableByTeacher(teacherId) {
-    clearLayout();
-    fetch(`${API_BASE_URL}/timetable/getByTeacher/${teacherId}`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log("Fetched data:", data);
-        createLayout(data.timetableDTO.classSubjectInstances);
-    })
-        .catch((error) => {
-        console.error("Error loading Timetable by teacher:", error);
-    });
-}
-export function getTimetableByClass(classId) {
-    fetch(`${API_BASE_URL}/timetable/getByClass/${classId}`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data);
-        createLayout(data.classSubjectInstances);
-    })
-        .catch((error) => {
-        console.error("Error loading Timetable by class:", error);
-    });
-}
-export function getTimetableByRoom(roomId) {
-    fetch(`${API_BASE_URL}/timetable/getByRoom/${roomId}`)
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data);
-        createLayout(data.classSubjectInstances);
-    })
-        .catch((error) => {
-        console.error("Error loading Timetable by room:", error);
-    });
-}

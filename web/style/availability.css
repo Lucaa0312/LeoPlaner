@@ -1,0 +1,110 @@
+.availability-layout {
+    display: grid;
+    grid-template-columns: 20rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1.143rem;
+}
+
+.teacher-list {
+    gap: 0.143rem;
+    max-height: calc(100vh - 11.429rem);
+    padding: 0.571rem;
+    overflow-y: auto;
+}
+
+.teacher-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.143rem;
+    width: 100%;
+    padding: 0.643rem 0.714rem;
+    border: none;
+    border-radius: var(--radius-small);
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+}
+
+.teacher-item:hover {
+    background: var(--sf2);
+}
+
+.teacher-item.active {
+    background: var(--acs);
+    color: var(--act);
+}
+
+.teacher-item-name {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.571rem;
+    font-weight: 600;
+}
+
+.teacher-item-summary {
+    color: var(--mu);
+    font-size: 0.857rem;
+}
+
+.availability-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.143rem;
+    color: var(--mu);
+    font-size: 0.857rem;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.429rem;
+}
+
+.legend-swatch {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--ln);
+    border-radius: 0.286rem;
+}
+
+.availability-slot {
+    border: 1px solid var(--ln);
+    border-radius: var(--radius-small);
+    font-size: 0.857rem;
+    font-weight: 600;
+}
+
+.availability-slot:hover {
+    border-color: var(--ac);
+}
+
+.slot-free {
+    background: var(--sf);
+    color: var(--mu);
+}
+
+.slot-nonPreferred {
+    border-color: var(--warn);
+    background: var(--warns);
+    color: var(--warn);
+}
+
+.slot-nonWorking {
+    border-color: var(--bad);
+    background: repeating-linear-gradient(
+        135deg,
+        var(--bads) 0 0.357rem,
+        color-mix(in oklch, var(--bad) 35%, var(--bads)) 0.357rem 0.5rem
+    );
+    color: var(--bad);
+}
+
+@media (max-width: 60em) {
+    .availability-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-list {
+        max-height: 18.571rem;
+    }
+}

@@ -1,4 +1,4 @@
-import { getJson, postJson, putJson } from "../utils/apiHelpers.js";
+import { deleteRequest, getJson, postJson, putJson } from "../utils/apiHelpers.js";
 import type { CreateTeacherRequest, Teacher } from "../types/teacher.js";
 
 export function fetchTeachers(): Promise<Teacher[]> {
@@ -17,4 +17,8 @@ export function updateTeacher(
     `/teachers/update/${teacherId}`,
     teacher,
   );
+}
+
+export function deleteTeacher(teacherId: number): Promise<void> {
+  return deleteRequest(`/teachers/delete/${teacherId}`);
 }

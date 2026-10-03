@@ -1,240 +1,238 @@
-import initNavbar from "./navbar.js";
-import { fetchSubjects, createSubject, updateSubject, } from "../api/subjectApi.js";
-import { getElement, formatName, aquireElement, } from "../utils/elementHelpers.js";
-import { openPopup, closePopup } from "../components/popup.js";
-import { toggleEmptyState } from "../components/emptyState.js";
-import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
+import { initAppShell } from "../components/appShell.js";
+import { createPageHeader, setPageKicker } from "../components/pageHeader.js";
+import { createActionsCell, createDataTable, createElementCell, createEmptyRow, createSearchBox, createTextCell, matchesSearch, } from "../components/dataTable.js";
+import { createSidePanel, createFormField, createTextInput } from "../components/sidePanel.js";
+import { createChipList, createChipSelect } from "../components/chipSelect.js";
+import { askConfirmation } from "../components/confirmDialog.js";
+import { showToast } from "../components/toast.js";
 import { initColorPicker } from "../features/colorSelector.js";
-import { initSearchElement } from "../features/searchElement.js";
-const DEFAULT_SUBJECT_COLOR = {
-    red: 128,
-    green: 128,
-    blue: 128,
-};
-function createRoomTypesElement(roomTypes) {
-    if (roomTypes.length === 0) {
-        return document.createElement("div");
-    }
-    const roomTypesElement = document.createElement("p");
-    roomTypesElement.className = "room-types";
-    roomTypesElement.innerHTML = roomTypes.join("<br>");
-    return roomTypesElement;
+import { fetchSubjects, createSubject, updateSubject, deleteSubject } from "../api/subjectApi.js";
+import { fetchTeachers } from "../api/teacherApi.js";
+import { aquireElement } from "../utils/elementHelpers.js";
+import { ROOM_TYPES } from "../types/room.js";
+const COLUMNS = ["Farbe", "Kürzel", "Name", "Benötigter Raumtyp", "Lehrer"];
+let subjects = [];
+let teachers = [];
+let searchQuery = "";
+let editingSubjectId = null;
+let tableBody = null;
+let panelSlot = null;
+function formatColor(color) {
+    return `rgb(${color.red}, ${color.green}, ${color.blue})`;
 }
-function createSubjectCard(subject) {
-    const subjectBox = document.createElement("div");
-    subjectBox.className = "subject-box";
-    const subjectInfo = document.createElement("div");
-    subjectInfo.className = "subject-info";
-    const subjectName = document.createElement("h2");
-    subjectName.className = "subject-name";
-    subjectName.title = subject.subjectName;
-    subjectName.textContent = formatName(subject.subjectName);
-    const requiredRoomTypes = createRoomTypesElement(subject.requiredRoomTypes);
-    const editDiv = document.createElement("div");
-    editDiv.className = "subject-edit";
-    editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
-    editDiv.addEventListener("click", () => {
-        openEditSubjectForm(subject);
+// Short codes of all teachers who teach this subject.
+function findTeacherSymbols(subject) {
+    const symbols = [];
+    for (const teacher of teachers) {
+        for (const taught of teacher.teachingSubject) {
+            if (taught.id === subject.id) {
+                symbols.push(teacher.nameSymbol);
+                break;
+            }
+        }
+    }
+    return symbols;
+}
+function buildPage() {
+    const page = aquireElement("page");
+    const header = createPageHeader({
+        kicker: "Stammdaten",
+        title: "Fächer",
+        actions: [{ id: "add-btn", icon: "ti-plus", label: "Neu: Fach", primary: true }],
     });
-    subjectInfo.append(subjectName);
-    if (subject.requiredRoomTypes.length > 0) {
-        subjectInfo.append(requiredRoomTypes);
-    }
-    subjectBox.append(subjectInfo, editDiv);
-    if (subject.subjectColor) {
-        subjectBox.style.backgroundColor = `rgba(${subject.subjectColor.red}, ${subject.subjectColor.green}, ${subject.subjectColor.blue}, 0.4)`;
-    }
-    else {
-        subjectBox.style.backgroundColor = `rgba(${DEFAULT_SUBJECT_COLOR.red}, ${DEFAULT_SUBJECT_COLOR.green}, ${DEFAULT_SUBJECT_COLOR.blue}, 0.4)`;
-    }
-    return subjectBox;
+    const toolbar = document.createElement("div");
+    toolbar.className = "toolbar";
+    toolbar.appendChild(createSearchBox(handleSearch));
+    const layout = document.createElement("div");
+    layout.className = "table-layout";
+    const table = createDataTable(COLUMNS);
+    tableBody = table.body;
+    panelSlot = document.createElement("div");
+    panelSlot.className = "hidden";
+    layout.append(table.element, panelSlot);
+    page.replaceChildren(header, toolbar, layout);
+    const addButton = aquireElement("add-btn");
+    addButton.addEventListener("click", handleAddClick);
 }
-function openEditSubjectForm(subject) {
-    openSubjectForm(subject);
+function handleSearch(query) {
+    searchQuery = query;
+    renderRows();
+}
+function handleAddClick() {
+    openSubjectForm(null);
 }
 async function loadAndRenderSubjects() {
-    const noSubjectsElement = getElement("no-subjects");
-    const subjectsContainer = getElement("display-subjects");
-    if (!noSubjectsElement || !subjectsContainer) {
-        return;
-    }
     try {
-        const subjects = await fetchSubjects();
-        toggleEmptyState(noSubjectsElement, subjects.length > 0);
-        subjectsContainer.replaceChildren();
-        if (subjects.length === 0) {
-            return;
-        }
-        const gridContainer = document.createElement("div");
-        gridContainer.className = "grid-layout";
-        for (const subject of subjects) {
-            gridContainer.appendChild(createSubjectCard(subject));
-        }
-        subjectsContainer.appendChild(gridContainer);
+        subjects = await fetchSubjects();
     }
     catch (error) {
         console.error("Fehler beim Laden der Fächer:", error);
+        subjects = [];
     }
-}
-function collectSubjectData(selectetRoomTypes, selectedSubjectColor) {
-    const nameInput = getElement("name-input");
-    const symbolInput = aquireElement("initials-input");
-    if (!nameInput) {
-        throw new Error("Fehlendes Formularelement");
+    try {
+        teachers = await fetchTeachers();
     }
-    return {
-        subjectName: nameInput.value.trim(),
-        subjectSymbol: symbolInput.value.trim(),
-        requiredRoomTypes: selectetRoomTypes,
-        subjectColor: selectedSubjectColor,
-    };
+    catch (error) {
+        console.error("Fehler beim Laden der Lehrer:", error);
+        teachers = [];
+    }
+    setPageKicker(`Stammdaten · ${subjects.length} Einträge`);
+    renderRows();
 }
-function buildAddSubjectFormContent(subject) {
-    const container = document.createElement("div");
-    container.id = "subject-modal-content";
-    const formGrid = document.createElement("div");
-    formGrid.className = "subject-form-grid";
-    // name / initials block
-    const nameInitials = document.createElement("div");
-    nameInitials.className = "form-name-initials-inputs";
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.id = "name-input";
-    nameInput.className = "subject-input";
-    nameInput.placeholder = "Name";
-    const initialsInput = document.createElement("input");
-    initialsInput.type = "text";
-    initialsInput.id = "initials-input";
-    initialsInput.className = "subject-input";
-    initialsInput.placeholder = "Abkürzung";
-    nameInput.value = subject?.subjectName ?? "";
-    initialsInput.value = subject?.subjectSymbol ?? "";
-    nameInitials.append(nameInput, initialsInput);
-    // roomtype block
-    const roomtypeBlock = document.createElement("div");
-    roomtypeBlock.id = "roomtype-block";
-    const roomtypeInputContainer = document.createElement("div");
-    roomtypeInputContainer.id = "roomtype-input-container";
-    const addRoomImg = document.createElement("img");
-    addRoomImg.id = "add-room-img";
-    addRoomImg.src = "../assets/img/magnifyingGlass.png";
-    addRoomImg.alt = "Add Room";
-    const roomtypeInput = document.createElement("input");
-    roomtypeInput.type = "text";
-    roomtypeInput.id = "roomtype-input";
-    roomtypeInput.placeholder = "Benötigter Raum Typ";
-    roomtypeInputContainer.append(addRoomImg, roomtypeInput);
-    const roomtypeDropdown = document.createElement("div");
-    roomtypeDropdown.id = "roomtype-dropdown";
-    const selectedRoomtypes = document.createElement("div");
-    selectedRoomtypes.id = "selected-roomtypes";
-    roomtypeBlock.append(roomtypeInputContainer, roomtypeDropdown, selectedRoomtypes);
-    formGrid.append(nameInitials, roomtypeBlock);
-    container.appendChild(formGrid);
-    return container;
-}
-function openSubjectForm(existingSubject) {
-    const noSubjectsElement = getElement("no-subjects");
-    const disableOverlay = getElement("disable-overlay");
-    const displaySubjects = getElement("display-subjects");
-    const addSubjectScreen = getElement("add-subject-screen");
-    if (!addSubjectScreen || !disableOverlay || !displaySubjects)
+function renderRows() {
+    if (!tableBody) {
         return;
-    if (noSubjectsElement)
-        noSubjectsElement.style.display = "none";
-    openPopup({
-        modal: addSubjectScreen,
-        overlay: disableOverlay,
-        scrollContainer: displaySubjects,
-    });
-    const isEditMode = !!existingSubject;
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-subject-header-container";
-    const title = document.createElement("h1");
-    title.id = "add-subject-header";
-    title.textContent = isEditMode
-        ? "Dieses Fach bearbeiten"
-        : "Ein neues Fach hinzufügen";
-    const closeScreenButton = document.createElement("div");
-    closeScreenButton.id = "close-add-subject-screen-btn";
-    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-    closeScreenButton.addEventListener("click", () => {
-        closePopup({
-            modal: addSubjectScreen,
-            overlay: disableOverlay,
-            scrollContainer: displaySubjects,
-        });
-    });
-    const formContent = buildAddSubjectFormContent(existingSubject);
-    const colorPickerContainer = document.createElement("div");
-    colorPickerContainer.id = "color-selection-container";
-    const confirmButton = document.createElement("div");
-    confirmButton.id = "confirm-subject-btn";
-    confirmButton.textContent = isEditMode ? "Speichern" : "Bestätigen";
-    headerContainer.append(title, closeScreenButton);
-    addSubjectScreen.replaceChildren(headerContainer, formContent, colorPickerContainer, confirmButton);
-    const selectorInput = getElement("roomtype-input");
-    const selectorDropdown = getElement("roomtype-dropdown");
-    const selectedContainer = getElement("selected-roomtypes");
-    const inputContainer = getElement("roomtype-input-container");
-    if (!selectorInput ||
-        !selectorDropdown ||
-        !selectedContainer ||
-        !inputContainer)
+    }
+    tableBody.replaceChildren();
+    for (const subject of subjects) {
+        const texts = [subject.subjectSymbol, subject.subjectName, subject.requiredRoomTypes.join(" ")];
+        if (matchesSearch(searchQuery, texts)) {
+            tableBody.appendChild(createSubjectRow(subject));
+        }
+    }
+    if (tableBody.children.length === 0) {
+        tableBody.appendChild(createEmptyRow(COLUMNS.length, "Keine Einträge gefunden."));
+    }
+}
+function createSubjectRow(subject) {
+    const row = document.createElement("tr");
+    if (subject.id === editingSubjectId) {
+        row.className = "selected";
+    }
+    const colorDot = document.createElement("span");
+    colorDot.className = "color-dot";
+    if (subject.subjectColor) {
+        colorDot.style.background = formatColor(subject.subjectColor);
+    }
+    let typesCell;
+    if (subject.requiredRoomTypes.length > 0) {
+        typesCell = createElementCell(createChipList(subject.requiredRoomTypes));
+    }
+    else {
+        typesCell = createTextCell("beliebig", "muted");
+    }
+    const teacherSymbols = findTeacherSymbols(subject);
+    let teachersCell;
+    if (teacherSymbols.length > 0) {
+        teachersCell = createElementCell(createChipList(teacherSymbols));
+    }
+    else {
+        teachersCell = createTextCell("keiner", "muted");
+    }
+    function handleEditClick() {
+        openSubjectForm(subject);
+    }
+    function handleDeleteClick() {
+        void confirmAndDeleteSubject(subject);
+    }
+    row.append(createElementCell(colorDot), createTextCell(subject.subjectSymbol, "mono strong"), createTextCell(subject.subjectName, ""), typesCell, teachersCell, createActionsCell(handleEditClick, handleDeleteClick));
+    return row;
+}
+function openSubjectForm(subject) {
+    if (!panelSlot) {
         return;
-    const roomTypeSelector = initRoomTypeSelector({
-        input: selectorInput,
-        dropdown: selectorDropdown,
-        selectedContainer,
-        inputContainer,
-    });
-    if (existingSubject) {
-        existingSubject.requiredRoomTypes.forEach((type) => {
-            roomTypeSelector.restore?.(type);
-        });
     }
-    const colorPicker = initColorPicker(colorPickerContainer);
-    if (existingSubject) {
-        colorPicker.setColor?.(existingSubject.subjectColor);
+    let title = "Neues Fach";
+    let nameValue = "";
+    let symbolValue = "";
+    let selectedTypes = [];
+    if (subject) {
+        title = "Fach bearbeiten";
+        nameValue = subject.subjectName;
+        symbolValue = subject.subjectSymbol;
+        selectedTypes = subject.requiredRoomTypes;
+        editingSubjectId = subject.id;
     }
-    confirmButton.addEventListener("click", async () => {
+    else {
+        editingSubjectId = null;
+    }
+    const nameInput = createTextInput(nameValue, "z. B. Angewandte Mathematik", false);
+    const symbolInput = createTextInput(symbolValue, "z. B. AM", true);
+    const typeOptions = [];
+    for (const type of ROOM_TYPES) {
+        typeOptions.push({ value: type, label: type });
+    }
+    const typeSelect = createChipSelect(typeOptions, selectedTypes);
+    const colorContainer = document.createElement("div");
+    const colorPicker = initColorPicker(colorContainer);
+    if (subject && subject.subjectColor) {
+        colorPicker.setColor(subject.subjectColor);
+    }
+    const panel = createSidePanel({ title, onSave: handleSaveClick, onCancel: closeSubjectForm });
+    panel.body.append(createFormField("Name", nameInput, ""), createFormField("Kürzel", symbolInput, ""), createFormField("Benötigte Raumtypen", typeSelect.element, "Leer = jeder Raum. Bei mehreren reicht einer davon."), createFormField("Farbe", colorContainer, "Wird im Stundenplan verwendet."));
+    async function handleSaveClick() {
+        panel.clearError();
+        const name = nameInput.value.trim();
+        const symbol = symbolInput.value.trim();
+        if (name === "" || symbol === "") {
+            panel.showError("Bitte Name und Kürzel ausfüllen.");
+            return;
+        }
+        const subjectData = {
+            subjectName: name,
+            subjectSymbol: symbol,
+            requiredRoomTypes: typeSelect.getSelected(),
+            subjectColor: colorPicker.getSelectedColor(),
+        };
+        panel.setSaving(true);
         try {
-            const subjectData = collectSubjectData(roomTypeSelector.getSelectedTypes(), colorPicker.getSelectedColor());
-            if (!subjectData)
-                return;
-            if (isEditMode && existingSubject) {
-                await updateSubject(existingSubject.id, subjectData);
-                console.log("It works");
+            if (subject) {
+                await updateSubject(subject.id, subjectData);
             }
             else {
-                console.log("SUBJECT DATA:", subjectData);
-                console.log("ROOM TYPES:", subjectData.requiredRoomTypes);
                 await createSubject(subjectData);
             }
-            closePopup({
-                modal: addSubjectScreen,
-                overlay: disableOverlay,
-                scrollContainer: displaySubjects,
-            });
-            await loadAndRenderSubjects();
         }
         catch (error) {
-            console.error("Error occurred:", error);
+            console.error("Fehler beim Speichern des Fachs:", error);
+            panel.showError("Speichern fehlgeschlagen.");
+            panel.setSaving(false);
+            return;
         }
+        closeSubjectForm();
+        showToast("Fach gespeichert");
+        await loadAndRenderSubjects();
+    }
+    panelSlot.replaceChildren(panel.element);
+    panelSlot.className = "";
+    renderRows();
+    nameInput.focus();
+}
+function closeSubjectForm() {
+    if (!panelSlot) {
+        return;
+    }
+    editingSubjectId = null;
+    panelSlot.replaceChildren();
+    panelSlot.className = "hidden";
+    renderRows();
+}
+async function confirmAndDeleteSubject(subject) {
+    const confirmed = await askConfirmation({
+        title: `Fach „${subject.subjectSymbol} · ${subject.subjectName}“ löschen?`,
+        text: "Das kann nicht rückgängig gemacht werden.",
+        confirmLabel: "Löschen",
     });
+    if (!confirmed) {
+        return;
+    }
+    try {
+        await deleteSubject(subject.id);
+    }
+    catch (error) {
+        console.error("Fehler beim Löschen des Fachs:", error);
+        showToast("Löschen fehlgeschlagen.");
+        return;
+    }
+    if (editingSubjectId === subject.id) {
+        closeSubjectForm();
+    }
+    showToast("Fach gelöscht");
+    await loadAndRenderSubjects();
 }
 function initializeApp() {
-    initNavbar();
+    initAppShell("subjects");
+    buildPage();
     void loadAndRenderSubjects();
-    const addBtn = getElement("add-btn");
-    addBtn?.addEventListener("click", () => openSubjectForm());
-    const inputField = getElement("input-field");
-    inputField?.addEventListener("input", () => {
-        initSearchElement({
-            inputId: "input-field",
-            selectedRow: ".subject-box",
-            values: [".subject-name", ".room-types"],
-        });
-    });
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

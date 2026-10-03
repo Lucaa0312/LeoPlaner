@@ -1,0 +1,82 @@
+.io-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 1.143rem;
+}
+
+.import-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.571rem;
+    padding: 2rem 1.143rem;
+    border: 1.5px dashed var(--ln);
+    border-radius: var(--radius);
+    background: var(--sf2);
+    text-align: center;
+}
+
+.import-area > i {
+    color: var(--ac);
+    font-size: 2.429rem;
+}
+
+.import-area .btn {
+    margin-top: 0.429rem;
+}
+
+.import-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.429rem;
+    list-style: none;
+}
+
+.import-file {
+    display: flex;
+    align-items: center;
+    gap: 0.571rem;
+    font-family: var(--font-mono);
+    font-size: 0.857rem;
+}
+
+.import-file i {
+    color: var(--ac);
+    font-size: 1.143rem;
+}
+
+.import-file.unknown,
+.import-file.unknown i {
+    color: var(--bad);
+}
+
+.import-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.286rem;
+}
+
+.import-warning {
+    color: var(--warn);
+}
+
+.export-row {
+    display: flex;
+    align-items: center;
+    gap: 0.857rem;
+    padding: 0.857rem;
+    border: 1px solid var(--ln);
+    border-radius: var(--radius-small);
+}
+
+.export-row > i {
+    color: var(--mu);
+    font-size: 1.571rem;
+}
+
+@media (max-width: 60em) {
+    .io-layout {
+        grid-template-columns: 1fr;
+    }
+}

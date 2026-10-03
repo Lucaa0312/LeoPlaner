@@ -26,14 +26,19 @@ export async function getFetchResponse(path) {
 }
 export async function putJson(url, data) {
     const response = await fetch(`${API_BASE_URL}${url}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
     });
+    if (!response.ok) {
+        throw new Error(`PUT ${url} failed with status ${response.status}`);
+    }
+}
+export async function deleteRequest(path) {
+    const response = await fetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
+    if (!response.ok) {
+        throw new Error(`DELETE ${path} failed with status ${response.status}`);
+    }
 }

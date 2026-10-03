@@ -1,6 +1,5 @@
 export function initColorPicker(container) {
     container.innerHTML = `
-      <h2 id="color-title">Wähle eine Farbe aus</h2>
 
       <div id="color-ui">
         <canvas id="color-wheel" width="220" height="220"></canvas>
@@ -121,9 +120,12 @@ export function initColorPicker(container) {
         ctx.stroke();
     }
     function setFromPoint(clientX, clientY) {
+        // The canvas is drawn at its own resolution but shown at a size that follows the root font size.
         const rect = canvas.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
         const dx = x - cx;
         const dy = y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -142,22 +144,24 @@ export function initColorPicker(container) {
         rgbEl.textContent = `RGB(${selectedColor.red}, ${selectedColor.green}, ${selectedColor.blue})`;
         drawWheel();
     }
-    canvas.addEventListener("pointerdown", (event) => {
+    function handlePointerDown(event) {
         dragging = true;
         canvas.setPointerCapture(event.pointerId);
         setFromPoint(event.clientX, event.clientY);
-    });
-    canvas.addEventListener("pointermove", (event) => {
-        if (!dragging)
+    }
+    function handlePointerMove(event) {
+        if (!dragging) {
             return;
+        }
         setFromPoint(event.clientX, event.clientY);
-    });
-    canvas.addEventListener("pointerup", () => {
+    }
+    function handlePointerEnd() {
         dragging = false;
-    });
-    canvas.addEventListener("pointercancel", () => {
-        dragging = false;
-    });
+    }
+    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointermove", handlePointerMove);
+    canvas.addEventListener("pointerup", handlePointerEnd);
+    canvas.addEventListener("pointercancel", handlePointerEnd);
     lightness.addEventListener("input", updateColor);
     updateColor();
     return {

@@ -1,0 +1,136 @@
+.optimization-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 22.857rem;
+    gap: 1.143rem;
+}
+
+.controls-card {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* the graph fills the card, which is as tall as the thermometer next to it */
+.chart-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 22.857rem;
+}
+
+.cost-chart {
+    position: absolute;
+    inset: 0;
+}
+
+.chart-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+/* ------------------TEMPERATURE THERMOMETER--------------------- */
+.gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.857rem;
+    flex: 1;
+    border-radius: var(--radius-small);
+    outline: none;
+}
+
+.gauge:focus-visible {
+    outline: 2px solid var(--ac);
+    outline-offset: 0.286rem;
+}
+
+.gauge-value {
+    font-size: 1.714rem;
+    font-weight: 500;
+}
+
+.gauge-body {
+    display: flex;
+    gap: 0.857rem;
+}
+
+/* labels sit next to the tube, from 0,1 at the bottom to 10 000 at the top */
+.gauge-scale {
+    position: relative;
+    width: 4rem;
+    height: 20rem;
+    margin-bottom: 2.857rem;
+}
+
+.gauge-label {
+    position: absolute;
+    right: 0;
+    transform: translateY(50%);
+    color: var(--mu);
+    font-size: 0.857rem;
+}
+
+.gauge-thermometer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.gauge-tube {
+    position: relative;
+    width: 1.429rem;
+    height: 20rem;
+    border: 1px solid var(--ln);
+    border-bottom: none;
+    border-radius: 0.714rem 0.714rem 0 0;
+    background: linear-gradient(to top in oklch, var(--ac), var(--chart-high));
+}
+
+.gauge-empty {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0.714rem 0.714rem 0 0;
+    background: var(--sf2);
+}
+
+.gauge-handle {
+    position: absolute;
+    left: 50%;
+    width: 2.429rem;
+    height: 0.571rem;
+    border: 1px solid var(--ln);
+    border-radius: 999rem;
+    background: var(--sf);
+    box-shadow: 0 0.071rem 0.286rem rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, 50%);
+}
+
+.gauge-bulb {
+    width: 2.857rem;
+    height: 2.857rem;
+    margin-top: -0.357rem;
+    border: 1px solid var(--ln);
+    border-radius: 50%;
+    background: var(--ac);
+}
+
+/* large screens are also taller, so the graph gets more room */
+@media (min-width: 120em) {
+    .chart-wrapper {
+        min-height: 30rem;
+    }
+}
+
+@media (max-width: 60em) {
+    .optimization-area {
+        grid-template-columns: 1fr;
+    }
+}

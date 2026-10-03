@@ -1,314 +1,278 @@
-import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement } from "../utils/elementHelpers.js";
-import initNavbar from "./navbar.js";
-import { fetchClassSubjects } from "../api/classSubjectApi.js";
-import { fetchSchoolClasses } from "../api/classSubjectApi.js";
-/**
- * Groups the class subjects by their class name.
- */
-function groupClasses(classSubjects) {
-    const groupedMap = new Map();
-    for (const item of classSubjects) {
-        const existing = groupedMap.get(item.className);
-        if (existing) {
-            existing.weeklyHours += item.weeklyHours;
-            existing.subjects.push(item);
-            existing.subjectCount++;
-        }
-        else {
-            groupedMap.set(item.className, {
-                className: item.className,
-                weeklyHours: item.weeklyHours,
-                subjectCount: 1,
-                subjects: [item],
-            });
-        }
+import { initAppShell } from "../components/appShell.js";
+import { createPageHeader, setPageKicker } from "../components/pageHeader.js";
+import { createActionsCell, createDataTable, createEmptyRow, createSearchBox, createTextCell, matchesSearch, } from "../components/dataTable.js";
+import { createSidePanel, createFormField, createSelect, fillSelect } from "../components/sidePanel.js";
+import { createSearchSelect } from "../components/searchSelect.js";
+import { createToggleSwitch } from "../components/toggleSwitch.js";
+import { showNotAvailable } from "../components/placeholder.js";
+import { showToast } from "../components/toast.js";
+import { createClassSubject, fetchClassSubjects, fetchSchoolClasses } from "../api/classSubjectApi.js";
+import { fetchSubjects } from "../api/subjectApi.js";
+import { fetchTeachers } from "../api/teacherApi.js";
+import { aquireElement } from "../utils/elementHelpers.js";
+// Creating works. The backend has no update or delete and sends no id, so edit and delete are placeholders.
+const COLUMNS = ["Klasse", "Fach", "Lehrer", "Std./Woche", "Doppelstunde"];
+const ALL_CLASSES = "all";
+let classSubjects = [];
+let schoolClasses = [];
+let subjects = [];
+let teachers = [];
+let searchQuery = "";
+let classFilter = ALL_CLASSES;
+let tableBody = null;
+let classFilterSelect = null;
+let panelSlot = null;
+function formatTeachers(classSubject) {
+    const names = [];
+    for (const teacher of classSubject.teacher) {
+        names.push(`${teacher.nameSymbol} · ${teacher.teacherName}`);
     }
-    return Array.from(groupedMap.values());
+    return names.join(", ");
 }
-/**
- * Closes the overview page for the given class.
- */
-function closeOverview(groupedClassesLength) {
-    const headerHoursBox = getElement("header-hours-box");
-    const headerSubjectCountBox = getElement("header-subject-count-box");
-    if (!headerHoursBox || !headerSubjectCountBox) {
-        console.log("headerHoursBox or headerSubjectCountBox is null");
-        return;
+function formatDoublePeriod(classSubject) {
+    if (classSubject.requiresDoublePeriod) {
+        return "Pflicht";
     }
-    headerHoursBox.style.display = "";
-    headerSubjectCountBox.style.display = "";
-    for (let i = 0; i < groupedClassesLength; i++) {
-        const hoursBox = getElement("hours-box-" + i);
-        const subjectCountBox = getElement("subject-count-box-" + i);
-        if (!hoursBox || !subjectCountBox) {
-            console.log("hoursBox or subjectCountBox is null");
-            return;
-        }
-        hoursBox.style.display = "";
-        subjectCountBox.style.display = "";
+    else if (classSubject.isBetterDoublePeriod) {
+        return "bevorzugt";
     }
-    const overviewBox = getElement("overview-box");
-    if (overviewBox) {
-        overviewBox.style.display = "none";
-    }
-    const closeOverviewBox = getElement("close-overview-box");
-    closeOverviewBox?.remove();
+    return "–";
 }
-/**
- * Opens the overview page for the given class.
- */
-/*function openOverview(groupedClassesLength: number) {
-  const headerHoursBox = getElement<HTMLDivElement>("header-hours-box");
-  const headerSubjectCountBox = getElement<HTMLDivElement>(
-    "header-subject-count-box",
-  );
-
-  if (!headerHoursBox || !headerSubjectCountBox) {
-    console.log("headerHoursBox or headerSubjectCountBox is null");
-    return;
-  } else {
-    headerHoursBox.style.display = "none";
-    headerSubjectCountBox.style.display = "none";
-    for (let i = 0; i < groupedClassesLength; i++) {
-      const hoursBox = getElement<HTMLDivElement>("hours-box-" + i);
-      const subjectCountBox = getElement<HTMLDivElement>(
-        "subject-count-box-" + i,
-      );
-      if (!hoursBox || !subjectCountBox) {
-        console.log("hoursBox or subjectCountBox is null");
-        return;
-      } else {
-        hoursBox.style.display = "none";
-        subjectCountBox.style.display = "none";
-      }
+function teachesSubject(teacher, subjectId) {
+    for (const subject of teacher.teachingSubject) {
+        if (subject.id === subjectId) {
+            return true;
+        }
     }
-  }
-
-  const overviewBox = getElement<HTMLDivElement>("overview-box");
-  if (overviewBox) {
-    overviewBox.style.display = "block";
-  }
-
-  const closeOverviewBox = document.createElement("div");
-  closeOverviewBox.id = "close-overview-box";
-
-  const xMark = document.createElement("i");
-  xMark.className = "fa-solid fa-xmark";
-
-  xMark.onclick = () => {
-    closeOverview(groupedClassesLength);
-  };
-
-  closeOverviewBox.appendChild(xMark);
-
-  overviewBox?.replaceChildren(closeOverviewBox);
+    return false;
 }
-*/
-function openOverview(groupedClass, groupedClassesLength) {
-    const headerHoursBox = getElement("header-hours-box");
-    const headerSubjectCountBox = getElement("header-subject-count-box");
-    if (!headerHoursBox || !headerSubjectCountBox) {
-        console.log("headerHoursBox or headerSubjectCountBox is null");
-        return;
-    }
-    else {
-        headerHoursBox.style.display = "none";
-        headerSubjectCountBox.style.display = "none";
-        for (let i = 0; i < groupedClassesLength; i++) {
-            const hoursBox = getElement("hours-box-" + i);
-            const subjectCountBox = getElement("subject-count-box-" + i);
-            if (!hoursBox || !subjectCountBox) {
-                console.log("hoursBox or subjectCountBox is null");
-                return;
-            }
-            else {
-                hoursBox.style.display = "none";
-                subjectCountBox.style.display = "none";
-            }
-        }
-    }
-    const overviewBox = getElement("overview-box");
-    if (overviewBox) {
-        overviewBox.style.display = "block";
-    }
-    // --- Titelleiste mit Klassennamen + X ----------------------------------
-    const titleBar = document.createElement("div");
-    titleBar.id = "overview-title-bar";
-    const title = document.createElement("span");
-    title.id = "overview-title";
-    title.textContent = `${groupedClass.className.toUpperCase()} - Überblick`;
-    const closeOverviewBox = document.createElement("div");
-    closeOverviewBox.id = "close-overview-box";
-    const xMark = document.createElement("i");
-    xMark.className = "fa-solid fa-xmark";
-    xMark.onclick = () => {
-        closeOverview(groupedClassesLength);
-    };
-    closeOverviewBox.appendChild(xMark);
-    titleBar.append(title, closeOverviewBox);
-    // --- Suchfeld ----------------------------------------------------------
-    const searchBox = document.createElement("div");
-    searchBox.id = "overview-search-box";
-    const searchInput = document.createElement("input");
-    searchInput.type = "text";
-    searchInput.placeholder = "Suchen";
-    searchInput.id = "overview-search-input";
-    const searchIcon = document.createElement("i");
-    searchIcon.className = "fa-solid fa-magnifying-glass";
-    searchIcon.id = "overview-search-icon";
-    searchBox.append(searchInput, searchIcon);
-    // --- Scrollbarer Inhalt (Fächer) ---------------------------------------
-    const content = document.createElement("div");
-    content.id = "overview-content";
-    // Fächer
-    const subjectsHeader = document.createElement("div");
-    subjectsHeader.className = "overview-section-header";
-    subjectsHeader.textContent = "Fächer";
-    content.appendChild(subjectsHeader);
-    for (const cs of groupedClass.subjects) {
-        const item = document.createElement("div");
-        item.className = "overview-item";
-        const label = document.createElement("span");
-        label.textContent = cs.subject?.subjectName ?? "(unbekannt)";
-        const remove = document.createElement("i");
-        remove.className = "fa-solid fa-xmark overview-item-remove";
-        remove.onclick = () => {
-            console.log("remove subject", cs);
-            // TODO: API-Call zum Entfernen des Fachs
-        };
-        item.append(label, remove);
-        content.appendChild(item);
-    }
-    // Raum
-    const room = groupedClass.schoolClass?.classRoom;
-    if (room) {
-        const roomHeader = document.createElement("div");
-        roomHeader.className = "overview-section-header";
-        roomHeader.textContent = "Raum";
-        content.appendChild(roomHeader);
-        const item = document.createElement("div");
-        item.className = "overview-item";
-        const label = document.createElement("span");
-        label.textContent = room.roomName;
-        const remove = document.createElement("i");
-        remove.className = "fa-solid fa-xmark overview-item-remove";
-        remove.onclick = () => {
-            console.log("remove room", room);
-            // TODO: API-Call zum Entfernen/Ändern des Raums
-        };
-        item.append(label, remove);
-        content.appendChild(item);
-    }
-    // Live-Suche
-    searchInput.addEventListener("input", () => {
-        const q = searchInput.value.trim().toLowerCase();
-        const items = content.querySelectorAll(".overview-item");
-        for (const item of items) {
-            const text = item.querySelector("span")?.textContent ?? "";
-            item.style.display = text.toLowerCase().includes(q) ? "" : "none";
-        }
+function buildPage() {
+    const page = aquireElement("page");
+    const header = createPageHeader({
+        kicker: "Stammdaten",
+        title: "Klassen-Fächer",
+        actions: [{ id: "add-btn", icon: "ti-plus", label: "Neu: Zuordnung", primary: true }],
     });
-    overviewBox?.replaceChildren(titleBar, searchBox, content);
+    const toolbar = document.createElement("div");
+    toolbar.className = "toolbar";
+    classFilterSelect = createSearchSelect(handleClassFilterChange);
+    classFilterSelect.element.classList.add("class-filter");
+    toolbar.append(createSearchBox(handleSearch), classFilterSelect.element);
+    // shows "Alle Klassen" right away, the classes are added after loading
+    renderFilters();
+    const layout = document.createElement("div");
+    layout.className = "table-layout";
+    const table = createDataTable(COLUMNS);
+    tableBody = table.body;
+    panelSlot = document.createElement("div");
+    panelSlot.className = "hidden";
+    layout.append(table.element, panelSlot);
+    page.replaceChildren(header, toolbar, layout);
+    const addButton = aquireElement("add-btn");
+    addButton.addEventListener("click", handleAddClick);
 }
-/**
- * Creates a class subject card for the given grouped class.
- */
-function createClassSubjectCard(groupedClass, count, groupedClassesLength) {
-    const row = document.createElement("div");
-    row.className = "class-row";
-    const left = document.createElement("div");
-    left.className = "class-main";
-    const classTitle = document.createElement("input");
-    classTitle.className = "class-title";
-    classTitle.value = groupedClass.className.toUpperCase();
-    const subjectsBtn = document.createElement("button");
-    subjectsBtn.className = "action-btn";
-    subjectsBtn.innerHTML =
-        'Fächer <i class="fa-regular fa-square-plus" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.3"></i>';
-    subjectsBtn.onclick = () => { };
-    const roomBtn = document.createElement("button");
-    roomBtn.className = "action-btn";
-    roomBtn.innerHTML =
-        'Raum zuweisen <i class="fa-regular fa-square-plus" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.3"></i>';
-    const overviewBtn = document.createElement("button");
-    overviewBtn.className = "action-btn";
-    overviewBtn.innerHTML =
-        'Überblick <i class="fa-regular fa-eye" style="margin-left: 0.3vw; color: #4f46e5; scale: 1.2"></i>';
-    overviewBtn.onclick = () => {
-        openOverview(groupedClass, groupedClassesLength);
-    };
-    left.append(classTitle, subjectsBtn, roomBtn, overviewBtn);
-    const hoursBox = document.createElement("div");
-    hoursBox.id = `hours-box-${count}`;
-    hoursBox.className = "info-box";
-    const hours = document.createElement("span");
-    hours.textContent = String(groupedClass.weeklyHours);
-    hoursBox.appendChild(hours);
-    const subjectCountBox = document.createElement("div");
-    subjectCountBox.id = `subject-count-box-${count}`;
-    subjectCountBox.className = "info-box";
-    const subjectCount = document.createElement("span");
-    subjectCount.textContent = String(groupedClass.subjectCount);
-    subjectCountBox.appendChild(subjectCount);
-    row.append(left, hoursBox, subjectCountBox);
-    return row;
+function handleSearch(query) {
+    searchQuery = query;
+    renderRows();
 }
-/**
- * Loads and renders the class subjects on the page.
- */
-async function loadAndRenderClassSubjects() {
-    const noClassSubjectsElement = getElement("no-classSubjects");
-    const classSubjectsContainer = getElement("display-classSubjects");
-    if (!noClassSubjectsElement || !classSubjectsContainer) {
-        return;
+function handleAddClick() {
+    openClassSubjectForm();
+}
+async function loadAndRender() {
+    try {
+        classSubjects = await fetchClassSubjects();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Klassen-Fächer:", error);
+        classSubjects = [];
     }
     try {
-        const [classSubjects, schoolClasses] = await Promise.all([
-            fetchClassSubjects(),
-            fetchSchoolClasses(),
-        ]);
-        console.log(classSubjects);
-        const groupedClasses = groupClasses(classSubjects);
-        // Raum/SchoolClass an jede gruppierte Klasse anhängen
-        const classMap = new Map();
-        for (const sc of schoolClasses) {
-            classMap.set(sc.className.toLowerCase(), sc);
-        }
-        for (const gc of groupedClasses) {
-            gc.schoolClass = classMap.get(gc.className.toLowerCase());
-        }
-        toggleEmptyState(noClassSubjectsElement, classSubjects.length > 0);
-        classSubjectsContainer.replaceChildren();
-        if (classSubjects.length === 0) {
-            return;
-        }
-        const gridContainer = document.createElement("div");
-        gridContainer.className = "grid-layout";
-        const br = document.createElement("br");
-        const headerRow = document.createElement("div");
-        headerRow.className = "class-header-row";
-        headerRow.innerHTML = `
-        <div class="header-main">Klasse</div>
-        <div id="header-hours-box" class="header-box">Wöchentliche Stunden</div>
-        <div id="header-subject-count-box" class="header-box">Fächer Anzahl</div>
-    `;
-        gridContainer.appendChild(headerRow);
-        let groupedClassesLength = groupedClasses.length;
-        let count = 0;
-        for (const groupedClass of groupedClasses) {
-            console.log(groupedClass);
-            gridContainer.appendChild(createClassSubjectCard(groupedClass, count, groupedClassesLength));
-            count++;
-        }
-        classSubjectsContainer.append(gridContainer, br, br, br);
+        schoolClasses = await fetchSchoolClasses();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Klassen:", error);
+        schoolClasses = [];
+    }
+    try {
+        subjects = await fetchSubjects();
     }
     catch (error) {
         console.error("Fehler beim Laden der Fächer:", error);
+        subjects = [];
+    }
+    try {
+        teachers = await fetchTeachers();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Lehrer:", error);
+        teachers = [];
+    }
+    setPageKicker(`Stammdaten · ${classSubjects.length} Einträge`);
+    renderFilters();
+    renderRows();
+}
+// "Alle Klassen" stays first, the classes are listed sorted and can be searched.
+function renderFilters() {
+    if (!classFilterSelect) {
+        return;
+    }
+    const options = [];
+    for (const schoolClass of schoolClasses) {
+        options.push({ value: schoolClass.className, label: schoolClass.className });
+    }
+    classFilterSelect.setOptions(options, classFilter, { value: ALL_CLASSES, label: "Alle Klassen" });
+}
+function handleClassFilterChange() {
+    if (!classFilterSelect) {
+        return;
+    }
+    classFilter = classFilterSelect.getValue();
+    renderRows();
+}
+function renderRows() {
+    if (!tableBody) {
+        return;
+    }
+    tableBody.replaceChildren();
+    for (const classSubject of classSubjects) {
+        let inFilter = true;
+        if (classFilter !== ALL_CLASSES && classSubject.className !== classFilter) {
+            inFilter = false;
+        }
+        const texts = [
+            classSubject.className,
+            classSubject.subject.subjectSymbol,
+            classSubject.subject.subjectName,
+            formatTeachers(classSubject),
+        ];
+        if (inFilter && matchesSearch(searchQuery, texts)) {
+            tableBody.appendChild(createClassSubjectRow(classSubject));
+        }
+    }
+    if (tableBody.children.length === 0) {
+        tableBody.appendChild(createEmptyRow(COLUMNS.length, "Keine Einträge gefunden."));
     }
 }
+function createClassSubjectRow(classSubject) {
+    const row = document.createElement("tr");
+    let teacherCell;
+    if (classSubject.teacher.length > 0) {
+        teacherCell = createTextCell(formatTeachers(classSubject), "");
+    }
+    else {
+        teacherCell = createTextCell("kein Lehrer", "text-bad strong");
+    }
+    let doublePeriodClass = "";
+    if (classSubject.requiresDoublePeriod) {
+        doublePeriodClass = "strong";
+    }
+    else if (!classSubject.isBetterDoublePeriod) {
+        doublePeriodClass = "muted";
+    }
+    row.append(createTextCell(classSubject.className, "mono strong"), createTextCell(`${classSubject.subject.subjectSymbol} · ${classSubject.subject.subjectName}`, ""), teacherCell, createTextCell(String(classSubject.weeklyHours), "mono"), createTextCell(formatDoublePeriod(classSubject), doublePeriodClass), createActionsCell(showNotAvailable, showNotAvailable));
+    return row;
+}
+function openClassSubjectForm() {
+    if (!panelSlot) {
+        return;
+    }
+    if (schoolClasses.length === 0 || subjects.length === 0) {
+        showToast("Zuerst werden Klassen und Fächer benötigt.");
+        return;
+    }
+    const classOptions = [];
+    let selectedClassId = String(schoolClasses[0].id);
+    for (const schoolClass of schoolClasses) {
+        classOptions.push({ value: String(schoolClass.id), label: schoolClass.className });
+        if (schoolClass.className === classFilter) {
+            selectedClassId = String(schoolClass.id);
+        }
+    }
+    const subjectOptions = [];
+    for (const subject of subjects) {
+        subjectOptions.push({ value: String(subject.id), label: `${subject.subjectSymbol} · ${subject.subjectName}` });
+    }
+    const classSelect = createSearchSelect(handleClassChange);
+    classSelect.setOptions(classOptions, selectedClassId);
+    const subjectSelect = createSearchSelect(fillTeacherOptions);
+    subjectSelect.setOptions(subjectOptions, String(subjects[0].id));
+    const teacherSelect = createSelect([], "");
+    fillTeacherOptions();
+    const hoursInput = document.createElement("input");
+    hoursInput.type = "number";
+    hoursInput.className = "form-input mono";
+    hoursInput.min = "1";
+    hoursInput.max = "12";
+    hoursInput.value = "2";
+    const requiresDouble = createToggleSwitch("Muss als Doppelstunde stattfinden (hart)", false);
+    const betterDouble = createToggleSwitch("Besser als Doppelstunde (weich)", false);
+    const panel = createSidePanel({
+        title: "Neue Zuordnung",
+        onSave: handleSaveClick,
+        onCancel: closeClassSubjectForm,
+    });
+    panel.body.append(createFormField("Klasse", classSelect.element, ""), createFormField("Fach", subjectSelect.element, ""), createFormField("Lehrer", teacherSelect, "Nur Lehrer, die das Fach unterrichten."), createFormField("Wochenstunden", hoursInput, ""), createFormField("Doppelstunde", requiresDouble.element, ""), createFormField("", betterDouble.element, ""));
+    // The class only matters when saving.
+    function handleClassChange() {
+        // nothing to update
+    }
+    // Offers only the teachers of the chosen subject.
+    function fillTeacherOptions() {
+        const subjectId = Number(subjectSelect.getValue());
+        const teacherOptions = [{ value: "", label: "— kein Lehrer —" }];
+        for (const teacher of teachers) {
+            if (teachesSubject(teacher, subjectId)) {
+                teacherOptions.push({ value: String(teacher.id), label: `${teacher.nameSymbol} · ${teacher.teacherName}` });
+            }
+        }
+        fillSelect(teacherSelect, teacherOptions, "");
+    }
+    async function handleSaveClick() {
+        panel.clearError();
+        const hours = Number(hoursInput.value);
+        if (!Number.isInteger(hours) || hours <= 0) {
+            panel.showError("Wochenstunden müssen größer als 0 sein.");
+            return;
+        }
+        const assignedTeachers = [];
+        if (teacherSelect.value !== "") {
+            assignedTeachers.push({ id: Number(teacherSelect.value) });
+        }
+        const classSubjectData = {
+            subject: { id: Number(subjectSelect.getValue()) },
+            teachers: assignedTeachers,
+            schoolClass: { id: Number(classSelect.getValue()) },
+            weeklyHours: hours,
+            requiresDoublePeriod: requiresDouble.isOn(),
+            betterDoublePeriod: betterDouble.isOn(),
+        };
+        panel.setSaving(true);
+        try {
+            await createClassSubject(classSubjectData);
+        }
+        catch (error) {
+            console.error("Fehler beim Speichern der Zuordnung:", error);
+            panel.showError("Speichern fehlgeschlagen.");
+            panel.setSaving(false);
+            return;
+        }
+        closeClassSubjectForm();
+        showToast("Zuordnung gespeichert");
+        await loadAndRender();
+    }
+    panelSlot.replaceChildren(panel.element);
+    panelSlot.className = "";
+}
+function closeClassSubjectForm() {
+    if (!panelSlot) {
+        return;
+    }
+    panelSlot.replaceChildren();
+    panelSlot.className = "hidden";
+}
 function initializeApp() {
-    initNavbar();
-    void loadAndRenderClassSubjects();
+    initAppShell("classSubjects");
+    buildPage();
+    void loadAndRender();
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

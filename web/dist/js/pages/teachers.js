@@ -1,483 +1,254 @@
-import initNavbar from "./navbar.js";
-import { createTeacher, fetchTeachers, updateTeacher, } from "../api/teacherApi.js";
-import { toggleEmptyState } from "../components/emptyState.js";
-import { getElement, aquireElement, formatName, } from "../utils/elementHelpers.js";
-import { closePopup, openPopup } from "../components/popup.js";
-import { imagePreview } from "../features/imagePreview.js";
+import { initAppShell } from "../components/appShell.js";
+import { createPageHeader, setPageKicker } from "../components/pageHeader.js";
+import { createActionsCell, createDataTable, createElementCell, createEmptyRow, createSearchBox, createTextCell, matchesSearch, } from "../components/dataTable.js";
+import { createSidePanel, createFormField, createTextInput } from "../components/sidePanel.js";
+import { createChipList } from "../components/chipSelect.js";
+import { createSearchMultiSelect } from "../components/searchSelect.js";
+import { askConfirmation } from "../components/confirmDialog.js";
+import { showToast } from "../components/toast.js";
+import { fetchTeachers, createTeacher, updateTeacher, deleteTeacher } from "../api/teacherApi.js";
 import { fetchSubjects } from "../api/subjectApi.js";
-import { initSubjectSelector } from "../features/subjectSelector.js";
-import { initSetAvailability } from "../features/availabilitySelector.js";
-function createTeacherSubjectChips(subjects) {
-    const visibleSubjects = subjects.slice(0, 2);
-    const hiddenSubjects = subjects.slice(2);
-    const remaining = subjects.length - visibleSubjects.length;
-    let chips = visibleSubjects
-        .map((subject) => `<span class="subject-chip" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
-        .join("");
-    if (remaining > 0) {
-        chips += `<span class="subject-chip extra">+${remaining}</span>`;
-    }
-    chips += hiddenSubjects
-        .map((subject) => `<span class="subject-chip hidden-subject" style="display: none;" title="${formatName(subject.subjectName)}">${formatName(subject.subjectName)}</span>`)
-        .join("");
-    return chips;
-}
-function showRemainingSubjects(teacherID) {
-    const container = document.querySelector(`.teacher-subjects[data-index="${teacherID}"]`);
-    if (!container)
-        return;
-    const hiddenChips = container.querySelectorAll(".hidden-subject");
-    hiddenChips.forEach((chip) => {
-        chip.style.display = "inline-block";
-    });
-    const extraChip = container.querySelector(".subject-chip.extra");
-    if (extraChip) {
-        extraChip.style.display = "none";
-    }
-}
-function closeAllTeachers() {
-    const allTeacherContainers = document.querySelectorAll(".teacher-subjects");
-    allTeacherContainers.forEach((container) => {
-        const hiddenChips = container.querySelectorAll(".hidden-subject");
-        hiddenChips.forEach((chip) => {
-            chip.style.display = "none";
-        });
-        const extraChip = container.querySelector(".subject-chip.extra");
-        if (extraChip) {
-            extraChip.style.display = "inline-block";
+import { fetchClassSubjects } from "../api/classSubjectApi.js";
+import { aquireElement } from "../utils/elementHelpers.js";
+const COLUMNS = ["Name", "Kürzel", "Unterrichtsfächer", "Std./Woche"];
+let teachers = [];
+let subjects = [];
+let classSubjects = [];
+let searchQuery = "";
+let editingTeacherId = null;
+let tableBody = null;
+let panelSlot = null;
+// Weekly hours of all class-subjects this teacher is assigned to.
+function countWeeklyHours(teacher) {
+    let hours = 0;
+    for (const classSubject of classSubjects) {
+        for (const assigned of classSubject.teacher) {
+            if (assigned.id === teacher.id) {
+                hours = hours + classSubject.weeklyHours;
+                break;
+            }
         }
-    });
+    }
+    return hours;
 }
-function createTableInfoRow() {
-    const tableInfo = document.createElement("div");
-    tableInfo.id = "table-info";
-    const nameHeader = document.createElement("p");
-    nameHeader.id = "teacher-left-section";
-    nameHeader.textContent = "Name";
-    const initialsHeader = document.createElement("p");
-    initialsHeader.id = "teacher-initials-section";
-    initialsHeader.innerHTML = "K&uuml;rzel";
-    const subjectsHeader = document.createElement("p");
-    subjectsHeader.id = "teacher-subjects-section";
-    subjectsHeader.innerHTML = "F&auml;cher";
-    const workloadHeader = document.createElement("p");
-    workloadHeader.id = "teacher-workload-section";
-    workloadHeader.textContent = "Arbeitslast";
-    const editHeader = document.createElement("p");
-    editHeader.id = "teacher-edit-section";
-    editHeader.textContent = "Bearbeiten";
-    tableInfo.append(nameHeader, initialsHeader, subjectsHeader, workloadHeader, editHeader);
-    return tableInfo;
+function getSubjectSymbols(teacher) {
+    const symbols = [];
+    for (const subject of teacher.teachingSubject) {
+        symbols.push(subject.subjectSymbol);
+    }
+    return symbols;
 }
-let subjectChipTeacherID = 0;
-function createTeacherRow(teacher) {
-    const card = document.createElement("div");
-    card.className = "teacher-row";
-    const teacherLeft = document.createElement("div");
-    teacherLeft.className = "teacher-left";
-    const avatarPlaceholder = document.createElement("div");
-    avatarPlaceholder.className = "avatar-placeholder";
-    avatarPlaceholder.textContent = "👤";
-    const teacherInfo = document.createElement("div");
-    teacherInfo.className = "teacher-info";
-    const teacherName = document.createElement("div");
-    teacherName.className = "teacher-name";
-    teacherName.textContent = teacher.teacherName;
-    const teacherInitials = document.createElement("div");
-    teacherInitials.className = "teacher-initials";
-    teacherInitials.textContent = teacher.nameSymbol;
-    const teacherSubjects = document.createElement("div");
-    teacherSubjects.className = "teacher-subjects";
-    const currentTeacherID = subjectChipTeacherID;
-    teacherSubjects.dataset.index = currentTeacherID.toString();
-    teacherSubjects.innerHTML = createTeacherSubjectChips(teacher.teachingSubject);
-    teacherSubjects.addEventListener("click", (event) => {
-        const target = event.target;
-        if (target.classList.contains("extra")) {
-            closeAllTeachers();
-            showRemainingSubjects(currentTeacherID);
-        }
+function buildPage() {
+    const page = aquireElement("page");
+    const header = createPageHeader({
+        kicker: "Stammdaten",
+        title: "Lehrer",
+        actions: [{ id: "add-btn", icon: "ti-plus", label: "Neu: Lehrer", primary: true }],
     });
-    subjectChipTeacherID++;
-    const teacherWorkload = document.createElement("div");
-    teacherWorkload.className = "teacher-workload";
-    teacherWorkload.textContent = "—";
-    const teacherEdit = document.createElement("div");
-    teacherEdit.className = "teacher-edit";
-    teacherEdit.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
-    teacherEdit.addEventListener("click", () => {
-        void openAddTeacherForm(teacher);
-    });
-    teacherInfo.appendChild(teacherName);
-    teacherLeft.append(avatarPlaceholder, teacherInfo);
-    card.append(teacherLeft, teacherInitials, teacherSubjects, teacherWorkload, teacherEdit);
-    return card;
+    const toolbar = document.createElement("div");
+    toolbar.className = "toolbar";
+    toolbar.appendChild(createSearchBox(handleSearch));
+    const layout = document.createElement("div");
+    layout.className = "table-layout";
+    const table = createDataTable(COLUMNS);
+    tableBody = table.body;
+    panelSlot = document.createElement("div");
+    panelSlot.className = "hidden";
+    layout.append(table.element, panelSlot);
+    page.replaceChildren(header, toolbar, layout);
+    const addButton = aquireElement("add-btn");
+    addButton.addEventListener("click", handleAddClick);
+}
+function handleSearch(query) {
+    searchQuery = query;
+    renderRows();
+}
+function handleAddClick() {
+    openTeacherForm(null);
 }
 async function loadAndRenderTeachers() {
-    const noTeachersElement = getElement("no-teachers");
-    const teachersContainer = getElement("display-teachers");
-    if (!noTeachersElement || !teachersContainer)
-        return;
     try {
-        const teachers = await fetchTeachers();
-        toggleEmptyState(noTeachersElement, teachers.length > 0);
-        teachersContainer.replaceChildren();
-        if (teachers.length === 0)
-            return;
-        if (!teachersContainer)
-            return;
-        const tableInfoRow = createTableInfoRow();
-        teachersContainer.appendChild(tableInfoRow);
-        const br = document.createElement("br");
-        teachers.forEach((teacher) => {
-            const teacherRow = createTeacherRow(teacher);
-            teachersContainer.appendChild(teacherRow);
-        });
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
-        teachersContainer.appendChild(br);
+        teachers = await fetchTeachers();
     }
     catch (error) {
-        console.error("Fehler beim Laden der Lehrer: " + error);
+        console.error("Fehler beim Laden der Lehrer:", error);
+        teachers = [];
     }
-}
-function collectTeacherData(state) {
-    return {
-        teacherName: `${state.firstName} ${state.lastName}`,
-        nameSymbol: state.nameSymbol,
-        teachingSubject: state.selectedSubjects.map((subject) => ({
-            id: subject.id,
-        })),
-        teacher_non_working_hours: state.nonWorkingHours,
-        teacher_non_preferred_hours: state.nonPreferredHours,
-    };
-}
-function buildFormHeader(modal, overlay, scrollContainer) {
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-teacher-header-container";
-    const title = document.createElement("h1");
-    title.id = "add-teacher-header";
-    title.textContent = "Einen neuen Lehrer hinzufügen";
-    const closeScreenButton = document.createElement("div");
-    closeScreenButton.id = "close-add-teacher-screen-btn";
-    closeScreenButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-    closeScreenButton.addEventListener("click", () => {
-        closePopup({
-            modal: modal,
-            overlay: overlay,
-            scrollContainer: scrollContainer,
-        });
-    });
-    headerContainer.append(title, closeScreenButton);
-    return headerContainer;
-}
-function buildAvatarUploadSection() {
-    const avaterUploadDiv = document.createElement("div");
-    avaterUploadDiv.className = "avatar-upload";
-    const teacherImageInput = document.createElement("input");
-    teacherImageInput.type = "file";
-    teacherImageInput.id = "teacher-image-input";
-    teacherImageInput.name = "teacher-image";
-    teacherImageInput.accept = "image/*";
-    const avatarLabel = document.createElement("label");
-    avatarLabel.htmlFor = "teacher-image-input";
-    avatarLabel.className = "avatar-label";
-    const avatarPreview = document.createElement("img");
-    avatarPreview.id = "avatar-preview";
-    avatarPreview.src = "../assets/img/userPreview.svg";
-    avatarPreview.alt = "Upload Photo";
-    const avatarText = document.createElement("p");
-    avatarText.textContent = "Profilbild hochladen";
-    avatarLabel.appendChild(avatarPreview);
-    avaterUploadDiv.append(teacherImageInput, avatarLabel, avatarText);
-    return avaterUploadDiv;
-}
-function buildStepIndicator(currentStep) {
-    const container = document.createElement("div");
-    container.id = "step-indicator";
-    const steps = [1, 2, 3];
-    steps.forEach((step, index) => {
-        const dot = document.createElement("div");
-        dot.className = "step-dot";
-        if (step === currentStep) {
-            dot.classList.add("active");
-        }
-        if (step < currentStep) {
-            dot.classList.add("completed");
-        }
-        container.appendChild(dot);
-        if (index < steps.length - 1) {
-            const line = document.createElement("div");
-            line.className = "step-line";
-            if (step < currentStep) {
-                line.classList.add("completed");
-            }
-            container.appendChild(line);
-        }
-    });
-    return container;
-}
-function buildNavigationButtons(config) {
-    const navContainer = document.createElement("div");
-    navContainer.id = "wizard-nav";
-    if (config.showBack && config.onBack) {
-        const backButton = document.createElement("div");
-        backButton.id = "back-teacher-btn";
-        backButton.textContent = "Zurück";
-        backButton.addEventListener("click", () => {
-            config.onBack();
-        });
-        navContainer.appendChild(backButton);
+    try {
+        subjects = await fetchSubjects();
     }
-    const nextButton = document.createElement("div");
-    nextButton.id = "submit-teacher-btn";
-    nextButton.textContent = config.nextLabel;
-    nextButton.addEventListener("click", () => {
-        config.onNext();
-    });
-    navContainer.appendChild(nextButton);
-    return navContainer;
+    catch (error) {
+        console.error("Fehler beim Laden der Fächer:", error);
+        subjects = [];
+    }
+    try {
+        classSubjects = await fetchClassSubjects();
+    }
+    catch (error) {
+        console.error("Fehler beim Laden der Klassen-Fächer:", error);
+        classSubjects = [];
+    }
+    setPageKicker(`Stammdaten · ${teachers.length} Einträge`);
+    renderRows();
 }
-function buildStep1(state) {
-    const container = document.createElement("div");
-    container.id = "step-1-container";
-    const addTeacherForm = document.createElement("form");
-    addTeacherForm.id = "add-teacher-form";
-    const inputContainer = document.createElement("div");
-    inputContainer.className = "input-container";
-    const firstNameLable = document.createElement("label");
-    firstNameLable.htmlFor = "first-name-input";
-    firstNameLable.textContent = "Vorname: ";
-    const firstNameInput = document.createElement("input");
-    firstNameInput.type = "text";
-    firstNameInput.id = "first-name-input";
-    firstNameInput.name = "first-name";
-    firstNameInput.required = true;
-    firstNameInput.placeholder = "Vorname";
-    firstNameInput.value = state.firstName;
-    const lastNameLabel = document.createElement("label");
-    lastNameLabel.htmlFor = "last-name-input";
-    lastNameLabel.textContent = "Nachname: ";
-    const lastNameInput = document.createElement("input");
-    lastNameInput.type = "text";
-    lastNameInput.id = "last-name-input";
-    lastNameInput.name = "last-name";
-    lastNameInput.required = true;
-    lastNameInput.placeholder = "Nachname";
-    lastNameInput.value = state.lastName;
-    const initialsLabel = document.createElement("label");
-    initialsLabel.htmlFor = "initials-input";
-    initialsLabel.textContent = "Kürzel: ";
-    const initialsInput = document.createElement("input");
-    initialsInput.type = "text";
-    initialsInput.id = "initials-input";
-    initialsInput.name = "initials";
-    initialsInput.required = true;
-    initialsInput.placeholder = "Initialen";
-    initialsInput.value = state.nameSymbol;
-    inputContainer.append(firstNameLable, firstNameInput, lastNameLabel, lastNameInput, initialsLabel, initialsInput);
-    addTeacherForm.append(inputContainer);
-    container.appendChild(addTeacherForm);
-    return container;
-}
-async function buildStep2(state) {
-    const container = document.createElement("div");
-    container.id = "step-2-container";
-    const addSubjectsContainer = document.createElement("div");
-    addSubjectsContainer.id = "add-subjects-container";
-    const subjectInputContainer = document.createElement("div");
-    subjectInputContainer.id = "subject-input-container";
-    const addSubjectImg = document.createElement("img");
-    addSubjectImg.id = "add-subject-img";
-    addSubjectImg.src = "../assets/img/magnifyingGlass.png";
-    addSubjectImg.alt = "Add Subject";
-    const subjectInput = document.createElement("input");
-    subjectInput.type = "text";
-    subjectInput.id = "subject-input";
-    subjectInput.placeholder = "Fach hinzufügen";
-    subjectInputContainer.append(addSubjectImg, subjectInput);
-    const subjectDropdown = document.createElement("div");
-    subjectDropdown.id = "subject-dropdown";
-    const selectedSubjectsContainer = document.createElement("div");
-    selectedSubjectsContainer.id = "selected-subjects";
-    addSubjectsContainer.append(subjectInputContainer, subjectDropdown, selectedSubjectsContainer);
-    container.appendChild(addSubjectsContainer);
-    const allSubjects = await fetchSubjects();
-    const subjectSelector = initSubjectSelector({
-        input: subjectInput,
-        dropdown: subjectDropdown,
-        selectedContainer: selectedSubjectsContainer,
-        inputContainer: subjectInputContainer,
-        allSubjects: allSubjects,
-    });
-    state.selectedSubjects.forEach((subject) => {
-        subjectSelector.restore?.(subject);
-    });
-    container._subjectSelector = subjectSelector;
-    return container;
-}
-const periods = [
-    { start: "07:05", end: "07:55", label: "0. EH" },
-    { start: "08:00", end: "08:50", label: "1. EH" },
-    { start: "08:55", end: "09:45", label: "2. EH" },
-    { start: "10:00", end: "10:50", label: "3. EH" },
-    { start: "10:55", end: "11:45", label: "4. EH" },
-    { start: "11:50", end: "12:40", label: "5. EH" },
-    { start: "12:45", end: "13:35", label: "6. EH" },
-    { start: "13:40", end: "14:30", label: "7. EH" },
-    { start: "14:35", end: "15:25", label: "8. EH" },
-    { start: "15:30", end: "16:20", label: "9. EH" },
-    { start: "16:25", end: "17:15", label: "10. EH" },
-    { start: "17:20", end: "18:05", label: "11. EH" },
-    { start: "18:05", end: "18:50", label: "12. EH" },
-    { start: "19:00", end: "19:45", label: "13. EH" },
-    { start: "19:45", end: "20:30", label: "14. EH" },
-    { start: "20:40", end: "21:25", label: "15. EH" },
-    { start: "21:25", end: "22:10", label: "16. EH" },
-];
-function buildStep3(state) {
-    const container = document.createElement("div");
-    container.id = "step-3-container";
-    const gridContainer = document.createElement("div");
-    gridContainer.id = "availability-grid";
-    container.appendChild(gridContainer);
-    const availability = initSetAvailability({
-        container: gridContainer,
-        periods,
-    });
-    container._availability = availability;
-    return container;
-}
-async function openAddTeacherForm(existingTeacher) {
-    const noTeachersElement = aquireElement("no-teachers");
-    const disableOverlay = aquireElement("disable-overlay");
-    const displayTeachers = aquireElement("display-teachers");
-    const addTeacherScreen = aquireElement("add-teacher-screen");
-    if (!addTeacherScreen || !disableOverlay || !displayTeachers)
+function renderRows() {
+    if (!tableBody) {
         return;
-    if (noTeachersElement)
-        noTeachersElement.style.display = "none";
-    openPopup({
-        modal: addTeacherScreen,
-        overlay: disableOverlay,
-        scrollContainer: displayTeachers,
-    });
-    const header = buildFormHeader(addTeacherScreen, disableOverlay, displayTeachers);
-    const isEditMode = !!existingTeacher;
-    const [firstName, ...lastParts] = (existingTeacher?.teacherName ?? "").split(" ");
-    const state = {
-        firstName: firstName ?? "",
-        lastName: lastParts.join(" "),
-        nameSymbol: existingTeacher?.nameSymbol ?? "",
-        email: "",
-        selectedSubjects: existingTeacher?.teachingSubject ?? [],
-        nonWorkingHours: existingTeacher?.teacherNonWorkingHours ?? [],
-        nonPreferredHours: existingTeacher?.teacherNonPreferredHours ?? [],
-    };
-    let currentStep = 1;
-    function saveStep1() {
-        state.firstName =
-            getElement("first-name-input")?.value.trim() ?? "";
-        state.lastName =
-            getElement("last-name-input")?.value.trim() ?? "";
-        state.nameSymbol =
-            getElement("initials-input")?.value.trim() ?? "";
-        state.email =
-            getElement("email-input")?.value.trim() ?? "";
     }
-    function saveStep2(stepContainer) {
-        const selector = stepContainer._subjectSelector;
-        if (selector) {
-            state.selectedSubjects = selector.getSelectedSubjects();
+    tableBody.replaceChildren();
+    for (const teacher of teachers) {
+        const texts = [teacher.teacherName, teacher.nameSymbol, getSubjectSymbols(teacher).join(" ")];
+        if (matchesSearch(searchQuery, texts)) {
+            tableBody.appendChild(createTeacherRow(teacher));
         }
     }
-    function saveStep3(stepContainer) {
-        const availability = stepContainer._availability;
-        if (availability) {
-            state.nonWorkingHours = availability.getNonWorking();
-            state.nonPreferredHours = availability.getNonPreferred();
-        }
+    if (tableBody.children.length === 0) {
+        tableBody.appendChild(createEmptyRow(COLUMNS.length, "Keine Einträge gefunden."));
     }
-    async function renderStep() {
-        const stepIndicator = buildStepIndicator(currentStep);
-        if (currentStep === 1) {
-            const avaterUploadDiv = buildAvatarUploadSection();
-            const stepContent = buildStep1(state);
-            const nav = buildNavigationButtons({
-                showBack: false,
-                nextLabel: "Weiter",
-                onNext: () => {
-                    saveStep1();
-                    currentStep = 2;
-                    void renderStep();
-                },
-            });
-            addTeacherScreen.replaceChildren(header, stepIndicator, avaterUploadDiv, stepContent, nav);
-            imagePreview();
+}
+function createTeacherRow(teacher) {
+    const row = document.createElement("tr");
+    if (teacher.id === editingTeacherId) {
+        row.className = "selected";
+    }
+    const subjectSymbols = getSubjectSymbols(teacher);
+    let subjectsCell;
+    if (subjectSymbols.length > 0) {
+        subjectsCell = createElementCell(createChipList(subjectSymbols));
+    }
+    else {
+        subjectsCell = createTextCell("keine", "muted");
+    }
+    function handleEditClick() {
+        openTeacherForm(teacher);
+    }
+    function handleDeleteClick() {
+        void confirmAndDeleteTeacher(teacher);
+    }
+    row.append(createTextCell(teacher.teacherName, "strong"), createTextCell(teacher.nameSymbol, "mono"), subjectsCell, createTextCell(String(countWeeklyHours(teacher)), "mono"), createActionsCell(handleEditClick, handleDeleteClick));
+    return row;
+}
+function openTeacherForm(teacher) {
+    if (!panelSlot) {
+        return;
+    }
+    let title = "Neuer Lehrer";
+    let nameValue = "";
+    let symbolValue = "";
+    const selectedSubjects = [];
+    if (teacher) {
+        title = "Lehrer bearbeiten";
+        nameValue = teacher.teacherName;
+        symbolValue = teacher.nameSymbol;
+        for (const subject of teacher.teachingSubject) {
+            selectedSubjects.push(String(subject.id));
         }
-        else if (currentStep === 2) {
-            const stepContent = await buildStep2(state);
-            const nav = buildNavigationButtons({
-                showBack: true,
-                nextLabel: "Weiter",
-                onBack: () => {
-                    saveStep2(stepContent);
-                    currentStep = 1;
-                    void renderStep();
-                },
-                onNext: () => {
-                    saveStep2(stepContent);
-                    currentStep = 3;
-                    void renderStep();
-                },
-            });
-            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+        editingTeacherId = teacher.id;
+    }
+    else {
+        editingTeacherId = null;
+    }
+    const nameInput = createTextInput(nameValue, "Nachname Vorname", false);
+    const symbolInput = createTextInput(symbolValue, "z. B. HOF", true);
+    const subjectOptions = [];
+    for (const subject of subjects) {
+        subjectOptions.push({
+            value: String(subject.id),
+            label: `${subject.subjectSymbol} · ${subject.subjectName}`,
+            chipLabel: subject.subjectSymbol,
+        });
+    }
+    const subjectSelect = createSearchMultiSelect(subjectOptions, selectedSubjects, "Fach hinzufügen");
+    const panel = createSidePanel({ title, onSave: handleSaveClick, onCancel: closeTeacherForm });
+    panel.body.append(createFormField("Name", nameInput, ""), createFormField("Kürzel", symbolInput, ""), createFormField("Unterrichtsfächer", subjectSelect.element, "Verfügbarkeiten werden separat unter „Verfügbarkeit“ gepflegt."));
+    async function handleSaveClick() {
+        panel.clearError();
+        const name = nameInput.value.trim();
+        const symbol = symbolInput.value.trim();
+        if (name === "" || symbol === "") {
+            panel.showError("Bitte Name und Kürzel ausfüllen.");
+            return;
         }
-        else if (currentStep === 3) {
-            const stepContent = buildStep3(state);
-            const availability = stepContent._availability;
-            if (availability && isEditMode) {
-                availability.restore(state.nonWorkingHours, state.nonPreferredHours);
+        const teachingSubject = [];
+        for (const subjectId of subjectSelect.getSelected()) {
+            teachingSubject.push({ id: Number(subjectId) });
+        }
+        // Keep what is stored, the form does not edit availability or wishes.
+        let nonWorkingHours = [];
+        let nonPreferredHours = [];
+        let wishText = null;
+        if (teacher) {
+            nonWorkingHours = teacher.teacherNonWorkingHours;
+            nonPreferredHours = teacher.teacherNonPreferredHours;
+            wishText = teacher.wishText;
+        }
+        const teacherData = {
+            teacherName: name,
+            nameSymbol: symbol,
+            teachingSubject: teachingSubject,
+            teacher_non_working_hours: nonWorkingHours,
+            teacher_non_preferred_hours: nonPreferredHours,
+            wishText: wishText,
+        };
+        panel.setSaving(true);
+        try {
+            if (teacher) {
+                await updateTeacher(teacher.id, teacherData);
             }
-            const nav = buildNavigationButtons({
-                showBack: true,
-                nextLabel: "Bestätigen",
-                onBack: () => {
-                    currentStep = 2;
-                    void renderStep();
-                },
-                onNext: async () => {
-                    saveStep3(stepContent);
-                    try {
-                        const teacherData = collectTeacherData(state);
-                        if (isEditMode && existingTeacher) {
-                            await updateTeacher(existingTeacher.id, teacherData);
-                        }
-                        else {
-                            await createTeacher(teacherData);
-                        }
-                        closePopup({
-                            modal: addTeacherScreen,
-                            overlay: disableOverlay,
-                            scrollContainer: displayTeachers,
-                        });
-                        await loadAndRenderTeachers();
-                    }
-                    catch (error) {
-                        console.error(error);
-                    }
-                },
-            });
-            addTeacherScreen.replaceChildren(header, stepIndicator, stepContent, nav);
+            else {
+                await createTeacher(teacherData);
+            }
         }
+        catch (error) {
+            console.error("Fehler beim Speichern des Lehrers:", error);
+            panel.showError("Speichern fehlgeschlagen.");
+            panel.setSaving(false);
+            return;
+        }
+        closeTeacherForm();
+        showToast("Lehrer gespeichert");
+        await loadAndRenderTeachers();
     }
-    await renderStep();
+    panelSlot.replaceChildren(panel.element);
+    panelSlot.className = "";
+    renderRows();
+    nameInput.focus();
+}
+function closeTeacherForm() {
+    if (!panelSlot) {
+        return;
+    }
+    editingTeacherId = null;
+    panelSlot.replaceChildren();
+    panelSlot.className = "hidden";
+    renderRows();
+}
+async function confirmAndDeleteTeacher(teacher) {
+    const confirmed = await askConfirmation({
+        title: `Lehrer „${teacher.nameSymbol} · ${teacher.teacherName}“ löschen?`,
+        text: "Das kann nicht rückgängig gemacht werden.",
+        confirmLabel: "Löschen",
+    });
+    if (!confirmed) {
+        return;
+    }
+    try {
+        await deleteTeacher(teacher.id);
+    }
+    catch (error) {
+        console.error("Fehler beim Löschen des Lehrers:", error);
+        showToast("Löschen fehlgeschlagen.");
+        return;
+    }
+    if (editingTeacherId === teacher.id) {
+        closeTeacherForm();
+    }
+    showToast("Lehrer gelöscht");
+    await loadAndRenderTeachers();
 }
 function initializeApp() {
-    initNavbar();
+    initAppShell("teachers");
+    buildPage();
     void loadAndRenderTeachers();
-    const addBtn = getElement("add-btn");
-    addBtn?.addEventListener("click", () => openAddTeacherForm());
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

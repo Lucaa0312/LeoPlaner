@@ -1,245 +1,210 @@
-import initNavbar from "./navbar.js";
-import { fetchRooms, createRoom, updateRoom } from "../api/roomApi.js";
-import { aquireElement, getElement } from "../utils/elementHelpers.js";
-import { openPopup, closePopup } from "../components/popup.js";
-import { toggleEmptyState } from "../components/emptyState.js";
-import { initRoomTypeSelector } from "../features/roomTypeSelector.js";
-import { initSearchElement } from "../features/searchElement.js";
-let editingRoom = null;
-function formatRoomName(room) {
-    console.log(room);
-    return `${room.nameShort.toUpperCase()} - ${room.roomName.charAt(0).toUpperCase()}${room.roomName.slice(1).toLowerCase()}`;
+import { initAppShell } from "../components/appShell.js";
+import { createPageHeader, setPageKicker } from "../components/pageHeader.js";
+import { createActionsCell, createDataTable, createElementCell, createEmptyRow, createSearchBox, createTextCell, matchesSearch, } from "../components/dataTable.js";
+import { createSidePanel, createFormField, createTextInput } from "../components/sidePanel.js";
+import { createChipList, createChipSelect } from "../components/chipSelect.js";
+import { askConfirmation } from "../components/confirmDialog.js";
+import { showToast } from "../components/toast.js";
+import { fetchRooms, createRoom, updateRoom, deleteRoom } from "../api/roomApi.js";
+import { aquireElement } from "../utils/elementHelpers.js";
+import { ROOM_TYPES } from "../types/room.js";
+const COLUMNS = ["Nummer", "Name", "Kürzel", "Raumtypen"];
+let rooms = [];
+let searchQuery = "";
+let editingRoomId = null;
+let tableBody = null;
+let panelSlot = null;
+function formatRoomLabel(room) {
+    return `${room.nameShort} · ${room.roomName}`;
 }
-function createRoomCard(room) {
-    const roomBox = document.createElement("div");
-    roomBox.className = "room-box";
-    const roomInfo = document.createElement("div");
-    roomInfo.className = "room-info";
-    const title = document.createElement("h2");
-    title.className = "room-name";
-    title.textContent = formatRoomName(room);
-    const types = document.createElement("p");
-    types.className = "room-types";
-    types.innerHTML = room.roomTypes.join("<br>");
-    const editDiv = document.createElement("div");
-    editDiv.className = "room-edit";
-    editDiv.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
-    editDiv.addEventListener("click", () => {
-        openEditRoomForm(room);
+function buildPage() {
+    const page = aquireElement("page");
+    const header = createPageHeader({
+        kicker: "Stammdaten",
+        title: "Räume",
+        actions: [{ id: "add-btn", icon: "ti-plus", label: "Neu: Raum", primary: true }],
     });
-    roomInfo.append(title, types);
-    roomBox.append(roomInfo, editDiv);
-    return roomBox;
+    const toolbar = document.createElement("div");
+    toolbar.className = "toolbar";
+    toolbar.appendChild(createSearchBox(handleSearch));
+    const layout = document.createElement("div");
+    layout.className = "table-layout";
+    const table = createDataTable(COLUMNS);
+    tableBody = table.body;
+    panelSlot = document.createElement("div");
+    panelSlot.className = "hidden";
+    layout.append(table.element, panelSlot);
+    page.replaceChildren(header, toolbar, layout);
+    const addButton = aquireElement("add-btn");
+    addButton.addEventListener("click", handleAddClick);
+}
+function handleSearch(query) {
+    searchQuery = query;
+    renderRows();
+}
+function handleAddClick() {
+    openRoomForm(null);
 }
 async function loadAndRenderRooms() {
-    const noRoomsElement = getElement("no-rooms");
-    const roomsContainer = getElement("display-rooms");
-    if (!noRoomsElement || !roomsContainer) {
-        return;
-    }
     try {
-        const rooms = await fetchRooms();
-        toggleEmptyState(noRoomsElement, rooms.length > 0);
-        roomsContainer.replaceChildren();
-        if (rooms.length === 0) {
-            return;
-        }
-        const gridContainer = document.createElement("div");
-        gridContainer.className = "grid-layout";
-        for (const room of rooms) {
-            gridContainer.appendChild(createRoomCard(room));
-        }
-        roomsContainer.appendChild(gridContainer);
+        rooms = await fetchRooms();
     }
     catch (error) {
         console.error("Fehler beim Laden der Räume:", error);
+        rooms = [];
+    }
+    setPageKicker(`Stammdaten · ${rooms.length} Einträge`);
+    renderRows();
+}
+function renderRows() {
+    if (!tableBody) {
+        return;
+    }
+    tableBody.replaceChildren();
+    for (const room of rooms) {
+        const texts = [String(room.roomNumber), room.roomName, room.nameShort, room.roomTypes.join(" ")];
+        if (matchesSearch(searchQuery, texts)) {
+            tableBody.appendChild(createRoomRow(room));
+        }
+    }
+    if (tableBody.children.length === 0) {
+        tableBody.appendChild(createEmptyRow(COLUMNS.length, "Keine Einträge gefunden."));
     }
 }
-function collectRoomFormData(selectedTypes) {
-    const nameInput = getElement("name-input");
-    const numberInput = getElement("number-input");
-    const roomShortInput = getElement("initials-input");
-    if (!nameInput || !numberInput || !roomShortInput) {
-        return null;
+function createRoomRow(room) {
+    const row = document.createElement("tr");
+    if (room.id === editingRoomId) {
+        row.className = "selected";
     }
-    return {
-        roomName: nameInput.value.trim(),
-        roomNumber: Number(numberInput.value || 0),
-        nameShort: roomShortInput.value.trim(),
-        roomTypes: selectedTypes,
-    };
-}
-function buildAddRoomModalContent() {
-    const content = document.createElement("div");
-    content.id = "room-modal-content";
-    const roomFormGrid = document.createElement("div");
-    roomFormGrid.className = "room-form-grid";
-    const nameInitialsDiv = document.createElement("div");
-    nameInitialsDiv.className = "form-name-initials-inputs";
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.id = "name-input";
-    nameInput.className = "room-input";
-    nameInput.placeholder = "Name";
-    const initialsInput = document.createElement("input");
-    initialsInput.type = "text";
-    initialsInput.id = "initials-input";
-    initialsInput.className = "room-input";
-    initialsInput.placeholder = "Abkürzung";
-    nameInitialsDiv.append(nameInput, initialsInput);
-    const numberPrefixSuffixDiv = document.createElement("div");
-    numberPrefixSuffixDiv.className = "form-number-prefix-suffix-inputs";
-    const numberInput = document.createElement("input");
-    numberInput.type = "text";
-    numberInput.id = "number-input";
-    numberInput.className = "room-input";
-    numberInput.placeholder = "Nummer";
-    const prefixInput = document.createElement("input");
-    prefixInput.type = "text";
-    prefixInput.id = "prefix-input";
-    prefixInput.className = "room-input";
-    prefixInput.placeholder = "Prefix";
-    const suffixInput = document.createElement("input");
-    suffixInput.type = "text";
-    suffixInput.id = "suffix-input";
-    suffixInput.className = "room-input";
-    suffixInput.placeholder = "Suffix";
-    numberPrefixSuffixDiv.append(numberInput, prefixInput, suffixInput);
-    const roomtypeBlock = document.createElement("div");
-    roomtypeBlock.id = "roomtype-block";
-    const roomtypeInputContainer = document.createElement("div");
-    roomtypeInputContainer.id = "roomtype-input-container";
-    const img = document.createElement("img");
-    img.id = "add-room-img";
-    img.src = "../assets/img/magnifyingGlass.png";
-    img.alt = "Add Room";
-    const roomtypeInput = document.createElement("input");
-    roomtypeInput.type = "text";
-    roomtypeInput.id = "roomtype-input";
-    roomtypeInput.placeholder = "Raum Typen auswählen";
-    roomtypeInputContainer.append(img, roomtypeInput);
-    const roomtypeDropdown = document.createElement("div");
-    roomtypeDropdown.id = "roomtype-dropdown";
-    const selectedRoomtypes = document.createElement("div");
-    selectedRoomtypes.id = "selected-roomtypes";
-    roomtypeBlock.append(roomtypeInputContainer, roomtypeDropdown, selectedRoomtypes);
-    roomFormGrid.append(nameInitialsDiv, numberPrefixSuffixDiv, roomtypeBlock);
-    content.appendChild(roomFormGrid);
-    return content;
-}
-function openEditRoomForm(room) {
-    editingRoom = room;
-    openRoomForm(room);
-}
-function openAddRoomForm() {
-    editingRoom = null;
-    openRoomForm(null);
+    let typesCell;
+    if (room.roomTypes.length > 0) {
+        typesCell = createElementCell(createChipList(room.roomTypes));
+    }
+    else {
+        typesCell = createTextCell("kein Typ", "text-bad");
+    }
+    function handleEditClick() {
+        openRoomForm(room);
+    }
+    function handleDeleteClick() {
+        void confirmAndDeleteRoom(room);
+    }
+    row.append(createTextCell(String(room.roomNumber), "mono"), createTextCell(room.roomName, "strong"), createTextCell(room.nameShort, "mono"), typesCell, createActionsCell(handleEditClick, handleDeleteClick));
+    return row;
 }
 function openRoomForm(room) {
-    const noRooms = getElement("no-rooms");
-    const overlay = getElement("disable-overlay");
-    const displayRooms = getElement("display-rooms");
-    const addRoomScreen = getElement("add-room-screen");
-    if (!overlay || !displayRooms || !addRoomScreen) {
+    if (!panelSlot) {
         return;
     }
-    if (noRooms) {
-        noRooms.style.display = "none";
-    }
-    openPopup({
-        modal: addRoomScreen,
-        overlay,
-        scrollContainer: displayRooms,
-    });
-    const headerContainer = document.createElement("div");
-    headerContainer.id = "add-room-header-container";
-    const title = document.createElement("h1");
-    title.id = "add-room-header";
-    title.textContent = room
-        ? "Diesen Raum bearbeiten"
-        : "Einen neuen Raum hinzufügen";
-    const closeButton = document.createElement("div");
-    closeButton.id = "close-add-room-screen-btn";
-    closeButton.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>`;
-    const content = buildAddRoomModalContent();
-    const nameInput = content.querySelector("#name-input");
-    const numberInput = content.querySelector("#number-input");
-    const initialsInput = content.querySelector("#initials-input");
+    let title = "Neuer Raum";
+    let numberValue = "";
+    let nameValue = "";
+    let shortValue = "";
+    let selectedTypes = ["CLASSROOM"];
     if (room) {
-        if (!nameInput || !numberInput || !initialsInput) {
-            throw new Error("Form inputs missing");
+        title = "Raum bearbeiten";
+        numberValue = String(room.roomNumber);
+        nameValue = room.roomName;
+        shortValue = room.nameShort;
+        selectedTypes = room.roomTypes;
+        editingRoomId = room.id;
+    }
+    else {
+        editingRoomId = null;
+    }
+    const numberInput = createTextInput(numberValue, "z. B. 124", true);
+    const nameInput = createTextInput(nameValue, "z. B. EDV-Saal 1", false);
+    const shortInput = createTextInput(shortValue, "z. B. E58", true);
+    const typeOptions = [];
+    for (const type of ROOM_TYPES) {
+        typeOptions.push({ value: type, label: type });
+    }
+    const typeSelect = createChipSelect(typeOptions, selectedTypes);
+    const panel = createSidePanel({ title, onSave: handleSaveClick, onCancel: closeRoomForm });
+    panel.body.append(createFormField("Nummer", numberInput, ""), createFormField("Name", nameInput, ""), createFormField("Kürzel", shortInput, ""), createFormField("Raumtypen", typeSelect.element, "Mindestens ein Typ. Mehrere sind möglich."));
+    async function handleSaveClick() {
+        panel.clearError();
+        const name = nameInput.value.trim();
+        const short = shortInput.value.trim();
+        const roomNumber = Number(numberInput.value.trim());
+        const types = typeSelect.getSelected();
+        if (name === "" || short === "") {
+            panel.showError("Bitte Name und Kürzel ausfüllen.");
+            return;
         }
-        nameInput.value = room.roomName;
-        numberInput.value = String(room.roomNumber);
-        initialsInput.value = room.nameShort;
-    }
-    const confirmButton = document.createElement("div");
-    confirmButton.id = "confirm-room-btn";
-    confirmButton.textContent = room ? "Speichern" : "Bestätigen";
-    headerContainer.append(title, closeButton);
-    addRoomScreen.replaceChildren(headerContainer, content, confirmButton);
-    const selectorInput = getElement("roomtype-input");
-    const selectorDropdown = getElement("roomtype-dropdown");
-    const selectedContainer = getElement("selected-roomtypes");
-    const inputContainer = getElement("roomtype-input-container");
-    if (!selectorInput || !selectorDropdown || !selectedContainer || !inputContainer) {
-        return;
-    }
-    const roomTypeSelector = initRoomTypeSelector({
-        input: selectorInput,
-        dropdown: selectorDropdown,
-        selectedContainer,
-        inputContainer,
-    });
-    if (room) {
-        room.roomTypes.forEach(type => {
-            roomTypeSelector.restore?.(type);
-        });
-    }
-    closeButton.addEventListener("click", () => {
-        closePopup({
-            modal: addRoomScreen,
-            overlay,
-            scrollContainer: displayRooms,
-        });
-    });
-    confirmButton.addEventListener("click", async () => {
+        if (numberInput.value.trim() === "" || !Number.isInteger(roomNumber)) {
+            panel.showError("Die Nummer muss eine ganze Zahl sein.");
+            return;
+        }
+        if (types.length === 0) {
+            panel.showError("Ein Raum braucht mindestens einen Raumtyp.");
+            return;
+        }
+        const roomData = {
+            roomName: name,
+            roomNumber: roomNumber,
+            nameShort: short,
+            roomTypes: types,
+        };
+        panel.setSaving(true);
         try {
-            const roomData = collectRoomFormData(roomTypeSelector.getSelectedTypes());
-            if (!roomData) {
-                return;
-            }
             if (room) {
                 await updateRoom(room.id, roomData);
-                console.log("It works");
             }
             else {
                 await createRoom(roomData);
             }
-            closePopup({
-                modal: addRoomScreen,
-                overlay,
-                scrollContainer: displayRooms,
-            });
-            await loadAndRenderRooms();
         }
         catch (error) {
-            console.error("Fehler beim Erstellen des Raums:", error);
+            console.error("Fehler beim Speichern des Raums:", error);
+            panel.showError("Speichern fehlgeschlagen.");
+            panel.setSaving(false);
+            return;
         }
+        closeRoomForm();
+        showToast("Raum gespeichert");
+        await loadAndRenderRooms();
+    }
+    panelSlot.replaceChildren(panel.element);
+    panelSlot.className = "";
+    renderRows();
+    nameInput.focus();
+}
+function closeRoomForm() {
+    if (!panelSlot) {
+        return;
+    }
+    editingRoomId = null;
+    panelSlot.replaceChildren();
+    panelSlot.className = "hidden";
+    renderRows();
+}
+async function confirmAndDeleteRoom(room) {
+    const confirmed = await askConfirmation({
+        title: `Raum „${formatRoomLabel(room)}“ löschen?`,
+        text: "Das kann nicht rückgängig gemacht werden.",
+        confirmLabel: "Löschen",
     });
+    if (!confirmed) {
+        return;
+    }
+    try {
+        await deleteRoom(room.id);
+    }
+    catch (error) {
+        console.error("Fehler beim Löschen des Raums:", error);
+        showToast("Löschen fehlgeschlagen.");
+        return;
+    }
+    if (editingRoomId === room.id) {
+        closeRoomForm();
+    }
+    showToast("Raum gelöscht");
+    await loadAndRenderRooms();
 }
 function initializeApp() {
-    initNavbar();
+    initAppShell("rooms");
+    buildPage();
     void loadAndRenderRooms();
-    const addBtn = getElement("add-btn");
-    addBtn?.addEventListener("click", openAddRoomForm);
-    const inputField = getElement("input-field");
-    inputField?.addEventListener("input", () => {
-        initSearchElement({
-            inputId: "input-field",
-            selectedRow: ".room-box",
-            values: [".room-name", ".room-types"],
-        });
-    });
 }
 document.addEventListener("DOMContentLoaded", initializeApp);

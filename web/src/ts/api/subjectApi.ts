@@ -1,4 +1,4 @@
-import { getJson, postJson, putJson } from "../utils/apiHelpers.js";
+import { deleteRequest, getJson, postJson, putJson } from "../utils/apiHelpers.js";
 import type { CreateSubjectRequest, Subject } from "../types/subject.js";
 
 export function fetchSubjects(): Promise<Subject[]> {
@@ -17,4 +17,8 @@ export function updateSubject(
     `/subjects/update/${subjectId}`,
     subject,
   );
+}
+
+export function deleteSubject(subjectId: number): Promise<void> {
+  return deleteRequest(`/subjects/delete/${subjectId}`);
 }

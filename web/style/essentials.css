@@ -1,306 +1,152 @@
-/*VARIABLES*/
+/* ------------------DESIGN TOKENS--------------------- */
+/* Taken from the click dummy. Light is the default, dark is set by data-theme="dark" on <html>. */
 :root {
-    /*colors*/
-    --transparent: rgba(0, 0, 0, 0);
+    --bg: #eef1ef;
+    --sf: #ffffff;
+    --sf2: #f5f8f6;
+    --ink: #15201b;
+    --mu: #536159;
+    --ln: #d7e0db;
+    --ac: oklch(0.47 0.09 160);
+    --aci: #ffffff;
+    --acs: #e1ede6;
+    --act: oklch(0.4 0.08 160);
+    --cl: #e8efeb;
+    --warn: oklch(0.5 0.12 65);
+    --warns: oklch(0.95 0.05 85);
+    --bad: oklch(0.5 0.17 27);
+    --bads: oklch(0.95 0.025 27);
+    /* high costs in the cost graph of the Optimierung page */
+    --chart-high: oklch(0.7 0.16 55);
 
-    /*Leo colors*/
-    --leo-primary-color1: #4f46e5;
-    --leo-primary-color2: #3b82f6;
-    --leo-secondary-color: #f59e0b;
-    --leo-background-color: #ebebeb;
-    --leo-text-color: #1f2937;
+    --font-text: "Hanken Grotesk", sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
 
-    /*constant values*/
+    --radius: 0.857rem;
+    --radius-small: 0.571rem;
+    --sidebar-width: 16.857rem;
+    --sidebar-width-collapsed: 4.714rem;
+
+    color-scheme: light;
 }
 
-/*EXTERNAL FONTS*/
-/* @font-face {
-    font-family: alte-haas-grotesk;
-    src: url(../assets/font/alte-haas-grotesk/AlteHaasGroteskRegular.ttf);
-} */
+:root[data-theme="dark"] {
+    --bg: #0e1311;
+    --sf: #151c19;
+    --sf2: #121815;
+    --ink: #e3ebe7;
+    --mu: #8fa198;
+    --ln: #26332d;
+    --ac: oklch(0.75 0.1 160);
+    --aci: #0e1311;
+    --acs: #1e2c26;
+    --act: oklch(0.82 0.09 160);
+    --cl: #1e2924;
+    --warn: oklch(0.82 0.12 80);
+    --warns: oklch(0.3 0.05 75);
+    --bad: oklch(0.75 0.13 27);
+    --bads: oklch(0.29 0.05 27);
+    --chart-high: oklch(0.78 0.14 60);
 
-/*GENERAL CHANGES*/
+    color-scheme: dark;
+}
+
+/* ------------------BASE--------------------- */
 * {
     margin: 0;
     padding: 0;
-    font-family: "Roboto", sans-serif;
+    box-sizing: border-box;
 }
 
-/* ------------------FLEX CONTAINER--------------------- */
-
-.flex-container {
-    display: flex;
-    flex-direction: row;
+html,
+body {
     height: 100%;
-    width: 100%;
 }
 
-.flex-row {
+/* Every size below is in rem, so this one value scales the whole interface:
+   14px up to about 1490 CSS px width, then growing with the viewport (about 15.5px at 1920,
+   18px at 2560), at most 22px from about 3800 CSS px (4K at 100% scaling). */
+html {
+    font-size: clamp(0.875rem, 0.55rem + 0.35vw, 1.375rem);
+}
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+a {
+    color: var(--act);
+}
+
+input,
+select,
+button,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--ac);
+    outline-offset: -1px;
+}
+
+button {
+    cursor: pointer;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+.strong {
+    font-weight: 600;
+}
+
+.muted {
+    color: var(--mu);
+}
+
+.text-bad {
+    color: var(--bad);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ------------------APP LAYOUT--------------------- */
+.app {
     display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-.flex-column {
-    display: flex;
-    flex-direction: column;
-}
-
-/* ----------------disable overlay ------------------ */
-#disable-overlay {
-    display: none;
-    width: 85vw;
-    position: fixed;
-    top: 0;
-    left: 15vw;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* ------------------MAIN CONTENT BOX--------------------- */
-#main-content {
-    background-color: var(--leo-background-color);
-    width: 85vw;
     height: 100vh;
+    overflow: hidden;
+}
+
+#main-content {
     position: relative;
-
-    overflow-y: hidden;
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 2rem 2.286rem 3.429rem;
 }
 
-#header-text {
-    font-weight: bold;
-    font-size: 3rem;
-    color: var(--leo-text-color);
-
-    margin-left: 5vw;
-    margin-top: 2vh;
-    margin-right: 43vw;
-}
-
-#header-subtext {
-    opacity: 0.4;
-    font-weight: bold;
-    font-size: 2.25rem;
-    color: var(--leo-text-color);
-
-    margin-left: 5vw;
-}
-
-/* ------------------ CONTROLS CSS SUCH AS SEARCH AND ADD BUTTON---------------------*/
-#controls {
-    margin-top: 2vh;
+.page {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-
-    position: absolute;
-    right: 0;
+    gap: 1.429rem;
+    /* wide screens use the space, very wide ones stop before table rows get too long */
+    max-width: 150rem;
 }
 
-#search-bar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-
-    width: 20vw;
-
-    padding-right: 1vw;
-    padding-left: 1vw;
-    padding-top: 0.5vh;
-    padding-bottom: 0.5vh;
-
-    background-color: #d9d9d9;
-
-    border-top-left-radius: 0.4vw;
-    border-bottom-left-radius: 0.4vw;
-    border-style: none;
-    font-size: 1.75rem;
-
-    color: var(--leo-text-color);
-}
-
-#input-field {
-    background: transparent;
-    color: var(--leo-text-color);
-    font-size: 1.5rem;
-    /*text-align: right;*/
-
-    width: 13vw;
-    /*width: 15vw;*/
-    /*width: 20vw;*/
-    margin-right: 0.5vw;
-    border: none;
-    outline: none;
-}
-
-#search-icon {
-    color: var(--leo-text-color);
-    width: 1.5vw;
-    height: 1.5vw;
-
-    justify-self: center;
-}
-
-#add-btn svg {
-    scale: 0.8;
-    position: relative;
-    bottom: 0.7vh;
-}
-
-#add-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    width: 18vw;
-    height: 3.5vh;
-
-    font-weight: semi-bold;
-
-    margin-top: 1.5vh;
-
-    padding-left: 1vw;
-    padding-right: 1vw;
-    padding-top: 0.5vh;
-    padding-bottom: 0.5vh;
-
-    border-top-left-radius: 0.4vw;
-    border-bottom-left-radius: 0.4vw;
-
-    background-color: var(--leo-primary-color1);
-    color: white;
-
-    cursor: pointer;
-
-    transition: all 200ms ease-in;
-}
-
-#add-btn:hover {
-    background-color: var(--leo-primary-color2);
-    scale: 1.02;
-}
-
-/* ------------------NAVIGATION BAR--------------------- */
-#nav-bar {
-    height: 100%;
-    width: 15vw;
-}
-
-#logo-container {
-    background-color: var(--leo-background-color);
-    border-radius: 50%;
-
-    width: 5vw;
-    height: 5vw;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    margin-top: 2vh;
-    margin-left: 1vw;
-}
-
-#nav-item-container {
-    margin-top: 10vh;
-}
-
-.nav-item {
-    display: grid;
-    grid-template-columns: 3rem auto;
-    align-items: center;
-    gap: 1rem;
-
-    margin-top: 2vh;
-
-    border-top-right-radius: 0.3vw;
-    border-bottom-right-radius: 0.3vw;
-    border-left-color: transparent;
-    border-left-width: 0.25vw;
-    border-left-style: solid;
-
-    padding-top: 0.1vw;
-    padding-bottom: 0.1vw;
-    padding-left: 1vw;
-    padding-right: 1vw;
-
-    cursor: pointer;
-
-    color: var(--leo-text-color);
-    font-weight: 0;
-    font-size: 2rem;
-}
-
-.nav-item:hover {
-    color: var(--leo-primary-color1);
-    background-color: #eef2ff;
-}
-
-.nav-item i {
-    font-size: 2.5rem;
-    justify-self: center;
-}
-
-#account-info-box {
-    display: grid;
-    grid-template-columns: 5vw auto;
-    align-items: center;
-
-    position: fixed;
-    bottom: 2vh;
-
-    margin-left: 1vw;
-
-    cursor: pointer;
-}
-
-#account-avatar {
-    width: 2vw;
-    height: 2vw;
-    object-fit: scale-down;
-}
-
-#account-avatar-container {
-    width: 2.5vw;
-    height: 2.5vw;
-    border-radius: 50%;
-
-    margin-left: 1vw;
-
-    object-fit: scale-down;
-    border-style: solid;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#account-username {
-    font-size: 2rem;
-    color: var(--leo-text-color);
-    font-weight: 0;
-}
-
-#help-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    color: rgba(0, 0, 0, 0.5);
-    width: 10vw;
-
-    position: fixed;
-    bottom: 11vh;
-    left: 0;
-
-    padding-left: 2vw;
-
-    border-bottom: var(--leo-primary-color1);
-    border-bottom-width: 0.2vw;
-    border-bottom-style: solid;
-}
-
-#help-section svg {
-    scale: 0.8;
-    margin-right: 0.2vw;
+@media (max-width: 45em) {
+    #main-content {
+        padding: 1.429rem 1.143rem 2.857rem;
+    }
 }
