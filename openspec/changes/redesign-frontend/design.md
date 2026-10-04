@@ -288,6 +288,41 @@ A native `<select>` cannot be searched (only first-letter jumps), and there are 
 *Alternative:* `<input list>` with `<datalist>`. Rejected: looks different in every browser, does not
 follow the theme, and accepts free text that matches no entry.
 
+### 13. Logo mark as clock hands inside a dial ring
+
+The "L" in `.logo-mark` is drawn as two clock hands inside a ring instead of a text glyph: the
+vertical stroke is the minute hand pointing to 12, the horizontal stroke is the shorter hour hand
+pointing to 3. The ring is centred in the mark; the corner of the L sits a little below and left of
+the centre, so the mark reads as a mix of a clock and an L. The rounded square with `--ac` background
+stays as it is.
+
+```
+ ┌───────────────┐
+ │   ╭───┬───╮   │   ring centred on (15, 15)
+ │  │    │    │  │   minute hand (long)
+ │  │    │    │  │
+ │  │    └─── │  │   corner at (14, 17) · hour hand (short)
+ │   ╰───────╯   │
+ └───────────────┘
+```
+
+- Inline SVG built in `appShell.ts` (replaces `textContent = "L"`), `viewBox="0 0 30 30"`, all parts in
+  `currentColor` so `--aci` keeps working in both designs.
+- Ring: circle at (15, 15), r 10.5, stroke width 2, no fill.
+- Hands: one path `M14 8 V17 H20.5`, stroke width 2.5, round caps and round join. About 1 px stays
+  free between each hand tip and the inner edge of the ring.
+- Corner 2 below the centre: the vertical stroke gets clearly longer than the horizontal one, so the
+  L reads well, while the corner stays close enough to the centre for a clock. Corner 1 left of the
+  centre: the horizontal stroke pulls the L to the right, so this shift balances it inside the ring.
+- `.logo-mark` drops the `font-*` rules; size and background stay.
+
+*Alternatives:* plain hands without ring and the corner in the centre (built in 8.16; reads as an L,
+but looks shifted to the top right); markers at 12 / 3 / 6 / 9 as dots (8.15); corner exactly in the
+centre of the ring (pure clock, the L gets small); corner 4 below the centre (more L, less clock);
+pivot dot on the corner (hides the corner of the L). Variants compared in a preview at 30 px, 16 px
+and enlarged, in both designs. The old wordmark `web/assets/img/LeoPlanerLogoSVG.svg` is not used and
+does not need to match.
+
 ## Risks / Trade-offs
 
 - [`POST /api/classSubjects` was never used by the frontend; the entity field `isBetterDoublePeriod`

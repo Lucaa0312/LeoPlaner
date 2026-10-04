@@ -15,3 +15,4 @@ leo-planer/src/main/resources/privateKey.pem
 
 # real k8s secret (only the template is committed)
 k8s/secret.yaml
+LeoPlanerKlickDummy.html

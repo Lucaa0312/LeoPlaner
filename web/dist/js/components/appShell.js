@@ -3,11 +3,9 @@ import { getElement } from "../utils/elementHelpers.js";
 import { readSetting, writeSetting } from "../utils/storage.js";
 const navGroups = [
     {
-        label: "Planung",
+        label: "Übersicht",
         items: [
             { id: "overview", icon: "ti-layout-dashboard", label: "Übersicht", path: "./overview.html" },
-            { id: "timetable", icon: "ti-calendar-week", label: "Stundenplan", path: "./timetable.html" },
-            { id: "optimization", icon: "ti-chart-line", label: "Optimierung", path: "./optimization.html" },
         ],
     },
     {
@@ -19,6 +17,13 @@ const navGroups = [
             { id: "subjects", icon: "ti-book-2", label: "Fächer", path: "./subjects.html" },
             { id: "classSubjects", icon: "ti-link", label: "Klassen-Fächer", path: "./classSubjects.html" },
             { id: "availability", icon: "ti-calendar-off", label: "Verfügbarkeit", path: "./availability.html" },
+        ],
+    },
+    {
+        label: "Planung",
+        items: [
+            { id: "optimization", icon: "ti-chart-line", label: "Optimierung", path: "./optimization.html" },
+            { id: "timetable", icon: "ti-calendar-week", label: "Stundenplan", path: "./timetable.html" },
         ],
     },
     {
@@ -62,10 +67,7 @@ function renderSidebar() {
     const logo = document.createElement("a");
     logo.className = "sidebar-logo";
     logo.href = "./overview.html";
-    const logoMark = document.createElement("span");
-    logoMark.className = "logo-mark";
-    logoMark.textContent = "L";
-    logo.appendChild(logoMark);
+    logo.appendChild(createLogoMark());
     if (!collapsed) {
         const logoText = document.createElement("span");
         logoText.className = "logo-text";
@@ -98,6 +100,33 @@ function renderSidebar() {
     collapseButton.addEventListener("click", handleCollapseClick);
     footer.append(themeButton, collapseButton);
     sidebar.replaceChildren(logo, nav, footer);
+}
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+// The "L" drawn as clock hands inside a dial ring, its corner a little below and left of the centre (design.md decision 13).
+function createLogoMark() {
+    const logoMark = document.createElement("span");
+    logoMark.className = "logo-mark";
+    const svg = document.createElementNS(SVG_NAMESPACE, "svg");
+    svg.setAttribute("viewBox", "0 0 30 30");
+    svg.setAttribute("aria-hidden", "true");
+    const ring = document.createElementNS(SVG_NAMESPACE, "circle");
+    ring.setAttribute("cx", "15");
+    ring.setAttribute("cy", "15");
+    ring.setAttribute("r", "10.5");
+    ring.setAttribute("fill", "none");
+    ring.setAttribute("stroke", "currentColor");
+    ring.setAttribute("stroke-width", "2");
+    svg.appendChild(ring);
+    const hands = document.createElementNS(SVG_NAMESPACE, "path");
+    hands.setAttribute("d", "M14 8 V17 H20.5");
+    hands.setAttribute("fill", "none");
+    hands.setAttribute("stroke", "currentColor");
+    hands.setAttribute("stroke-width", "2.5");
+    hands.setAttribute("stroke-linecap", "round");
+    hands.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(hands);
+    logoMark.appendChild(svg);
+    return logoMark;
 }
 function createNavGroup(group, index, collapsed) {
     const groupElement = document.createElement("div");
