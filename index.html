@@ -1,39 +1,59 @@
 <!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>LeoPlaner</title>
-        <link rel="stylesheet" href="./web/style/index.css" />
-        <link rel="stylesheet" href="./web/style/essentials.css" />
-        <script type="module" src="./web/dist/js/pages/index.js"></script>
-    </head>
-    <body>
-        <div class="landing-container">
-            <h1>Wilkommen zum LeoPlaner</h1>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeoPlaner</title>
+  <meta name="description" content="LeoPlaner erstellt den Stundenplan Ihrer Schule: Daten importieren, prüfen, optimieren, exportieren." />
+  <link rel="icon" href="./web/assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./web/style/glas.css" />
+  <link rel="stylesheet" href="./web/style/demo.css" />
+  <link rel="stylesheet" href="./web/style/start.css" />
+  <script type="module" src="./web/dist/js/pages/index.js"></script>
+</head>
+<body>
+  <div class="start">
+    <header class="top">
+      <a class="brand" href="./index.html" aria-label="LeoPlaner, Startseite"><span class="logo"></span></a>
+      <nav class="top-act" aria-label="Konto">
+        <a class="btn btn-quiet" href="./web/pages/anmelden.html">Anmelden</a>
+        <a class="btn btn-dark" href="./web/pages/anmelden.html#registrieren">Konto anlegen</a>
+      </nav>
+    </header>
 
-            <p class="landing-subtitle">Der Weg zum optimalen Stundenplan.</p>
-
-            <div class="landing-nav-buttons">
-                <a
-                    href="./web/pages/timetable.html"
-                    class="landing-btn landing-btn-primary"
-                >
-                    Stundenplan
-                </a>
-                <a
-                    href="./web/pages/dashboard.html"
-                    class="landing-btn landing-btn-secondary"
-                >
-                    Dashboard
-                </a>
-                <a
-                    href="./web/pages/teacher.html"
-                    class="landing-btn landing-btn-secondary"
-                >
-                    Einstellungen
-                </a>
-            </div>
+    <main>
+      <section class="hero" aria-labelledby="h-title">
+        <div class="pitch">
+          <p class="eyebrow">Automatische Stundenplanung für Schulen</p>
+          <h1 id="h-title">Der Stundenplan, der sich <span class="hl">selbst sortiert.</span></h1>
+          <p class="lead">LeoPlaner verteilt alle Stunden Ihrer Schule auf die Woche: ohne Doppelbelegung, mit wenig Lücken und mit Rücksicht auf die Wünsche der Lehrkräfte. Sie liefern die Daten, der Rechner sucht den besten Plan.</p>
+          <div class="cta">
+            <a class="btn btn-dark btn-lg" href="./web/pages/anmelden.html#registrieren">Konto anlegen<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a>
+            <a class="btn btn-glass btn-lg" href="./web/pages/anmelden.html">Anmelden</a>
+          </div>
         </div>
-    </body>
+
+        <figure class="stage glass">
+          <figcaption class="stage-head">
+            <div><b>Beispielwoche 3AHIF</b><span class="muted">So arbeitet die Optimierung, im Kleinen</span></div>
+            <button type="button" class="btn btn-glass btn-sm" data-replay><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 9.5A5.5 5.5 0 1 1 13.9 5.6M16 3.5v3.8h-3.8"/></svg>Neu mischen</button>
+          </figcaption>
+          <div data-demo></div>
+        </figure>
+      </section>
+
+      <section class="flow" aria-labelledby="f-title">
+        <h2 id="f-title" class="sr">So läuft die Planung</h2>
+        <ol class="flow-steps">
+          <li><span class="mark">1</span><b>Importieren</b><span>Die Schuldaten als Excel oder Untis-Export hochladen.</span></li>
+          <li><span class="mark">2</span><b>Prüfen</b><span>Fehlende Lehrkräfte und zu volle Wochen finden, bevor gerechnet wird.</span></li>
+          <li><span class="mark">3</span><b>Optimieren</b><span>Der Algorithmus probiert Millionen Varianten und behält die beste.</span></li>
+          <li><span class="mark">4</span><b>Ergebnis &amp; Export</b><span>Pläne je Klasse, Lehrkraft und Raum ansehen, drucken, exportieren.</span></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="foot">LeoPlaner · Projekt der HTL Leonding</footer>
+  </div>
+</body>
 </html>

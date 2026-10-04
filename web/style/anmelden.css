@@ -1,0 +1,80 @@
+/* Anmelden / Registrieren: built like the start page (start.css gives the top bar and the
+   container): the headline on the plain ground, the form in one glass card beside it.
+   Registration has two short steps. Design only, not wired up. */
+.auth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:clamp(32px,6vw,120px);align-items:center;width:100%}
+
+/* left: the words */
+.intro{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.intro h1{font:700 clamp(40px,2.4vw + 16px,60px)/1.04 var(--f-ui);letter-spacing:-.035em;white-space:normal;max-width:14ch}
+.intro .lead{font-size:clamp(16px,.3vw + 14px,18px);line-height:1.55;color:var(--ink-2);max-width:44ch}
+.swap{font-size:15px;color:var(--ink-2);display:flex;align-items:center;gap:8px;padding-top:6px}
+.swap .link{font-size:15px}
+.swap .link .ic{transition:transform .2s var(--ease)}
+.swap .link:hover .ic{transform:translateX(3px)}
+
+/* registration progress: the current step is graphite, a done step mint with a tick */
+.reg-steps{list-style:none;display:flex;flex-direction:column;gap:4px;min-width:min(340px,100%);margin-top:4px}
+.reg-steps li{display:flex;align-items:center;gap:14px;padding:10px 14px 10px 10px;border-radius:14px;color:var(--ink-3)}
+.reg-steps li.now{background:#fafbfc;box-shadow:var(--sh-sm);color:var(--ink)}
+.reg-steps .mark{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 12.5px var(--f-data);background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(24,28,40,.10);color:var(--ink-2)}
+.reg-steps .mk{width:14px;height:14px;stroke-width:2.6}
+.reg-steps li.now .mark{background:var(--graphite);color:#fff;box-shadow:none}
+.reg-steps li.done .mark{background:var(--mint);color:#fff;box-shadow:none}
+.reg-steps b{display:block;font:700 15.5px var(--f-ui)}
+.reg-steps span:not(.mark){font-size:13.5px;color:var(--ink-3)}
+
+/* right: the form card */
+.card{padding:28px 30px 26px;display:flex;flex-direction:column}
+.card-title{font:700 20px var(--f-ui);letter-spacing:-.015em;margin-bottom:18px}
+.card form,.pane{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lbl-row{font-size:13.5px;color:var(--ink-2)}
+.lbl-row{display:flex;justify-content:space-between;align-items:baseline}
+.link.small{font-size:13px}
+.inp{height:44px;padding:0 13px;border:0;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px rgba(24,28,40,.12);width:100%;font-size:15px;transition:box-shadow .15s}
+.inp::placeholder{color:#8a8f9c}
+.inp:hover{box-shadow:inset 0 0 0 1px rgba(24,28,40,.22)}
+.inp:focus{outline:0;box-shadow:inset 0 0 0 2px var(--teal)}
+.inp[aria-invalid]{box-shadow:inset 0 0 0 2px var(--rose)}
+.err{font-size:12.5px;color:var(--rose-ink);font-weight:600}
+.err:empty{display:none}
+.card .hint{font-size:13px}
+
+/* password: eye inside the field, caps-lock hint, meter + rules in one compact row */
+.pw{position:relative}
+.pw .inp{padding-right:48px}
+.eye{position:absolute;top:6px;right:6px;width:32px;height:32px;border:0;border-radius:9px;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer}
+.eye:hover{background:rgba(24,28,40,.06);color:var(--ink)}
+.caps{font-size:12.5px;font-weight:600;color:var(--amber-ink)}
+.strength{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.meter{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.meter i{height:4px;border-radius:2px;background:rgba(24,28,40,.08);transition:background-color .25s}
+.meter[data-level="1"] i:nth-child(-n+1){background:var(--rose)}
+.meter[data-level="2"] i:nth-child(-n+2){background:var(--amber)}
+.meter[data-level="3"] i{background:var(--mint)}
+.rules{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.rules li{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:9px;background:rgba(24,28,40,.05);font:600 12px var(--f-data);color:var(--ink-3);transition:background-color .2s,color .2s}
+.rules li::before{content:"";width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.5px rgba(24,28,40,.25);flex:none}
+.rules li.ok{background:#dcf1e5;color:var(--mint-ink)}
+.rules li.ok::before{background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3.2L15 6.5'/%3E%3C/svg%3E") center/9px no-repeat;box-shadow:none}
+
+/* remember me */
+.check{display:inline-flex;gap:9px;align-items:center;cursor:pointer;font-size:14px;color:var(--ink-2);align-self:flex-start}
+.check input{position:absolute;opacity:0;width:1px;height:1px}
+.check .box{width:18px;height:18px;border-radius:6px;background:#fff;box-shadow:inset 0 0 0 1.5px rgba(24,28,40,.25)}
+.check input:checked+.box{background:var(--graphite) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 10.5l3.2 3.2L15 6.5'/%3E%3C/svg%3E") center/12px no-repeat;box-shadow:none}
+.check input:focus-visible+.box{outline:2.5px solid var(--teal);outline-offset:2px}
+
+.actions-row{display:flex;gap:10px;margin-top:6px}
+.actions-row .btn{height:48px;border-radius:15px;font-size:15.5px;padding:0 20px}
+.actions-row [data-submit]{flex:1}
+.card .banner{margin-top:14px}
+.or{display:flex;align-items:center;gap:12px;margin:20px 0 14px;font-size:13px;color:var(--ink-3)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--hair)}
+.skip{height:44px;border-radius:14px}
+
+@media (max-width:960px){
+  .auth{grid-template-columns:minmax(0,460px);justify-content:center}
+  .intro h1{font-size:36px}
+  .reg-steps{display:none}
+}

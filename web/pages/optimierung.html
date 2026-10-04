@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Optimierung · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/optimierung.css" />
+  <script type="module" src="../dist/js/pages/optimierung.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="nav glass layer-1" aria-label="Navigation"></aside>
+    <main class="main">
+      <header class="head">
+        <div class="h-title">
+          <h1>Optimierung</h1>
+          <span class="chip" role="status" aria-live="polite" data-chip data-state="loading"><span class="dot"></span><span data-chip-text>Lädt …</span></span>
+        </div>
+        <div class="actions">
+          <div class="seg" role="group" aria-label="Modus">
+            <button type="button" aria-pressed="true" data-mode="einfach">Einfach</button>
+            <button type="button" aria-pressed="false" data-mode="erweitert">Erweitert</button>
+          </div>
+          <button type="button" class="btn btn-glass" data-secondary hidden></button>
+          <button type="button" class="btn btn-dark" data-primary disabled></button>
+        </div>
+      </header>
+
+      <div class="work" data-work>
+        <section class="chartp glass layer-2" data-arrive style="--o:1" aria-label="Kostenverlauf">
+          <div class="cp-head">
+            <h2 class="panel-title">Kostenverlauf</h2>
+            <div class="seg" role="group" aria-label="Ausschnitt">
+              <button type="button" aria-pressed="true" data-zoom="all">Ganzer Lauf</button>
+              <button type="button" aria-pressed="false" data-zoom="end">Feinschliff</button>
+            </div>
+            <div class="legend" aria-hidden="true"><span><i class="lg-line"></i>Kosten (weniger ist besser)</span><span><i class="lg-best"></i>Bester Wert</span><span><i class="lg-heat"></i>Aufgewärmt</span><span><i class="lg-peak"></i>Höchstwert</span></div>
+          </div>
+          <div class="banner-slot" data-banner></div>
+          <div class="plot" data-plot>
+            <canvas data-canvas role="img" aria-label="Kosten über die Iterationen"></canvas>
+            <div class="tip" data-tip aria-hidden="true"></div>
+            <div class="plot-empty" data-empty hidden></div>
+          </div>
+          <dl class="facts">
+            <div><dt>Kosten jetzt</dt><dd data-f="cost">–</dd></div>
+            <div><dt>Bester Wert</dt><dd data-f="best">–</dd></div>
+            <div><dt>Seit Start</dt><dd data-f="trend">–</dd></div>
+            <div><dt>Iteration</dt><dd data-f="iter">–</dd></div>
+            <div><dt>Iterationen / s</dt><dd data-f="rate">–</dd></div>
+          </dl>
+        </section>
+
+        <div class="side">
+          <section class="glass layer-2" data-arrive style="--o:2" aria-label="Was gerade passiert">
+            <h2 class="panel-title">Was gerade passiert</h2>
+            <div class="phases" data-phases><span>Erkunden</span><span>Verbessern</span><span>Feinschliff</span></div>
+            <p class="explain" data-explain>Lädt …</p>
+            <a class="btn btn-glass cta" href="./ergebnis.html" data-result hidden></a>
+          </section>
+          <section class="temp glass layer-2 adv" data-arrive style="--o:3" aria-label="Temperatur">
+            <label class="panel-title" for="temp">Temperatur</label><output for="temp" class="num" data-temp>–</output>
+            <input id="temp" type="range" min="0" max="1000" step="1" value="0" aria-describedby="temp-h" disabled />
+            <div class="row" aria-hidden="true"><span>kühl · kleine Änderungen</span><span>heiß · mutige Züge</span></div>
+            <p id="temp-h" class="hint" data-temp-hint>Sinkt während des Laufs von selbst. Hochziehen lässt den Plan wieder größere Änderungen ausprobieren.</p>
+          </section>
+          <section class="milestones glass layer-2 adv" data-arrive style="--o:4" aria-label="Meilensteine">
+            <h2 class="panel-title">Meilensteine</h2>
+            <ol data-ms></ol>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
