@@ -18,7 +18,8 @@ spec:
       containers:
         - name: leo-planer
           # Change the tag for every new version (not "latest"), then kubectl apply again.
-          image: ghcr.io/lucaa0312/leoplaner:0.1.0
+          # 0.2.0 is built from the branch leocloud-demo-fixes@9558d3f (Andi's redesign + progress fixes), not from main.
+          image: ghcr.io/lucaa0312/leoplaner:0.2.0
           ports:
             - containerPort: 8080
           env:
@@ -34,10 +35,16 @@ spec:
                 secretKeyRef: { name: leoplaner-db, key: POSTGRES_PASSWORD }
             - name: QUARKUS_DATASOURCE_JDBC_URL
               value: jdbc:postgresql://postgres:5432/$(POSTGRES_DB)
-            # Admin actions (reset / demo data) are off in the cloud. To use them temporarily:
-            #   kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED=true
-            # and switch off again with:
-            #   kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED-
+            # Admin actions (reset / demo data): on, because this instance is only a demo.
+            # Anyone with the URL can use them. Remove both entries before real data goes here.
+            - name: LEOPLANER_RESET_ENABLED
+              value: "true"
+            - name: LEOPLANER_DEMO_DATA_ENABLED
+              value: "true"
+            # Browsers check pages/scripts/styles on every load (Quarkus' default caches them for 24h
+            # without asking, so a new version stays invisible until the cache runs out).
+            - name: QUARKUS_HTTP_STATIC_RESOURCES_MAX_AGE
+              value: "0S"
           # Health checks (quarkus-smallrye-health)
           startupProbe:          # give the JVM up to 150s to start before the other probes begin
             httpGet: { path: /q/health/started, port: 8080 }

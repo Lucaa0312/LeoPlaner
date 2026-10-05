@@ -18,8 +18,10 @@ After changing TypeScript: `cd web && npm run build`.
 - **Demodaten laden**: loads the demo data from `leo-planer/src/main/resources/demo-data/` (only into an empty DB)
 - **Daten zurücksetzen**: deletes everything (teachers, rooms, subjects, classes, timetables)
 
-Both buttons only exist in dev mode (`quarkus:dev`). In the cloud they are hidden and the endpoints
-answer `403`. Restarting `quarkus:dev` still empties the database, as before.
+Both buttons exist in dev mode (`quarkus:dev`) and on the LeoCloud demo, where `k8s/leo-planer.yaml`
+switches them on (see [Resetting / loading demo data in the cloud](#resetting--loading-demo-data-in-the-cloud)).
+The production image on its own keeps them off: hidden, and the endpoints answer `403`. Restarting
+`quarkus:dev` still empties the database, as before.
 
 - **Daten importieren**: an Excel export from LeoPlaner, or the real school data (see
   [Real school data](#real-school-data-local-and-cloud)). Works the same locally and in the cloud.
@@ -172,15 +174,34 @@ curl -F files=@TimetableExportScriptFinal.sql -F files=@GPU006.TXT -F files=@GPU
 
 ## Resetting / loading demo data in the cloud
 
-The admin actions are switched off in the cloud. To use them for a moment:
+The LeoCloud instance is only a demo, so `k8s/leo-planer.yaml` switches the admin actions on for good
+(`LEOPLANER_RESET_ENABLED`, `LEOPLANER_DEMO_DATA_ENABLED`). To get a clean demo: **Daten zurücksetzen**,
+then **Demodaten laden**.
+
+**Anyone** with the URL can use them. If the real school data is imported there (e.g. to show it to
+the teacher), anyone with the URL can see it and delete it with one click. Make a backup first (see
+[Backups](#backups-and-what-destroys-data)), and switch the buttons off when the instance is used for more
+than a demo: remove both entries from `k8s/leo-planer.yaml` and `kubectl apply` it, or right away:
 
 ```bash
-kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED=true LEOPLANER_DEMO_DATA_ENABLED=true
-# the pod restarts; reload the dashboard, the buttons are visible now, use them
 kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED- LEOPLANER_DEMO_DATA_ENABLED-
 ```
 
-While switched on, **anyone** with the URL can use them, so switch them off right afterwards.
+(`kubectl set env` only lasts until the next `kubectl apply -f k8s/leo-planer.yaml`.)
+
+`QUARKUS_HTTP_STATIC_RESOURCES_MAX_AGE=0S` in the manifest makes browsers check pages, scripts and
+styles on every load. Without it Quarkus lets them keep the files for 24 hours without asking, and a new
+version stays invisible until the cache runs out (Ctrl+Shift+R helps for one page).
+
+Image `0.2.0` is built from the branch `leocloud-demo-fixes` (commit `9558d3f`), not from `main`: Andi's
+redesign (`ultimate_design@1d7f92e`) plus the optimisation progress kept on the server and the
+"Ergebnis ansehen" button. Until that is merged, build it from a checkout of that branch:
+
+```bash
+git worktree add ../leoplaner-ultimate leocloud-demo-fixes   # once
+cd ../leoplaner-ultimate
+sudo docker build -f leo-planer/Dockerfile.prod -t ghcr.io/lucaa0312/leoplaner:0.2.0 .
+```
 
 ## Backups, and what destroys data
 
