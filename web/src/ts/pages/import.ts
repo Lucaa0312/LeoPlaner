@@ -118,8 +118,6 @@ function renderReport(rec: ImportRecord, fresh: boolean): void {
     ${rec.counts.length ? `<div class="figs">${rec.counts.map(([k, v]) => `<div><b>${num(v)}</b><span>${esc(k)}</span></div>`).join("")}</div>` : ""}
     ${rec.files.length ? `<h3 class="sub-title">Dateien</h3>${fileList(rec.files)}` : ""}
     ${rec.feasibility.length ? `<h3 class="sub-title">Nicht lösbar (${rec.feasibility.length})</h3><p class="hint">Diese Punkte kann keine Anordnung lösen. Sie müssen in den Daten geändert werden.</p>${msgs(rec.feasibility, "error", "alert")}` : ""}
-    ${rec.warnings.length ? `<h3 class="sub-title">Hinweise (${rec.warnings.length})</h3>${msgs(rec.warnings, "warn", "info")}` : ""}
-    ${!rec.feasibility.length && !rec.warnings.length ? `<p class="muted" style="margin-top:8px">Der Import hat keine Hinweise gemeldet.</p>` : ""}
     <div class="toolbar" style="margin-top:16px"><span class="sp"></span><a class="btn btn-dark" href="./optimierung.html">Weiter zur Optimierung ${icon("arrow")}</a></div>`;
 }
 
