@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.algorithm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -165,6 +166,49 @@ public class RunStateTest {
             assertTrue(seen.get(i) >= seen.get(i - 1), "progress went back at step " + i + ": " + seen);
         }
         assertEquals(1, seen.get(seen.size() - 1));
+        assertEquals("finished", run.snapshot().status());
+    }
+
+    @Test
+    public void erweitertDoesNotFillTheBar() {
+        run.start(RunState.Mode.EINFACH);
+        playRound(200_000, 100, 500);
+        final double einfach = run.getProgress();
+
+        run.setMode(RunState.Mode.ERWEITERT);
+        run.loopStarted();
+        for (int i = 1; i <= 40; i++) {
+            now += 300;
+            // Erweitert cools far below 0.1 and never ends by itself
+            run.progress(i * 50_000L, 100 * Math.pow(0.5, i), 500);
+        }
+        assertEquals(einfach, run.getProgress(), "the bar waits while in Erweitert");
+        assertNull(run.snapshot().etaSeconds());
+    }
+
+    @Test
+    public void backToEinfachGoesOnFromTheBar() {
+        run.start(RunState.Mode.EINFACH);
+        playRound(200_000, 100, 500);
+        run.setMode(RunState.Mode.ERWEITERT);
+        run.loopStarted();
+        now += 300;
+        run.progress(2_000_000, 0.001, 500);
+        final double before = run.getProgress();
+
+        run.setMode(RunState.Mode.EINFACH);
+        now += 300;
+        run.progress(2_050_000, 0.001, 500);
+        assertTrue(run.getProgress() >= before);
+        assertTrue(run.getProgress() < 0.9, "not stuck near 99 % with rounds still ahead: " + run.getProgress());
+        assertNotNull(run.snapshot().etaSeconds());
+
+        // and the run still finishes
+        boolean goesOn = true;
+        for (int r = 0; r < 10 && goesOn; r++) {
+            playRound(500_000, RunState.ROUND_REHEAT, 500);
+            goesOn = run.roundEnded(500);
+        }
         assertEquals("finished", run.snapshot().status());
     }
 

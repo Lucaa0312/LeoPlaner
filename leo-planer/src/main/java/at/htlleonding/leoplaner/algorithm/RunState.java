@@ -138,12 +138,14 @@ public class RunState {
 
     private void setModeLocked(final Mode mode) {
         if (mode == Mode.EINFACH && this.mode != Mode.EINFACH) {
-            // Einfach counts its rounds from here
+            // Einfach counts its rounds from here, and the bar goes on from where it stood
             round = Math.max(round, 1);
             roundsWithoutGain = 0;
             bestAtRoundStart = bestCost;
             roundStartIteration = iterations;
             selfReheated = false;
+            progressBase = progress;
+            progressFromIteration = iterations;
         }
         this.mode = mode;
     }
@@ -273,22 +275,22 @@ public class RunState {
      * down: it never moves backwards.
      */
     private void estimate() {
-        if (!Double.isFinite(temperature)) {
+        // Erweitert runs until someone stops it: there is no end to count towards. The bar waits
+        // where it is and goes on when the run is switched back to Einfach.
+        if (!Double.isFinite(temperature) || mode != Mode.EINFACH) {
+            etaSeconds = null;
             return;
         }
-        double left = mode == Mode.EINFACH && !selfReheated ? loopIters(temperature) : itersToCold(temperature);
-        double capMillis = Double.POSITIVE_INFINITY;
-        if (mode == Mode.EINFACH) {
-            final int more = Math.max(0, ROUNDS_WITHOUT_GAIN_TO_FINISH - roundsWithoutGain - 1);
-            final double perRound = roundLengths.isEmpty()
-                    ? loopIters(ROUND_REHEAT)
-                    : roundLengths.stream().mapToLong(Long::longValue).average().orElse(0);
-            left += more * perRound;
-            capMillis = Math.max(0, timeLimitMillis - elapsedMillis());
-        }
+        double left = selfReheated ? itersToCold(temperature) : loopIters(temperature);
+        final int more = Math.max(0, ROUNDS_WITHOUT_GAIN_TO_FINISH - roundsWithoutGain - 1);
+        final double perRound = roundLengths.isEmpty()
+                ? loopIters(ROUND_REHEAT)
+                : roundLengths.stream().mapToLong(Long::longValue).average().orElse(0);
+        left += more * perRound;
+        final double capMillis = Math.max(0, timeLimitMillis - elapsedMillis());
         final double done = iterations - progressFromIteration;
         double own = done + left > 0 ? done / (done + left) : 0;
-        if (Double.isFinite(capMillis) && timeLimitMillis > 0) {
+        if (timeLimitMillis > 0) {
             own = Math.max(own, 1 - capMillis / timeLimitMillis);
         }
         progress = Math.min(MAX_BEFORE_FINISHED, Math.max(progress, progressBase + (1 - progressBase) * own));
