@@ -79,17 +79,37 @@ export const DAY_HOURS = 10;
 export const isEvening = (className) => /^(\d+A[BC]IFT?|1AVIF)$/i.test(className);
 /** how many hours a class's week can hold */
 export const classCapacity = (className) => DAYS.length * (isEvening(className) ? 6 : DAY_HOURS);
-/** slots a teacher can be planned in (day school), after their "kann nicht" hours */
-export function teacherFreeSlots(t) {
-    const blocked = new Set(t.teacherNonWorkingHours.filter((s) => s.schoolHour >= 1 && s.schoolHour <= DAY_HOURS).map((s) => `${s.day}${s.schoolHour}`));
-    return DAYS.length * DAY_HOURS - blocked.size;
+/** hours of the day a class is taught in: 1-10, or 11-16 for the evening school */
+const classWindow = (className) => isEvening(className) ? [11, 12, 13, 14, 15, 16] : Array.from({ length: DAY_HOURS }, (_, i) => i + 1);
+/**
+ * slots a teacher can be planned in, after their "kann nicht" hours. Counted over the hours of the
+ * classes they teach (day and/or evening school), like the import's feasibility check does.
+ */
+export function teacherFreeSlots(t, classSubjects) {
+    const window = new Set();
+    for (const cs of classSubjects)
+        if (cs.teacher.some((x) => x.id === t.id))
+            classWindow(cs.className).forEach((h) => window.add(h));
+    if (!window.size)
+        classWindow("").forEach((h) => window.add(h));
+    const blocked = new Set(t.teacherNonWorkingHours.filter((s) => window.has(s.schoolHour)).map((s) => `${s.day}${s.schoolHour}`));
+    return DAYS.length * window.size - blocked.size;
 }
-/** weekly hours each teacher is assigned through the class subjects */
+/** weekly hours each teacher is assigned; a lesson coupled across several classes counts once */
 export function teacherLoad(classSubjects) {
     const m = new Map();
-    for (const cs of classSubjects)
-        for (const t of cs.teacher)
+    const seen = new Set();
+    for (const cs of classSubjects) {
+        for (const t of cs.teacher) {
+            if (cs.couplingKey) {
+                const k = `${t.id}|${cs.couplingKey}`;
+                if (seen.has(k))
+                    continue;
+                seen.add(k);
+            }
             m.set(t.id, (m.get(t.id) ?? 0) + cs.weeklyHours);
+        }
+    }
     return m;
 }
 /** weekly hours per class name */

@@ -76,6 +76,11 @@ async function upload(files) {
         return;
     }
     store.invalidate();
+    // new data: the Optimierung page starts in Einfach again, whatever was picked before
+    try {
+        localStorage.setItem("leoplaner.mode", "einfach");
+    }
+    catch { }
     const d = await store.all().catch(() => null);
     const g = answer.schoolData?.gpu ?? null, t = answer.schoolData?.teachers ?? null;
     const counts = d ? [["Lehrer", d.teachers.length], ["Klassen", d.classes.length], ["Fächer", d.subjects.length], ["Räume", d.rooms.length], ["Zuteilungen", d.classSubjects.length]] : [];
@@ -126,7 +131,7 @@ function renderReport(rec, fresh) {
     ${rec.feasibility.length ? `<h3 class="sub-title">Nicht lösbar (${rec.feasibility.length})</h3><p class="hint">Diese Punkte kann keine Anordnung lösen. Sie müssen in den Daten geändert werden.</p>${msgs(rec.feasibility, "error", "alert")}` : ""}
     ${rec.warnings.length ? `<h3 class="sub-title">Hinweise (${rec.warnings.length})</h3>${msgs(rec.warnings, "warn", "info")}` : ""}
     ${!rec.feasibility.length && !rec.warnings.length ? `<p class="muted" style="margin-top:8px">Der Import hat keine Hinweise gemeldet.</p>` : ""}
-    <div class="toolbar" style="margin-top:16px"><span class="sp"></span><a class="btn btn-dark" href="./pruefung.html">Weiter zur Prüfung ${icon("arrow")}</a></div>`;
+    <div class="toolbar" style="margin-top:16px"><span class="sp"></span><a class="btn btn-dark" href="./optimierung.html">Weiter zur Optimierung ${icon("arrow")}</a></div>`;
 }
 // ---------- drag and drop, picker ----------
 pick.addEventListener("click", () => input.click());

@@ -75,3 +75,58 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radiu
   .cp-head .legend{display:none}
 }
 @media (max-height:820px){.milestones{display:none}}
+
+/* ---- status card (Einfach): replaces the chart ---- */
+.work:not(.simple) .simple-only{display:none}
+.work.simple .side .cta{display:none}
+/* one colour per state: --c deep, --c2 light end of the disc, the rest is derived */
+.status{--c:var(--graphite-2);--c2:#4a4f5e;position:relative;display:flex;flex-direction:column;align-self:start;min-height:0;padding:18px 20px;overflow:hidden}
+.status[data-tone=busy]{--c:var(--teal);--c2:#22a9b3}
+.status[data-tone=good]{--c:var(--mint);--c2:#35c486}
+.status[data-tone=warn]{--c:var(--amber);--c2:#e8a92c}
+.status[data-tone=error]{--c:var(--rose);--c2:#ef6a8a}
+.status::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 50% at 50% 30%,color-mix(in srgb,var(--c) 11%,transparent),transparent 72%);transition:background .6s}
+.status>*{position:relative}
+.status .banner-slot:not(:empty){margin-top:0}
+.st-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;max-width:520px;margin:0 auto;padding:14px 0 16px;text-align:center}
+
+.st-icon{position:relative;display:grid;place-items:center;width:72px;height:72px;margin:16px 0 22px;border-radius:50%;color:#fff;
+  background:linear-gradient(150deg,var(--c2),var(--c));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 8px color-mix(in srgb,var(--c) 10%,transparent),0 0 0 17px color-mix(in srgb,var(--c) 5%,transparent),0 10px 22px color-mix(in srgb,var(--c) 32%,transparent);
+  transition:box-shadow .5s,background .5s}
+.st-icon .ic{width:30px;height:30px;stroke-width:2}
+/* running: a ring sweeps around the disc and the halo breathes */
+[data-tone=busy] .st-icon::after{content:"";position:absolute;inset:-8px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 55%,var(--c) 100%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));animation:spin 1.6s linear infinite}
+[data-tone=busy] .st-icon .ic{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(.88) rotate(45deg)}}
+[data-tone=good] .st-icon{animation:pop .6s var(--ease)}
+@keyframes pop{from{transform:scale(.7)}}
+
+.st-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;font:600 12.5px var(--f-data);letter-spacing:.02em;color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.st-eyebrow:empty{display:none}
+.st-eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+[data-tone=busy] .st-eyebrow::before{animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.st-title{font:700 clamp(23px,.6vw + 16px,29px)/1.15 var(--f-ui);letter-spacing:-.025em;text-wrap:balance}
+.st-text{max-width:440px;font-size:14.5px;line-height:1.55;color:var(--ink-2);text-wrap:pretty}
+
+.st-eta{width:min(380px,100%);margin-top:6px}
+.st-eta[hidden]{display:none}
+.st-bar{height:8px;border-radius:4px;background:color-mix(in srgb,var(--c) 12%,transparent);overflow:hidden}
+.st-bar i{display:block;height:100%;width:var(--p,0%);border-radius:inherit;background:linear-gradient(90deg,var(--c2),var(--c));transition:width .8s var(--ease)}
+.st-eta p{display:flex;justify-content:space-between;margin-top:7px;font:500 13px var(--f-data);color:var(--ink-2)}
+.st-eta .num{font-weight:700;color:var(--c)}
+.st-facts[hidden]{display:none}
+.st-facts{display:flex;gap:12px;margin-top:6px}
+.st-facts div{min-width:150px;padding:10px 16px 11px;border-radius:14px;background:#fff;box-shadow:var(--sh-sm);text-align:center}
+.st-facts dt{font:500 12.5px var(--f-data);color:var(--ink-3)}
+.st-facts dd{margin-top:2px;font:700 22px/1.15 var(--f-data);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.st-facts .good{color:var(--mint-ink)}
+.st-action:not(:empty){margin-top:8px}
+.st-action{display:flex;flex-direction:column;align-items:center;gap:10px}
+.st-more{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.st-action .st-more .btn{height:36px;padding:0 15px 0 12px;font-size:14px}
+.st-action .btn{height:40px;padding:0 20px 0 16px}
+.st-action .btn .ic{transition:transform .2s var(--ease)}
+.st-action .btn:hover .ic:last-child{transform:translateX(3px)}

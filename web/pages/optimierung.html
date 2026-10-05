@@ -23,13 +23,29 @@
             <button type="button" aria-pressed="true" data-mode="einfach">Einfach</button>
             <button type="button" aria-pressed="false" data-mode="erweitert">Erweitert</button>
           </div>
-          <button type="button" class="btn btn-glass" data-secondary hidden></button>
           <button type="button" class="btn btn-dark" data-primary disabled></button>
         </div>
       </header>
 
       <div class="work" data-work>
-        <section class="chartp glass layer-2" data-arrive style="--o:1" aria-label="Kostenverlauf">
+        <section class="status glass layer-2 simple-only" data-arrive style="--o:1" aria-label="Stand der Optimierung" data-st data-tone="idle">
+          <div class="banner-slot" data-banner></div>
+          <div class="st-body">
+            <div class="st-icon" data-st-icon aria-hidden="true"></div>
+            <p class="st-eyebrow" data-st-eyebrow></p>
+            <h2 class="st-title" data-st-title aria-live="polite">Lädt …</h2>
+            <p class="st-text" data-st-text></p>
+            <div class="st-eta" data-st-eta hidden title="Mindestzeit, berechnet aus der Temperatur (sie sinkt in festen Schritten) und dem aktuellen Tempo. Die Optimierung stoppt erst nach drei Durchgängen ohne Verbesserung: Bringt ein Durchgang noch etwas, kommt einer dazu.">
+              <div class="st-bar" data-st-bar role="presentation"><i></i></div>
+              <p><span data-st-left></span><span class="num" data-st-pct></span></p>
+            </div>
+            <dl class="st-facts" data-st-facts hidden>
+              <div><dt>Besser als zu Beginn</dt><dd data-st-gain>–</dd></div>
+            </dl>
+            <div class="st-action" data-st-action></div>
+          </div>
+        </section>
+        <section class="chartp glass layer-2 adv" data-arrive style="--o:1" aria-label="Kostenverlauf">
           <div class="cp-head">
             <h2 class="panel-title">Kostenverlauf</h2>
             <div class="seg" role="group" aria-label="Ausschnitt">

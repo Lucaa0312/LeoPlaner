@@ -121,8 +121,8 @@ kubectl config current-context       # must say leocloud, NOT minikube
 leocloud get template nginx          # look for the host in its Ingress
 ```
 
-Put that host into `k8s/ingress.yaml` (replace `YOUR-HOST...`). Copy `ingressClassName` or annotations
-from the template too, if it has any. Then:
+If that host differs from the one in `k8s/ingress.yaml`, put it there (lowercase). Copy `ingressClassName`
+or annotations from the template too, if they changed. Then:
 
 ```bash
 kubectl apply -f k8s/secret.yaml

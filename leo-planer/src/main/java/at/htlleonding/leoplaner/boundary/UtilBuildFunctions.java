@@ -94,6 +94,7 @@ public class UtilBuildFunctions {
 
         return new ClassSubjectDTO(classSubject.getWeeklyHours(), classSubject.isRequiresDoublePeriod(),
                 classSubject.isBetterDoublePeriod(), classSubject.getSchoolClass().getClassName(),
+                classSubject.getCouplingKey(),
                 classSubject.getTeachers().stream()
                         .map(t -> UtilBuildFunctions.createTeacherSubjectLinkDTO(t))
                         .toList(),

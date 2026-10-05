@@ -3,10 +3,14 @@
 // reheat). Reheats are marked "Aufgewärmt", and a dashed line shows the best cost so far.
 // Points are folded into fine buckets on the log-x axis as they arrive, so a frame only draws a few
 // thousand segments however long the run gets. Axes and the live point glide instead of jumping.
+// A hard conflict costs HARD_COST, so a few of them at the start would squash the real (soft) curve
+// to the floor: the y-axis is scaled to the points without hard conflicts, the others run off the top.
+// Both zooms fit the y-axis to the visible costs instead of starting at 0.
 import { num, short } from "./ui.js";
 
 export type ChartPt = { x: number; t: number; c: number };
-type Bucket = { k: number; x0: number; x1: number; cFirst: number; cLast: number; min: number; max: number };
+/** min/max: all points; smin/smax: only points without a hard conflict (±Infinity when none) */
+type Bucket = { k: number; x0: number; x1: number; cFirst: number; cLast: number; min: number; max: number; smin: number; smax: number };
 type View = { x0: number; x1: number; y0: number; y1: number };
 
 const BUCKETS_PER_DECADE = 500;
@@ -20,6 +24,9 @@ const LABELS = ["Erkunden", "Verbessern", "Feinschliff"];
 const lg = (x: number): number => Math.log10(Math.max(1, x));
 /** a reheat: the temperature at least triples between two points and ends up warm */
 export const isReheat = (prevT: number, t: number): boolean => t > prevT * 3 && t > 0.5;
+/** what the backend charges per broken hard rule (CostModel.IMPOSSIBLE_COST) */
+export const HARD_COST = 100_000_000;
+export const hardConflicts = (c: number): number => Math.floor(c / HARD_COST);
 
 export class CostChart {
   private ctx: CanvasRenderingContext2D;
@@ -69,9 +76,12 @@ export class CostChart {
     if (!b0 || p.c < b0.c) this.best.push({ x: p.x, c: p.c });
     const k = Math.floor(lg(p.x) * BUCKETS_PER_DECADE);
     const b = this.buckets[this.buckets.length - 1];
-    if (b && b.k === k) { b.x1 = p.x; b.cLast = p.c; b.min = Math.min(b.min, p.c); b.max = Math.max(b.max, p.c); }
-    else this.buckets.push({ k, x0: p.x, x1: p.x, cFirst: p.c, cLast: p.c, min: p.c, max: p.c });
-    if (!this.peakPt || p.c > this.peakPt.c) this.peakPt = p;
+    const soft = p.c < HARD_COST;
+    if (b && b.k === k) {
+      b.x1 = p.x; b.cLast = p.c; b.min = Math.min(b.min, p.c); b.max = Math.max(b.max, p.c);
+      if (soft) { b.smin = Math.min(b.smin, p.c); b.smax = Math.max(b.smax, p.c); }
+    } else this.buckets.push({ k, x0: p.x, x1: p.x, cFirst: p.c, cLast: p.c, min: p.c, max: p.c, smin: soft ? p.c : Infinity, smax: soft ? p.c : -Infinity });
+    if (soft && (!this.peakPt || p.c > this.peakPt.c)) this.peakPt = p;
     this.kick();
   }
   /** where "Verbessern" and "Feinschliff" start (undefined: not yet), and which phase is current */
@@ -97,22 +107,26 @@ export class CostChart {
     const last = this.pts[this.pts.length - 1];
     if (!last || this.pts.length < 2) return null;
     const end = lg(last.x);
-    let x0 = 0, x1 = Math.max(6, end + 0.35);
+    // start where the curve enters the scale: the stretch with hard conflicts runs off the top anyway
+    const firstSoft = this.pts.find((p) => p.c < HARD_COST);
+    let x0 = firstSoft && firstSoft.x < last.x ? lg(firstSoft.x) : 0;
+    let x1 = Math.max(x0 + 1, end + (end - x0) * 0.04);
     if (this.zoom === "end") {
       const polish = this.phaseX[1] ?? this.reheats[this.reheats.length - 1];
       x0 = Math.min(polish !== undefined ? lg(polish) : end - 0.6, end - 0.15);
       x1 = end + Math.max(0.06, (end - x0) * 0.1);
     }
-    let lo = Infinity, hi = -Infinity;
+    let lo = Infinity, hi = -Infinity, rawLo = Infinity, rawHi = -Infinity;
     const k0 = Math.floor(x0 * BUCKETS_PER_DECADE);
     for (let i = this.buckets.length - 1; i >= 0; i--) {
       const b = this.buckets[i]!;
       if (b.k < k0) break;
-      if (b.min < lo) lo = b.min;
-      if (b.max > hi) hi = b.max;
+      lo = Math.min(lo, b.smin); hi = Math.max(hi, b.smax);
+      rawLo = Math.min(rawLo, b.min); rawHi = Math.max(rawHi, b.max);
     }
+    // only hard conflicts in view: then they are the curve
+    if (!isFinite(lo)) { lo = rawLo; hi = rawHi; }
     if (!isFinite(lo)) return null;
-    if (this.zoom === "all") return { x0, x1, y0: 0, y1: hi * 1.06 };
     const pad = Math.max(10, (hi - lo) * 0.15);
     return { x0, x1, y0: Math.max(0, lo - pad), y1: hi + pad };
   }

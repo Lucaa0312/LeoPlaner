@@ -1,7 +1,6 @@
 // The Glas app shell: process sidebar (Option A "Leitfaden") with live step status, and arrival.
 import { icon } from "./ui.js";
 import { store } from "./store.js";
-import { countBy, runChecks, summaryText } from "./checks.js";
 
 export type StepKey = "import" | "pruefung" | "optimierung" | "ergebnis";
 export type StepState = "done" | "active" | "open" | "error";
@@ -10,9 +9,9 @@ export type PageKey = StepKey | "uebersicht" | "lehrer" | "klassen" | "faecher" 
 type Step = { key: StepKey; n: number; label: string; href: string };
 const STEPS: Step[] = [
   { key: "import", n: 1, label: "Import", href: "./import.html" },
-  { key: "pruefung", n: 2, label: "Prüfung", href: "./pruefung.html" },
-  { key: "optimierung", n: 3, label: "Optimierung", href: "./optimierung.html" },
-  { key: "ergebnis", n: 4, label: "Ergebnis & Export", href: "./ergebnis.html" },
+  // "pruefung" is hidden: its page still exists but is not part of the process any more
+  { key: "optimierung", n: 2, label: "Optimierung", href: "./optimierung.html" },
+  { key: "ergebnis", n: 3, label: "Ergebnis & Export", href: "./ergebnis.html" },
 ];
 const DATA = [
   { key: "lehrer", label: "Lehrer", href: "./lehrer.html" },
@@ -71,9 +70,6 @@ export function renderShell(opts: ShellOptions): Shell {
       const has = d.classSubjects.length > 0;
       const skip = (k: StepKey): boolean => !!opts.ownsStep && k === opts.active;
       if (!skip("import")) setStep("import", has ? "done" : "open", has ? "Daten da" : "");
-      const fs = has ? runChecks(d) : [];
-      const { errors } = countBy(fs);
-      if (!skip("pruefung")) setStep("pruefung", !has ? "open" : errors ? "error" : "done", has ? (errors ? `${errors} Fehler` : summaryText(fs) === "Keine Probleme" ? "Keine Fehler" : summaryText(fs)) : "");
       return Promise.all([store.isRunning(), store.hasRunBefore()]).then(([running, ran]) => {
         if (!skip("optimierung")) setStep("optimierung", running ? "active" : ran && has ? "done" : "open", running ? "Läuft" : ran && has ? "Fertig" : "");
         if (!skip("ergebnis")) setStep("ergebnis", "open", "");

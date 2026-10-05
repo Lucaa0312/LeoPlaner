@@ -1,4 +1,4 @@
-// 4 Ergebnis & Export: the finished timetable per class, teacher or room, plus export and print.
+// 3 Ergebnis & Export: the finished timetable per class, teacher or room, plus export and print.
 import { renderShell } from "../glas/shell.js";
 import { el, esc, icon, num, title, toast, dayName } from "../glas/ui.js";
 import { store, classHours, DAY_SHORT, HOUR_TIMES, rgb, param } from "../glas/store.js";
@@ -90,7 +90,7 @@ function renderSummary() {
     <div><b>${num(hours)}</b><span>Wochenstunden</span></div>
     <div class="${classGaps ? "bad" : "ok"}"><b>${num(classGaps)}</b><span>Freistunden in Klassenplänen</span></div>
     <div><b>${num(teacherGaps)}</b><span>Freistunden bei Lehrkräften</span></div>
-    <p class="note">${running ? "Die Optimierung läuft noch. Das ist ein Zwischenstand." : "Harte Regeln prüft der Server noch nicht einzeln. Offene Punkte zeigt die <a href=\"./pruefung.html\">Prüfung</a>."}</p>`;
+    <p class="note">${running ? "Die Optimierung läuft noch. Das ist ein Zwischenstand." : "Harte Regeln prüft der Server noch nicht einzeln."}</p>`;
 }
 // ---------- list ----------
 function renderList() {
@@ -109,9 +109,12 @@ function renderList() {
 }
 // ---------- grid ----------
 const grid = el("[data-grid]");
+/** the grid stops at this period, later hours are not shown */
+const LAST_HOUR = 11;
 function renderPlan() {
     const it = items(kind).find((i) => i.id === current);
-    const [lo, hi] = school?.hourRange ?? [1, 8];
+    const [lo, top] = school?.hourRange ?? [1, 8];
+    const hi = Math.min(top, LAST_HOUR);
     const rows = hi - lo + 1;
     grid.style.gridTemplateRows = `32px repeat(${rows}, minmax(38px, 1fr))`;
     if (!it) {
@@ -139,11 +142,11 @@ function renderPlan() {
                 : ["Für diese Klasse gibt es noch keinen Plan.", "Starten Sie die Optimierung, dann erscheint er hier."];
         h += `<div class="grid-empty" style="grid-row:2 / span ${rows}"><div><b>${msg[0]}</b>${msg[1]}</div></div>`;
     }
-    h += ls.map((l, i) => {
+    h += ls.filter((l) => l.hour <= hi).map((l, i) => {
         const t0 = l.teachers[0];
         const a = kind === "lehrer" ? l.cls.toUpperCase() : t0 ? `${t0.sym}${l.teachers.length > 1 ? ` +${l.teachers.length - 1}` : ""}` : "–";
         const b = kind === "raum" ? l.cls.toUpperCase() : l.room ? `Raum ${l.room}` : "kein Raum";
-        return `<button type="button" class="tile${l.len === 1 ? " one" : ""}" style="--i:${i};--c:${rgb(l.color)};--ink-c:${tileInk(l.color)};grid-column:${l.day + 2};grid-row:${l.hour - lo + 2} / span ${l.len}" data-k="${l.key}" data-t="${t0?.id ?? ""}"
+        return `<button type="button" class="tile${l.len === 1 ? " one" : ""}" style="--i:${i};--c:${rgb(l.color)};--ink-c:${tileInk(l.color)};grid-column:${l.day + 2};grid-row:${l.hour - lo + 2} / span ${Math.min(l.len, hi - l.hour + 1)}" data-k="${l.key}" data-t="${t0?.id ?? ""}"
       aria-label="${esc(title(l.subjectName))}, ${dayName(l.day)} ${l.hour}. Stunde${l.len > 1 ? ` bis ${l.hour + l.len - 1}.` : ""}, ${esc(l.teachers.map((x) => x.name).join(", ") || "ohne Lehrkraft")}, ${esc(b)}">
       <span class="s">${esc(l.subject)}</span><span class="a">${esc(a)}</span><span class="b">${esc(b)}</span></button>`;
     }).join("");

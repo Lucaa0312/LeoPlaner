@@ -7,7 +7,7 @@ let classSubjects = [];
 let load = new Map();
 const sym = (t) => t.nameSymbol.toUpperCase();
 const loadCell = (t) => {
-    const h = load.get(t.id) ?? 0, free = teacherFreeSlots(t);
+    const h = load.get(t.id) ?? 0, free = teacherFreeSlots(t, classSubjects);
     const pct = free ? Math.min(100, Math.round((h / free) * 100)) : 100;
     return `<span class="load"><span class="num">${h}/${free}</span><span class="bar${h > free ? " over" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span></span>`;
 };
@@ -29,7 +29,7 @@ masterDetail({
         { label: "Kürzel", cell: (t) => `<span class="code">${esc(sym(t))}</span>`, sort: sym },
         { label: "Name", cell: (t) => `<span class="nm">${esc(t.teacherName)}</span>`, sort: (t) => t.teacherName },
         { label: "Fächer", compact: true, cell: (t) => `<span class="mini">${t.teachingSubject.slice(0, 4).map((s) => `<span class="tag">${esc(s.subjectSymbol.toUpperCase())}</span>`).join("")}${t.teachingSubject.length > 4 ? `<span class="mut">+${t.teachingSubject.length - 4}</span>` : ""}</span>` },
-        { label: "Stunden / frei", num: true, cell: loadCell, sort: (t) => (load.get(t.id) ?? 0) / Math.max(1, teacherFreeSlots(t)) },
+        { label: "Stunden / frei", num: true, cell: loadCell, sort: (t) => (load.get(t.id) ?? 0) / Math.max(1, teacherFreeSlots(t, classSubjects)) },
     ],
     idle: (items) => `<b>${items.length} Lehrkräfte</b>Wählen Sie eine Lehrkraft, um ihre Fächer und ihre Verfügbarkeit zu sehen und zu ändern.`,
     detail: renderDetail,
@@ -40,7 +40,7 @@ function renderDetail(t, api) {
     const root = api.body;
     const mine = t ? classSubjects.filter((cs) => cs.teacher.some((x) => x.id === t.id)) : [];
     const hours = t ? load.get(t.id) ?? 0 : 0;
-    const free = t ? teacherFreeSlots(t) : DAYS.length * DAY_HOURS;
+    const free = t ? teacherFreeSlots(t, classSubjects) : DAYS.length * DAY_HOURS;
     const classes = [...new Set(mine.map((cs) => cs.className.toUpperCase()))];
     // availability state per cell: 0 free, 1 will nicht, 2 kann nicht
     const key = (d, h) => `${DAYS[d]}:${h}`;

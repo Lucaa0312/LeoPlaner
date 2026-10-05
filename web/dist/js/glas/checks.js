@@ -58,7 +58,7 @@ export function runChecks(d) {
     }
     const load = teacherLoad(d.classSubjects);
     for (const t of d.teachers) {
-        const hours = load.get(t.id) ?? 0, free = teacherFreeSlots(t);
+        const hours = load.get(t.id) ?? 0, free = teacherFreeSlots(t, d.classSubjects);
         if (hours > free)
             out.push({ sev: "error", kind: "lehrer", id: t.id, tag: code(t.nameSymbol), text: `${hours} Stunden zugeteilt, nur ${free} Einheiten frei`, rule: "teacherOver" });
     }

@@ -1,10 +1,9 @@
-// 3 Optimierung: the run, shown as its cost curve only (the timetable lives in step 4).
+// 2 Optimierung: the run, in words (Einfach) or as its cost curve (Erweitert). The timetable lives in step 3.
 import { renderShell } from "../glas/shell.js";
 import { el, icon, num, short, toast, reduceMotion } from "../glas/ui.js";
-import { CostChart, isReheat } from "../glas/costChart.js";
+import { CostChart, HARD_COST, hardConflicts, isReheat } from "../glas/costChart.js";
 import { algorithmApi, ProgressSocket, setAutomatic, noteAutomatic, believedAutomatic } from "../api/algorithmApi.js";
 import { store } from "../glas/store.js";
-import { countBy, runChecks } from "../glas/checks.js";
 import type { HistoryPoint, Progress, SocketStatus } from "../api/algorithmApi.js";
 
 type State = "loading" | "offline" | "nodata" | "idle" | "starting" | "running" | "stopped";
@@ -40,6 +39,8 @@ let bestC = Infinity;
 let keptBest = Infinity;
 let improveX: number | undefined, polishX: number | undefined;
 let lastEventAt = 0, lastEventIter = 0, rate = 0;
+/** the backend's current loop: where it started (cumulative iteration) and whether it already reheated itself */
+let loop = { x: 0, reheated: false };
 let temperature = NaN;
 let socketStatus: SocketStatus = "connecting";
 let startTimer = 0;
@@ -49,8 +50,34 @@ let tempSentAt = 0;
 let modeFixedAt = 0;
 let milestones: { x: number; when: string; html: string; fresh?: boolean }[] = [];
 /** Einfach rounds (only meaningful in the controlling tab) */
-let rounds = { active: false, n: 0, sinceGain: 0, bestAtRoundStart: Infinity, startedAt: 0, userStopped: false };
+let rounds = { active: false, n: 0, sinceGain: 0, bestAtRoundStart: Infinity, startedAt: 0, userStopped: false,
+  /** where the current round began, and how long the finished reheat rounds took (both in iterations) */
+  startX: 0, lens: [] as number[] };
 let finishedNote = "";
+/*
+ * "Fertig" only exists in this page: the backend just knows "not running". So the finished run is
+ * remembered in the browser, tied to the history it ended with. Coming back to the page shows
+ * "Fertig" again as long as the server still has exactly that history.
+ */
+const FINISHED_KEY = "leoplaner.finished";
+type FinishedRecord = { note: string; len: number; iteration: number; cost: number };
+function rememberFinished(): void {
+  const note = finishedNote;
+  algorithmApi.history().then((h) => {
+    const l = h[h.length - 1];
+    if (!l || finishedNote !== note) return;
+    const rec: FinishedRecord = { note, len: h.length, iteration: l.iteration, cost: l.cost };
+    try { localStorage.setItem(FINISHED_KEY, JSON.stringify(rec)); } catch {}
+  }).catch(() => {});
+}
+function forgetFinished(): void { try { localStorage.removeItem(FINISHED_KEY); } catch {} }
+function finishedFor(h: HistoryPoint[]): string {
+  try {
+    const r = JSON.parse(localStorage.getItem(FINISHED_KEY) ?? "null") as FinishedRecord | null;
+    const l = h[h.length - 1];
+    return r && l && r.len === h.length && r.iteration === l.iteration && r.cost === l.cost ? r.note : "";
+  } catch { return ""; }
+}
 /** a start after any earlier stop ends at once on the server (BACKEND_TODO #15): we kick it once with "resume" */
 let startKicked = false;
 
@@ -61,8 +88,13 @@ function loadMode(): Mode {
   try { return localStorage.getItem("leoplaner.mode") === "erweitert" ? "erweitert" : "einfach"; } catch { return "einfach"; }
 }
 function saveMode(): void { try { localStorage.setItem("leoplaner.mode", mode); } catch {} }
-const peak = (): Pt | undefined => pts.reduce<Pt | undefined>((m, p) => (!m || p.c > m.c ? p : m), undefined);
+const soft = (p: Pt): boolean => p.c < HARD_COST;
+/** highest cost without a hard conflict: a start with conflicts is off the chart's scale */
+const peak = (): Pt | undefined => pts.filter(soft).reduce<Pt | undefined>((m, p) => (!m || p.c > m.c ? p : m), undefined);
 const first = (): Pt | undefined => pts[0];
+/** what the trend and the "Kosten unter" milestones compare with: the first plan without hard conflicts */
+const baseline = (): Pt | undefined => pts.find(soft) ?? pts[0];
+const conflictsText = (c: number): string => { const n = hardConflicts(c); return `${n} ${n === 1 ? "harter Konflikt" : "harte Konflikte"}`; };
 const last = (): Pt | undefined => pts[pts.length - 1];
 /*
  * Phases: "Erkunden" until the plan first cools below PHASE_IMPROVE, then "Verbessern" through every
@@ -90,17 +122,21 @@ function fmtTemp(t: number): string {
 // ---------- chart ----------
 const plot = el("[data-plot]");
 const chart = new CostChart(plot, el<HTMLCanvasElement>("[data-canvas]"), el("[data-tip]"),
-  (p) => `<b>${num(p.c)}</b>Iteration ${num(p.x)} · ${["Erkunden", "Verbessern", "Feinschliff"][phaseAt(p.x)]} · Temperatur ${fmtTemp(p.t)}`);
+  (p) => `<b>${num(p.c)}</b>${soft(p) ? "" : `${conflictsText(p.c)} · `}Iteration ${num(p.x)} · ${["Erkunden", "Verbessern", "Feinschliff"][phaseAt(p.x)]} · Temperatur ${fmtTemp(p.t)}`);
 
 function resetData(): void {
-  pts = []; offset = 0; lastRaw = -1; bestC = Infinity; keptBest = Infinity; improveX = undefined; polishX = undefined;
+  pts = []; shownGain = 0; offset = 0; lastRaw = -1; loop = { x: 0, reheated: false }; bestC = Infinity; keptBest = Infinity; improveX = undefined; polishX = undefined;
   chart.reset();
 }
 function addPoint(raw: number, t: number, c: number): void {
-  if (lastRaw >= 0 && raw < lastRaw) { offset += lastRaw; keptBest = Infinity; }   // counter restarted after a pause/resume
+  const restarted = lastRaw >= 0 && raw < lastRaw;
+  if (restarted) { offset += lastRaw; keptBest = Infinity; }   // counter restarted after a pause/resume
   lastRaw = raw;
   const x = offset + raw;
   const prev = last();
+  if (restarted || !pts.length) loop = { x, reheated: false };
+  // the self-reheat goes to about 128; a few iterations in, so a start or our own round reheat does not count
+  else if (prev && x - loop.x > 10_000 && t > 2 * ROUND_REHEAT && isReheat(prev.t, t)) loop.reheated = true;
   let p: Pt;
   if (prev && x <= prev.x) { prev.c = c; prev.t = t; p = prev; }
   else { p = { x, t, c }; pts.push(p); }
@@ -117,7 +153,7 @@ function setFact(key: string, text: string, cls = ""): void {
   if (d.className !== cls && !d.classList.contains("bump")) d.className = cls;
 }
 function renderFacts(): void {
-  const l = last(), f = first();
+  const l = last(), f = baseline();
   setFact("cost", l ? num(l.c) : "–");
   setFact("best", pts.length ? num(bestC) : "–");
   if (l && f && f.c > 0) {
@@ -139,7 +175,7 @@ const TEXT: Record<State, string> = {
 };
 const PHASE_TEXT = [
   "Probiert mutig Neues aus. Die Kosten dürfen dabei steigen.",
-  "Löst die großen Konflikte und schließt Lücken.",
+  "Schließt Lücken und verbessert den Plan.",
   "Stimmt den Plan fein ab.",
 ];
 /** recompute where "Feinschliff" starts and hand the phase edges to the chart */
@@ -177,8 +213,10 @@ function renderPhase(): void {
 function rebuildMilestones(): void {
   milestones = [];
   updatePhases();
-  const f = first(); if (!f) return;
-  milestones.push({ x: f.x, when: "Start", html: `Zufälliger Plan · Kosten <b>${num(f.c)}</b>` });
+  const s = first(); if (!s) return;
+  milestones.push({ x: s.x, when: "Start", html: `Zufälliger Plan · ${soft(s) ? "" : `${conflictsText(s.c)} · `}Kosten <b>${num(s.c)}</b>` });
+  const f = baseline()!;
+  if (f !== s) milestones.push({ x: f.x, when: short(f.x), html: `Keine harten Konflikte mehr · Kosten <b>${num(f.c)}</b>` });
   const pk = peak();
   if (pk && pk.c > f.c) milestones.push({ x: pk.x, when: short(pk.x), html: `Höchstwert <b>${num(pk.c)}</b> · mutige Phase` });
   const imp = pts.find((p) => p.t <= PHASE_IMPROVE), pol = polishX !== undefined ? pts.find((p) => p.x === polishX) : undefined;
@@ -190,7 +228,7 @@ function rebuildMilestones(): void {
   }
   if (pol) milestones.push({ x: pol.x, when: short(pol.x), html: `Phase „Feinschliff“ beginnt · Kosten <b>${num(pol.c)}</b>` });
   const bp = pts.find((p) => p.c === bestC);
-  if (bp && bp !== f) milestones.push({ x: bp.x, when: short(bp.x), html: `Bester Wert <b>${num(bestC)}</b>` });
+  if (bp && bp !== f && bp !== s) milestones.push({ x: bp.x, when: short(bp.x), html: `Bester Wert <b>${num(bestC)}</b>` });
   milestones.sort((a, z) => z.x - a.x);
 }
 function renderMilestones(): void {
@@ -205,10 +243,21 @@ const slider = el<HTMLInputElement>("#temp");
 const toSlider = (t: number): number => Math.round(((Math.log10(Math.max(t, 0.001)) + 3) / 6) * 1000);
 const fromSlider = (v: number): number => 10 ** ((v / 1000) * 6 - 3);
 let sliderBusy = false, sendTimer = 0;
+/**
+ * The temperature picked on the slider. Progress events keep reporting the old one for a moment,
+ * so the slider shows this until the backend reports it back (sentAt 0: not sent yet).
+ */
+let wanted: { t: number; sentAt: number } | null = null;
+function settleWanted(t: number): void {
+  if (!wanted?.sentAt) return;
+  const arrived = t <= wanted.t * 1.001 && t >= wanted.t * 0.5;
+  if (arrived || performance.now() - wanted.sentAt > 2000) wanted = null;
+}
 function renderTemp(): void {
-  const out = el("[data-temp]"), txt = fmtTemp(temperature);
+  const t = wanted?.t ?? temperature;
+  const out = el("[data-temp]"), txt = fmtTemp(t);
   if (out.textContent !== txt) out.textContent = txt;
-  if (!sliderBusy && isFinite(temperature)) slider.value = String(toSlider(temperature));
+  if (!sliderBusy && isFinite(t)) slider.value = String(toSlider(t));
   slider.style.setProperty("--fill", `${Number(slider.value) / 10}%`);
   slider.disabled = !(state === "running" || state === "stopped") || socketStatus !== "open";
   el("[data-temp-hint]").textContent = state === "stopped"
@@ -218,20 +267,25 @@ function renderTemp(): void {
 slider.addEventListener("pointerdown", () => (sliderBusy = true));
 addEventListener("pointerup", () => (sliderBusy = false));
 slider.addEventListener("input", () => {
-  temperature = fromSlider(Number(slider.value));
-  renderTemp(); renderPhase();
+  // sent from this value, not from `temperature`: progress events overwrite that every 50 ms
+  const t = fromSlider(Number(slider.value));
+  temperature = t;
+  wanted = { t, sentAt: 0 };
+  renderTemp(); renderPhase(); renderCard();
   clearTimeout(sendTimer);
-  sendTimer = window.setTimeout(() => sendTemperature(temperature), 120);
+  sendTimer = window.setTimeout(() => sendTemperature(t), 120);
 });
 function sendTemperature(t: number): boolean {
+  t = Number(t.toPrecision(4));
   tempSentAt = performance.now();
-  return socket.send(`temperature:${Number(t.toPrecision(4))}`);
+  const sent = socket.send(`temperature:${t}`);
+  wanted = sent ? { t, sentAt: tempSentAt } : null;
+  if (!sent) renderTemp();
+  return sent;
 }
 
 // ---------- header controls ----------
 const primary = el<HTMLButtonElement>("[data-primary]");
-const secondary = el<HTMLButtonElement>("[data-secondary]");
-let confirmTimer = 0;
 /** instant feedback while the server takes its moment; the next state render replaces it */
 function pending(b: HTMLButtonElement, text: string): void {
   b.innerHTML = `<span class="btn-spin" aria-hidden="true"></span>${text}`;
@@ -239,96 +293,45 @@ function pending(b: HTMLButtonElement, text: string): void {
 }
 
 function renderControls(): void {
+  // one button: Pausieren while a run goes on, Fortsetzen otherwise (Optimierung starten before the first run)
   const live = socketStatus === "open";
-  secondary.classList.remove("confirm");
-  secondary.disabled = false;
-  if (state === "idle") {
-    primary.innerHTML = `${icon("play")}Optimierung starten`;
-    primary.disabled = false;
-    secondary.hidden = true;
-  } else if (state === "running") {
-    if (mode === "erweitert") {
-      primary.innerHTML = `${icon("pause")}Pausieren`;
-      secondary.hidden = false;
-      secondary.innerHTML = `${icon("stop")}<span class="lbl">Beenden</span>`;
-      secondary.setAttribute("aria-label", "Beenden");
-    } else {
-      primary.innerHTML = `${icon("stop")}Beenden`;
-      secondary.hidden = true;
-    }
-    primary.disabled = !live && mode === "erweitert";
+  if (state === "running" || state === "starting") {
+    primary.innerHTML = `${icon("pause")}Pausieren`;
+    primary.disabled = state === "starting" || !live;
   } else if (state === "stopped") {
     primary.innerHTML = `${icon("play")}Fortsetzen`;
     primary.disabled = !live;
-    secondary.hidden = false;
-    secondary.innerHTML = `${icon("redo")}<span class="lbl">Neu beginnen</span>`;
-    secondary.setAttribute("aria-label", "Neu beginnen");
-  } else if (state === "starting") {
-    primary.innerHTML = `${icon("play")}Startet …`;
-    primary.disabled = true;
-    secondary.hidden = true;
   } else {
     primary.innerHTML = `${icon("play")}Optimierung starten`;
-    primary.disabled = true;
-    secondary.hidden = true;
+    primary.disabled = state !== "idle";
   }
   document.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
 }
 
-/**
- * 2 Prüfung before a fresh start: with errors in the data the plan will not be usable.
- * The run can still be started on purpose ("Trotzdem starten").
- */
-let checksAccepted = false;
-async function preflight(): Promise<boolean> {
-  if (checksAccepted) return true;
-  try {
-    store.invalidate();
-    const { errors } = countBy(runChecks(await store.all()));
-    if (!errors) return true;
-    showBanner("error", `Die Prüfung meldet ${errors} ${errors === 1 ? "Fehler" : "Fehler"} in den Daten. Damit entsteht kein brauchbarer Plan. <a class="link" href="./pruefung.html">Zur Prüfung</a>`, {
-      label: "Trotzdem starten",
-      run: () => { checksAccepted = true; showBanner(null); void startRun(true); },
-    });
-    return false;
-  } catch { return true; } // the check is a help, not a gate: if it cannot load, the run may start
-}
-
 primary.addEventListener("click", async () => {
-  if (state === "idle") { if (await preflight()) await startRun(true); return; }
+  if (state === "idle") { await startRun(true); return; }
   if (state === "stopped") return resumeRun();
   if (state === "running") {
-    if (mode === "erweitert") {
-      if (!socket.send("pause")) toast("Keine Verbindung zum Server. Bitte gleich nochmal versuchen.");
-      else pending(primary, "Wird angehalten …");
-    } else await stopRun();
+    // Einfach must not start its next round when the pause ends this one
+    rounds.userStopped = true;
+    if (!socket.send("pause")) { rounds.userStopped = false; toast("Keine Verbindung zum Server. Bitte gleich nochmal versuchen."); }
+    else pending(primary, "Wird angehalten …");
   }
 });
-secondary.addEventListener("click", async () => {
-  if (state === "running") return stopRun();
-  if (state === "stopped") {
-    // starting over throws away the current plan: ask once, inline
-    if (!secondary.classList.contains("confirm")) {
-      secondary.classList.add("confirm");
-      secondary.innerHTML = `${icon("alert")}Wirklich neu? Plan wird verworfen`;
-      clearTimeout(confirmTimer);
-      confirmTimer = window.setTimeout(renderControls, 4000);
-      return;
-    }
-    clearTimeout(confirmTimer);
-    try {
-      secondary.classList.add("busy");
-      if (!(await preflight())) return;
-      await algorithmApi.randomize();
-      resetData(); milestones = [];
-      await startRun(true);
-    } catch {
-      toast("Neu beginnen hat nicht geklappt. Ist der Server erreichbar?");
-    } finally {
-      secondary.classList.remove("busy");
-    }
+
+/** throw the plan away and start over with a random one */
+async function restartRun(b: HTMLElement): Promise<void> {
+  try {
+    b.classList.add("busy");
+    await algorithmApi.randomize();
+    resetData(); milestones = [];
+    await startRun(true);
+  } catch {
+    toast("Neu beginnen hat nicht geklappt. Ist der Server erreichbar?");
+  } finally {
+    b.classList.remove("busy");
   }
-});
+}
 document.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((b) => b.addEventListener("click", async () => {
   const next: Mode = b.dataset.mode === "erweitert" ? "erweitert" : "einfach";
   if (next === mode) return;
@@ -338,7 +341,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((b) => b.add
   if (state === "running") {
     inControl = true;
     rounds.active = mode === "einfach";
-    if (rounds.active) startRounds();
+    if (rounds.active) startRounds(true);
     try { await setAutomatic(mode === "einfach", socket); } catch { toast("Moduswechsel hat nicht geklappt."); }
   }
   renderAll();
@@ -349,8 +352,11 @@ document.querySelectorAll<HTMLButtonElement>("[data-zoom]").forEach((b) => b.add
   chart.setZoom(zoom);
 }));
 
-function startRounds(): void {
-  rounds = { active: true, n: 1, sinceGain: 0, bestAtRoundStart: bestC, startedAt: performance.now(), userStopped: false };
+/** keep: continue the round count of an earlier stop (resume, mode switch) instead of starting at 1 */
+function startRounds(keep = false): void {
+  const go = keep && rounds.n > 0;
+  rounds = { active: true, n: go ? rounds.n + 1 : 1, sinceGain: 0, bestAtRoundStart: bestC, startedAt: performance.now(), userStopped: false,
+    startX: last()?.x ?? 0, lens: go ? rounds.lens : [] };
   finishedNote = "";
 }
 
@@ -359,7 +365,9 @@ async function startRun(fresh: boolean): Promise<void> {
   startKicked = false;
   inControl = true;
   if (mode === "einfach") startRounds(); else rounds.active = false;
+  eta = { fromX: last()?.x ?? 0, base: 0, shown: 0 };
   finishedNote = "";
+  forgetFinished();
   try {
     await setAutomatic(mode === "einfach", socket);
     // the backend keeps the last run's (cold) temperature: a fresh run must start hot
@@ -382,21 +390,18 @@ function failStart(reason: string): void {
 }
 async function resumeRun(): Promise<void> {
   inControl = true;
+  // after a pause the bar goes on from where it stopped; improving a finished plan is a new stretch
+  const base = finishedNote ? 0 : eta.shown;
+  eta = { fromX: last()?.x ?? 0, base, shown: base };
   finishedNote = "";
-  if (mode === "einfach") startRounds(); else rounds.active = false;
+  forgetFinished();
+  if (mode === "einfach") startRounds(true); else rounds.active = false;
   try { await setAutomatic(mode === "einfach", socket); } catch {}
   // basic mode stops at once when it is already cold: give it a warm start
   if (mode === "einfach" && !(temperature > PHASE_POLISH)) sendTemperature(ROUND_REHEAT);
   if (!socket.send("resume")) { rounds.active = false; toast("Keine Verbindung zum Server. Bitte gleich nochmal versuchen."); return; }
   setState("starting");
   armStartTimer("Der Lauf ist nicht weitergelaufen.");
-}
-async function stopRun(): Promise<void> {
-  rounds.userStopped = true;
-  pending(mode === "erweitert" ? secondary : primary, "Wird beendet …");
-  primary.classList.add("busy");
-  try { await algorithmApi.stop(); } catch { toast("Beenden hat nicht geklappt. Ist der Server erreichbar?"); }
-  finally { primary.classList.remove("busy"); }
 }
 
 /** The server only keeps the best plan of its latest loop, which can be worse than the lowest point of the curve. */
@@ -421,6 +426,9 @@ function continueRounds(): boolean {
     finishedNote += keptNote();
     return false;
   }
+  const endX = last()?.x ?? rounds.startX;
+  if (rounds.n > 1) rounds.lens.push(endX - rounds.startX);
+  rounds.startX = endX;
   rounds.n++;
   rounds.bestAtRoundStart = bestC;
   sendTemperature(ROUND_REHEAT);
@@ -429,12 +437,169 @@ function continueRounds(): boolean {
   return true;
 }
 
+// ---------- status card (Einfach: the state in words instead of the curve) ----------
+type Tone = "idle" | "busy" | "good" | "warn" | "error";
+type Card = { tone: Tone; ic: string; eb: string; title: string; text: string; facts: boolean; action: string };
+const PHASE_NAME = ["Erkunden", "Verbessern", "Feinschliff"];
+const resultLink = (dark: boolean, label: string): string =>
+  `<a class="btn ${dark ? "btn-dark" : "btn-glass"}" href="./ergebnis.html">${label} ${icon("arrow")}</a>`;
+/** improvement of cost c over the first conflict-free plan, in whole percent */
+function gainPct(c: number): number | undefined {
+  const f = baseline();
+  return f && f.c > 0 ? Math.round((1 - c / f.c) * 100) : undefined;
+}
+function card(): Card {
+  const l = last();
+  switch (state) {
+    case "loading": return { tone: "busy", ic: icon("calendar"), eb: "", title: "Lädt …", text: "Der aktuelle Stand wird geholt.", facts: false, action: "" };
+    case "offline": return { tone: "error", ic: icon("wifi"), eb: "Keine Verbindung", title: "Server nicht erreichbar", text: "Sobald er wieder läuft, geht es hier weiter.", facts: false,
+      action: `<button type="button" class="btn btn-dark" data-retry>${icon("redo")}Erneut versuchen</button>` };
+    case "nodata": return { tone: "idle", ic: icon("upload"), eb: "Schritt 1 fehlt", title: "Noch nichts zu verplanen", text: "Es sind keine Stunden angelegt. Importieren Sie zuerst die Daten des Schuljahres.", facts: false,
+      action: `<a class="btn btn-dark" href="./import.html">Zum Import ${icon("arrow")}</a>` };
+    case "idle": return { tone: "idle", ic: icon("calendar"), eb: "Bereit", title: "Bereit für den Stundenplan", text: "Die Optimierung probiert Millionen Anordnungen aus und stoppt von selbst, sobald der Plan nicht mehr besser wird.", facts: false,
+      action: `<button type="button" class="btn btn-dark" data-start>${icon("play")}Optimierung starten</button>` };
+    case "starting": return { tone: "busy", ic: icon("spark"), eb: "Startet", title: "Gleich geht’s los …", text: "Der Lauf beginnt gleich.", facts: false, action: "" };
+    case "running": {
+      const ph = l ? phaseAt(l.x) : 0;
+      const [title, text] = ph === 2 ? ["Wird verfeinert", "Fast fertig. Der Plan wird fein abgestimmt."]
+        : ph === 1 ? ["Plan wird verbessert", "Jetzt werden Lücken geschlossen und der Plan wird besser."]
+        : ["Plan wird erstellt …", "Probiert mutig verschiedene Anordnungen aus."];
+      const eb = `${rounds.active ? `Durchgang ${rounds.n}` : "Läuft"} · ${PHASE_NAME[ph]}`;
+      return { tone: "busy", ic: icon("spark"), eb, title,
+        text: mode === "einfach" && !rounds.active ? `${text} Stoppt von selbst.` : text, facts: true,
+        action: resultLink(false, "Zwischenstand ansehen") };
+    }
+    case "stopped":
+      if (!finishedNote) return { tone: "warn", ic: icon("pause"), eb: "Angehalten", title: "Pause", text: "Der beste Plan bisher ist gespeichert. Sie können fortsetzen oder das Ergebnis ansehen.", facts: true,
+        action: resultLink(false, "Ergebnis ansehen") };
+      return { tone: "good", ic: icon("check"), eb: "Fertig", title: "Ihr Stundenplan ist fertig", text: finishedNote, facts: true,
+        action: `${resultLink(true, "Ergebnis ansehen")}<div class="st-more">`
+          + `<button type="button" class="btn btn-glass" data-more>${icon("spark")}Weiter verbessern</button>`
+          + `<button type="button" class="btn btn-glass" data-restart>${icon("redo")}Neu beginnen</button></div>` };
+  }
+}
+/*
+ * Time left, counted in iterations and turned into time with the measured speed (iterations / s).
+ * The iterations are predictable because the backend cools by a fixed factor (×0.999993 per
+ * iteration). In automatic mode one backend loop has two legs:
+ *   1. cool from its start temperature down to 0.1,
+ *   2. heat itself up to about 128 and cool down to 0.1 again, then stop.
+ * (Seen in the history: from 8 the first leg ends at iteration 626.500, the reheat goes to 127,65,
+ * the loop stops at 1.648.000.) Einfach then needs at least as many more such loops as are missing
+ * to "no gain three times in a row", each starting at ROUND_REHEAT. If a loop still brings a gain,
+ * one more follows: the time then goes up, the bar only slows down, it never moves backwards.
+ */
+const COOL_PER_ITER = -Math.log(0.999993);
+const COLD = 0.1;
+const SELF_REHEAT = 128;
+const itersToCold = (t: number): number => (t > COLD ? Math.log(t / COLD) / COOL_PER_ITER : 0);
+/** one whole backend loop that starts at temperature t */
+const loopIters = (t: number): number => itersToCold(t) + itersToCold(SELF_REHEAT);
+/** fromX: where the bar started counting; base: where it stood then (after a resume it goes on from there) */
+let eta = { fromX: 0, base: 0, shown: 0 };
+function estimate(): { pct: number; ms: number } | undefined {
+  const l = last();
+  if (state !== "running" || !l || !(rate > 0) || !isFinite(temperature)) return undefined;
+  // on the first leg the self-reheat is still ahead
+  let left = loop.reheated ? itersToCold(temperature) : loopIters(temperature);
+  let capMs = Infinity;
+  if (rounds.active) {
+    const more = Math.max(0, ROUNDS_WITHOUT_GAIN_TO_FINISH - rounds.sinceGain - 1);
+    const lens = rounds.lens;
+    const perRound = lens.length ? lens.reduce((a, b) => a + b, 0) / lens.length : loopIters(ROUND_REHEAT);
+    left += more * perRound;
+    capMs = Math.max(0, MAX_RUN_MS - (performance.now() - rounds.startedAt));
+  }
+  left = Math.max(0, left);
+  if (l.x < eta.fromX) eta = { fromX: l.x, base: 0, shown: 0 };
+  const done = l.x - eta.fromX;
+  const ms = Math.min((left / rate) * 1000, capMs);
+  const own = Math.max(done + left > 0 ? done / (done + left) : 0, isFinite(capMs) ? 1 - capMs / MAX_RUN_MS : 0);
+  eta.shown = Math.min(0.99, Math.max(eta.shown, eta.base + (1 - eta.base) * own));
+  return { pct: eta.shown, ms };
+}
+/** a lower bound: a round that still improves the plan adds another one */
+function fmtLeft(ms: number): string {
+  if (ms < 10_000) return "Noch mindestens ein paar Sekunden";
+  if (ms < 55_000) return `Noch mindestens ${Math.round(ms / 5000) * 5} Sekunden`;
+  const min = Math.max(1, Math.round(ms / 60_000));
+  return `Noch mindestens ${min} ${min === 1 ? "Minute" : "Minuten"}`;
+}
+
+/** the bar stays after a stop: frozen where it was when paused, full when finished */
+function bar(): { pct: number; label: string } | undefined {
+  if (state === "running") {
+    const e = estimate();
+    if (e) return { pct: e.pct, label: fmtLeft(e.ms) };
+    return eta.shown > 0 ? { pct: eta.shown, label: "Restzeit wird berechnet …" } : undefined;
+  }
+  if (state === "stopped") {
+    if (finishedNote) return { pct: 1, label: "Fertig" };
+    if (eta.shown > 0) return { pct: eta.shown, label: "Angehalten" };
+  }
+  return undefined;
+}
+
+let cardAction = "";
+/** last improvement shown in the card; a fresh start sets it back to 0 */
+let shownGain = 0;
+function renderCard(): void {
+  const k = card();
+  const box = el("[data-st]");
+  if (box.dataset.tone !== k.tone) box.dataset.tone = k.tone;
+  const ic = el("[data-st-icon]");
+  if (ic.innerHTML !== k.ic) ic.innerHTML = k.ic;
+  const eb = el("[data-st-eyebrow]");
+  if (eb.textContent !== k.eb) eb.textContent = k.eb;
+  const t = el("[data-st-title]"), p = el("[data-st-text]");
+  if (t.textContent !== k.title) t.textContent = k.title;
+  if (p.textContent !== k.text) p.textContent = k.text;
+  const e = bar(), etaBox = el("[data-st-eta]");
+  etaBox.hidden = !e;
+  if (e) {
+    el("[data-st-bar]").style.setProperty("--p", `${(e.pct * 100).toFixed(1)}%`);
+    const left = e.label, pct = `${Math.round(e.pct * 100)} %`;
+    const lt = el("[data-st-left]"), pc = el("[data-st-pct]");
+    if (lt.textContent !== left) lt.textContent = left;
+    if (pc.textContent !== pct) pc.textContent = pct;
+  }
+  // while exploring the plan can briefly get worse: the number then stays where it was until it improves again
+  const facts = el("[data-st-facts]");
+  facts.hidden = !k.facts || !pts.length;
+  if (!facts.hidden) {
+    const g = gainPct(state === "stopped" && isFinite(keptBest) ? keptBest : last()!.c);
+    if (g !== undefined && g > 0) shownGain = g;
+    const gd = el("[data-st-gain]"), gain = `${shownGain} %`;
+    if (gd.textContent !== gain) gd.textContent = gain;
+    gd.className = shownGain > 0 ? "good" : "";
+  }
+  // rebuild the button only when it changes, so it does not flicker under the cursor
+  if (cardAction !== k.action) { cardAction = k.action; el("[data-st-action]").innerHTML = k.action; }
+}
+el("[data-st-action]").addEventListener("click", (e) => {
+  const b = (e.target as Element).closest("button");
+  if (b?.hasAttribute("data-start") || b?.hasAttribute("data-more")) primary.click();
+  else if (b?.hasAttribute("data-retry")) void sync();
+  else if (b?.hasAttribute("data-restart")) {
+    // starting over throws away the finished plan: ask once, inline
+    if (!b.classList.contains("confirm")) {
+      b.classList.add("confirm");
+      b.innerHTML = `${icon("alert")}Wirklich neu? Plan wird verworfen`;
+      setTimeout(() => { cardAction = ""; renderCard(); }, 4000);
+      return;
+    }
+    void restartRun(b);
+  }
+});
+
 // ---------- banner + empty states ----------
+/** every view (status card, chart) has its own slot: only one of them is visible */
 function showBanner(kind: "error" | "warn" | null, text = "", action?: { label: string; run: () => void }): void {
-  const slot = el("[data-banner]");
-  if (!kind) { if (slot.innerHTML) slot.innerHTML = ""; return; }
-  slot.innerHTML = `<div class="banner banner-${kind}" role="alert">${icon(kind === "error" ? "alert" : "wifi")}<span>${text}</span>${action ? `<button type="button" class="btn btn-glass">${action.label}</button>` : ""}</div>`;
-  if (action) slot.querySelector("button")!.addEventListener("click", action.run);
+  document.querySelectorAll<HTMLElement>("[data-banner]").forEach((slot) => {
+    if (!kind) { if (slot.innerHTML) slot.innerHTML = ""; return; }
+    slot.innerHTML = `<div class="banner banner-${kind}" role="alert">${icon(kind === "error" ? "alert" : "wifi")}<span>${text}</span>${action ? `<button type="button" class="btn btn-glass">${action.label}</button>` : ""}</div>`;
+    if (action) slot.querySelector("button")!.addEventListener("click", action.run);
+  });
 }
 function renderEmpty(): void {
   const box = el("[data-empty]");
@@ -469,10 +634,12 @@ function renderStatus(): void {
 }
 
 function renderAll(): void {
-  renderStatus(); renderControls(); renderEmpty(); renderFacts(); renderPhase(); renderTemp(); renderMilestones();
+  renderStatus(); renderControls(); renderEmpty(); renderFacts(); renderPhase(); renderTemp(); renderMilestones(); renderCard();
 }
 function setState(s: State): void {
   if (state === s) return;
+  // a run this tab only watches: the estimate counts from here
+  if (s === "running" && !rounds.active && !inControl) eta = { fromX: last()?.x ?? 0, base: 0, shown: 0 };
   state = s;
   renderAll();
 }
@@ -488,12 +655,14 @@ function onProgress(p: Progress): void {
       if (socket.send("resume")) return;
     }
     if (p.iteration > 0) addPoint(p.iteration, p.temperature, p.currentCost);
+    settleWanted(p.temperature);
     temperature = p.temperature;
     // Einfach: keep going in rounds instead of showing "stopped" between them
-    if (continueRounds()) { renderStatus(); renderPhase(); return; }
+    if (continueRounds()) { renderStatus(); renderPhase(); renderCard(); return; }
     inControl = false;
     rounds.active = false;
     setState("stopped");
+    if (finishedNote) rememberFinished();
     rebuildMilestones();
     renderAll();
     return;
@@ -506,6 +675,7 @@ function onProgress(p: Progress): void {
     renderMilestones();
   }
   addPoint(p.iteration, p.temperature, p.currentCost);
+  settleWanted(p.temperature);
   temperature = p.temperature;
   checkAutomatic(prevT, p.temperature);
   const now = performance.now(), l = last()!;
@@ -533,7 +703,7 @@ function scheduleTextRender(): void {
   if (textTimer) return;
   textTimer = window.setTimeout(() => {
     textTimer = 0;
-    renderFacts(); renderPhase(); renderTemp();
+    renderFacts(); renderPhase(); renderTemp(); renderCard();
   }, 250);
 }
 
@@ -580,7 +750,10 @@ async function sync(): Promise<void> {
     showBanner(null);
     if (lessons === 0) setState("nodata");
     else if (running) setState("running");
-    else setState(pts.length ? "stopped" : "idle");
+    else {
+      if (!inControl) finishedNote = finishedFor(history as HistoryPoint[]);
+      setState(pts.length ? "stopped" : "idle");
+    }
     rebuildMilestones();
     renderAll();
   } catch {
