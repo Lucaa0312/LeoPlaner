@@ -3,6 +3,7 @@ import initNavbar from "./navbar.js";
 import { clearCharts } from "./graph.js";
 import { getFetchResponse } from "../utils/apiHelpers.js";
 import { initExportButton } from "../features/exportButton.js";
+import { API_BASE_URL } from "../utils/apiBase.js";
 const DAYS = [
     "MONDAY",
     "TUESDAY",
@@ -69,13 +70,17 @@ export function clearLayout() {
 }
 export function loadTimetable() {
     clearLayout();
-    fetch("http://localhost:8080/api/timetable/getByClass/1")
-        .then((response) => {
-        return response.json();
-    })
-        .then((data) => {
-        console.log(data.classSubjectInstances);
-        createLayout(data.classSubjectInstances);
+    // Show the first class. Its id is not fixed: after a reset or an excel import the ids change.
+    fetch(`${API_BASE_URL}/getAllClasses`)
+        .then((response) => response.json())
+        .then((classes) => {
+        const firstClass = classes[0];
+        if (!firstClass) {
+            return;
+        }
+        return fetch(`${API_BASE_URL}/timetable/getByClass/${firstClass.id}`)
+            .then((response) => response.json())
+            .then((data) => createLayout(data.classSubjectInstances ?? []));
     })
         .catch((error) => {
         console.error("Error loading Timetable:", error);
@@ -129,7 +134,7 @@ function initializeApp() {
 document.addEventListener("DOMContentLoaded", initializeApp);
 export function getTimetableByTeacher(teacherId) {
     clearLayout();
-    fetch(`http://localhost:8080/api/timetable/getByTeacher/${teacherId}`)
+    fetch(`${API_BASE_URL}/timetable/getByTeacher/${teacherId}`)
         .then((response) => {
         return response.json();
     })
@@ -142,7 +147,7 @@ export function getTimetableByTeacher(teacherId) {
     });
 }
 export function getTimetableByClass(classId) {
-    fetch(`http://localhost:8080/api/timetable/getByClass/${classId}`)
+    fetch(`${API_BASE_URL}/timetable/getByClass/${classId}`)
         .then((response) => {
         return response.json();
     })
@@ -155,7 +160,7 @@ export function getTimetableByClass(classId) {
     });
 }
 export function getTimetableByRoom(roomId) {
-    fetch(`http://localhost:8080/api/timetable/getByRoom/${roomId}`)
+    fetch(`${API_BASE_URL}/timetable/getByRoom/${roomId}`)
         .then((response) => {
         return response.json();
     })

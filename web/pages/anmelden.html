@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anmelden · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/start.css" />
+  <link rel="stylesheet" href="../style/anmelden.css" />
+  <script type="module" src="../dist/js/pages/anmelden.js"></script>
+</head>
+<body>
+  <div class="start">
+    <header class="top">
+      <a class="brand" href="../../index.html" aria-label="LeoPlaner, Startseite"><span class="logo"></span></a>
+      <nav class="top-act" aria-label="Navigation">
+        <a class="btn btn-quiet" href="../../index.html">Zur Startseite</a>
+      </nav>
+    </header>
+
+    <main class="auth" data-mode="in" data-step="1">
+      <section class="intro" aria-live="polite">
+        <p class="eyebrow" data-eyebrow>Anmelden</p>
+        <h1 data-title>Willkommen zurück.</h1>
+        <p class="lead" data-lead>Melden Sie sich an, um die Stundenplanung Ihrer Schule fortzusetzen.</p>
+
+        <ol class="reg-steps" data-only="up" hidden>
+          <li data-s="1"><span class="mark">1</span><div><b>Zugang</b><span>E-Mail-Adresse und Passwort</span></div></li>
+          <li data-s="2"><span class="mark">2</span><div><b>Schule</b><span>Ihr Name und Ihre Schule</span></div></li>
+        </ol>
+
+        <p class="swap"><span data-swap-text>Noch kein Konto?</span> <a class="link" href="#registrieren" data-swap>Konto anlegen<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a></p>
+      </section>
+
+      <section class="card glass" aria-labelledby="card-title">
+        <h2 id="card-title" class="card-title" data-card-title>Mit E-Mail anmelden</h2>
+        <form data-form novalidate>
+          <div class="pane" data-pane="1">
+            <div class="field">
+              <label for="lg-mail">E-Mail</label>
+              <input class="inp" id="lg-mail" type="email" autocomplete="email" placeholder="name@schule.at" />
+              <p class="err" data-err="lg-mail"></p>
+            </div>
+            <div class="field">
+              <div class="lbl-row"><label for="lg-pw">Passwort</label><a class="link small" href="#" data-forgot data-only="in">Vergessen?</a></div>
+              <div class="pw">
+                <input class="inp" id="lg-pw" type="password" autocomplete="current-password" aria-describedby="lg-caps" />
+                <button type="button" class="eye" data-eye aria-label="Passwort anzeigen" aria-pressed="false"></button>
+              </div>
+              <p class="caps" id="lg-caps" data-caps hidden>Feststelltaste ist aktiv.</p>
+              <div class="strength" data-only="up" hidden>
+                <div class="meter" data-meter data-level="0" aria-hidden="true"><i></i><i></i><i></i></div>
+                <ul class="rules" data-rules>
+                  <li data-rule="len">8 Zeichen</li>
+                  <li data-rule="mix">Groß und klein</li>
+                  <li data-rule="num">Zahl oder Zeichen</li>
+                </ul>
+              </div>
+              <p class="err" data-err="lg-pw"></p>
+            </div>
+            <div class="field" data-only="up" hidden>
+              <label for="lg-pw2">Passwort wiederholen</label>
+              <input class="inp" id="lg-pw2" type="password" autocomplete="new-password" />
+              <p class="err" data-err="lg-pw2"></p>
+            </div>
+            <label class="check" data-only="in"><input type="checkbox" /><span class="box" aria-hidden="true"></span>Angemeldet bleiben</label>
+          </div>
+
+          <div class="pane" data-pane="2" hidden>
+            <div class="field">
+              <label for="lg-name">Ihr Name</label>
+              <input class="inp" id="lg-name" autocomplete="name" placeholder="Vor- und Nachname" />
+              <p class="err" data-err="lg-name"></p>
+            </div>
+            <div class="field">
+              <label for="lg-school">Schule</label>
+              <input class="inp" id="lg-school" autocomplete="organization" placeholder="z. B. HTL Leonding" />
+              <p class="err" data-err="lg-school"></p>
+            </div>
+            <p class="hint">Mit dem Konto speichert LeoPlaner die Daten Ihrer Schule getrennt von anderen Schulen.</p>
+          </div>
+
+          <div class="actions-row">
+            <button type="button" class="btn btn-glass" data-back hidden>Zurück</button>
+            <button type="submit" class="btn btn-dark" data-submit>Anmelden</button>
+          </div>
+        </form>
+        <div data-msg aria-live="polite"></div>
+        <div class="or"><span>oder</span></div>
+        <a class="btn btn-glass skip" href="./uebersicht.html">Ohne Anmeldung weiter</a>
+      </section>
+    </main>
+
+    <footer class="foot">Die Anmeldung ist entworfen, aber noch nicht angeschlossen: Das Backend hat noch keine Konto-Endpunkte. Ihre Daten liegen weiterhin für alle sichtbar auf dem Server.</footer>
+  </div>
+</body>
+</html>

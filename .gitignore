@@ -12,3 +12,23 @@ leo-planer/.gitignore
 leo-planer/src/main/resources/privateKey.pem
 
 .vscode
+
+# real k8s secret (only the template is committed)
+k8s/secret.yaml
+# Local AI tooling (skills, agents, MCP config) - not shared
+.claude/skills/*
+!.claude/skills/openspec-*/
+.claude/agents/
+.claude/settings.local.json
+.agents/
+skills-lock.json
+.mcp.json
+.impeccable/
+PRODUCT.md
+DESIGN.md
+
+# Playwright artifacts
+.playwright-mcp/
+test-results/
+playwright-report/
+design/redesign/

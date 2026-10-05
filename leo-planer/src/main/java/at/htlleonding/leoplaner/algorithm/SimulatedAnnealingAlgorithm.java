@@ -2,6 +2,7 @@ package at.htlleonding.leoplaner.algorithm;
 
 import at.htlleonding.leoplaner.data.DataRepository;
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
+import at.htlleonding.leoplaner.dto.RunStatusDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Random;
@@ -76,8 +77,6 @@ public class SimulatedAnnealingAlgorithm {
     private static final double MIN_TEMPERATURE = 0.1;
     /** automatic mode reheats to this share of the start temperature */
     private static final double REHEAT_FRACTION = 0.25;
-    /** automatic mode stops after this many reheats in a row found no new best */
-    private static final int MAX_FRUITLESS_REHEATS = 2;
 
     /**
      * About a million iterations from the start temperature down to 0.1. A move
@@ -85,7 +84,7 @@ public class SimulatedAnnealingAlgorithm {
      * whole school, which is what its 1600 blocks need to reach zero hard
      * violations reliably.
      */
-    private final double COOLING_RATE = 0.999993;
+    static final double COOLING_RATE = 0.999993;
     public static final double BOLTZMANN_CONSTANT = 1;
 
     public record History(long iteration, double temperature, long cost) {
@@ -105,17 +104,20 @@ public class SimulatedAnnealingAlgorithm {
      */
     private void run(final long iterationCap, final boolean fresh) {
         final Schedule schedule = dataRepository.getSchedule();
+        final RunState run = dataRepository.getRunState();
         if (schedule == null || schedule.getBlocks().isEmpty()) {
-            progressEvent.fire(new AlgorithmProgressDTO(0, getTemperature(), 0, true));
+            run.reset();
+            this.dataRepository.setAlgorithmRunning(false);
+            progressEvent.fire(new AlgorithmProgressDTO(0, getTemperature(), 0, true, run.snapshot()));
             return;
         }
 
         this.dataRepository.setAlgorithmRunning(true);
+        run.loopStarted();
         this.dataRepository.setAlgorithmRunningAtLeastOnce(true);
         long iterationCounter = 0;
         long bestCosts = Long.MAX_VALUE;
-        long bestAtLastReheat = bestCosts;
-        int fruitlessReheats = 0;
+        int hitBestCostCounter = 0;
 
         final Random random = ThreadLocalRandom.current();
         if (fresh) {
@@ -158,7 +160,9 @@ public class SimulatedAnnealingAlgorithm {
 
             final long now = System.nanoTime();
             if (iterationCounter == 0 || now - lastProgressNanos >= PROGRESS_INTERVAL_NANOS) {
-                progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), currentCost, false));
+                run.progress(iterationCounter, getTemperature(), bestCosts);
+                progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), currentCost, false,
+                        run.snapshot()));
                 lastProgressNanos = now;
             }
             if (now - lastPublishNanos >= PUBLISH_INTERVAL_NANOS) {
@@ -168,14 +172,20 @@ public class SimulatedAnnealingAlgorithm {
 
             coolTempertaure(iterationCounter);
 
+            // Automatic (Einfach) mode: cold once, reheat itself; cold twice, the round is
+            // over.
+            // The run state decides whether another round follows or the run is finished.
             if (automaticMode.get() && getTemperature() < MIN_TEMPERATURE) {
-                fruitlessReheats = bestCosts < bestAtLastReheat ? 0 : fruitlessReheats + 1;
-                bestAtLastReheat = bestCosts;
+                hitBestCostCounter++;
 
-                if (fruitlessReheats >= MAX_FRUITLESS_REHEATS) {
-                    pauseAlgorithm();
-                } else {
+                if (hitBestCostCounter < 2) {
+                    run.selfReheated();
                     setTemperature(startTemperature * REHEAT_FRACTION);
+                } else if (run.roundEnded(bestCosts)) {
+                    hitBestCostCounter = 0;
+                    setTemperature(RunState.ROUND_REHEAT);
+                } else {
+                    pauseAlgorithm();
                 }
             }
 
@@ -184,8 +194,11 @@ public class SimulatedAnnealingAlgorithm {
 
         this.dataRepository.getTimetableService().publish();
         logCostBreakdown(schedule, iterationCounter);
+        run.progress(iterationCounter, getTemperature(), bestCosts);
+        run.stopped();
         this.dataRepository.setAlgorithmRunning(false);
-        progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), currentCost, true));
+        progressEvent.fire(new AlgorithmProgressDTO(iterationCounter, getTemperature(), currentCost, true,
+                run.snapshot()));
     }
 
     /**
@@ -287,7 +300,9 @@ public class SimulatedAnnealingAlgorithm {
         setTemperature(current * COOLING_RATE);
     }
 
-    /** T0 at iteration 0, falling with the logarithm of the iteration from there. */
+    /**
+     * T0 at iteration 0, falling with the logarithm of the iteration from there.
+     */
     public void decreaseTemperatureLog(double T0, double k) {
         setTemperature(T0 * Math.log(2) / Math.log(k + 2));
     }
@@ -296,19 +311,66 @@ public class SimulatedAnnealingAlgorithm {
         isRunning.set(paused);
     }
 
+    /**
+     * The loop stops after its current iteration; it reports "not running" itself
+     * when it ends.
+     */
     public void pauseAlgorithm() {
-        if (getIsRunning()) {
-            isRunning.set(false);
-            this.dataRepository.setAlgorithmRunning(false);
+        isRunning.set(false);
+    }
+
+    /**
+     * Starts a fresh run on the current plan and returns when the run ends (pause,
+     * stop or Einfach
+     * finishing). Does nothing while a run is already going on.
+     */
+    public void startRun(final RunState.Mode mode) {
+        synchronized (this) {
+            if (dataRepository.getAlgorithmRunning()) {
+                return;
+            }
+            applyMode(mode);
+            // the last run left the temperature cold: a fresh run starts hot
+            setTemperature(INITIAL_TEMPERATURE);
+            isRunning.set(true);
+            dataRepository.setAlgorithmRunning(true);
+            dataRepository.getRunState().start(mode);
         }
+        algorithmLoop();
     }
 
     public void resumeAlgorithm() {
-        if (!getIsRunning()) {
-            isRunning.set(true);
-            this.dataRepository.setAlgorithmRunning(true);
-            new Thread(() -> run(Long.MAX_VALUE, false)).start();
+        resumeAlgorithm(automaticMode.get() ? RunState.Mode.EINFACH : RunState.Mode.ERWEITERT);
+    }
+
+    /**
+     * Goes on after a pause, or improves a finished plan further, in a new thread.
+     */
+    public synchronized void resumeAlgorithm(final RunState.Mode mode) {
+        if (dataRepository.getAlgorithmRunning()) {
+            return;
         }
+        applyMode(mode);
+        // Einfach stops at once when the plan is already cold: give it a warm start
+        if (mode == RunState.Mode.EINFACH && getTemperature() <= 1) {
+            setTemperature(RunState.ROUND_REHEAT);
+        }
+        dataRepository.getRunState().resume(mode);
+        isRunning.set(true);
+        dataRepository.setAlgorithmRunning(true);
+        new Thread(() -> run(Long.MAX_VALUE, false)).start();
+    }
+
+    /** Switches between Einfach (automatic) and Erweitert, also during a run. */
+    public void applyMode(final RunState.Mode mode) {
+        final boolean automatic = mode == RunState.Mode.EINFACH;
+        automaticMode.set(automatic);
+        this.dataRepository.setAutomaticMode(automatic);
+        dataRepository.getRunState().setMode(mode);
+    }
+
+    public RunStatusDTO getRunStatus() {
+        return dataRepository.getRunState().snapshot();
     }
 
     public boolean getAutomaticMode() {
@@ -322,7 +384,6 @@ public class SimulatedAnnealingAlgorithm {
     public void toggleAutomaticMode() {
         boolean toggledMode = !automaticMode.get();
 
-        automaticMode.set(toggledMode);
-        this.dataRepository.setAutomaticMode(toggledMode);
+        applyMode(toggledMode ? RunState.Mode.EINFACH : RunState.Mode.ERWEITERT);
     }
 }

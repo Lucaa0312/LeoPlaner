@@ -11,6 +11,7 @@ import {
 } from "./timetable.js";
 
 import { getElement, aquireElement } from "../utils/elementHelpers.js";
+import { API_BASE_URL, WS_BASE_URL } from "../utils/apiBase.js";
 
 let toggledAdvanced = false;
 
@@ -23,7 +24,7 @@ const hintBox = getElement<HTMLElement>("hintBox");
 
 let isUserTouchingSlider = false;
 
-const socket = new WebSocket("http://localhost:8080/api/algorithm/progress");
+const socket = new WebSocket(`${WS_BASE_URL}/algorithm/progress`);
 
 // Draw the chart
 function drawChart() {
@@ -249,7 +250,7 @@ function finalizeChart(): void {
 let optimizedBefore = false;
 function initializeChart() {
   console.log("Fetching data:");
-  fetch("http://localhost:8080/api/isAlgorithmRunningAtLeastOnce")
+  fetch(`${API_BASE_URL}/isAlgorithmRunningAtLeastOnce`)
     .then((response) => {
       return response.json();
     })
@@ -258,7 +259,7 @@ function initializeChart() {
       console.log(didRun);
       optimizedBefore = didRun;
       if (didRun) {
-        fetch("http://localhost:8080/api/get/algorithmHistory")
+        fetch(`${API_BASE_URL}/get/algorithmHistory`)
           .then((response) => {
             return response.json();
           })
@@ -394,9 +395,9 @@ async function handleOptimizeButton() {
     try {
       if (!optimizedBefore) {
     // Allererster Start
-    await fetch("http://localhost:8080/api/toggleAutomaticMode");
+    await fetch(`${API_BASE_URL}/toggleAutomaticMode`);
     automaticModeOn = true;
-    fetch("http://localhost:8080/api/run/algorithmAllClasses");
+    fetch(`${API_BASE_URL}/run/algorithmAllClasses`);
     optimizedBefore = true;
     paused = false;
     reloadedPage = false;
@@ -440,7 +441,7 @@ async function handleOptimizeButton() {
   if (!optimizedBefore) {
     isStarting = true;
     try {
-      fetch("http://localhost:8080/api/run/algorithmAllClasses");
+      fetch(`${API_BASE_URL}/run/algorithmAllClasses`);
       optimizedBefore = true;
       paused = false;
       reloadedPage = false;
@@ -491,7 +492,7 @@ advancedButton?.addEventListener("click", () => {
     if (!toggledAdvanced) {
         // Wechsel zu Fortgeschritten
         if (automaticModeOn) {
-            fetch("http://localhost:8080/api/toggleAutomaticMode");
+            fetch(`${API_BASE_URL}/toggleAutomaticMode`);
             automaticModeOn = false;
         }
         optimizeButton.textContent = "Optimierung starten";
@@ -508,7 +509,7 @@ advancedButton?.addEventListener("click", () => {
     } else {
         // Wechsel zurück zu Einfach
         if (!automaticModeOn && optimizedBefore) {
-            fetch("http://localhost:8080/api/toggleAutomaticMode");
+            fetch(`${API_BASE_URL}/toggleAutomaticMode`);
             automaticModeOn = true;
         }
         clearGraphBox();
@@ -826,7 +827,7 @@ function loadTeachers(itemDiv: HTMLElement): void {
 
   itemDiv.appendChild(list);
 
-  fetch(`http://localhost:8080/api/teachers`)
+  fetch(`${API_BASE_URL}/teachers`)
     .then((response) => {
       return response.json() as Promise<TeacherItem[]>;
     })
@@ -858,7 +859,7 @@ function loadClasses(itemDiv: HTMLElement): void {
   list.style.width = "100%";
 
   itemDiv.appendChild(list);
-  fetch(`http://localhost:8080/api/getAllClasses`)
+  fetch(`${API_BASE_URL}/getAllClasses`)
     .then((response) => {
       return response.json() as Promise<ClassItem[]>;
     })
@@ -888,7 +889,7 @@ function loadRooms(itemDiv: HTMLElement): void {
   list.style.width = "100%";
 
   itemDiv.appendChild(list);
-  fetch(`http://localhost:8080/api/rooms`)
+  fetch(`${API_BASE_URL}/rooms`)
     .then((response) => {
       return response.json() as Promise<RoomItem[]>;
     })

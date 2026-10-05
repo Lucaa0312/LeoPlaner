@@ -31,6 +31,12 @@ const navItems = [
     path: "./classSubjects.html",
   },
   {
+    id: "nav-item-optimierung",
+    icon: "fa-regular fa-chart-line",
+    text: "Optimierung",
+    path: "./optimierung.html",
+  },
+  {
     id: "nav-item-timetable",
     icon: "fa-regular fa-calendar-days",
     text: "Stundenplan",
