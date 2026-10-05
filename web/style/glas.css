@@ -76,7 +76,7 @@ h1{font:700 clamp(26px,1vw + 16px,34px)/1.1 var(--f-ui);letter-spacing:-.02em;wh
 .glass .seg{background:rgba(24,28,40,.05);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 17px 0 14px;border:0;border-radius:14px;cursor:pointer;font-weight:700;white-space:nowrap;text-decoration:none;transition:transform .2s var(--ease),background-color .2s,opacity .2s}
 .btn:active:not(:disabled){transform:scale(.97)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled,.btn[aria-disabled=true]{opacity:.45;cursor:not-allowed}
 .btn-dark{background:var(--graphite);color:#fff;box-shadow:0 8px 20px rgba(20,22,30,.22)}
 .btn-dark:hover:not(:disabled){background:var(--graphite-2)}
 .btn-glass{background:var(--glass-hi);box-shadow:var(--sh-sm);color:var(--ink)}

@@ -2,7 +2,23 @@
 import { API_BASE_URL, WS_BASE_URL } from "../utils/apiBase.js";
 
 export type HistoryPoint = { iteration: number; temperature: number; cost: number };
-export type Progress = { iteration: number; temperature: number; currentCost: number; finished: boolean };
+export type RunMode = "einfach" | "erweitert";
+/**
+ * The run as the server keeps it (GET /algorithm/status, and in every progress message). Rounds,
+ * progress and "finished" live on the server, so every page, tab and device shows the same.
+ */
+export type RunStatus = {
+  status: "idle" | "running" | "paused" | "finished";
+  mode: RunMode;
+  round: number;
+  /** 0..1, never moves backwards within a run */
+  progress: number;
+  /** minimum seconds left, null while unknown */
+  etaSeconds: number | null;
+  finishReason: "no_further_gain" | "time_limit" | null;
+  bestCost: number | null;
+};
+export type Progress = { iteration: number; temperature: number; currentCost: number; finished: boolean; run: RunStatus | null };
 
 async function getJson<T>(path: string): Promise<T> {
   const r = await fetch(`${API_BASE_URL}${path}`);
@@ -18,37 +34,17 @@ export const algorithmApi = {
   history: () => getJson<HistoryPoint[]>("/get/algorithmHistory"),
   isRunning: () => getJson<boolean>("/isAlgorithmRunning"),
   hasRunBefore: () => getJson<boolean>("/isAlgorithmRunningAtLeastOnce"),
+  status: () => getJson<RunStatus>("/algorithm/status"),
   lessonCount: async () => (await getJson<unknown[]>("/classSubjects")).length,
   stop: () => get("/stopAlgorithmAllClasses"),
   /** fresh random plan + cleared history */
   randomize: () => get("/randomize"),
-  toggleAutomaticMode: () => get("/toggleAutomaticMode"),
   /**
-   * Starts the run. The backend answers only when the run ends (pause, stop or
-   * basic mode finishing), so callers must not await this for UI feedback.
+   * Starts a fresh run in this mode (the server starts it hot). The backend answers only when the
+   * run ends (pause, stop or Einfach finishing), so callers must not await this for UI feedback.
    */
-  start: () => fetch(`${API_BASE_URL}/run/algorithmAllClasses`),
+  start: (mode: RunMode) => fetch(`${API_BASE_URL}/run/algorithmAllClasses?mode=${mode}`),
 };
-
-/**
- * The backend has no read endpoint for automatic (basic) mode, only a toggle.
- * We remember what we last set; a server restart resets it to off.
- * See design/redesign/BACKEND_TODO.md #6.
- */
-const AUTO_KEY = "leoplaner.automaticMode";
-export function believedAutomatic(): boolean {
-  try { return localStorage.getItem(AUTO_KEY) === "on"; } catch { return false; }
-}
-/** record what the server was observed doing (it can drift from what we last set) */
-export function noteAutomatic(on: boolean): void {
-  try { localStorage.setItem(AUTO_KEY, on ? "on" : "off"); } catch {}
-}
-export async function setAutomatic(on: boolean, socket?: ProgressSocket): Promise<void> {
-  if (believedAutomatic() === on) return;
-  if (socket?.isOpen()) socket.send("toggleAutoMode");
-  else await algorithmApi.toggleAutomaticMode();
-  try { localStorage.setItem(AUTO_KEY, on ? "on" : "off"); } catch {}
-}
 
 export type SocketStatus = "connecting" | "open" | "closed";
 
@@ -79,7 +75,7 @@ export class ProgressSocket {
     };
   }
   isOpen(): boolean { return this.ws?.readyState === WebSocket.OPEN; }
-  send(msg: "pause" | "resume" | "toggleAutoMode" | `temperature:${number}`): boolean {
+  send(msg: "pause" | `resume:${RunMode}` | `mode:${RunMode}` | `temperature:${number}`): boolean {
     if (!this.isOpen()) return false;
     this.ws!.send(msg);
     return true;

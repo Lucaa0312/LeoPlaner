@@ -15,50 +15,17 @@ export const algorithmApi = {
     history: () => getJson("/get/algorithmHistory"),
     isRunning: () => getJson("/isAlgorithmRunning"),
     hasRunBefore: () => getJson("/isAlgorithmRunningAtLeastOnce"),
+    status: () => getJson("/algorithm/status"),
     lessonCount: async () => (await getJson("/classSubjects")).length,
     stop: () => get("/stopAlgorithmAllClasses"),
     /** fresh random plan + cleared history */
     randomize: () => get("/randomize"),
-    toggleAutomaticMode: () => get("/toggleAutomaticMode"),
     /**
-     * Starts the run. The backend answers only when the run ends (pause, stop or
-     * basic mode finishing), so callers must not await this for UI feedback.
+     * Starts a fresh run in this mode (the server starts it hot). The backend answers only when the
+     * run ends (pause, stop or Einfach finishing), so callers must not await this for UI feedback.
      */
-    start: () => fetch(`${API_BASE_URL}/run/algorithmAllClasses`),
+    start: (mode) => fetch(`${API_BASE_URL}/run/algorithmAllClasses?mode=${mode}`),
 };
-/**
- * The backend has no read endpoint for automatic (basic) mode, only a toggle.
- * We remember what we last set; a server restart resets it to off.
- * See design/redesign/BACKEND_TODO.md #6.
- */
-const AUTO_KEY = "leoplaner.automaticMode";
-export function believedAutomatic() {
-    try {
-        return localStorage.getItem(AUTO_KEY) === "on";
-    }
-    catch {
-        return false;
-    }
-}
-/** record what the server was observed doing (it can drift from what we last set) */
-export function noteAutomatic(on) {
-    try {
-        localStorage.setItem(AUTO_KEY, on ? "on" : "off");
-    }
-    catch { }
-}
-export async function setAutomatic(on, socket) {
-    if (believedAutomatic() === on)
-        return;
-    if (socket?.isOpen())
-        socket.send("toggleAutoMode");
-    else
-        await algorithmApi.toggleAutomaticMode();
-    try {
-        localStorage.setItem(AUTO_KEY, on ? "on" : "off");
-    }
-    catch { }
-}
 /** WebSocket on /algorithm/progress with automatic reconnect. */
 export class ProgressSocket {
     onProgress;
