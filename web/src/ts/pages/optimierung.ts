@@ -309,7 +309,10 @@ document.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((b) => b.add
   saveMode();
   el("[data-work]").classList.toggle("simple", mode === "einfach");
   // during a run the server switches; otherwise the mode goes with the next start or resume
-  if (state === "running" && !socket.send(`mode:${mode}`)) toast("Moduswechsel hat nicht geklappt.");
+  if (state === "running") {
+    if (socket.send(`mode:${mode}`)) modeSentAt = performance.now();
+    else toast("Moduswechsel hat nicht geklappt.");
+  }
   renderAll();
 }));
 document.querySelectorAll<HTMLButtonElement>("[data-zoom]").forEach((b) => b.addEventListener("click", () => {
@@ -585,10 +588,12 @@ function scheduleTextRender(): void {
   }, 250);
 }
 
+/** when this page last switched the mode: messages already on their way still report the old one */
+let modeSentAt = 0;
 /** a running run shows its own mode (it may have been started on another device) */
 function adoptRun(r: RunStatus): void {
   applyRun(r);
-  if (r.status !== "idle" && r.mode !== mode) {
+  if (r.status !== "idle" && r.mode !== mode && performance.now() - modeSentAt > 2000) {
     mode = r.mode;
     el("[data-work]").classList.toggle("simple", mode === "einfach");
     renderControls();

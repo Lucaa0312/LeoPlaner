@@ -103,14 +103,23 @@ function renderList(): void {
 
 // ---------- grid ----------
 const grid = el("[data-grid]");
-/** the grid stops at this period, later hours are not shown */
-const LAST_HOUR = 11;
+/** this many hours fill the panel; later ones are reached by scrolling the grid */
+const VISIBLE_HOURS = 11;
+let rows = 0;
+/** the row height that fits VISIBLE_HOURS into the panel (never smaller than 38px) */
+function sizeRows(): void {
+  const shown = Math.min(rows, VISIBLE_HOURS);
+  if (!shown) return;
+  const free = grid.clientHeight - 32 - 8;
+  grid.style.setProperty("--row", `${Math.max(38, Math.floor(free / shown))}px`);
+}
+new ResizeObserver(sizeRows).observe(grid);
 function renderPlan(): void {
   const it = items(kind).find((i) => i.id === current);
-  const [lo, top] = school?.hourRange ?? [1, 8];
-  const hi = Math.min(top, LAST_HOUR);
-  const rows = hi - lo + 1;
-  grid.style.gridTemplateRows = `32px repeat(${rows}, minmax(38px, 1fr))`;
+  const [lo, hi] = school?.hourRange ?? [1, 8];
+  rows = hi - lo + 1;
+  grid.style.gridTemplateRows = `32px repeat(${rows}, var(--row, 38px))`;
+  sizeRows();
   if (!it) {
     el("[data-title]").textContent = "–"; el("[data-sub]").textContent = ""; el("[data-stats]").innerHTML = "";
     grid.innerHTML = `<div class="grid-empty" style="grid-row:2 / span ${rows}"><div><b>Kein Plan ausgewählt.</b>Wählen Sie links eine Klasse, Lehrkraft oder einen Raum.</div></div>`;
@@ -123,7 +132,7 @@ function renderPlan(): void {
     : ls.length ? `Raumplan · ${[...new Set(ls.map((l) => l.cls.toUpperCase()))].join(", ")}` : "Raumplan";
   el("[data-stats]").innerHTML = `<span><b>${s.hours}</b> Wochenstunden</span>${kind === "raum" ? "" : `<span class="${s.gaps ? "warn" : ""}"><b>${s.gaps}</b> ${s.gaps === 1 ? "Freistunde" : "Freistunden"}</span>`}<span><b>${s.doubles}</b> ${s.doubles === 1 ? "Doppelstunde" : "Doppelstunden"}</span>${s.latest ? `<span>bis zur <b>${s.latest}.</b> Stunde</span>` : ""}`;
 
-  let h = `<div></div>` + DAY_SHORT.map((d, i) => `<div class="gd" style="grid-column:${i + 2}">${d}</div>`).join("");
+  let h = `<div class="gd" style="grid-column:1"></div>` + DAY_SHORT.map((d, i) => `<div class="gd" style="grid-column:${i + 2}">${d}</div>`).join("");
   for (let r = 0; r < rows; r++) {
     const hour = lo + r, t = HOUR_TIMES[hour];
     h += `<div class="gh" style="grid-row:${r + 2}"><b>${hour}</b>${t ? t[0] : ""}</div>`;
