@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prüfung · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/flow.css" />
+  <script type="module" src="../dist/js/pages/pruefung.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="nav glass" aria-label="Navigation"></aside>
+    <main class="main">
+      <header class="head">
+        <div class="h-title">
+          <h1>Prüfung</h1>
+          <span class="chip" role="status" aria-live="polite" data-chip data-state="loading"><span class="dot"></span><span data-chip-text>Prüft …</span></span>
+        </div>
+        <div class="actions">
+          <div class="seg" role="group" aria-label="Anzeigen" data-filter>
+            <button type="button" aria-pressed="true" data-f="all">Alle</button>
+            <button type="button" aria-pressed="false" data-f="error">Nur Fehler</button>
+          </div>
+          <button type="button" class="btn btn-glass" data-recheck></button>
+        </div>
+      </header>
+      <div class="page" data-page>
+        <section class="glass state"><div><div class="spinner" aria-hidden="true"></div><p>Prüft die Stammdaten …</p></div></section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+/* Startseite: pitch + self-sorting demo week on the plain ground. See DESIGN.md. */
+body{overflow:auto}
+.start{min-height:100vh;display:flex;flex-direction:column;width:min(1360px,100%);margin:0 auto;padding:0 clamp(16px,3vw,40px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0 8px}
+.top .brand{padding:6px 0}
+.top .logo{width:150px;height:23px}
+.top-act{display:flex;gap:8px;align-items:center}
+main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(28px,4vh,56px);padding:clamp(20px,4vh,48px) 0}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(28px,4vw,72px);align-items:center}
+.eyebrow{font:600 13.5px var(--f-data);color:var(--teal-ink);letter-spacing:.01em}
+.pitch{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.pitch h1{font:700 clamp(40px,2.4vw + 16px,64px)/1.02 var(--f-ui);letter-spacing:-.035em;white-space:normal;max-width:16ch}
+/* the accent is one solid teal-tint underline, no gradient */
+.pitch .hl{box-shadow:inset 0 -.24em 0 var(--teal-tint);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.pitch .lead{font-size:clamp(16px,.3vw + 14px,18.5px);line-height:1.55;color:var(--ink-2);max-width:52ch}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn-lg{height:48px;padding:0 22px;border-radius:16px;font-size:16px}
+.btn-lg .ic{transition:transform .2s var(--ease)}
+.btn-lg:hover .ic{transform:translateX(3px)}
+
+/* the demo stage */
+.stage{margin:0;padding:20px 22px 18px;display:flex;flex-direction:column;gap:14px}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stage-head b{display:block;font:700 18px var(--f-ui);letter-spacing:-.01em}
+.stage-head .muted{font-size:13.5px}
+/* four steps */
+.flow-steps{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:s}
+.flow-steps li{display:flex;flex-direction:column;gap:6px;padding:18px 20px 20px;border-radius:20px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.flow-steps .mark{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 12.5px var(--f-data);color:#fff;background:var(--graphite);margin-bottom:6px}
+.flow-steps b{font:700 17px var(--f-ui)}
+.flow-steps span:not(.mark){font-size:14px;color:var(--ink-2)}
+.foot{padding:18px 0 22px;font-size:13px;color:var(--ink-3);border-top:1px solid var(--hair)}
+
+@media (max-width:1100px){
+  .hero{grid-template-columns:1fr}
+  .pitch h1{max-width:18ch}
+  .flow-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .flow-steps{grid-template-columns:1fr}
+  .top-act .btn-quiet{display:none}
+  .stage-head .muted{display:none}
+}

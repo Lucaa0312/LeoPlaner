@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/flow.css" />
+  <script type="module" src="../dist/js/pages/import.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="nav glass" aria-label="Navigation"></aside>
+    <main class="main">
+      <header class="head">
+        <div class="h-title">
+          <h1>Import</h1>
+          <span class="chip" role="status" aria-live="polite" data-chip data-state="loading"><span class="dot"></span><span data-chip-text>Lädt …</span></span>
+        </div>
+        <div class="actions"><span class="toolbar" data-admin></span></div>
+      </header>
+      <div class="page">
+        <section class="glass panel" data-arrive style="--o:1" aria-label="Dateien importieren">
+          <div class="drop" data-drop>
+            <span class="big" data-big></span>
+            <b data-drop-title>Dateien hierher ziehen</b>
+            <p data-drop-text>Eine Excel-Datei, oder alle Schuldaten-Dateien gemeinsam. Der Dateityp wird am Inhalt erkannt.</p>
+            <input type="file" id="files" accept=".xlsx,.xls,.txt,.sql,.json" multiple hidden data-input />
+            <button type="button" class="btn btn-dark" data-pick></button>
+            <p class="hint" data-replace></p>
+          </div>
+          <div class="banner-slot" data-error style="margin-top:12px"></div>
+        </section>
+
+        <section class="glass panel" data-arrive style="--o:2" aria-label="Was importiert werden kann">
+          <div class="kinds">
+            <div>
+              <h3>Excel-Datei</h3>
+              <ul>
+                <li><span class="tag">.xlsx</span>Arbeitsblätter Subjects, Rooms, Teachers, SchoolClasses und ClassSubjects</li>
+                <li><span class="tag">Tipp</span>Die Stammdaten-Exportdatei hat genau dieses Format.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Schuldaten</h3>
+              <ul>
+                <li><span class="tag">.sql</span>Stundenplan-Export mit Lehrern und gesperrten Stunden</li>
+                <li><span class="tag">GPU006</span>Fächer, <span class="tag">GPU002</span>Unterricht (Untis, .txt)</li>
+                <li><span class="tag">.json</span>Lehrerwünsche (freiwillig)</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass panel" id="bericht" data-arrive style="--o:3" aria-label="Importbericht" data-report hidden></section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

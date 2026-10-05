@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import at.htlleonding.leoplaner.algorithm.CoolingMode;
+import at.htlleonding.leoplaner.algorithm.RunState;
 import at.htlleonding.leoplaner.algorithm.Schedule;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.repository.ClassSubjectRepository;
@@ -48,6 +49,9 @@ public class DataRepository {
     private CoolingMode coolingMode = CoolingMode.GEOMETRIC;
 
     private boolean automaticMode = false;
+
+    /** the optimisation run as every client sees it (status, rounds, progress) */
+    private final RunState runState = new RunState();
 
     public boolean isAlgorithmRunningAtLeastOnce() {
         return algorithmRunningAtLeastOnce;
@@ -283,8 +287,12 @@ public class DataRepository {
         timetableService.clear();
     }
 
+    // A new plan or new data: the earlier run no longer describes it
     public void clearHistory() {
         timetableService.clearHistory();
+        if (!algorithmRunning) {
+            runState.reset();
+        }
     }
 
     // Deletes all school data. Truncates every table of the schema (CASCADE handles the foreign keys,
@@ -309,6 +317,13 @@ public class DataRepository {
         timetableService.clearHistory();
         timetableService.setBestSchoolSchedule(new HashMap<>());
         algorithmRunningAtLeastOnce = false;
+        if (!algorithmRunning) {
+            runState.reset();
+        }
+    }
+
+    public RunState getRunState() {
+        return runState;
     }
 
     public TimetableService getTimetableService() {
