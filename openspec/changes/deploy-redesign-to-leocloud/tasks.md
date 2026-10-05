@@ -24,8 +24,8 @@
 
 ## 4. Optimierung page (frontend, on leocloud-demo-fixes)
 
-- [ ] 4.1 `algorithmApi.ts`: add the run-state type, `status()`, and the new progress fields. Send the mode at start and resume instead of toggling. Verify with `npx tsc`.
-- [ ] 4.2 `optimierung.ts`: remove `rounds`, `continueRounds`, `eta`/`estimate`, `inControl`, `startKicked`, `checkAutomatic` and the `leoplaner.finished` record. On load and on reconnect, read `status()`. Render the status, round, bar, time left and "Fertig" text only from the run state. Verify with `npx tsc` and `grep -n "rounds\.\|FINISHED_KEY\|inControl" web/src/ts/pages/optimierung.ts` returning nothing.
+- [x] 4.1 `algorithmApi.ts`: add the run-state type, `status()`, and the new progress fields. Send the mode at start and resume instead of toggling. Verify with `npx tsc`.
+- [x] 4.2 `optimierung.ts`: remove `rounds`, `continueRounds`, `eta`/`estimate`, `inControl`, `startKicked`, `checkAutomatic` and the `leoplaner.finished` record. On load and on reconnect, read `status()`. Render the status, round, bar, time left and "Fertig" text only from the run state. Verify with `npx tsc` and `grep -n "rounds\.\|FINISHED_KEY\|inControl" web/src/ts/pages/optimierung.ts` returning nothing.
 - [x] 4.3 `optimierung.html` + `optimierung.ts`: add the header button next to the primary button. It reads "Zwischenstand ansehen" while running and "Ergebnis ansehen" otherwise, and is disabled with a hint when there is no plan. Verify in the browser for the idle, running and finished states.
 - [x] 4.4 Browser test against `quarkus:dev` (or the local container) in Einfach mode: start, then reload at about 30 % (the bar and round label are restored); go to Ergebnis and back (the run has continued); open a second tab (same values); wait for "Fertig", then reload ("Fertig" and a full bar); restart the WebSocket connection (no reset to 0). Verify that all of these hold and that the console shows no errors.
 - [x] 4.6 `import.ts`: remove the "Hinweise" list (and the "keine Hinweise" line) from the import report, keep "Nicht lösbar". Verify with `npx tsc` and by reloading the Import page after an import.
@@ -47,4 +47,4 @@
 - [x] 6.1 Open the hosted URL. Verify the new landing page and that the Übersicht, Lehrer, Räume, Fächer and Klassen pages load data.
 - [x] 6.2 Reset → demo data on the hosted demo: not run in the cloud, because the cloud holds the real school data and the user decided to keep it there with the buttons on (2026-10-05). Reset → demo data were verified locally with the same image code (dev mode and container check).
 - [x] 6.3 Start the optimisation, reload the page, switch to Ergebnis and back. Verify that the bar is never reset, that the run reaches "Fertig", and that a timetable is shown (WebSocket over `wss://` works).
-- [ ] 6.4 Commit the manifest, `DEPLOY.md` and the change on `main` as the user.
+- [x] 6.4 Commit the manifest, `DEPLOY.md` and the change on `main` as the user.
