@@ -193,15 +193,9 @@ kubectl set env deployment/leo-planer LEOPLANER_RESET_ENABLED- LEOPLANER_DEMO_DA
 styles on every load. Without it Quarkus lets them keep the files for 24 hours without asking, and a new
 version stays invisible until the cache runs out (Ctrl+Shift+R helps for one page).
 
-Image `0.2.0` is built from the branch `leocloud-demo-fixes` (commit `9558d3f`), not from `main`: Andi's
-redesign (`ultimate_design@1d7f92e`) plus the optimisation progress kept on the server and the
-"Ergebnis ansehen" button. Until that is merged, build it from a checkout of that branch:
-
-```bash
-git worktree add ../leoplaner-ultimate leocloud-demo-fixes   # once
-cd ../leoplaner-ultimate
-sudo docker build -f leo-planer/Dockerfile.prod -t ghcr.io/lucaa0312/leoplaner:0.2.0 .
-```
+Image `0.2.0` is Andi's redesign (#154) plus the optimisation progress kept on the server. It was built
+from `leocloud-demo-fixes@9558d3f`, which is merged into `main` now, so new versions are built from `main`
+again (see [Deploying a new version](#deploying-a-new-version)).
 
 ## Backups, and what destroys data
 

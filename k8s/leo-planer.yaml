@@ -18,7 +18,7 @@ spec:
       containers:
         - name: leo-planer
           # Change the tag for every new version (not "latest"), then kubectl apply again.
-          # 0.2.0 is built from the branch leocloud-demo-fixes@9558d3f (Andi's redesign + progress fixes), not from main.
+          # 0.2.0: Andi's redesign + server-side optimisation progress (leocloud-demo-fixes@9558d3f, merged into main).
           image: ghcr.io/lucaa0312/leoplaner:0.2.0
           ports:
             - containerPort: 8080
