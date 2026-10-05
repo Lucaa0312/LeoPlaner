@@ -1,6 +1,7 @@
 package at.htlleonding.leoplaner.boundary;
 
 import at.htlleonding.leoplaner.algorithm.CoolingMode;
+import at.htlleonding.leoplaner.algorithm.RunState;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm.History;
 import at.htlleonding.leoplaner.data.CSVManager;
@@ -10,6 +11,7 @@ import at.htlleonding.leoplaner.data.GpuImporter;
 import at.htlleonding.leoplaner.data.SchoolDataImport;
 import at.htlleonding.leoplaner.data.Room;
 import at.htlleonding.leoplaner.data.TimetableExportImporter;
+import at.htlleonding.leoplaner.dto.RunStatusDTO;
 import at.htlleonding.leoplaner.dto.TimetableExportImportResultDTO;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -93,10 +95,24 @@ public class Resource {
         this.dataRepository.randomizeSchoolSchedule();
     }
 
+    /**
+     * Starts a fresh run (mode einfach or erweitert; without it the current mode) and answers when
+     * the run ends. Clients follow it through algorithm/progress and algorithm/status.
+     */
     @Path("run/algorithmAllClasses")
     @GET
-    public void runAlgorithm() {
-        simulatedAnnealingAlgorithm.algorithmLoop();
+    public void runAlgorithm(@QueryParam("mode") String mode) {
+        simulatedAnnealingAlgorithm.startRun(mode == null
+                ? (simulatedAnnealingAlgorithm.getAutomaticMode() ? RunState.Mode.EINFACH : RunState.Mode.ERWEITERT)
+                : RunState.parseMode(mode));
+    }
+
+    /** The run as every client sees it: status, mode, round, progress, time left, finish reason. */
+    @Path("algorithm/status")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public RunStatusDTO getAlgorithmStatus() {
+        return simulatedAnnealingAlgorithm.getRunStatus();
     }
 
     @GET
