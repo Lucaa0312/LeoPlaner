@@ -26,7 +26,11 @@ public final class CostModel {
     public static final int MAX_HOURS_PER_DAY = 8;
     public static final int MAX_HOURS_ON_FRIDAY = 5;
     public static final int MIN_TEACHER_HOURS_PER_DAY = 4;
+    public static final int MAX_TEACHER_HOURS_PER_DAY = 8;
     public static final int LAST_COMFORTABLE_HOUR = 6;
+
+    /** This many hours off the middle of the day a free hour is no lunch break anymore. */
+    public static final int FAR_LUNCH_BREAK_HOURS = 3;
 
     /** How long a day has to be before it needs a lunch break at all. */
     public static final int LUNCH_BREAK_MIN_DAY_HOURS = 6;
@@ -43,6 +47,8 @@ public final class CostModel {
     public static final long LATE_START_COST = SEVERE_COST;
     /** the same lesson coming back later on a day it was already taught */
     public static final long SUBJECT_SAME_DAY_COST = HIGH_COST;
+    /** a lesson of two or three days a week sitting on days next to each other */
+    public static final long SUBJECT_SPREAD_COST = LOW_COST;
     public static final long LUNCH_BREAK_MISSING_COST = 2 * SEVERE_COST;
     public static final long TEACHER_GAP_COST = LOW_COST;
     // a lesson with no room to go to is as impossible as a clash
@@ -82,6 +88,21 @@ public final class CostModel {
         }
         final int missing = MIN_TEACHER_HOURS_PER_DAY - hours;
         return (long) missing * missing * MID_COST;
+    }
+
+    /** Cost of a teacher's day running past the most hours one should teach. */
+    public static long teacherLongDay(final int hours) {
+        final int excess = hours - MAX_TEACHER_HOURS_PER_DAY;
+        return excess <= 0 ? 0 : (long) excess * excess * HIGH_COST;
+    }
+
+    /**
+     * Cost of the free hours between a teacher's lessons of one day. One is
+     * next to nothing, but it grows quadratically: a lesson in the first hour
+     * and one in the ninth is a day spent waiting.
+     */
+    public static long teacherGap(final int gaps) {
+        return (long) gaps * gaps * TEACHER_GAP_COST;
     }
 
     /**
@@ -139,6 +160,11 @@ public final class CostModel {
             return 0;
         }
         final int deviation = Math.abs(breakHour - idealLunchBreakHour(lessonHours));
+        if (deviation >= FAR_LUNCH_BREAK_HOURS) {
+            // no lunch anymore but a hole in the day: a little more than a
+            // plain gap, and still less than having no break at all
+            return CLASS_GAP_COST + MID_COST;
+        }
         return (long) deviation * deviation * LOW_COST;
     }
 

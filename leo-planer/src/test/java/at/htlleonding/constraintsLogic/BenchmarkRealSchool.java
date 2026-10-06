@@ -27,8 +27,14 @@ public class BenchmarkRealSchool {
                 schedule.hardViolations(), schedule.breakdown().format());
 
         start = System.nanoTime();
-        final double rate = Math.pow(0.1 / 100, 1.0 / iterations);
-        SimulatedAnnealingAlgorithm.anneal(schedule, iterations, 100, rate, new Random(Long.getLong("seed", 1) + 1));
+        // -Dcalibrate=true starts at the measured temperature, -Dstart=290 at a given one
+        final double startTemperature = Boolean.getBoolean("calibrate")
+                ? SimulatedAnnealingAlgorithm.calibrateTemperature(schedule, new Random(Long.getLong("seed", 1) + 2))
+                : Double.parseDouble(System.getProperty("start", "100"));
+        System.out.printf("BENCH start temperature %.1f%n", startTemperature);
+        final double rate = Math.pow(0.1 / startTemperature, 1.0 / iterations);
+        SimulatedAnnealingAlgorithm.anneal(schedule, iterations, startTemperature, rate,
+                new Random(Long.getLong("seed", 1) + 1));
         final double seconds = (System.nanoTime() - start) / 1e9;
         System.out.printf("BENCH anneal %d iterations in %.1f s (%.1f us/it), hard %d, %s%n", iterations, seconds,
                 seconds * 1e6 / iterations, schedule.hardViolations(), schedule.breakdown().format());

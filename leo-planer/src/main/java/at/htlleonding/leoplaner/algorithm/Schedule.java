@@ -55,6 +55,8 @@ public final class Schedule {
     private final boolean[] isPoolRoom;
     private final int poolSize;
     private final int groupCount;
+    /** the parallel groups each class has lessons in, a handful of the school's many */
+    private final int[][] groupsOfClass;
 
     // occupancy: how many blocks cover each slot; for a class split by parallel group,
     // index 0 counting the lessons the whole class attends
@@ -71,6 +73,9 @@ public final class Schedule {
     private final long[] roomCost;
     private final long[] capacityCost = new long[DAY_COUNT];
     private long totalCost;
+    /** scratch for classCost, which runs on every move */
+    private final int[] hoursPerDay = new int[SchoolDays.values().length];
+    private final long[] hoursOfDay = new long[DAY_COUNT];
 
     // entities touched by the move being evaluated
     private final int[] classStamp;
@@ -98,7 +103,8 @@ public final class Schedule {
         Block[] blocks;
         int[] oldDays;
         int[] oldHours;
-        final List<long[]> saved = new ArrayList<>();
+        /** the costs of everything touched as they were before, in the order of the lists below */
+        long[] saved = new long[16];
         final IntList classes = new IntList();
         final IntList teachers = new IntList();
         final IntList rooms = new IntList();
@@ -156,6 +162,17 @@ public final class Schedule {
             for (final int r : block.rooms) {
                 blocksOfRoom.get(r).add(block);
             }
+        }
+
+        groupsOfClass = new int[classes.size()][];
+        for (int c = 0; c < classes.size(); c++) {
+            final List<Integer> groups = new ArrayList<>();
+            for (final Block block : blocksOfClass.get(c)) {
+                if (block.group != 0) {
+                    addOnce(groups, block.group);
+                }
+            }
+            groupsOfClass[c] = toArray(groups);
         }
 
         classOcc = new int[classes.size()][groupCount + 1][SLOTS];
@@ -386,7 +403,7 @@ public final class Schedule {
     private int unitsAt(final int c, final int slot) {
         final int[][] occ = classOcc[c];
         int units = occ[0][slot];
-        for (int g = 1; g <= groupCount; g++) {
+        for (final int g : groupsOfClass[c]) {
             if (occ[g][slot] > 0) {
                 units++;
             }
@@ -396,7 +413,6 @@ public final class Schedule {
 
     private long classCost(final int c, final CostBreakdown breakdown) {
         long cost = 0;
-        final int[] hoursPerDay = new int[SchoolDays.values().length];
 
         for (int d = 0; d < DAY_COUNT; d++) {
             final SchoolDays day = DAYS[d];
@@ -443,8 +459,7 @@ public final class Schedule {
                     (long) Math.max(0, first - classFirstHour[c]) * CostModel.LATE_START_COST);
             cost += charge(breakdown, CostCategory.DAY_LENGTH, CostModel.dayLength(day, lessonHours));
         }
-        cost += charge(breakdown, CostCategory.SUBJECT_SAME_DAY,
-                sameDayRepeats(blocksOfClass.get(c)) * CostModel.SUBJECT_SAME_DAY_COST);
+        cost += lessonDaysCost(blocksOfClass.get(c), breakdown);
         cost += charge(breakdown, CostCategory.DAY_BALANCE, CostModel.dayBalance(hoursPerDay));
 
         for (final Block block : blocksOfClass.get(c)) {
@@ -455,48 +470,73 @@ public final class Schedule {
             cost += charge(breakdown, CostCategory.DAY_OF_WEEK, CostModel.costOfDay(day));
             cost += charge(breakdown, CostCategory.LATE_HOURS,
                     CostModel.classPosition(block.hour - classFirstHour[c] + 1, block.duration, day));
-            if (block.betterDouble && block.duration == 1) {
+            if (block.betterDouble && block.duration == 1 && !isBackToBack(blocksOfClass.get(c), block)) {
                 cost += charge(breakdown, CostCategory.DOUBLE_PERIOD, CostModel.MID_COST);
             }
         }
         return cost;
     }
 
-    /**
-     * How often a lesson comes back later on a day it was already taught,
-     * counted per lesson and day as the runs of back-to-back hours minus one:
-     * a single and a single right after it are just a double, a single in the
-     * first and one in the seventh hour are a repeat.
-     */
-    private static long sameDayRepeats(final List<Block> classBlocks) {
-        long repeats = 0;
-        final int size = classBlocks.size();
-        for (int i = 0; i < size; i++) {
-            final Block a = classBlocks.get(i);
-            if (!a.isPlaced()) {
-                continue;
-            }
-            boolean firstOfLessonAndDay = true;
-            long hoursOfDay = 0; // bit per hour this lesson covers on a's day
-            for (int j = 0; j < size; j++) {
-                final Block b = classBlocks.get(j);
-                if (b.members != a.members || b.day != a.day) {
-                    continue;
-                }
-                if (j < i) {
-                    firstOfLessonAndDay = false; // counted when its first block came up
-                    break;
-                }
-                for (int h = b.hour; h < b.hour + b.duration && h < 64; h++) {
-                    hoursOfDay |= 1L << h;
-                }
-            }
-            if (firstOfLessonAndDay) {
-                // runs of set bits: count the bits whose lower neighbour is not set
-                repeats += Long.bitCount(hoursOfDay & ~(hoursOfDay << 1)) - 1;
+    /** Whether another block of the same lesson sits right before or after the block. */
+    private static boolean isBackToBack(final List<Block> classBlocks, final Block block) {
+        for (final Block other : classBlocks) {
+            if (other != block && other.members == block.members && other.day == block.day
+                    && (other.hour + other.duration == block.hour || block.hour + block.duration == other.hour)) {
+                return true;
             }
         }
-        return repeats;
+        return false;
+    }
+
+    /**
+     * What the days a class's lessons sit on cost.
+     *
+     * SUBJECT_SAME_DAY: how often a lesson comes back later on a day it was
+     * already taught, counted per lesson and day as the runs of back-to-back
+     * hours minus one: a single and a single right after it are just a double,
+     * a single in the first and one in the seventh hour are a repeat.
+     *
+     * SUBJECT_SPREAD: a lesson taught on two or three days pays for every two
+     * of them that follow each other, Monday and Tuesday rather than Monday
+     * and Thursday. On four or five days there is nothing left to spread.
+     *
+     * The blocks of one lesson are built one after the other and so follow
+     * each other in a class's list, which is what lets this go through it once.
+     */
+    private long lessonDaysCost(final List<Block> classBlocks, final CostBreakdown breakdown) {
+        long repeats = 0;
+        long neighbouringDays = 0;
+        final int size = classBlocks.size();
+        int i = 0;
+        while (i < size) {
+            final List<ClassSubject> lesson = classBlocks.get(i).members;
+            if (i + 1 == size || classBlocks.get(i + 1).members != lesson) {
+                i++; // a lesson of one block cannot come back
+                continue;
+            }
+            java.util.Arrays.fill(hoursOfDay, 0); // bit per hour the lesson covers on each day
+            for (; i < size && classBlocks.get(i).members == lesson; i++) {
+                final Block block = classBlocks.get(i);
+                if (block.isPlaced()) {
+                    hoursOfDay[block.day] |= ((1L << block.duration) - 1) << block.hour;
+                }
+            }
+            int days = 0; // bit per day the lesson is taught on
+            for (int d = 0; d < DAY_COUNT; d++) {
+                final long hours = hoursOfDay[d];
+                if (hours != 0) {
+                    // runs of set bits: count the bits whose lower neighbour is not set
+                    repeats += Long.bitCount(hours & ~(hours << 1)) - 1;
+                    days |= 1 << d;
+                }
+            }
+            final int taughtOn = Integer.bitCount(days);
+            if (taughtOn == 2 || taughtOn == 3) {
+                neighbouringDays += Integer.bitCount(days & (days >> 1));
+            }
+        }
+        return charge(breakdown, CostCategory.SUBJECT_SAME_DAY, repeats * CostModel.SUBJECT_SAME_DAY_COST)
+                + charge(breakdown, CostCategory.SUBJECT_SPREAD, neighbouringDays * CostModel.SUBJECT_SPREAD_COST);
     }
 
     /**
@@ -552,9 +592,19 @@ public final class Schedule {
             cost += charge(breakdown, CostCategory.TEACHER_NON_WORKING, nonWorkingHours * CostModel.IMPOSSIBLE_COST);
             cost += charge(breakdown, CostCategory.TEACHER_NON_PREFERRED, nonPreferredHours * CostModel.SEVERE_COST);
             cost += charge(breakdown, CostCategory.TEACHER_SHORT_DAY, CostModel.teacherDayLength(hours));
+            cost += charge(breakdown, CostCategory.TEACHER_LONG_DAY, CostModel.teacherLongDay(hours));
             if (hours > 0) {
-                cost += charge(breakdown, CostCategory.TEACHER_GAP,
-                        (long) (last - first + 1 - hours) * CostModel.TEACHER_GAP_COST);
+                int free = last - first + 1 - hours;
+                // as for a class: a long day needs one free hour, and that one is no gap
+                if (hours > CostModel.LUNCH_BREAK_MIN_DAY_HOURS) {
+                    if (free == 0) {
+                        cost += charge(breakdown, CostCategory.TEACHER_LUNCH_MISSING,
+                                CostModel.LUNCH_BREAK_MISSING_COST);
+                    } else {
+                        free--;
+                    }
+                }
+                cost += charge(breakdown, CostCategory.TEACHER_GAP, CostModel.teacherGap(free));
             }
         }
         return cost;
@@ -625,7 +675,6 @@ public final class Schedule {
         frame.teachers.clear();
         frame.rooms.clear();
         frame.days.clear();
-        frame.saved.clear();
         frame.blocks = moved;
         frame.oldDays = new int[moved.length];
         frame.oldHours = new int[moved.length];
@@ -669,35 +718,33 @@ public final class Schedule {
             }
         }
 
-        final long[] oldClass = new long[frame.classes.size()];
-        final long[] oldTeacher = new long[frame.teachers.size()];
-        final long[] oldRoom = new long[frame.rooms.size()];
-        final long[] oldDay = new long[frame.days.size()];
+        final int touched = frame.classes.size() + frame.teachers.size() + frame.rooms.size() + frame.days.size();
+        if (frame.saved.length < touched) {
+            frame.saved = new long[touched * 2];
+        }
+        final long[] saved = frame.saved;
+        int n = 0;
         long after = 0;
-        for (int i = 0; i < oldClass.length; i++) {
+        for (int i = 0; i < frame.classes.size(); i++) {
             final int c = frame.classes.get(i);
-            oldClass[i] = classCost[c];
+            saved[n++] = classCost[c];
             after += classCost[c] = classCost(c, null);
         }
-        for (int i = 0; i < oldTeacher.length; i++) {
+        for (int i = 0; i < frame.teachers.size(); i++) {
             final int t = frame.teachers.get(i);
-            oldTeacher[i] = teacherCost[t];
+            saved[n++] = teacherCost[t];
             after += teacherCost[t] = teacherCost(t, null);
         }
-        for (int i = 0; i < oldRoom.length; i++) {
+        for (int i = 0; i < frame.rooms.size(); i++) {
             final int r = frame.rooms.get(i);
-            oldRoom[i] = roomCost[r];
+            saved[n++] = roomCost[r];
             after += roomCost[r] = roomCost(r, null);
         }
-        for (int i = 0; i < oldDay.length; i++) {
+        for (int i = 0; i < frame.days.size(); i++) {
             final int d = frame.days.get(i);
-            oldDay[i] = capacityCost[d];
+            saved[n++] = capacityCost[d];
             after += capacityCost[d] = capacityCost(d, null);
         }
-        frame.saved.add(oldClass);
-        frame.saved.add(oldTeacher);
-        frame.saved.add(oldRoom);
-        frame.saved.add(oldDay);
 
         frame.delta = after - before;
         totalCost += frame.delta;
@@ -737,21 +784,19 @@ public final class Schedule {
                 occupy(block, 1);
             }
         }
-        final long[] oldClass = frame.saved.get(0);
-        final long[] oldTeacher = frame.saved.get(1);
-        final long[] oldRoom = frame.saved.get(2);
-        final long[] oldDay = frame.saved.get(3);
-        for (int i = 0; i < oldClass.length; i++) {
-            classCost[frame.classes.get(i)] = oldClass[i];
+        final long[] saved = frame.saved;
+        int n = 0;
+        for (int i = 0; i < frame.classes.size(); i++) {
+            classCost[frame.classes.get(i)] = saved[n++];
         }
-        for (int i = 0; i < oldTeacher.length; i++) {
-            teacherCost[frame.teachers.get(i)] = oldTeacher[i];
+        for (int i = 0; i < frame.teachers.size(); i++) {
+            teacherCost[frame.teachers.get(i)] = saved[n++];
         }
-        for (int i = 0; i < oldRoom.length; i++) {
-            roomCost[frame.rooms.get(i)] = oldRoom[i];
+        for (int i = 0; i < frame.rooms.size(); i++) {
+            roomCost[frame.rooms.get(i)] = saved[n++];
         }
-        for (int i = 0; i < oldDay.length; i++) {
-            capacityCost[frame.days.get(i)] = oldDay[i];
+        for (int i = 0; i < frame.days.size(); i++) {
+            capacityCost[frame.days.get(i)] = saved[n++];
         }
         totalCost -= frame.delta;
     }
@@ -1102,10 +1147,12 @@ public final class Schedule {
             final int own = own(block, d, h);
             for (final int c : block.classes) {
                 final int[][] occ = classOcc[c];
-                for (int g = 0; g <= groupCount; g++) {
-                    final int others = occ[g][slot] - (g == block.group ? own : 0);
-                    // lessons of the block's own parallel group may share the hour
-                    if (others > 0 && (g != block.group || g == 0)) {
+                if (occ[0][slot] - (block.group == 0 ? own : 0) > 0) {
+                    return false;
+                }
+                // lessons of the block's own parallel group may share the hour
+                for (final int g : groupsOfClass[c]) {
+                    if (g != block.group && occ[g][slot] > 0) {
                         return false;
                     }
                 }
