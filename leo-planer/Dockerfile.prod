@@ -1,0 +1,42 @@
+# Production image (LeoCloud): Quarkus backend + static frontend in one container.
+# The dev image (Dockerfile, quarkus:dev) stays as it is.
+#
+# Build from the REPOSITORY ROOT (the build needs leo-planer/ and web/):
+#   docker build -f leo-planer/Dockerfile.prod -t ghcr.io/lucaa0312/leoplaner:<tag> .
+
+# ---- 1) compile the TypeScript frontend ----
+FROM node:22-alpine AS frontend
+WORKDIR /web
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+COPY web/tsconfig.json ./
+COPY web/src ./src
+RUN npx tsc
+
+# ---- 2) build the Quarkus app, with the frontend as static resources ----
+FROM maven:3.9.12-eclipse-temurin-21 AS backend
+WORKDIR /build
+COPY leo-planer/pom.xml ./
+RUN mvn -B -q dependency:go-offline
+COPY leo-planer/src ./src
+
+# Quarkus serves META-INF/resources at "/", same layout as the repo: /index.html, /web/...
+ARG STATIC=src/main/resources/META-INF/resources
+COPY index.html ${STATIC}/index.html
+COPY web/pages ${STATIC}/web/pages
+COPY web/style ${STATIC}/web/style
+COPY web/assets ${STATIC}/web/assets
+COPY --from=frontend /web/dist ${STATIC}/web/dist
+
+RUN mvn -B -q package -DskipTests
+
+# ---- 3) small runtime image ----
+FROM eclipse-temurin:21-jre
+RUN useradd --system --uid 1001 leoplaner
+WORKDIR /deployments
+COPY --from=backend --chown=1001 /build/target/quarkus-app/ ./
+USER 1001
+
+EXPOSE 8080
+# Database settings come from the environment (QUARKUS_DATASOURCE_JDBC_URL / _USERNAME / _PASSWORD)
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "quarkus-run.jar"]

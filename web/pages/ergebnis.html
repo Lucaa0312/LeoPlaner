@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ergebnis &amp; Export · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/ergebnis.css" />
+  <script type="module" src="../dist/js/pages/ergebnis.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="nav glass" aria-label="Navigation"></aside>
+    <main class="main" data-main>
+      <header class="head">
+        <div class="h-title">
+          <h1>Ergebnis &amp; Export</h1>
+          <span class="chip" role="status" aria-live="polite" data-chip data-state="loading"><span class="dot"></span><span data-chip-text>Lädt …</span></span>
+        </div>
+        <div class="actions">
+          <a class="btn btn-glass" href="./optimierung.html" aria-label="Neu optimieren" data-again></a>
+          <button type="button" class="btn btn-glass" aria-label="Drucken" data-print></button>
+          <div class="menu-wrap">
+            <button type="button" class="btn btn-dark" aria-haspopup="menu" aria-expanded="false" data-export></button>
+            <div class="menu" role="menu" hidden data-menu></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary glass" data-arrive style="--o:1" aria-label="Zusammenfassung" data-summary></section>
+
+      <div class="content" data-content>
+        <aside class="browser glass" data-arrive style="--o:2" aria-label="Pläne">
+          <div class="seg" role="group" aria-label="Ansicht">
+            <button type="button" aria-pressed="true" data-kind="klasse">Klassen</button>
+            <button type="button" aria-pressed="false" data-kind="lehrer">Lehrer</button>
+            <button type="button" aria-pressed="false" data-kind="raum">Räume</button>
+          </div>
+          <label class="search"><span class="sr">Suchen</span><span data-search-ic></span><input data-q placeholder="Suchen …" autocomplete="off" /></label>
+          <ul class="list" data-list></ul>
+        </aside>
+        <section class="plan glass" data-arrive style="--o:3" aria-label="Stundenplan" data-plan>
+          <div class="p-head">
+            <div class="p-title"><h2 data-title>–</h2><p data-sub></p></div>
+            <div class="p-stats" data-stats></div>
+            <div class="p-nav"><button type="button" class="icon-btn prev" data-prev aria-label="Vorheriger Plan"></button><button type="button" class="icon-btn" data-next aria-label="Nächster Plan"></button></div>
+          </div>
+          <div class="p-banner" data-banner></div>
+          <div class="grid" data-grid></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

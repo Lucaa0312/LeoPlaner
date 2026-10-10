@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.data;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,8 +20,15 @@ public class CSVManager {
     final static String CLASS_SUBJECT_TYPE = "classSubjectName";
 
     public static boolean processCSV(final String filePath, final DataRepository dataRepository) {
-        final String[] lines = getLinesFromCSV(filePath);
+        return processLines(getLinesFromCSV(filePath), dataRepository);
+    }
 
+    // Reads a CSV bundled in the jar (e.g. "demo-data/teachers.csv"), independent of the working directory
+    public static boolean processCSVResource(final String resourcePath, final DataRepository dataRepository) {
+        return processLines(getLinesFromResource(resourcePath), dataRepository);
+    }
+
+    private static boolean processLines(final String[] lines, final DataRepository dataRepository) {
         if (lines == null || lines.length == 0) {
             return false;
         }
@@ -260,6 +269,17 @@ public class CSVManager {
             classSubject.setSchoolClass(schoolClass);
             // classSubject.setClassName(className);
             dataRepository.addClassSubject(classSubject);
+        }
+    }
+
+    public static String[] getLinesFromResource(final String resourcePath) {
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                throw new IllegalArgumentException("CSV resource " + resourcePath + " not found");
+            }
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8).lines().toArray(String[]::new);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

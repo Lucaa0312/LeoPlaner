@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klassen · LeoPlaner</title>
+  <link rel="icon" href="../assets/img/LeoPlanerLogoSVG.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../style/glas.css" />
+  <link rel="stylesheet" href="../style/daten.css" />
+  <script type="module" src="../dist/js/pages/klassen.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="nav glass" aria-label="Navigation"></aside>
+    <main class="main">
+      <header class="head">
+        <div class="h-title"><h1>Klassen</h1></div>
+        <div class="actions"><button type="button" class="btn btn-dark" data-add></button></div>
+      </header>
+      <div class="md">
+        <section class="tp glass" data-arrive style="--o:1" aria-label="Klassen">
+          <p class="note" data-note hidden></p>
+          <div class="tools">
+            <label class="search"><span class="sr">Suchen</span><span data-search-ic></span><input data-q placeholder="Suchen …" autocomplete="off" /></label>
+            <button type="button" class="toggle" aria-pressed="false" data-only>Nur mit Problemen</button>
+            <span class="count" data-count></span>
+          </div>
+          <div class="tw"><table class="tbl"><thead data-head></thead><tbody data-rows></tbody></table></div>
+        </section>
+        <section class="det glass" data-arrive style="--o:2" aria-label="Details" aria-live="polite" data-detail></section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

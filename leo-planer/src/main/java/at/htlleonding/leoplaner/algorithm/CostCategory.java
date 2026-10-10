@@ -25,13 +25,17 @@ public enum CostCategory {
     TEACHER_NON_PREFERRED(false),
     /** teacher comes in for only a handful of hours on a day */
     TEACHER_SHORT_DAY(false),
+    /** teacher with more hours on a day than anyone should teach */
+    TEACHER_LONG_DAY(false),
+    /** long teacher day without a free hour for lunch */
+    TEACHER_LUNCH_MISSING(false),
     /** teacher waiting between two lessons */
     TEACHER_GAP(false),
     /** flat surcharge for the weekday a lesson sits on */
     DAY_OF_WEEK(false),
     /** lesson running past the last comfortable hour of the day */
     LATE_HOURS(false),
-    /** subject that wants a double period but got a single one */
+    /** single hour of a subject that wants doubles, not next to another hour of it */
     DOUBLE_PERIOD(false),
     /** class day that is too short or too long */
     DAY_LENGTH(false),
@@ -43,6 +47,8 @@ public enum CostCategory {
     LATE_START(false),
     /** the same lesson twice on one day, not back to back */
     SUBJECT_SAME_DAY(false),
+    /** lesson taught on few days of the week and those right after each other */
+    SUBJECT_SPREAD(false),
     /** long class day without a free hour for lunch */
     LUNCH_BREAK_MISSING(false),
     /** lunch break sitting away from the middle of its day */

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import at.htlleonding.leoplaner.algorithm.Block;
 import at.htlleonding.leoplaner.algorithm.CostBreakdown;
 import at.htlleonding.leoplaner.algorithm.CostCategory;
+import at.htlleonding.leoplaner.algorithm.CostModel;
 import at.htlleonding.leoplaner.algorithm.Schedule;
 import at.htlleonding.leoplaner.algorithm.SimulatedAnnealingAlgorithm;
 import at.htlleonding.leoplaner.data.ClassSubject;
@@ -228,6 +229,56 @@ public class TestSchedule {
     }
 
     @Test
+    public void aFreeHourFarFromMiddayIsNoCheapLunch() {
+        final SchoolClass a = schoolClass("2AHIF", room("132"));
+        final List<ClassSubject> lessons = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            lessons.add(lesson(a, 1, teacher("T" + i)));
+        }
+        final Schedule schedule = Schedule.of(lessons);
+        final int[] hours = { 1, 3, 4, 5, 6, 7, 8, 9 };
+        for (int i = 0; i < hours.length; i++) {
+            place(schedule, schedule.getBlocks().get(i), 0, hours[i]);
+        }
+
+        assertTrue(cost(schedule, CostCategory.LUNCH_BREAK_POSITION) > CostModel.CLASS_GAP_COST);
+    }
+
+    @Test
+    public void singlesOfASubjectPreferringDoublesBelongBackToBack() {
+        final SchoolClass a = schoolClass("3BHIF", room("133"));
+        final ClassSubject maths = lesson(a, 2, teacher("KERD"));
+        maths.setBetterDoublePeriod(true);
+        maths.setBlockSizes("1,1");
+        final Schedule schedule = Schedule.of(List.of(maths));
+        final List<Block> singles = schedule.getBlocks();
+
+        place(schedule, singles.get(0), 0, 1);
+        place(schedule, singles.get(1), 0, 2);
+        assertEquals(0, cost(schedule, CostCategory.DOUBLE_PERIOD));
+
+        place(schedule, singles.get(1), 0, 4);
+        assertTrue(cost(schedule, CostCategory.DOUBLE_PERIOD) > 0);
+        place(schedule, singles.get(1), 1, 2);
+        assertTrue(cost(schedule, CostCategory.DOUBLE_PERIOD) > 0);
+    }
+
+    @Test
+    public void aLessonOnTwoDaysBelongsOnDaysApart() {
+        final SchoolClass a = schoolClass("3BHIF", room("133"));
+        final ClassSubject maths = lesson(a, 4, teacher("KERD"));
+        maths.setBlockSizes("2,2");
+        final Schedule schedule = Schedule.of(List.of(maths));
+
+        place(schedule, schedule.getBlocks().get(0), 0, 1);
+        place(schedule, schedule.getBlocks().get(1), 1, 1);
+        assertTrue(cost(schedule, CostCategory.SUBJECT_SPREAD) > 0);
+
+        place(schedule, schedule.getBlocks().get(1), 3, 1);
+        assertEquals(0, cost(schedule, CostCategory.SUBJECT_SPREAD));
+    }
+
+    @Test
     public void startingLaterThanTheFirstHourCosts() {
         final SchoolClass a = schoolClass("5CHITM", room("E11"));
         final ClassSubject english = lesson(a, 1, teacher("REIT"));
@@ -280,6 +331,49 @@ public class TestSchedule {
                 .distinct()
                 .toList();
         assertEquals(1, rooms.size(), rooms.toString());
+    }
+
+    /** One teacher with a single hour in each of the given hours of Monday. */
+    private Schedule teacherDay(final int... hours) {
+        final Teacher teacher = teacher("KLE");
+        final SchoolClass a = schoolClass("4AHIF", room("141"));
+        final List<ClassSubject> lessons = new ArrayList<>();
+        for (int i = 0; i < hours.length; i++) {
+            lessons.add(lesson(a, 1, teacher));
+        }
+        final Schedule schedule = Schedule.of(lessons);
+        for (int i = 0; i < hours.length; i++) {
+            place(schedule, schedule.getBlocks().get(i), 0, hours[i]);
+        }
+        return schedule;
+    }
+
+    @Test
+    public void teacherDayPastEightHoursCosts() {
+        assertEquals(0, cost(teacherDay(1, 2, 3, 4, 6, 7, 8, 9), CostCategory.TEACHER_LONG_DAY));
+        assertTrue(cost(teacherDay(1, 2, 3, 4, 5, 7, 8, 9, 10), CostCategory.TEACHER_LONG_DAY) > 0);
+    }
+
+    @Test
+    public void longTeacherDayNeedsAFreeHourAndThatOneIsNoGap() {
+        final Schedule without = teacherDay(1, 2, 3, 4, 5, 6, 7);
+        assertTrue(cost(without, CostCategory.TEACHER_LUNCH_MISSING) > 0);
+
+        final Schedule with = teacherDay(1, 2, 3, 5, 6, 7, 8);
+        assertEquals(0, cost(with, CostCategory.TEACHER_LUNCH_MISSING));
+        assertEquals(0, cost(with, CostCategory.TEACHER_GAP));
+
+        // six hours need no break
+        assertEquals(0, cost(teacherDay(1, 2, 3, 4, 5, 6), CostCategory.TEACHER_LUNCH_MISSING));
+    }
+
+    @Test
+    public void aLongTeacherGapCostsFarMoreThanItsHoursOneByOne() {
+        final long one = cost(teacherDay(1, 3), CostCategory.TEACHER_GAP);
+        final long seven = cost(teacherDay(1, 9), CostCategory.TEACHER_GAP);
+
+        assertEquals(CostModel.teacherGap(1), one);
+        assertTrue(seven > 7 * one, seven + " against " + one);
     }
 
     /** A small school with every kind of rule in it, including a lunch-heavy workshop. */
@@ -339,6 +433,20 @@ public class TestSchedule {
                 assertEquals(breakdown.total(), schedule.getTotalCost(), "after move " + i);
             }
         }
+    }
+
+    @Test
+    public void measuringTheStartTemperatureLeavesTheScheduleAlone() {
+        final Schedule schedule = Schedule.of(smallSchool());
+        schedule.construct(new Random(1));
+        final int[] before = schedule.snapshot();
+        final long cost = schedule.getTotalCost();
+
+        final double temperature = SimulatedAnnealingAlgorithm.calibrateTemperature(schedule, new Random(2));
+
+        assertTrue(temperature >= 1 && temperature <= 1000, "temperature " + temperature);
+        assertEquals(cost, schedule.getTotalCost());
+        assertTrue(java.util.Arrays.equals(before, schedule.snapshot()));
     }
 
     @Test

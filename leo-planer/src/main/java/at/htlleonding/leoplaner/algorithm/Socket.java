@@ -1,6 +1,8 @@
 package at.htlleonding.leoplaner.algorithm;
 
 import at.htlleonding.leoplaner.dto.AlgorithmProgressDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,13 +14,15 @@ import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
-import java.util.Locale;
 
 @ServerEndpoint("/api/algorithm/progress")
 @ApplicationScoped
 public class Socket {
     @Inject
     SimulatedAnnealingAlgorithm simulatedAnnealingAlgorithm;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     // opened and closed on websocket threads while the algorithm thread
     // iterates it for every progress event
@@ -35,14 +39,13 @@ public class Socket {
     }
 
     public void onProgressUpdate(@Observes AlgorithmProgressDTO progress) {
-        String json = String.format(Locale.US, "{\"iteration\": %d,"
-                + "\"temperature\": %f,"
-                + "\"currentCost\": %d,"
-                + "\"finished\": %s}",
-                progress.iteration(),
-                progress.temperature(),
-                progress.currentCost(),
-                progress.finished());
+        final String json;
+        try {
+            json = objectMapper.writeValueAsString(progress);
+        } catch (JsonProcessingException e) {
+            System.out.println("Could not write progress: " + e.getMessage());
+            return;
+        }
 
         sessions.forEach(s -> s.getAsyncRemote().sendText(json));
     }
@@ -55,8 +58,12 @@ public class Socket {
                 SimulatedAnnealingAlgorithm.setTemperature(newTemperature);
             } else if (update.startsWith("pause")) {
                 simulatedAnnealingAlgorithm.pauseAlgorithm();
+            } else if (update.startsWith("resume:")) {
+                simulatedAnnealingAlgorithm.resumeAlgorithm(RunState.parseMode(update.substring("resume:".length())));
             } else if (update.startsWith("resume")) {
                 simulatedAnnealingAlgorithm.resumeAlgorithm();
+            } else if (update.startsWith("mode:")) {
+                simulatedAnnealingAlgorithm.applyMode(RunState.parseMode(update.substring("mode:".length())));
             } else if (update.startsWith("toggleAutoMode")) {
                 simulatedAnnealingAlgorithm.toggleAutomaticMode();
             } else {

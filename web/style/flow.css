@@ -1,0 +1,100 @@
+/* Übersicht, 1 Import, 2 Prüfung: the guided-process pages. See DESIGN.md. */
+.main{grid-template-rows:auto minmax(0,1fr)}
+.page{overflow:auto;min-height:0;margin:-6px;padding:6px;display:flex;flex-direction:column;gap:14px}
+.page>*{flex:none}
+.lead{color:var(--ink-2);font-size:15px;max-width:68ch}
+
+/* next step panel */
+.next{display:flex;align-items:center;gap:20px;padding:22px 24px}
+.next .txt{flex:1;min-width:0}
+.next .kick{font:600 12.5px var(--f-data);color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.next .kick .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-3)}
+.next[data-tone=error] .kick .dot{background:var(--rose)}
+.next[data-tone=run] .kick .dot{background:var(--mint)}
+.next[data-tone=done] .kick .dot{background:var(--mint)}
+.next[data-tone=ready] .kick .dot{background:var(--teal)}
+.next h2{font:700 24px/1.15 var(--f-ui);letter-spacing:-.015em;margin-top:6px}
+.next p{color:var(--ink-2);margin-top:4px}
+
+/* four step cards */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:6px;padding:16px 18px;min-height:150px;text-decoration:none;color:inherit}
+.card .ch{display:flex;align-items:center;gap:10px;font-weight:700}
+.card .mark{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 12px var(--f-data);color:var(--ink-2);background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(24,28,40,.10)}
+.card .mark .ic{width:13px;height:13px;stroke-width:2.6}
+.card.is-done .mark{background:var(--mint);color:#fff;box-shadow:none}
+.card.is-error .mark{background:var(--rose);color:#fff;box-shadow:none}
+.card.is-now .mark{background:var(--graphite);color:#fff;box-shadow:none}
+.card p{font-size:13.5px;color:var(--ink-2)}
+.card .go{margin-top:auto;padding-top:8px}
+.card.is-later{opacity:.72}
+
+/* two panels side by side */
+.duo{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:14px;align-items:start}
+.rows{list-style:none}
+.rows li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--hair)}
+.rows li:first-child{border-top:0}
+.rows .t{flex:1;min-width:0;font-size:14px}
+.rows .num{font:700 15px var(--f-data);font-variant-numeric:tabular-nums}
+.sev{width:20px;height:20px;flex:none;border-radius:50%;display:grid;place-items:center;color:#fff}
+.sev .ic{width:13px;height:13px;stroke-width:2.4}
+.sev.error{background:var(--rose)}
+.sev.warn{background:var(--amber)}
+.more{font-size:13.5px;color:var(--ink-3);padding-top:10px}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar .sp{flex:1}
+
+/* import drop zone: a flat inset, never a dashed coloured box */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:40px 24px;border-radius:16px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8);transition:background .2s,box-shadow .2s}
+.drop.over{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 2px var(--teal)}
+.drop .big{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#fff;box-shadow:0 6px 16px rgba(28,34,52,.10);color:var(--teal-ink)}
+.drop .big .ic{width:24px;height:24px}
+.drop b{font:700 19px var(--f-ui);margin-top:6px}
+.drop p{color:var(--ink-2);font-size:14px;max-width:62ch}
+.drop .btn{margin-top:8px}
+.kinds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.kinds h3{font:700 15px var(--f-ui)}
+.kinds ul{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:4px;font-size:13.5px;color:var(--ink-2)}
+.kinds li{display:flex;gap:8px}
+.kinds li .tag{flex:none}
+
+/* report */
+.files{list-style:none;display:flex;flex-direction:column;gap:6px}
+.files li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.6);font-size:14px}
+.files li .ic{color:var(--mint-ink)}
+.files li.bad .ic{color:var(--rose-ink)}
+.files li .ty{margin-left:auto;font:600 12.5px var(--f-data);color:var(--ink-2)}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 0;margin:4px 0}
+.figs div{padding:10px 0}
+.figs b{display:block;font:700 22px var(--f-data);font-variant-numeric:tabular-nums}
+.figs span{font-size:13px;color:var(--ink-2)}
+.msg{font-size:14px;padding:9px 0;border-top:1px solid var(--hair);display:flex;gap:10px}
+.msg:first-child{border-top:0}
+.msg .ic{flex:none;margin-top:1px}
+.msg.warn{color:var(--amber-ink)}
+.msg.error{color:var(--rose-ink)}
+.sub-title{font:700 15px var(--f-ui);margin:14px 0 4px}
+
+/* Prüfung groups */
+.group h3{display:flex;align-items:center;gap:10px;font:700 17px var(--f-ui)}
+.group .why{color:var(--ink-2);font-size:13.5px;margin:4px 0 6px 30px}
+.group .rows{margin-left:30px}
+.verdict{display:flex;align-items:center;gap:16px;padding:20px 24px}
+.verdict .big{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.verdict .big .ic{width:24px;height:24px;stroke-width:2.2}
+.verdict.ok .big{background:var(--mint)}
+.verdict.warn .big{background:var(--amber)}
+.verdict.error .big{background:var(--rose)}
+.verdict h2{font:700 22px/1.2 var(--f-ui);letter-spacing:-.015em}
+.verdict p{color:var(--ink-2);margin-top:2px}
+.verdict .btns{margin-left:auto;display:flex;gap:10px}
+.filters{display:flex;gap:10px;align-items:center}
+
+@media (max-width:1180px){
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .duo{grid-template-columns:1fr}
+  .next{flex-wrap:wrap}
+  .verdict{flex-wrap:wrap}
+  .verdict .btns{margin-left:0}
+}

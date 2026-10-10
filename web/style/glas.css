@@ -1,0 +1,161 @@
+/* LeoPlaner · Glas: tokens and app shell. See DESIGN.md. */
+@font-face{font-family:"Alte Haas Grotesk";src:url("../assets/font/alte-haas-grotesk/AlteHaasGroteskRegular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Alte Haas Grotesk";src:url("../assets/font/alte-haas-grotesk/AlteHaasGroteskBold.ttf") format("truetype");font-weight:700;font-display:swap}
+@font-face{font-family:"Archivo";src:url("../assets/font/archivo/Archivo-Variable-latin.woff2") format("woff2");font-weight:400 800;font-display:swap}
+
+:root{
+  --ground:#e9ecf1;
+  --glass:rgba(255,255,255,.72); --glass-hi:rgba(255,255,255,.88); --glass-lo:rgba(255,255,255,.55);
+  --hair:rgba(24,28,40,.08); --hair-2:rgba(24,28,40,.05);
+  --ink:#171a24; --ink-2:#4a4f5e; --ink-3:#5a5f6e;
+  --graphite:#1d2029; --graphite-2:#2c303b;
+  --teal:#0b7a84; --teal-ink:#08626a; --teal-tint:#d8eff1;
+  --mint:#14935a; --mint-ink:#0f7448;
+  --amber:#b77600; --amber-ink:#7a4e00; --amber-tint:#fbedd0;
+  --rose:#d6345a; --rose-ink:#a8213f; --rose-tint:#fbe3e9;
+  --f-ui:"Alte Haas Grotesk","Helvetica Neue",Arial,sans-serif;
+  --f-data:"Archivo","Alte Haas Grotesk",sans-serif;
+  --blur:blur(26px) saturate(150%);
+  /* light enough for computers without graphics acceleration (software rendering) */
+  --sh:inset 0 1px 0 #fff,0 0 0 1px rgba(28,34,52,.06),0 6px 16px rgba(28,34,52,.07);
+  --sh-sm:inset 0 0 0 1px rgba(255,255,255,.8),0 0 0 1px rgba(28,34,52,.05),0 2px 6px rgba(28,34,52,.08);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --px:0; --py:0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{font:15px/1.45 var(--f-ui);color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased;overflow:hidden}
+::selection{background:var(--teal-tint)}
+:focus-visible{outline:2.5px solid var(--teal);outline-offset:2px}
+button,select,input{font:inherit;color:inherit}
+.ic{width:18px;height:18px;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+
+#app{display:grid;grid-template-columns:clamp(214px,12vw + 66px,264px) 1fr;gap:14px;height:100vh;min-height:740px;padding:14px}
+/* solid: 78 % white over the ground mixes to exactly this, without the cost of blending */
+.glass{background:#fafbfc;box-shadow:var(--sh);border-radius:24px;contain:layout style}
+
+/* ---- sidebar ---- */
+.nav{display:flex;flex-direction:column;padding:22px 12px 14px;gap:2px;min-height:0;overflow-x:hidden;overflow-y:auto}
+.brand{display:block;padding:2px 12px 26px}
+.logo{display:block;width:124px;height:19px;background:var(--ink);-webkit-mask:url("../assets/img/LeoPlanerLogoSVG.svg") left center/contain no-repeat;mask:url("../assets/img/LeoPlanerLogoSVG.svg") left center/contain no-repeat}
+.sec{font:600 12px var(--f-data);color:var(--ink-3);padding:20px 12px 8px}
+.nav a{position:relative;display:flex;align-items:center;gap:11px;min-height:38px;padding:0 12px;border-radius:12px;color:var(--ink);text-decoration:none;transition:background-color .2s}
+.nav a:hover{background:rgba(255,255,255,.6)}
+.nav .cnt{margin-left:auto;font:600 13px var(--f-data);font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.step .mark{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 11px var(--f-data);color:var(--ink-2);background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(24,28,40,.10)}
+.step .mk{width:12px;height:12px;stroke-width:2.6}
+.step.is-done .mark{background:var(--mint);color:#fff;box-shadow:none}
+.step.is-active .mark{background:var(--graphite);color:#fff;box-shadow:none}
+.nav a.step.is-active{background:var(--glass-hi);font-weight:700;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(28,34,52,.10)}
+.step .meta{margin-left:auto;font:500 12.5px var(--f-data);color:var(--ink-3);white-space:nowrap}
+.step.is-active .meta{color:var(--teal-ink)}
+.nav .foot{margin-top:auto;border-top:1px solid var(--hair);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+
+/* ---- main column ---- */
+.main{display:grid;grid-template-rows:auto minmax(0,1fr);gap:14px;min-width:0;min-height:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 6px 0;min-height:44px}
+.h-title{display:flex;align-items:center;gap:14px;min-width:0}
+h1{font:700 clamp(26px,1vw + 16px,34px)/1.1 var(--f-ui);letter-spacing:-.02em;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;height:30px;padding:0 13px 0 10px;border-radius:15px;background:var(--glass-hi);box-shadow:var(--sh-sm);font:600 13px var(--f-data);font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-3)}
+.chip .dot{position:relative}
+.chip[data-state=running] .dot{background:var(--mint)}
+.chip[data-state=running] .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--mint);animation:live 2s ease-out infinite;will-change:transform,opacity}
+.chip[data-state=paused] .dot{background:var(--amber)}
+.chip[data-state=done] .dot{background:var(--mint)}
+.chip[data-state=error] .dot{background:var(--rose)}
+@keyframes live{0%{transform:scale(1);opacity:.5}70%,100%{transform:scale(2.6);opacity:0}}
+.actions{display:flex;gap:10px;align-items:center}
+.seg{display:inline-flex;padding:4px;border-radius:14px;background:var(--glass-lo);box-shadow:var(--sh-sm)}
+.seg button{border:0;background:none;padding:0 14px;height:30px;border-radius:10px;cursor:pointer;color:var(--ink-2);transition:background .25s,color .25s}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 2px 8px rgba(28,34,52,.12)}
+.seg button:disabled{cursor:not-allowed;opacity:.5}
+.glass .seg{background:rgba(24,28,40,.05);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 17px 0 14px;border:0;border-radius:14px;cursor:pointer;font-weight:700;white-space:nowrap;text-decoration:none;transition:transform .2s var(--ease),background-color .2s,opacity .2s}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled,.btn[aria-disabled=true]{opacity:.45;cursor:not-allowed}
+.btn-dark{background:var(--graphite);color:#fff;box-shadow:0 8px 20px rgba(20,22,30,.22)}
+.btn-dark:hover:not(:disabled){background:var(--graphite-2)}
+.btn-glass{background:var(--glass-hi);box-shadow:var(--sh-sm);color:var(--ink)}
+.btn-glass:hover:not(:disabled){background:#fff}
+.glass .btn-glass{background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(24,28,40,.06);backdrop-filter:none;-webkit-backdrop-filter:none}
+.btn.busy{pointer-events:none;opacity:.7}
+.btn-spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:bspin .8s linear infinite}
+@keyframes bspin{to{transform:rotate(360deg)}}
+.panel-title{font:700 19px var(--f-ui);letter-spacing:-.015em}
+.muted{color:var(--ink-3)}
+.hint{font-size:12.5px;line-height:1.45;color:var(--ink-3)}
+
+/* banners: one line that names the problem and the way out */
+.banner{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;font-size:14px}
+.banner .ic{flex:none}
+.banner-error{background:var(--rose-tint);color:var(--rose-ink)}
+.banner-warn{background:var(--amber-tint);color:var(--amber-ink)}
+.banner .btn{height:32px;margin-left:auto}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:22px;z-index:30;transform:translate(-50%,20px);opacity:0;padding:10px 16px;border-radius:14px;background:var(--graphite);color:#fff;font-weight:600;box-shadow:0 10px 30px rgba(20,22,30,.3);transition:opacity .25s,transform .35s var(--ease);pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* no entrance animation: without graphics acceleration every animated frame repaints the whole window */
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media (prefers-reduced-transparency:reduce){.glass,.chip,.seg,.btn-glass{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media (max-width:1180px){.step .meta{display:none}.head .btn .lbl{display:none}.head .btn{padding:0 12px}}
+
+/* ---- shared parts for all Glas pages ---- */
+.step.is-error .mark,.step.was-error .mark{background:var(--rose);color:#fff;box-shadow:none}
+.step.is-error .meta{color:var(--rose-ink)}
+.step.was-done .mark{background:var(--mint)}
+.nav a[aria-current=page]:not(.step){background:var(--glass-hi);font-weight:700;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(28,34,52,.10)}
+.nav a[aria-disabled=true]{cursor:default}
+.btn-danger{background:var(--rose-ink);color:#fff;box-shadow:0 8px 20px rgba(168,33,63,.22)}
+.btn-danger:hover:not(:disabled){background:#8f1b35}
+.btn-quiet{background:none;color:var(--ink-2);padding:0 12px}
+.btn-quiet:hover:not(:disabled){background:rgba(255,255,255,.6);color:var(--ink)}
+.btn-sm{height:32px;border-radius:11px;padding:0 12px 0 10px;font-size:14px}
+.link{color:var(--teal-ink);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.link:hover{text-decoration:underline}
+.link .ic{width:16px;height:16px}
+
+/* dialog: glass overlay over the unchanged ground */
+.dlg{margin:auto;width:min(440px,calc(100vw - 32px));padding:22px;border:0;border-radius:18px;background:#fbfcfd;box-shadow:var(--sh);color:var(--ink)}
+.dlg::backdrop{background:rgba(29,32,41,.28)}
+.dlg h2{font:700 19px var(--f-ui);letter-spacing:-.015em}
+.dlg p{margin-top:8px;color:var(--ink-2);font-size:14px;line-height:1.5}
+.dlg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.dlg[open]{animation:popIn .25s var(--ease)}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(-4px)}}
+
+/* badges (Archivo, 9px radius) */
+.badge{display:inline-flex;align-items:center;gap:4px;font:700 12px var(--f-data);padding:3px 8px;border-radius:9px;background:rgba(24,28,40,.06);color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.badge.warn{background:var(--amber-tint);color:var(--amber-ink)}
+.badge.err{background:var(--rose-tint);color:var(--rose-ink)}
+.badge.ok{background:#dcf1e5;color:var(--mint-ink)}
+.tag{font:700 12px var(--f-data);padding:2px 7px;border-radius:7px;background:rgba(24,28,40,.06);color:var(--ink);letter-spacing:.02em;white-space:nowrap}
+
+/* search field (flat, inside panels) */
+.search{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(24,28,40,.06)}
+.search input{border:0;background:none;outline:none;flex:1;min-width:0}
+.search .ic{color:var(--ink-3)}
+.search:focus-within{outline:2.5px solid var(--teal);outline-offset:2px}
+
+/* empty / loading / error inside a panel */
+.state{display:grid;place-items:center;text-align:center;padding:32px 20px;min-height:180px}
+.state>div{max-width:440px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.state b{font:700 19px var(--f-ui)}
+.state p{color:var(--ink-2)}
+.state .btn{margin-top:8px}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--teal-tint);border-top-color:var(--teal);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scroll{overflow:auto;min-height:0}
+.panel{padding:18px 20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+/* thin, quiet scrollbars inside panels */
+*{scrollbar-width:thin;scrollbar-color:rgba(24,28,40,.2) transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:rgba(24,28,40,.2);border-radius:8px}
+*::-webkit-scrollbar-track{background:transparent}
