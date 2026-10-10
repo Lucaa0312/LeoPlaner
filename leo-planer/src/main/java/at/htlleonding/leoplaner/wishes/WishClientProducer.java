@@ -23,6 +23,12 @@ public class WishClientProducer {
     @ConfigProperty(name = "leoplaner.wishes.structured-output", defaultValue = "true")
     boolean structuredOutput;
 
+    @ConfigProperty(name = "leoplaner.wishes.max-tokens", defaultValue = "4096")
+    int maxTokens;
+
+    @ConfigProperty(name = "leoplaner.wishes.retry-reasoning-effort")
+    Optional<String> retryReasoningEffort;
+
     @Produces
     @ApplicationScoped
     WishExtractionClient client() {
@@ -31,6 +37,6 @@ public class WishClientProducer {
             return new FakeWishClient();
         }
         return new OpenAiCompatibleWishClient(baseUrl.get(), model.get(), apiKey.orElse(null),
-                WishResources.schema(), structuredOutput);
+                WishResources.schema(), structuredOutput, maxTokens, retryReasoningEffort.orElse(null));
     }
 }

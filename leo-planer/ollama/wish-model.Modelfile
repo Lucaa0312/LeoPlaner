@@ -1,0 +1,6 @@
+# qwen3:14b with a context window that fits the wish prompt plus the model's thinking.
+# Ollama's default (4096 on a 16 GB card) overflows and silently drops the system prompt;
+# the OpenAI compatible API has no per-request setting for it.
+#   ollama create qwen3-wish -f ollama/wish-model.Modelfile
+FROM qwen3:14b
+PARAMETER num_ctx 16384

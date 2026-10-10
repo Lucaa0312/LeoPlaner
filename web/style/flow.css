@@ -98,3 +98,11 @@
   .verdict{flex-wrap:wrap}
   .verdict .btns{margin-left:0}
 }
+
+/* Wünsche: wish text next to what was made of it */
+.wish-text{margin:10px 0 4px;padding:10px 14px;border-left:3px solid var(--hair);white-space:pre-wrap;font-size:14px;color:var(--ink-2)}
+.wish-src{display:block;font-size:12.5px;color:var(--ink-2);opacity:.8}
+.wish-degree{width:auto;height:32px}
+.wish-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:12px}
+.wish-add{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
+.wish-add .field[hidden]{display:none}

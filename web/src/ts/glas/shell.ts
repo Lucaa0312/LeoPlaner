@@ -1,10 +1,11 @@
 // The Glas app shell: process sidebar (Option A "Leitfaden") with live step status, and arrival.
 import { icon } from "./ui.js";
 import { store } from "./store.js";
+import { fetchWishReview } from "../api/wishApi.js";
 
 export type StepKey = "import" | "pruefung" | "optimierung" | "ergebnis";
 export type StepState = "done" | "active" | "open" | "error";
-export type PageKey = StepKey | "uebersicht" | "lehrer" | "klassen" | "faecher" | "raeume" | "konto";
+export type PageKey = StepKey | "uebersicht" | "lehrer" | "klassen" | "faecher" | "raeume" | "wuensche" | "konto";
 
 type Step = { key: StepKey; n: number; label: string; href: string };
 const STEPS: Step[] = [
@@ -18,6 +19,7 @@ const DATA = [
   { key: "klassen", label: "Klassen", href: "./klassen.html" },
   { key: "faecher", label: "Fächer", href: "./faecher.html" },
   { key: "raeume", label: "Räume", href: "./raeume.html" },
+  { key: "wuensche", label: "Wünsche", href: "./wuensche.html" },
 ] as const;
 
 export type ShellOptions = {
@@ -63,7 +65,7 @@ export function renderShell(opts: ShellOptions): Shell {
 
   const refresh = (): void => {
     // counts and status are a nicety: if the server is down they simply stay empty
-    const setCount = (k: string, v: number): void => { const t = nav.querySelector(`[data-count="${k}"]`); if (t) t.textContent = String(v); };
+    const setCount = (k: string, v: number | string): void => { const t = nav.querySelector(`[data-count="${k}"]`); if (t) t.textContent = String(v); };
     store.all().then((d) => {
       setCount("lehrer", d.teachers.length); setCount("klassen", d.classes.length);
       setCount("faecher", d.subjects.length); setCount("raeume", d.rooms.length);
@@ -74,6 +76,11 @@ export function renderShell(opts: ShellOptions): Shell {
         if (!skip("optimierung")) setStep("optimierung", running ? "active" : ran && has ? "done" : "open", running ? "Läuft" : ran && has ? "Fertig" : "");
         if (!skip("ergebnis")) setStep("ergebnis", "open", "");
       });
+    }).catch(() => {});
+    // wish texts that still need a human, so they are seen from every page before a run
+    fetchWishReview().then((items) => {
+      const open = items.filter((i) => !i.reviewed && (!i.extracted || i.unmappable.length > 0)).length;
+      setCount("wuensche", open ? `${open} offen` : "");
     }).catch(() => {});
   };
   refresh();

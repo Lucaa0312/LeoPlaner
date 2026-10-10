@@ -1,6 +1,7 @@
 // The Glas app shell: process sidebar (Option A "Leitfaden") with live step status, and arrival.
 import { icon } from "./ui.js";
 import { store } from "./store.js";
+import { fetchWishReview } from "../api/wishApi.js";
 const STEPS = [
     { key: "import", n: 1, label: "Import", href: "./import.html" },
     // "pruefung" is hidden: its page still exists but is not part of the process any more
@@ -12,6 +13,7 @@ const DATA = [
     { key: "klassen", label: "Klassen", href: "./klassen.html" },
     { key: "faecher", label: "Fächer", href: "./faecher.html" },
     { key: "raeume", label: "Räume", href: "./raeume.html" },
+    { key: "wuensche", label: "Wünsche", href: "./wuensche.html" },
 ];
 export function renderShell(opts) {
     const nav = document.querySelector(".nav");
@@ -61,6 +63,11 @@ export function renderShell(opts) {
                 if (!skip("ergebnis"))
                     setStep("ergebnis", "open", "");
             });
+        }).catch(() => { });
+        // wish texts that still need a human, so they are seen from every page before a run
+        fetchWishReview().then((items) => {
+            const open = items.filter((i) => !i.reviewed && (!i.extracted || i.unmappable.length > 0)).length;
+            setCount("wuensche", open ? `${open} offen` : "");
         }).catch(() => { });
     };
     refresh();

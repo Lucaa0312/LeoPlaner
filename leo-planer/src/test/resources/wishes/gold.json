@@ -1,0 +1,100 @@
+{
+  "conventions": [
+    "Hand-labelled expectations for wish texts of src/files/teacherWishes.json, matched by teacherId; TestWishGoldSet measures a model against them.",
+    "A wish is found when a produced wish has the same type and every field given here; candidates must match exactly, firstCandidate only the best day.",
+    "degrees lists every degree a careful reader would accept; leave it out where the wording does not decide.",
+    "or holds a second way to say the same wish. Hard constraints (\"geht nicht\") are left out, the prompt sends them to unmappable.",
+    "Only wishes a reader is sure of are listed. What a model produces beyond them is reported as extra, not as wrong."
+  ],
+  "classNames": ["3AFELA", "5AHIF", "3BHITM", "5BHITM"],
+  "teachers": [
+    {"nameSymbol": "IVCES", "teacherName": "Sara Ivcevic"}
+  ],
+  "texts": [
+    { "teacherId": "TR_ANZD", "expected": [
+      {"type": "LATEST_END", "hour": 7, "degrees": ["HIGH", "SEVERE"]},
+      {"type": "FREE_DAY", "candidates": ["FRIDAY"], "degrees": ["HIGH", "SEVERE"]},
+      {"type": "MAX_CONSECUTIVE", "count": 6}
+    ] },
+    { "teacherId": "TR_WEILG", "expected": [
+      {"type": "LATEST_END", "hour": 3, "day": "THURSDAY", "degrees": ["MID", "HIGH"]},
+      {"type": "FREE_DAY", "candidates": ["THURSDAY"], "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_AUZG", "expected": [
+      {"type": "FREE_DAY", "candidates": ["WEDNESDAY"], "degrees": ["HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_BAUM", "expected": [
+      {"type": "FEW_DAYS", "count": 1, "degrees": ["MID"]}
+    ] },
+    { "teacherId": "TR_DIWM", "expected": [
+      {"type": "FEW_DAYS", "count": 1, "degrees": ["MID"]}
+    ] },
+    { "teacherId": "TR_KASMA", "expected": [
+      {"type": "FEW_DAYS", "count": 1, "degrees": ["HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_FELS", "expected": [
+      {"type": "FREE_DAY", "firstCandidate": "FRIDAY", "degrees": ["MID", "HIGH"]}
+    ] },
+    { "teacherId": "TR_KARP", "expected": [
+      {"type": "FREE_DAY", "firstCandidate": "WEDNESDAY", "degrees": ["LOW", "MID"]}
+    ] },
+    { "teacherId": "TR_KLE", "expected": [
+      {"type": "FREE_DAY", "candidates": ["WEDNESDAY"], "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_MUEHP", "expected": [
+      {"type": "LATEST_END", "hour": 6, "day": "FRIDAY", "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_POVAC", "expected": [
+      {"type": "FREE_DAY", "candidates": ["MONDAY"], "degrees": ["MID", "HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_REISM", "expected": [
+      {"type": "FREE_DAY", "candidates": ["WEDNESDAY", "TUESDAY", "THURSDAY"], "degrees": ["HIGH", "SEVERE"]},
+      {"type": "LATEST_END", "hour": 4, "day": "FRIDAY", "degrees": ["HIGH", "SEVERE"],
+       "or": {"type": "FREE_AFTERNOON", "hour": 5, "candidates": ["FRIDAY"]}}
+    ] },
+    { "teacherId": "TR_ROCKH", "expected": [
+      {"type": "FREE_DAY", "firstCandidate": "WEDNESDAY", "degrees": ["LOW", "MID"]}
+    ] },
+    { "teacherId": "TR_MOSER", "expected": [
+      {"type": "EARLIEST_START", "hour": 2, "degrees": ["MID", "HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_LEHE", "expected": [
+      {"type": "EARLIEST_START", "hour": 2, "degrees": ["MID", "HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_TUMF", "expected": [
+      {"type": "FREE_DAY", "candidates": ["FRIDAY"], "degrees": ["MID"]}
+    ] },
+    { "teacherId": "TR_WINKD", "expected": [
+      {"type": "FREE_DAY", "count": 2, "candidates": ["MONDAY", "FRIDAY"], "degrees": ["LOW", "MID"]}
+    ] },
+    { "teacherId": "TR_EPP", "expected": [
+      {"type": "FREE_AFTERNOON", "hour": 7, "candidates": ["FRIDAY"], "degrees": ["MID", "HIGH", "SEVERE"]}
+    ] },
+    { "teacherId": "TR_APOLL", "expected": [
+      {"type": "MAX_CONSECUTIVE", "count": 6, "degrees": ["MID"]},
+      {"type": "FREE_DAY", "firstCandidate": "WEDNESDAY", "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_ARZT", "expected": [
+      {"type": "DOUBLE_PERIOD", "className": "3AFELA", "doublePeriodMode": "AVOID", "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_SCHEIN", "expected": [
+      {"type": "FREE_DAY", "count": 2, "candidates": ["THURSDAY", "FRIDAY"], "degrees": ["MID"]}
+    ] },
+    { "teacherId": "TR_SIVAD", "expected": [
+      {"type": "FEW_DAYS", "count": 2, "degrees": ["HIGH", "SEVERE"]},
+      {"type": "LINKED_TEACHER", "linkMode": "OPPOSITE_DAYS", "degrees": ["LOW", "MID"]}
+    ] },
+    { "teacherId": "TR_HAMM", "expected": [
+      {"type": "EARLIEST_START", "hour": 5, "day": "MONDAY"},
+      {"type": "EARLIEST_START", "hour": 7, "day": "TUESDAY"},
+      {"type": "EARLIEST_START", "hour": 5, "day": "WEDNESDAY"}
+    ] },
+    { "teacherId": "TR_ABER", "expected": [
+      {"type": "LATEST_END", "hour": 8, "day": "THURSDAY", "degrees": ["LOW"]},
+      {"type": "FREE_DAY", "candidates": ["FRIDAY"], "degrees": ["LOW"]}
+    ] },
+    { "teacherId": "TR_MUEHL", "expected": [
+      {"type": "FEW_DAYS", "count": 2, "degrees": ["LOW", "MID"]}
+    ] }
+  ]
+}
